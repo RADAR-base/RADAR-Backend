@@ -1,0 +1,32 @@
+// Apply the java plugin to add support for Java
+apply plugin: 'java'
+// enable gradle run and jar packaging with fixed main class
+apply plugin: 'application'
+
+mainClassName = 'org.radarcns.collect.MockDevice'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use 'jcenter' for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    maven {
+        url 'http://packages.confluent.io/maven/'
+    }
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    // The production code uses the SLF4J logging API at compile time
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    // main kafka implementation
+    compile group: 'org.apache.kafka', name: 'kafka_2.11', version: '0.10.0.1'
+    // to implement producers and consumers
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '0.10.0.1'
+    // addition of confluent's versioned Avro schemas
+    compile group: 'io.confluent', name: 'kafka-avro-serializer', version: '3.0.1'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.0'
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" group="radarbackend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" group="radarbackend" />
+    </modules>
+  </component>
+</project>

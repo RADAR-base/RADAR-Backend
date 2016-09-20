@@ -1,0 +1,8 @@
+.gradle/
+.idea/tasks.xml
+.idea/workspace.xml
+.idea/gradle.xml
+.idea/libraries/
+*.iml
+.DS_Store
+/build/

@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "empatica_e4_acceleration",
+  "doc": "Data from 3-axis accelerometer sensor. The accelerometer is configured to measure acceleration in the range [-2g, 2g]. Therefore the unit in this file is 1/64g.",
+  "fields": [
+    {"name": "time", "type": "double", "doc": "timestamp in UTC (µs)"},
+    {"name": "x", "type": {"type": "fixed", "size": 1, "name": "x"}, "doc": "acceleration in the x-axis (1/64g)"},
+    {"name": "y", "type": {"type": "fixed", "size": 1, "name": "y"}, "doc": "acceleration in the y-axis (1/64g)"},
+    {"name": "z", "type": {"type": "fixed", "size": 1, "name": "z"}, "doc": "acceleration in the z-axis (1/64g)"}
+  ]
+}
