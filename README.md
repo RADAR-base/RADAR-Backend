@@ -9,3 +9,6 @@ Run the application with
 ./gradlew run
 ```
 
+## Contributing
+
+Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html). If you want to contribute a feature or fix, please make a pull request
