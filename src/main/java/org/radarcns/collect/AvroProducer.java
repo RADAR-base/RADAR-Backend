@@ -16,13 +16,12 @@ public class AvroProducer {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Properties props = new Properties();
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-            io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+                io.confluent.kafka.serializers.KafkaAvroSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-            io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+                io.confluent.kafka.serializers.KafkaAvroSerializer.class);
         props.put("schema.registry.url", "http://ubuntu:8081");
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "ubuntu:9092");
         KafkaProducer<Object, GenericRecord> producer = new KafkaProducer<>(props);
-
 
 
         String userSchema = "{\"type\":\"record\"," +

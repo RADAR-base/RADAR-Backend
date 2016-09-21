@@ -3,7 +3,6 @@ package org.radarcns.collect;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +44,9 @@ public class MockDevice extends Thread {
             try {
                 for (int i = 0; i < hertz_modulus; i++) {
                     sendIfNeeded(i, acceleration,
-                            "x", fixedValue(acceleration, "x", (byte)15),
-                            "y", fixedValue(acceleration, "y", (byte)-15),
-                            "z", fixedValue(acceleration, "z", (byte)64));
+                            "x", fixedValue(acceleration, "x", (byte) 15),
+                            "y", fixedValue(acceleration, "y", (byte) -15),
+                            "z", fixedValue(acceleration, "z", (byte) 64));
                     sendIfNeeded(i, battery, "batteryLevel", 0.8f);
                     sendIfNeeded(i, bvp, "bloodVolumePulse", 80.0f);
                     sendIfNeeded(i, eda, "electroDermalActivity", 0.026897f);
@@ -71,7 +70,7 @@ public class MockDevice extends Thread {
             GenericRecord avroRecord = new GenericData.Record(topic.getSchema());
             avroRecord.put("time", System.currentTimeMillis() / 1000.0);
             for (int i = 0; i < values.length; i += 2) {
-                avroRecord.put((String)values[i], values[i + 1]);
+                avroRecord.put((String) values[i], values[i + 1]);
             }
             sender.send(topic.getName(), deviceId, avroRecord);
         }
@@ -81,7 +80,7 @@ public class MockDevice extends Thread {
         long currentTime = System.nanoTime();
         long nanoToSleep = nanoTimeStep - currentTime + lastSleep;
         if (nanoToSleep > 0) {
-            Thread.sleep(nanoToSleep / 1000000L, ((int)nanoToSleep) % 1000000);
+            Thread.sleep(nanoToSleep / 1000000L, ((int) nanoToSleep) % 1000000);
         }
         lastSleep = currentTime;
     }

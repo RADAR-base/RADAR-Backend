@@ -1,18 +1,17 @@
 package org.radarcns.collect;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.IndexedRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.errors.SerializationException;
+
 import io.confluent.kafka.serializers.KafkaAvroDecoder;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.IndexedRecord;
 import kafka.utils.VerifiableProperties;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.errors.SerializationException;
-
-import java.util.*;
 
 public class AvroConsumer {
     public static void main(String[] args) {

@@ -1,6 +1,5 @@
 package org.radarcns.collect;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -9,8 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-/** Directly sends a message to Kafka using a KafkaProducer */
-public class DirectProducer<K,V> implements KafkaSender<K, V> {
+/**
+ * Directly sends a message to Kafka using a KafkaProducer
+ */
+public class DirectProducer<K, V> implements KafkaSender<K, V> {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducer.class);
     private final KafkaProducer<K, V> producer;
 
