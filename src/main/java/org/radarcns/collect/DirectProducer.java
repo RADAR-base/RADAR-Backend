@@ -1,5 +1,6 @@
 package org.radarcns.collect;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -31,6 +32,16 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         producer.send(new ProducerRecord<>(topic, key, value));
     }
 
+    @Override
+    public void flush() {
+        producer.flush();
+    }
+
+    @Override
+    public void close() {
+        producer.close();
+    }
+
     public static void main(String[] args) {
         int numberOfDevices = 1;
         if (args.length > 0) {
@@ -38,10 +49,15 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         }
 
         logger.info("Simulating the load of " + numberOfDevices);
-        Thread[] threads = new Thread[numberOfDevices];
+        MockDevice[] threads = new MockDevice[numberOfDevices];
+        KafkaSender<String, GenericRecord>[] senders = new KafkaSender[numberOfDevices];
         for (int i = 0; i < numberOfDevices; i++) {
-            threads[i] = new MockDevice(new DirectProducer<>(), "device" + i);
+            senders[i] = new DirectProducer<>();
+            threads[i] = new MockDevice(senders[i], "device" + i);
             threads[i].start();
+        }
+        for (MockDevice device : threads) {
+            device.waitFor();
         }
     }
 }

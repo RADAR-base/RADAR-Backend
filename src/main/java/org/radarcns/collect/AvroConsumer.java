@@ -5,6 +5,12 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.errors.SerializationException;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
+
 import io.confluent.kafka.serializers.KafkaAvroDecoder;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerIterator;

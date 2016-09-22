@@ -1,6 +1,7 @@
 package org.radarcns.collect;
 
 import org.apache.avro.Schema;
+import org.radarcns.collect.util.IO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +23,9 @@ public class Topic {
     public Schema getSchema() {
         if (schema == null) {
             logger.debug("Retrieving schema for topic {}", getName());
-            InputStream schemaStream = Topic.class.getResourceAsStream("schema/" + getName() + ".json");
-            Scanner s = new Scanner(schemaStream).useDelimiter("\\A");
+            String schemaString = IO.readInputStream(Topic.class.getResourceAsStream("schema/" + getName() + ".json"));
             Schema.Parser parser = new Schema.Parser();
-            schema = parser.parse(s.hasNext() ? s.next() : "");
+            schema = parser.parse(schemaString);
         }
         return schema;
     }

@@ -6,8 +6,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class MockDevice extends Thread {
-    private final static Logger logger = LoggerFactory.getLogger(Topic.class);
+    private final static Logger logger = LoggerFactory.getLogger(MockDevice.class);
 
     private final Topic acceleration;
     private final Topic battery;
@@ -38,10 +40,9 @@ public class MockDevice extends Thread {
     }
 
     public void run() {
-        boolean interrupted = false;
         lastSleep = System.nanoTime();
-        while (!interrupted) {
-            try {
+        try {
+            while (true) {
                 for (int i = 0; i < hertz_modulus; i++) {
                     sendIfNeeded(i, acceleration,
                             "x", fixedValue(acceleration, "x", (byte) 15),
@@ -55,8 +56,14 @@ public class MockDevice extends Thread {
                     sendIfNeeded(i, temperature, "temperature", 37.0f);
                     sleep();
                 }
-            } catch (InterruptedException ex) {
-                interrupted = true;
+            }
+        } catch (InterruptedException ex) {
+            // do nothing, just exit the loop
+        } finally {
+            try {
+                sender.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -72,7 +79,21 @@ public class MockDevice extends Thread {
             for (int i = 0; i < values.length; i += 2) {
                 avroRecord.put((String) values[i], values[i + 1]);
             }
-            sender.send(topic.getName(), deviceId, avroRecord);
+            try {
+                sender.send(topic.getName(), deviceId, avroRecord);
+            } catch (IOException e) {
+                logger.error("Failed to send " + topic.getName() + " of device " + deviceId);
+            }
+        }
+    }
+
+    public void waitFor() {
+        while (isAlive()) {
+            try {
+                join();
+            } catch (InterruptedException ex) {
+                // do nothing
+            }
         }
     }
 
