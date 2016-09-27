@@ -1,4 +1,4 @@
-package org.radarcns.collect;
+package org.radarcns.process;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
