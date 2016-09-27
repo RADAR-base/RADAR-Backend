@@ -59,12 +59,6 @@ public class MockDevice extends Thread {
             }
         } catch (InterruptedException ex) {
             // do nothing, just exit the loop
-        } finally {
-            try {
-                sender.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -73,27 +67,19 @@ public class MockDevice extends Thread {
     }
 
     private void sendIfNeeded(int timeStep, Topic topic, Object... values) {
-        if (timeStep % (hertz_modulus / topic.getHertz()) == 0) {
+        if (topic.getHertz() > 0 && timeStep % (hertz_modulus / topic.getHertz()) == 0) {
             GenericRecord avroRecord = new GenericData.Record(topic.getSchema());
             avroRecord.put("time", System.currentTimeMillis() / 1000.0);
             for (int i = 0; i < values.length; i += 2) {
                 avroRecord.put((String) values[i], values[i + 1]);
             }
-            try {
-                sender.send(topic.getName(), deviceId, avroRecord);
-            } catch (IOException e) {
-                logger.error("Failed to send " + topic.getName() + " of device " + deviceId);
-            }
+            sender.send(topic.getName(), deviceId, avroRecord);
         }
     }
 
-    public void waitFor() {
+    public void waitFor() throws InterruptedException {
         while (isAlive()) {
-            try {
-                join();
-            } catch (InterruptedException ex) {
-                // do nothing
-            }
+            join();
         }
     }
 

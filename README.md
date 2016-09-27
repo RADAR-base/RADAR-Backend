@@ -4,9 +4,10 @@ A backend using Apache Kafka to process streaming data from multiple devices. It
 
 ## Usage
 
-Run the application with
+To run the application with 100 mock devices, with Kafka server radar-test.thehyve.net, run
+
 ```shell
-./gradlew run
+./gradlew run -PappArgs="['100']"
 ```
 
 ## Contributing

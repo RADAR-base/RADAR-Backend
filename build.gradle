@@ -3,7 +3,13 @@ apply plugin: 'java'
 // enable gradle run and jar packaging with fixed main class
 apply plugin: 'application'
 
-mainClassName = 'org.radarcns.collect.MockDevice'
+mainClassName = 'org.radarcns.collect.rest.RestProducer'
+
+run {
+    if ( project.hasProperty("appArgs") ) {
+        args Eval.me(appArgs)
+    }
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {

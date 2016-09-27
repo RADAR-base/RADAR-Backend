@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
@@ -38,65 +40,126 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import javafx.util.Pair;
 
 
-public class RestProducer implements KafkaSender<String, GenericRecord> {
+public class RestProducer extends Thread implements KafkaSender<String, GenericRecord> {
     private final static Logger logger = LoggerFactory.getLogger(RestProducer.class);
 
     private final String kafkaUrl;
     private final HttpClient httpClient;
-    private final Map<String, List<Pair<String, GenericRecord>>> cache;
-    private final int batchSize;
+    private final Map<String, List<Record>> cache;
+    private final int ageMillis;
     private final EncoderFactory encoderFactory;
     private final static ContentType KAFKA_CONTENT_TYPE = ContentType.create("application/vnd.kafka.avro.v1+json", Consts.UTF_8);
     private final SchemaRegistryClient schemaClient;
     private final Schema.Parser parser;
     private final Map<String, Pair<Integer, Schema>> valueCache;
     private final Map<String, Integer> keyCache;
+    private boolean isClosed;
+    private final Queue<List<Record>> recordQueue;
+    private final static int RETRIES = 3;
+    private final static int QUEUE_CAPACITY = 10000;
 
     /**
      * Create a REST producer that caches some values
      *
      * @param kafkaUrl base Kafka REST service URL.
      * @param schemaUrl base Avro Schema Registry service URL.
-     * @param batchSize number of records per topic to batch in one request (set to 0 to disable
-     *                  batching)
+     * @param ageMillis maximum time (ms) that a call for a given topic may aggregate messages.
      */
-    public RestProducer(String kafkaUrl, String schemaUrl, int batchSize) {
+    public RestProducer(String kafkaUrl, String schemaUrl, int ageMillis) {
         this.kafkaUrl = kafkaUrl;
         this.schemaClient = new CachedSchemaRegistryClient(schemaUrl, 1024);
-        this.batchSize = batchSize;
+        this.ageMillis = ageMillis;
         httpClient = HttpClientBuilder.create().build();
         cache = new HashMap<>();
         this.encoderFactory = EncoderFactory.get();
         this.parser = new Schema.Parser();
         this.valueCache = new HashMap<>();
         this.keyCache = new HashMap<>();
+        this.isClosed = false;
+        this.recordQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
     }
 
+    public void run() {
+        List<Record> records;
+        try {
+            while (true) {
+                synchronized (this) {
+                    while (!this.isClosed && this.recordQueue.isEmpty()) {
+                        wait();
+                    }
+                    if (this.isClosed) {
+                        break;
+                    }
+                    records = this.recordQueue.element();
+                }
+
+                IOException exception = null;
+                for (int i = 0; i < RETRIES; i++) {
+                    try {
+                        exception = null;
+                        send(records);
+                        break;
+                    } catch (IOException ex) {
+                        exception = ex;
+                    }
+                }
+                if (exception != null) {
+                    logger.error("Failed to send records to topic " + records.get(0).topic, exception);
+                }
+                synchronized (this) {
+                    this.recordQueue.remove();
+                    notifyAll();
+                }
+            }
+        } catch (InterruptedException e) {
+            // exit loop
+        }
+    }
+
+    private synchronized void enqueue(List<Record> records) {
+        if (records.isEmpty()) {
+            return;
+        }
+        try {
+            recordQueue.add(new ArrayList<>(records));
+            logger.info("Queue size: {}", recordQueue.size());
+            notifyAll();
+        } catch (IllegalStateException ex) {
+            logger.error("Send buffer is full! Discarding produced data.");
+        }
+        records.clear();
+    }
+
+    /**
+     * Send given key and record to a topic.
+     * @param topic topic name
+     * @param key key
+     * @param value value with schema
+     */
     @Override
-    public void send(String topic, String key, GenericRecord value) throws IOException {
-        List<Pair<String, GenericRecord>> batch = cache.get(topic);
+    public void send(String topic, String key, GenericRecord value) {
+        List<Record> batch = cache.get(topic);
 
         if (batch == null) {
             batch = new ArrayList<>();
             cache.put(topic, batch);
         } else if (!batch.isEmpty() &&
-                !batch.get(0).getValue().getSchema().equals(value.getSchema())) {
-            send(topic, batch);
+                !batch.get(0).value.getSchema().equals(value.getSchema())) {
+            enqueue(batch);
         }
-        batch.add(new Pair<>(key, value));
+        batch.add(new Record(topic, key, value));
 
-        if (batch.size() + 1 >= this.batchSize) {
-            send(topic, batch);
+        if (System.currentTimeMillis() - batch.get(0).milliTimeAdded >= this.ageMillis) {
+            enqueue(batch);
         }
     }
 
     /**
      * Actually make a REST request to the Kafka REST server and Schema Registry.
-     * @param topic Kafka topic
      * @param records values to send
      * @throws IOException if any of the requests fail
      */
-    private void send(String topic, List<Pair<String, GenericRecord>> records) throws IOException {
+    private void send(List<Record> records) throws IOException {
         if (records.isEmpty()) {
             return;
         }
@@ -104,7 +167,9 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
         KafkaRestRequest request = new KafkaRestRequest();
 
         // Get schema IDs
-        Schema valueSchema = records.get(0).getValue().getSchema();
+        Schema valueSchema = records.get(0).value.getSchema();
+        String topic = records.get(0).topic;
+
         Pair<Integer, Schema> cachedValue = valueCache.get(topic);
         if (cachedValue != null && cachedValue.getValue().equals(valueSchema)) {
             request.value_schema_id = cachedValue.getKey();
@@ -132,9 +197,9 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
 
         // Encode Avro records
         request.records = new ArrayList<>(records.size());
-        for (Pair<String, GenericRecord> recordPair : records) {
+        for (Record record : records) {
             try {
-                request.records.add(new Record(recordPair.getKey(), encode(recordPair.getValue())));
+                request.records.add(new RawRecord(record.key, encode(record.value)));
             } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot encode record", e);
             }
@@ -156,13 +221,15 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
         post.setHeader(new BasicHeader("Accept", "application/vnd.kafka.v1+json, application/vnd.kafka+json, application/json"));
         HttpResponse postResponse = httpClient.execute(post);
 
-        // Evaluate the result
         String content = IO.readInputStream(postResponse.getEntity().getContent());
-        if (postResponse.getStatusLine().getStatusCode() >= 400) {
-            System.out.println("FAILED: " + content);
+
+        // Evaluate the result
+        if (postResponse.getStatusLine().getStatusCode() < 400) {
+            logger.debug("Added message to topic {}: {}", topic, content);
+        } else {
+            logger.error("FAILED to transmit message: {}", content);
             throw new IOException("Failed to submit: " + content);
         }
-        records.clear();
     }
 
     private Integer getSchemaId(String subject, Schema schema) throws IOException {
@@ -183,15 +250,25 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
     }
 
     @Override
-    public void flush() throws IOException {
-        for (Map.Entry<String, List<Pair<String, GenericRecord>>> entry : cache.entrySet()) {
-            send(entry.getKey(), entry.getValue());
+    public void flush() throws InterruptedException {
+        for (List<Record> records : cache.values()) {
+            enqueue(records);
+        }
+        synchronized (this) {
+            while (!this.isClosed && !this.recordQueue.isEmpty()) {
+                wait();
+            }
         }
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws InterruptedException {
         flush();
+        synchronized (this) {
+            this.isClosed = true;
+            this.notifyAll();
+        }
+        join();
     }
 
     private String encode(GenericRecord value) throws IOException {
@@ -207,6 +284,20 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
         return new String(bytes1);
     }
 
+    private class Record {
+        final long milliTimeAdded;
+        final String topic;
+        final String key;
+        final GenericRecord value;
+
+        Record(String topic, String key, GenericRecord value) {
+            this.topic = topic;
+            this.key = key;
+            this.value = value;
+            this.milliTimeAdded = System.currentTimeMillis();
+        }
+    }
+
     /**
      * Structure of a Kafka REST request to upload data
      */
@@ -215,24 +306,24 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
         public String value_schema;
         public Integer key_schema_id;
         public Integer value_schema_id;
-        public List<RestProducer.Record> records;
+        public List<RawRecord> records;
     }
 
     /**
      * Structure of a single Kafka REST request record
      */
-    private static class Record {
+    private static class RawRecord {
         public String key;
         // Use a raw value, so we can put JSON in this String.
         @JsonRawValue
         public String value;
-        Record(String key, String value) {
+        RawRecord(String key, String value) {
             this.key = key;
             this.value = value;
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         int numberOfDevices = 1;
         if (args.length > 0) {
             numberOfDevices = Integer.parseInt(args[0]);
@@ -240,14 +331,18 @@ public class RestProducer implements KafkaSender<String, GenericRecord> {
 
         logger.info("Simulating the load of " + numberOfDevices);
         MockDevice[] threads = new MockDevice[numberOfDevices];
-        KafkaSender<String, GenericRecord>[] senders = new KafkaSender[numberOfDevices];
+        RestProducer[] senders = new RestProducer[numberOfDevices];
         for (int i = 0; i < numberOfDevices; i++) {
-            senders[i] = new RestProducer("http://ubuntu:8082", "http://ubuntu:8081", 128);
+            senders[i] = new RestProducer("http://radar-test.thehyve.net:8082", "http://radar-test.thehyve.net:8081", 1000);
+            senders[i].start();
             threads[i] = new MockDevice(senders[i], "device" + i);
             threads[i].start();
         }
         for (MockDevice device : threads) {
             device.waitFor();
+        }
+        for (RestProducer sender : senders) {
+            sender.close();
         }
     }
 }

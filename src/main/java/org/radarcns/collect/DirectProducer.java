@@ -42,7 +42,7 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         producer.close();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         int numberOfDevices = 1;
         if (args.length > 0) {
             numberOfDevices = Integer.parseInt(args[0]);
@@ -58,6 +58,9 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         }
         for (MockDevice device : threads) {
             device.waitFor();
+        }
+        for (KafkaSender<String, GenericRecord> sender : senders) {
+            sender.close();
         }
     }
 }
