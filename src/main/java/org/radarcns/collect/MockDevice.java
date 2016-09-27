@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class MockDevice extends Thread {
     private final static Logger logger = LoggerFactory.getLogger(MockDevice.class);
@@ -22,6 +23,7 @@ public class MockDevice extends Thread {
     private final KafkaSender<String, GenericRecord> sender;
     private final String deviceId;
     private final long nanoTimeStep;
+    private final float batteryDecayFactor;
     private long lastSleep;
 
     public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId) {
@@ -36,19 +38,20 @@ public class MockDevice extends Thread {
         hertz_modulus = 64;
         nanoTimeStep = 1000000000L / hertz_modulus;
         lastSleep = 0;
+
+        // decay
+        batteryDecayFactor = 0.1f * new Random().nextFloat();
+
         this.sender = sender;
     }
 
     public void run() {
         lastSleep = System.nanoTime();
         try {
-            while (true) {
+            for (int t = 0; t < Integer.MAX_VALUE; t++) {
                 for (int i = 0; i < hertz_modulus; i++) {
-                    sendIfNeeded(i, acceleration,
-                            "x", fixedValue(acceleration, "x", (byte) 15),
-                            "y", fixedValue(acceleration, "y", (byte) -15),
-                            "z", fixedValue(acceleration, "z", (byte) 64));
-                    sendIfNeeded(i, battery, "batteryLevel", 0.8f);
+                    sendIfNeeded(i, acceleration, "x", 15f, "y", -15f, "z", 64f);
+                    sendIfNeeded(i, battery, "batteryLevel", 1f - (batteryDecayFactor*t % 1));
                     sendIfNeeded(i, bvp, "bloodVolumePulse", 80.0f);
                     sendIfNeeded(i, eda, "electroDermalActivity", 0.026897f);
                     sendIfNeeded(i, ibi, "interBeatInterval", 0.921917f);
@@ -60,10 +63,6 @@ public class MockDevice extends Thread {
         } catch (InterruptedException ex) {
             // do nothing, just exit the loop
         }
-    }
-
-    private GenericFixed fixedValue(Topic t, String field, byte b) {
-        return new GenericData.Fixed(acceleration.getSchema().getField("x").schema(), new byte[]{b});
     }
 
     private void sendIfNeeded(int timeStep, Topic topic, Object... values) {
