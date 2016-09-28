@@ -18,6 +18,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
+import org.radarcns.ParsedSchemaMetadata;
 import org.radarcns.collect.KafkaSender;
 import org.radarcns.collect.MockDevice;
 import org.radarcns.collect.util.IO;
@@ -33,13 +34,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import javafx.util.Pair;
-
-
 public class RestProducer extends Thread implements KafkaSender<String, GenericRecord> {
     private final static Logger logger = LoggerFactory.getLogger(RestProducer.class);
 
@@ -49,10 +43,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     private final int ageMillis;
     private final EncoderFactory encoderFactory;
     private final static ContentType KAFKA_CONTENT_TYPE = ContentType.create("application/vnd.kafka.avro.v1+json", Consts.UTF_8);
-    private final SchemaRegistryClient schemaClient;
     private final Schema.Parser parser;
-    private final Map<String, Pair<Integer, Schema>> valueCache;
-    private final Map<String, Integer> keyCache;
+    private final SchemaRegistryRetriever schemaRetriever;
     private boolean isClosed;
     private final Queue<List<Record>> recordQueue;
     private final static int RETRIES = 3;
@@ -67,14 +59,12 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
      */
     public RestProducer(String kafkaUrl, String schemaUrl, int ageMillis) {
         this.kafkaUrl = kafkaUrl;
-        this.schemaClient = new CachedSchemaRegistryClient(schemaUrl, 1024);
         this.ageMillis = ageMillis;
         httpClient = HttpClientBuilder.create().build();
         cache = new HashMap<>();
+        schemaRetriever = new SchemaRegistryRetriever(schemaUrl);
         this.encoderFactory = EncoderFactory.get();
         this.parser = new Schema.Parser();
-        this.valueCache = new HashMap<>();
-        this.keyCache = new HashMap<>();
         this.isClosed = false;
         this.recordQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
     }
@@ -170,29 +160,21 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         Schema valueSchema = records.get(0).value.getSchema();
         String topic = records.get(0).topic;
 
-        Pair<Integer, Schema> cachedValue = valueCache.get(topic);
-        if (cachedValue != null && cachedValue.getValue().equals(valueSchema)) {
-            request.value_schema_id = cachedValue.getKey();
+        ParsedSchemaMetadata metadata = schemaRetriever.getOrSetSchemaMetadata(topic, true, valueSchema);
+        if (metadata.getId() != null) {
+            request.value_schema_id = metadata.getId();
         } else {
-            request.value_schema_id = getSchemaId(topic + "-value", valueSchema);
-            if (request.value_schema_id == null) {
-                request.value_schema = valueSchema.toString();
-            } else {
-                valueCache.put(topic, new Pair<>(request.value_schema_id, valueSchema));
-            }
+            logger.warn("Cannot get value schema, submitting data to the schema-less topic.");
+            request.value_schema = metadata.getSchema().toString();
+            topic = "schemaless-value";
         }
-
-        Integer cachedKey = keyCache.get(topic);
-        if (cachedKey != null) {
-            request.key_schema_id = cachedKey;
+        metadata = schemaRetriever.getOrSetSchemaMetadata(topic, false, Schema.create(Schema.Type.STRING));
+        if (metadata.getId() != null) {
+            request.key_schema_id = metadata.getId();
         } else {
-            request.key_schema_id = getSchemaId(topic + "-key", Schema.create(Schema.Type.STRING));
-
-            if (request.key_schema_id == null) {
-                request.key_schema = "\"string\"";
-            } else {
-                keyCache.put(topic, request.key_schema_id);
-            }
+            logger.warn("Cannot get key schema, submitting data to the schema-less topic.");
+            request.key_schema = metadata.getSchema().toString();
+            topic = "schemaless-key";
         }
 
         // Encode Avro records
@@ -214,7 +196,6 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Cannot encode values", e);
         }
-
         // Post to Kafka REST server
         HttpPost post = new HttpPost(kafkaUrl + "/topics/" + topic);
         post.setEntity(new StringEntity(data, KAFKA_CONTENT_TYPE));
@@ -227,25 +208,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         if (postResponse.getStatusLine().getStatusCode() < 400) {
             logger.debug("Added message to topic {}: {}", topic, content);
         } else {
-            logger.error("FAILED to transmit message: {}", content);
+            logger.error("FAILED to transmit message {}:\n{}", data, content);
             throw new IOException("Failed to submit: " + content);
-        }
-    }
-
-    private Integer getSchemaId(String subject, Schema schema) throws IOException {
-        try {
-            SchemaMetadata metadata = schemaClient.getLatestSchemaMetadata(subject);
-            Schema otherSchema = parser.parse(metadata.getSchema());
-            if (otherSchema.equals(schema)) {
-                return metadata.getId();
-            }
-        } catch (RestClientException ex) {
-            // try again by registering
-        }
-        try {
-            return schemaClient.register(subject, schema);
-        } catch (RestClientException ex1) {
-            return null;
         }
     }
 
@@ -275,7 +239,6 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JsonEncoder bytes = this.encoderFactory.jsonEncoder(value.getSchema(), out);
         GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(value.getSchema());
-
         writer.write(value, bytes);
         bytes.flush();
 

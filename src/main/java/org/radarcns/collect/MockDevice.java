@@ -1,12 +1,13 @@
 package org.radarcns.collect;
 
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
+import org.radarcns.SchemaRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class MockDevice extends Thread {
@@ -20,6 +21,7 @@ public class MockDevice extends Thread {
     private final Topic tags;
     private final Topic temperature;
     private final int hertz_modulus;
+    private final Map<Topic, Integer> topicFrequency;
     private final KafkaSender<String, GenericRecord> sender;
     private final String deviceId;
     private final long nanoTimeStep;
@@ -28,16 +30,31 @@ public class MockDevice extends Thread {
 
     public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId) {
         this.deviceId = deviceId;
-        acceleration = new Topic("empatica_e4_acceleration", 32);
-        battery = new Topic("empatica_e4_battery_level", 1);
-        bvp = new Topic("empatica_e4_blood_volume_pulse", 64);
-        eda = new Topic("empatica_e4_electrodermal_activity", 4);
-        ibi = new Topic("empatica_e4_inter_beat_interval", 1);
-        tags = new Topic("empatica_e4_tags", 1);
-        temperature = new Topic("empatica_e4_temperature", 4);
-        hertz_modulus = 64;
+        SchemaRetriever schemaRetriever = new LocalSchemaRetriever();
+        try {
+            acceleration = new Topic("empatica_e4_acceleration", schemaRetriever);
+            battery = new Topic("empatica_e4_battery_level", schemaRetriever);
+            bvp = new Topic("empatica_e4_blood_volume_pulse", schemaRetriever);
+            eda = new Topic("empatica_e4_electrodermal_activity", schemaRetriever);
+            ibi = new Topic("empatica_e4_inter_beat_interval", schemaRetriever);
+            tags = new Topic("empatica_e4_tags", schemaRetriever);
+            temperature = new Topic("empatica_e4_temperature", schemaRetriever);
+        } catch (IOException ex) {
+            logger.error("missing topic schema", ex);
+            throw new RuntimeException(ex);
+        }
+        hertz_modulus = 1;
         nanoTimeStep = 1000000000L / hertz_modulus;
         lastSleep = 0;
+
+        topicFrequency = new HashMap<>();
+        topicFrequency.put(acceleration, 0); // 32
+        topicFrequency.put(battery, 1);
+        topicFrequency.put(bvp, 0); // 64
+        topicFrequency.put(eda, 0); // 4
+        topicFrequency.put(ibi, 0); // 1
+        topicFrequency.put(tags, 0); // 1
+        topicFrequency.put(temperature, 0); // 4
 
         // decay
         batteryDecayFactor = 0.1f * new Random().nextFloat();
@@ -66,12 +83,9 @@ public class MockDevice extends Thread {
     }
 
     private void sendIfNeeded(int timeStep, Topic topic, Object... values) {
-        if (topic.getHertz() > 0 && timeStep % (hertz_modulus / topic.getHertz()) == 0) {
-            GenericRecord avroRecord = new GenericData.Record(topic.getSchema());
-            avroRecord.put("time", System.currentTimeMillis() / 1000.0);
-            for (int i = 0; i < values.length; i += 2) {
-                avroRecord.put((String) values[i], values[i + 1]);
-            }
+        int hertz = topicFrequency.get(topic);
+        if (hertz > 0 && timeStep % (hertz_modulus / hertz) == 0) {
+            GenericRecord avroRecord = topic.createSimpleRecord(values);
             sender.send(topic.getName(), deviceId, avroRecord);
         }
     }

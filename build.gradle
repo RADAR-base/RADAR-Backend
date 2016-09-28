@@ -25,8 +25,6 @@ repositories {
 dependencies {
     // The production code uses the SLF4J logging API at compile time
     compile 'org.slf4j:slf4j-api:1.7.21'
-    // main kafka implementation
-    compile group: 'org.apache.kafka', name: 'kafka_2.11', version: '0.10.0.1'
     // to implement producers and consumers
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: '0.10.0.1'
     // addition of confluent's versioned Avro schemas

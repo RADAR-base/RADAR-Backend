@@ -1,40 +1,54 @@
 package org.radarcns.collect;
 
 import org.apache.avro.Schema;
-import org.radarcns.collect.util.IO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.radarcns.SchemaRetriever;
 
-import java.io.InputStream;
-import java.util.Scanner;
+import java.io.IOException;
+
 
 public class Topic {
-    private final int hertz;
     private final String name;
     private Schema schema;
-    private final static Logger logger = LoggerFactory.getLogger(Topic.class);
 
-    public Topic(String name, int hertz) {
+    public Topic(String name, SchemaRetriever retriever) throws IOException {
         this.name = name;
-        this.hertz = hertz;
-        this.schema = null;
+        this.schema = retriever.getSchemaMetadata(getName(), true).getSchema();
     }
 
-    public Schema getSchema() {
-        if (schema == null) {
-            logger.debug("Retrieving schema for topic {}", getName());
-            String schemaString = IO.readInputStream(Topic.class.getResourceAsStream("schema/" + getName() + ".json"));
-            Schema.Parser parser = new Schema.Parser();
-            schema = parser.parse(schemaString);
-        }
+    public Schema getValueSchema() throws IOException {
         return schema;
     }
 
-    public int getHertz() {
-        return hertz;
+    public GenericRecord createSimpleRecord(Object... values) {
+        GenericRecord avroRecord = new GenericData.Record(schema);
+        if (schema.getField("time") != null) {
+            avroRecord.put("time", System.currentTimeMillis() / 1000.0);
+        }
+        for (int i = 0; i < values.length; i += 2) {
+            avroRecord.put((String) values[i], values[i + 1]);
+        }
+        return avroRecord;
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Topic topic = (Topic) o;
+
+        return name != null ? name.equals(topic.name) : topic.name == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 }
