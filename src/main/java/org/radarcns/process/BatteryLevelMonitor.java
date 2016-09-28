@@ -4,18 +4,19 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.errors.SerializationException;
-import org.radarcns.collect.MockDevice;
+import org.radarcns.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import io.confluent.kafka.serializers.KafkaAvroDecoder;
 import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
@@ -27,10 +28,11 @@ public class BatteryLevelMonitor {
     private final KafkaAvroDecoder keyDecoder;
     private final String topic;
     private final KafkaStream<Object, Object> stream;
-    private final static Logger logger = LoggerFactory.getLogger(MockDevice.class);
+    private final static Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
-    private final Set<String> isLow;
-    private final Set<String> isCritical;
+    private final Set<Device> isLow;
+    private final Set<Device> isCritical;
+    private final List<BatteryLevelListener> listeners;
 
     public BatteryLevelMonitor(String topic) {
         Properties props = new Properties();
@@ -55,34 +57,40 @@ public class BatteryLevelMonitor {
         this.stream = consumer.createMessageStreams(topicCountMap, keyDecoder, valueDecoder).get(topic).get(0);
         this.isLow = new HashSet<>();
         this.isCritical = new HashSet<>();
+        this.listeners = new ArrayList<>();
     }
 
     public void monitor() {
         logger.info("Monitoring stream {}", topic);
-        ConsumerIterator it = stream.iterator();
 
-        while (it.hasNext()) {
-            MessageAndMetadata messageAndMetadata = it.next();
+        for (MessageAndMetadata messageAndMetadata : stream) {
             try {
-                String key = (String) messageAndMetadata.key();
+                Device device = new Device((String) messageAndMetadata.key());
                 IndexedRecord value = (IndexedRecord) messageAndMetadata.message();
                 Schema recordSchema = value.getSchema();
 
                 int batteryLevelFieldId = recordSchema.getField("batteryLevel").pos();
-                Number batteryLevel = (Number)value.get(batteryLevelFieldId);
+                Number batteryLevel = (Number) value.get(batteryLevelFieldId);
                 if (batteryLevel.floatValue() < 0.05) {
-                    boolean newlyCritical = isCritical.add(key);
+                    boolean newlyCritical = isCritical.add(device);
                     if (newlyCritical) {
-                        isLow.add(key);
-                        logger.error("Battery level of device {} is critically low", key);
+                        isLow.add(device);
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(device, BatteryLevelListener.Status.CRITICAL);
+                        }
                     }
                 } else if (batteryLevel.floatValue() < 0.2) {
-                    if (isLow.add(key)) {
-                        logger.warn("Battery level of device {} is low", key);
+                    if (isLow.add(device)) {
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(device, BatteryLevelListener.Status.LOW);
+                        }
                     }
                 } else {
-                    if (isLow.remove(key)) {
-                        isCritical.remove(key);
+                    if (isLow.remove(device)) {
+                        isCritical.remove(device);
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(device, BatteryLevelListener.Status.NORMAL);
+                        }
                     }
                 }
             } catch (SerializationException e) {
@@ -91,7 +99,13 @@ public class BatteryLevelMonitor {
         }
     }
 
+    public void addBatteryLevelListener(BatteryLevelListener listener) {
+        this.listeners.add(listener);
+    }
+
     public static void main(String[] args) {
-        new BatteryLevelMonitor("empatica_e4_battery_level").monitor();
+        BatteryLevelMonitor monitor = new BatteryLevelMonitor("empatica_e4_battery_level");
+        monitor.addBatteryLevelListener(new BatteryLevelLogger());
+        monitor.monitor();
     }
 }
