@@ -5,15 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public abstract class SchemaRetriever {
     private final static Logger logger = LoggerFactory.getLogger(SchemaRetriever.class);
-    private final Map<String, ParsedSchemaMetadata> cache;
+    private final ConcurrentMap<String, ParsedSchemaMetadata> cache;
 
     public SchemaRetriever() {
-        cache = new HashMap<>();
+        cache = new ConcurrentHashMap<>();
     }
 
     protected String subject(String topic, boolean ofValue) {
@@ -26,7 +26,10 @@ public abstract class SchemaRetriever {
         ParsedSchemaMetadata value = cache.get(subject(topic, ofValue));
         if (value == null) {
             value = retrieveSchemaMetadata(topic, ofValue);
-            cache.put(subject(topic, ofValue), value);
+            ParsedSchemaMetadata oldValue = cache.putIfAbsent(subject(topic, ofValue), value);
+            if (oldValue != null) {
+                value = oldValue;
+            }
         }
         return value;
     }

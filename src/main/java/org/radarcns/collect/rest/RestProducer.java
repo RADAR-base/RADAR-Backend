@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.JsonEncoder;
 import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -19,58 +19,80 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.radarcns.ParsedSchemaMetadata;
+import org.radarcns.SchemaRetriever;
 import org.radarcns.collect.KafkaSender;
+import org.radarcns.collect.LocalSchemaRetriever;
 import org.radarcns.collect.MockDevice;
-import org.radarcns.collect.util.IO;
+import org.radarcns.util.IO;
+import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
+/**
+ * Send Avro Records to a Kafka REST Proxy.
+ *
+ * This queues messages for a specified amount of time and then sends all messages up to that time.
+ */
 public class RestProducer extends Thread implements KafkaSender<String, GenericRecord> {
     private final static Logger logger = LoggerFactory.getLogger(RestProducer.class);
 
     private final String kafkaUrl;
     private final HttpClient httpClient;
-    private final Map<String, List<Record>> cache;
+    private final ConcurrentMap<String, List<Record>> cache;
     private final int ageMillis;
     private final EncoderFactory encoderFactory;
     private final static ContentType KAFKA_CONTENT_TYPE = ContentType.create("application/vnd.kafka.avro.v1+json", Consts.UTF_8);
-    private final Schema.Parser parser;
-    private final SchemaRegistryRetriever schemaRetriever;
+    private final SchemaRetriever schemaRetriever;
     private boolean isClosed;
     private final Queue<List<Record>> recordQueue;
     private final static int RETRIES = 3;
     private final static int QUEUE_CAPACITY = 10000;
+    private final Map<String, Long> lastOffsetsSent;
+    private final AtomicLong currentOffset;
 
     /**
      * Create a REST producer that caches some values
      *
      * @param kafkaUrl base Kafka REST service URL.
-     * @param schemaUrl base Avro Schema Registry service URL.
+     * @param schemaRetriever retriever of the registry metadata.
      * @param ageMillis maximum time (ms) that a call for a given topic may aggregate messages.
      */
-    public RestProducer(String kafkaUrl, String schemaUrl, int ageMillis) {
+    public RestProducer(String kafkaUrl, int ageMillis, SchemaRetriever schemaRetriever) {
         this.kafkaUrl = kafkaUrl;
         this.ageMillis = ageMillis;
         httpClient = HttpClientBuilder.create().build();
-        cache = new HashMap<>();
-        schemaRetriever = new SchemaRegistryRetriever(schemaUrl);
+        cache = new ConcurrentHashMap<>();
+        this.schemaRetriever = schemaRetriever;
         this.encoderFactory = EncoderFactory.get();
-        this.parser = new Schema.Parser();
         this.isClosed = false;
         this.recordQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        this.lastOffsetsSent = new ConcurrentHashMap<>();
+        this.currentOffset = new AtomicLong(1L);
     }
 
+    /**
+     * Actually make REST requests.
+     *
+     * The offsets of the sent messages are added to a
+     */
     public void run() {
         List<Record> records;
+        RollingTimeAverage opsSent = new RollingTimeAverage(20000L);
+        RollingTimeAverage opsRequests = new RollingTimeAverage(20000L);
         try {
             while (true) {
                 synchronized (this) {
@@ -82,6 +104,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
                     }
                     records = this.recordQueue.element();
                 }
+                opsSent.add(records.size());
+                opsRequests.add(1);
 
                 IOException exception = null;
                 for (int i = 0; i < RETRIES; i++) {
@@ -93,26 +117,32 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
                         exception = ex;
                     }
                 }
-                if (exception != null) {
+                if (exception == null) {
+                    Record lastRecord = records.get(records.size() - 1);
+                    lastOffsetsSent.put(lastRecord.topic, lastRecord.offset);
+                } else {
                     logger.error("Failed to send records to topic " + records.get(0).topic, exception);
                 }
                 synchronized (this) {
                     this.recordQueue.remove();
                     notifyAll();
                 }
+                logger.debug("Sending {} messages in {} requests per second",
+                        (int)Math.round(opsSent.getAverage()),
+                        (int)Math.round(opsRequests.getAverage()));
             }
         } catch (InterruptedException e) {
             // exit loop
         }
     }
 
-    private synchronized void enqueue(List<Record> records) {
+    private void enqueue(List<Record> records) {
         if (records.isEmpty()) {
             return;
         }
         try {
             recordQueue.add(new ArrayList<>(records));
-            logger.info("Queue size: {}", recordQueue.size());
+            logger.debug("Queue size: {}", recordQueue.size());
             notifyAll();
         } catch (IllegalStateException ex) {
             logger.error("Send buffer is full! Discarding produced data.");
@@ -127,21 +157,34 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
      * @param value value with schema
      */
     @Override
-    public void send(String topic, String key, GenericRecord value) {
+    public long send(String topic, String key, GenericRecord value) {
         List<Record> batch = cache.get(topic);
-
         if (batch == null) {
-            batch = new ArrayList<>();
-            cache.put(topic, batch);
-        } else if (!batch.isEmpty() &&
-                !batch.get(0).value.getSchema().equals(value.getSchema())) {
-            enqueue(batch);
+            batch = cache.putIfAbsent(topic, new ArrayList<>());
+            if (batch == null) {
+                batch = cache.get(topic);
+            }
         }
-        batch.add(new Record(topic, key, value));
 
-        if (System.currentTimeMillis() - batch.get(0).milliTimeAdded >= this.ageMillis) {
-            enqueue(batch);
+        Record record = new Record(this.currentOffset.getAndIncrement(), topic, key, value);
+
+        synchronized (this) {
+            if (!batch.isEmpty() && !batch.get(0).value.getSchema().equals(value.getSchema())) {
+                enqueue(batch);
+            }
+            batch.add(record);
+
+            if (System.currentTimeMillis() - batch.get(0).milliTimeAdded >= this.ageMillis) {
+                enqueue(batch);
+            }
         }
+
+        return record.offset;
+    }
+
+    @Override
+    public long getLastSentOffset(String topic) {
+        return this.lastOffsetsSent.get(topic);
     }
 
     /**
@@ -155,6 +198,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         }
         // Initialize empty Kafka REST proxy request
         KafkaRestRequest request = new KafkaRestRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         // Get schema IDs
         Schema valueSchema = records.get(0).value.getSchema();
@@ -165,7 +210,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             request.value_schema_id = metadata.getId();
         } else {
             logger.warn("Cannot get value schema, submitting data to the schema-less topic.");
-            request.value_schema = metadata.getSchema().toString();
+            request.value_schema = mapper.writeValueAsString(metadata.getSchema());
             topic = "schemaless-value";
         }
         metadata = schemaRetriever.getOrSetSchemaMetadata(topic, false, Schema.create(Schema.Type.STRING));
@@ -181,15 +226,14 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         request.records = new ArrayList<>(records.size());
         for (Record record : records) {
             try {
-                request.records.add(new RawRecord(record.key, encode(record.value)));
+                String rawValue = encode(record.value);
+                request.records.add(new RawRecord(record.key, rawValue));
             } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot encode record", e);
             }
         }
 
         // Convert request to JSON
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String data;
         try {
             data = mapper.writeValueAsString(request);
@@ -206,19 +250,17 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
 
         // Evaluate the result
         if (postResponse.getStatusLine().getStatusCode() < 400) {
-            logger.debug("Added message to topic {}: {}", topic, content);
+            logger.debug("Added message to topic {}: {} -> {}", topic, data, content);
         } else {
-            logger.error("FAILED to transmit message {}:\n{}", data, content);
+            logger.error("FAILED to transmit message {} -> {}", data, content);
             throw new IOException("Failed to submit: " + content);
         }
     }
 
     @Override
     public void flush() throws InterruptedException {
-        for (List<Record> records : cache.values()) {
-            enqueue(records);
-        }
         synchronized (this) {
+            cache.values().forEach(this::enqueue);
             while (!this.isClosed && !this.recordQueue.isEmpty()) {
                 wait();
             }
@@ -237,14 +279,14 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
 
     private String encode(GenericRecord value) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        JsonEncoder bytes = this.encoderFactory.jsonEncoder(value.getSchema(), out);
+        Encoder encoder = this.encoderFactory.jsonEncoder(value.getSchema(), out);
         GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(value.getSchema());
-        writer.write(value, bytes);
-        bytes.flush();
+        writer.write(value, encoder);
+        encoder.flush();
 
-        byte[] bytes1 = out.toByteArray();
+        byte[] bytes = out.toByteArray();
         out.close();
-        return new String(bytes1);
+        return new String(bytes);
     }
 
     private class Record {
@@ -252,8 +294,10 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         final String topic;
         final String key;
         final GenericRecord value;
+        private final long offset;
 
-        Record(String topic, String key, GenericRecord value) {
+        Record(long offset, String topic, String key, GenericRecord value) {
+            this.offset = offset;
             this.topic = topic;
             this.key = key;
             this.value = value;
@@ -287,6 +331,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     }
 
     public static void main(String[] args) throws InterruptedException {
+        System.out.println(System.currentTimeMillis());
         int numberOfDevices = 1;
         if (args.length > 0) {
             numberOfDevices = Integer.parseInt(args[0]);
@@ -294,11 +339,13 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
 
         logger.info("Simulating the load of " + numberOfDevices);
         MockDevice[] threads = new MockDevice[numberOfDevices];
-        RestProducer[] senders = new RestProducer[numberOfDevices];
+        RestProducer[] senders = new RestProducer[1];
+        SchemaRetriever schemaRetriever = new SchemaRegistryRetriever("http://radar-test.thehyve.net:8081");
+        SchemaRetriever localSchemaRetriever =  new LocalSchemaRetriever();
+        senders[0] = new RestProducer("http://radar-test.thehyve.net:8082", 1000, schemaRetriever);
+        senders[0].start();
         for (int i = 0; i < numberOfDevices; i++) {
-            senders[i] = new RestProducer("http://radar-test.thehyve.net:8082", "http://radar-test.thehyve.net:8081", 1000);
-            senders[i].start();
-            threads[i] = new MockDevice(senders[i], "device" + i);
+            threads[i] = new MockDevice(senders[0], "device" + i, localSchemaRetriever);
             threads[i].start();
         }
         for (MockDevice device : threads) {

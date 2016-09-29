@@ -4,9 +4,14 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.radarcns.SchemaRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -15,6 +20,8 @@ import java.util.Properties;
 public class DirectProducer<K, V> implements KafkaSender<K, V> {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducer.class);
     private final KafkaProducer<K, V> producer;
+    private long currentOffset;
+    private final Map<String, Long> offsetsSent;
 
     public DirectProducer() {
         Properties props = new Properties();
@@ -25,11 +32,22 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         props.put("schema.registry.url", "http://ubuntu:8081");
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "ubuntu:9092");
         producer = new KafkaProducer<>(props);
+        this.currentOffset = 0L;
+        this.offsetsSent = new HashMap<>();
     }
 
     @Override
-    public void send(String topic, K key, V value) {
+    public long send(String topic, K key, V value) {
         producer.send(new ProducerRecord<>(topic, key, value));
+
+        long offset = currentOffset++;
+        offsetsSent.put(topic, offset);
+        return offset;
+    }
+
+    @Override
+    public long getLastSentOffset(String topic) {
+        return offsetsSent.get(topic);
     }
 
     @Override
@@ -51,9 +69,10 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         logger.info("Simulating the load of " + numberOfDevices);
         MockDevice[] threads = new MockDevice[numberOfDevices];
         KafkaSender<String, GenericRecord>[] senders = new KafkaSender[numberOfDevices];
+        SchemaRetriever schemaRetriever = new LocalSchemaRetriever();
         for (int i = 0; i < numberOfDevices; i++) {
             senders[i] = new DirectProducer<>();
-            threads[i] = new MockDevice(senders[i], "device" + i);
+            threads[i] = new MockDevice(senders[i], "device" + i, schemaRetriever);
             threads[i].start();
         }
         for (MockDevice device : threads) {

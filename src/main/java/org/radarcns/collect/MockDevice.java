@@ -28,9 +28,8 @@ public class MockDevice extends Thread {
     private final float batteryDecayFactor;
     private long lastSleep;
 
-    public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId) {
+    public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId, SchemaRetriever schemaRetriever) {
         this.deviceId = deviceId;
-        SchemaRetriever schemaRetriever = new LocalSchemaRetriever();
         try {
             acceleration = new Topic("empatica_e4_acceleration", schemaRetriever);
             battery = new Topic("empatica_e4_battery_level", schemaRetriever);
@@ -66,7 +65,7 @@ public class MockDevice extends Thread {
         lastSleep = System.nanoTime();
         try {
             for (int t = 0; t < Integer.MAX_VALUE; t++) {
-                for (int i = 0; i < hertz_modulus; i++) {
+                for (int i = 1; i <= hertz_modulus; i++) {
                     sendIfNeeded(i, acceleration, "x", 15f, "y", -15f, "z", 64f);
                     sendIfNeeded(i, battery, "batteryLevel", 1f - (batteryDecayFactor*t % 1));
                     sendIfNeeded(i, bvp, "bloodVolumePulse", 80.0f);

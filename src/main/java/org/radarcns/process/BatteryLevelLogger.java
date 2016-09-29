@@ -14,10 +14,13 @@ public class BatteryLevelLogger implements BatteryLevelListener {
                 break;
             case LOW:
                 logger.warn("Battery level of device {} is low", device.getId());
+                break;
             case CRITICAL:
                 logger.warn("Battery level of device {} is critically low", device.getId());
+                break;
             case EMPTY:
                 logger.error("Battery of device {} is empty", device.getId());
+                break;
         }
     }
 }

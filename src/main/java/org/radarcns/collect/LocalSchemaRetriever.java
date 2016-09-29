@@ -1,9 +1,8 @@
 package org.radarcns.collect;
 
-import org.apache.avro.Schema;
 import org.radarcns.ParsedSchemaMetadata;
 import org.radarcns.SchemaRetriever;
-import org.radarcns.collect.util.IO;
+import org.radarcns.util.IO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

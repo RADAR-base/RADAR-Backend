@@ -1,12 +1,17 @@
 package org.radarcns.collect;
 
-import java.io.IOException;
+import java.util.List;
 
 public interface KafkaSender<K, V> {
     /**
-     * Send a message to Kafka eventually.
+     * Send a message to Kafka eventually. Returns an offset of the message ID.
      */
-    void send(String topic, K key, V value);
+    long send(String topic, K key, V value);
+
+    /**
+     * Get the latest offsets actually sent for a given topic.
+     */
+    long getLastSentOffset(String topic);
 
     /**
      * Flush all remaining messages.

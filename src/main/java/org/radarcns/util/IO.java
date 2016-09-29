@@ -1,4 +1,4 @@
-package org.radarcns.collect.util;
+package org.radarcns.util;
 
 import java.io.IOException;
 import java.io.InputStream;
