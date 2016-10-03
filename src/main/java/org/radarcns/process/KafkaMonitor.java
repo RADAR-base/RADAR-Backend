@@ -89,8 +89,12 @@ public abstract class KafkaMonitor {
      * Handles any deserialization message.
      *
      * This implementation tries to find the partition that contains the faulty message and
-     * increases the consumer position.
+     * increases the consumer position to skip that message.
+     *
+     * The new position is not committed, so on failure of the client, the message must be skipped
+     * again.
      */
+    // TODO: submit the message to another topic to indicate that it could not be deserialized.
     protected void handleSerializationException() {
         logger.error("Failed to deserialize message. Skipping message.");
         TopicPartition partition = null;

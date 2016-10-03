@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -40,7 +38,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 /**
  * Send Avro Records to a Kafka REST Proxy.
@@ -160,7 +157,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     public long send(String topic, String key, GenericRecord value) {
         List<Record> batch = cache.get(topic);
         if (batch == null) {
-            batch = cache.putIfAbsent(topic, new ArrayList<>());
+            batch = cache.putIfAbsent(topic, new ArrayList<Record>());
             if (batch == null) {
                 batch = cache.get(topic);
             }
@@ -260,7 +257,9 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     @Override
     public void flush() throws InterruptedException {
         synchronized (this) {
-            cache.values().forEach(this::enqueue);
+            for (List<Record> records : cache.values()) {
+                enqueue(records);
+            }
             while (!this.isClosed && !this.recordQueue.isEmpty()) {
                 wait();
             }

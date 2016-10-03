@@ -1,9 +1,13 @@
-// Apply the java plugin to add support for Java
-apply plugin: 'java'
-// enable gradle run and jar packaging with fixed main class
-apply plugin: 'application'
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+    // enable gradle run and jar packaging with fixed main class
+    id 'application'
+}
 
 mainClassName = 'org.radarcns.collect.rest.RestProducer'
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
 
 run {
     if ( project.hasProperty("appArgs") ) {
@@ -27,9 +31,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.21'
     // to implement producers and consumers
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: '0.10.0.1'
-    // addition of confluent's versioned Avro schemas
-
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.3'
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: '3.0.1'
 }
 
