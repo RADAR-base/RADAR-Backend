@@ -26,6 +26,7 @@ public class MockDevice extends Thread {
     private final String deviceId;
     private final long nanoTimeStep;
     private final float batteryDecayFactor;
+    private final float timeDriftFactor;
     private long lastSleep;
 
     public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId, SchemaRetriever schemaRetriever) {
@@ -56,7 +57,9 @@ public class MockDevice extends Thread {
         topicFrequency.put(temperature, 0); // 4
 
         // decay
-        batteryDecayFactor = 0.1f * new Random().nextFloat();
+        Random random = new Random();
+        batteryDecayFactor = 0.1f * random.nextFloat();
+        timeDriftFactor = 0.01f * random.nextFloat();
 
         this.sender = sender;
     }
@@ -84,7 +87,7 @@ public class MockDevice extends Thread {
     private void sendIfNeeded(int timeStep, Topic topic, Object... values) {
         int hertz = topicFrequency.get(topic);
         if (hertz > 0 && timeStep % (hertz_modulus / hertz) == 0) {
-            GenericRecord avroRecord = topic.createSimpleRecord(values);
+            GenericRecord avroRecord = topic.createSimpleRecord(System.currentTimeMillis() / 1000d + timeStep * timeDriftFactor, values);
             sender.send(topic.getName(), deviceId, avroRecord);
         }
     }

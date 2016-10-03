@@ -1,7 +1,5 @@
 package org.radarcns.collect;
 
-import java.util.List;
-
 public interface KafkaSender<K, V> {
     /**
      * Send a message to Kafka eventually. Returns an offset of the message ID.

@@ -1,4 +1,4 @@
-package org.radarcns.collect.rest;
+package org.radarcns.collect;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
@@ -20,9 +20,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.radarcns.ParsedSchemaMetadata;
 import org.radarcns.SchemaRetriever;
-import org.radarcns.collect.KafkaSender;
-import org.radarcns.collect.LocalSchemaRetriever;
-import org.radarcns.collect.MockDevice;
 import org.radarcns.util.IO;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -30,11 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,7 +54,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     private boolean isClosed;
     private final Queue<List<Record>> recordQueue;
     private final static int RETRIES = 3;
-    private final static int QUEUE_CAPACITY = 10000;
+    private final static int QUEUE_CAPACITY = 100;
     private final Map<String, Long> lastOffsetsSent;
     private final AtomicLong currentOffset;
 
@@ -76,7 +73,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         this.schemaRetriever = schemaRetriever;
         this.encoderFactory = EncoderFactory.get();
         this.isClosed = false;
-        this.recordQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        this.recordQueue = new ArrayDeque<>(QUEUE_CAPACITY);
         this.lastOffsetsSent = new ConcurrentHashMap<>();
         this.currentOffset = new AtomicLong(1L);
     }
@@ -133,17 +130,14 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         }
     }
 
-    private void enqueue(List<Record> records) {
+    /** Enqueue a batch of records for actual sending. */
+    private synchronized void enqueue(List<Record> records) {
         if (records.isEmpty()) {
             return;
         }
-        try {
-            recordQueue.add(new ArrayList<>(records));
-            logger.debug("Queue size: {}", recordQueue.size());
-            notifyAll();
-        } catch (IllegalStateException ex) {
-            logger.error("Send buffer is full! Discarding produced data.");
-        }
+        recordQueue.add(new ArrayList<>(records));
+        logger.debug("Queue size: {}", recordQueue.size());
+        notifyAll();
         records.clear();
     }
 

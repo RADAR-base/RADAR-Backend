@@ -17,14 +17,17 @@ public class Topic {
         this.schema = retriever.getSchemaMetadata(getName(), true).getSchema();
     }
 
-    public Schema getValueSchema() throws IOException {
+    public Schema getValueSchema() {
         return schema;
     }
 
-    public GenericRecord createSimpleRecord(Object... values) {
+    public GenericRecord createSimpleRecord(double time, Object... values) {
         GenericRecord avroRecord = new GenericData.Record(schema);
         if (schema.getField("time") != null) {
-            avroRecord.put("time", System.currentTimeMillis() / 1000.0);
+            avroRecord.put("time", time);
+        }
+        if (schema.getField("timeReceived") != null) {
+            avroRecord.put("timeReceived", System.currentTimeMillis() / 1000.0);
         }
         for (int i = 0; i < values.length; i += 2) {
             avroRecord.put((String) values[i], values[i + 1]);

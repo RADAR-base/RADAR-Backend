@@ -1,4 +1,4 @@
-package org.radarcns.collect.rest;
+package org.radarcns.collect;
 
 import org.apache.avro.Schema;
 import org.radarcns.ParsedSchemaMetadata;
