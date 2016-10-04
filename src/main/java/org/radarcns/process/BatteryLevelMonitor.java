@@ -7,22 +7,22 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.Device;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+/** Monitors the battery level for any devices running empty */
 public class BatteryLevelMonitor extends KafkaMonitor {
     private final Set<Device> isLow;
     private final Set<Device> isCritical;
     private final List<BatteryLevelListener> listeners;
 
     public BatteryLevelMonitor(String topic) {
-        super(topic, "radar-test.thehyve.net:9092", "http://radar-test.thehyve.net:8081");
+        super(Collections.singletonList(topic), "radar-test.thehyve.net:9092", "http://radar-test.thehyve.net:8081");
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "battery_monitors");

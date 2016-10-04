@@ -13,15 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 /**
- * Monitor a single topic for anomalous behavior.
+ * Monitor a list of topics for anomalous behavior.
  */
 public abstract class KafkaMonitor {
-    protected final String topic;
+    protected final List<String> topics;
     private final static Logger logger = LoggerFactory.getLogger(KafkaMonitor.class);
 
     protected KafkaConsumer consumer;
@@ -33,11 +34,11 @@ public abstract class KafkaMonitor {
      * Update the properties field in the subclasses. During any overriding constructor, be sure
      * to call {@see configure()}.
      *
-     * @param topic topic to monitor
+     * @param topics topics to monitor
      * @param kafkaServers string with Kafka bootstrap servers
      * @param schemaUrl Schema Registry URL
      */
-    public KafkaMonitor(String topic, String kafkaServers, String schemaUrl) {
+    public KafkaMonitor(List<String> topics, String kafkaServers, String schemaUrl) {
         properties = new Properties();
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
@@ -46,7 +47,7 @@ public abstract class KafkaMonitor {
         properties.setProperty("bootstrap.servers", kafkaServers);
 
         this.consumer = null;
-        this.topic = topic;
+        this.topics = topics;
     }
 
     /**
@@ -54,17 +55,17 @@ public abstract class KafkaMonitor {
      */
     protected void configure(Properties properties) {
         consumer = new KafkaConsumer<String, GenericRecord>(properties);
-        consumer.subscribe(Collections.singletonList(topic));
+        consumer.subscribe(topics);
     }
 
     /**
      * Monitor a given topic until the {@see isDone()} method returns true.
      *
      * When a message is encountered that cannot be deserialized,
-     * {@see handleSerializationException} is called.
+     * {@link #handleSerializationException()} is called.
      */
     public void monitor() {
-        logger.info("Monitoring stream {}", topic);
+        logger.info("Monitoring streams {}", topics);
         RollingTimeAverage ops = new RollingTimeAverage(20000);
 
         try {
@@ -100,11 +101,13 @@ public abstract class KafkaMonitor {
         TopicPartition partition = null;
         try {
             Consumer<String, GenericRecord> tmpConsumer = new KafkaConsumer<>(properties);
-            for (Object partInfo : consumer.partitionsFor(topic)) {
-                partition = new TopicPartition(topic, ((PartitionInfo)partInfo).partition());
-                tmpConsumer.assign(Collections.singletonList(partition));
-                tmpConsumer.seek(partition, consumer.position(partition));
-                tmpConsumer.poll(0);
+            for (String topic : topics) {
+                for (Object partInfo : consumer.partitionsFor(topic)) {
+                    partition = new TopicPartition(topic, ((PartitionInfo) partInfo).partition());
+                    tmpConsumer.assign(Collections.singletonList(partition));
+                    tmpConsumer.seek(partition, consumer.position(partition));
+                    tmpConsumer.poll(0);
+                }
             }
         } catch (SerializationException ex1) {
             consumer.seek(partition, consumer.position(partition) + 1);

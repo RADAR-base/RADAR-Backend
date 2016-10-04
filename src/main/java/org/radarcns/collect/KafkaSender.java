@@ -2,9 +2,10 @@ package org.radarcns.collect;
 
 public interface KafkaSender<K, V> {
     /**
-     * Send a message to Kafka eventually. Returns an offset of the message ID.
+     * Send a message to Kafka eventually. Given offset must be strictly monotonically increasing
+     * for subsequent calls.
      */
-    long send(String topic, K key, V value);
+    void send(long offset, String topic, K key, V value);
 
     /**
      * Get the latest offsets actually sent for a given topic.

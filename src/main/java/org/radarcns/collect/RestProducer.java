@@ -10,23 +10,18 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.http.Consts;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 import org.radarcns.ParsedSchemaMetadata;
 import org.radarcns.SchemaRetriever;
-import org.radarcns.util.IO;
+import org.radarcns.net.HttpClient;
+import org.radarcns.net.HttpResponse;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +29,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Send Avro Records to a Kafka REST Proxy.
@@ -44,19 +38,16 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RestProducer extends Thread implements KafkaSender<String, GenericRecord> {
     private final static Logger logger = LoggerFactory.getLogger(RestProducer.class);
 
-    private final String kafkaUrl;
-    private final HttpClient httpClient;
+    private final URL kafkaUrl;
     private final ConcurrentMap<String, List<Record>> cache;
     private final int ageMillis;
     private final EncoderFactory encoderFactory;
-    private final static ContentType KAFKA_CONTENT_TYPE = ContentType.create("application/vnd.kafka.avro.v1+json", Consts.UTF_8);
     private final SchemaRetriever schemaRetriever;
     private boolean isClosed;
     private final Queue<List<Record>> recordQueue;
     private final static int RETRIES = 3;
     private final static int QUEUE_CAPACITY = 100;
     private final Map<String, Long> lastOffsetsSent;
-    private final AtomicLong currentOffset;
 
     /**
      * Create a REST producer that caches some values
@@ -65,17 +56,15 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
      * @param schemaRetriever retriever of the registry metadata.
      * @param ageMillis maximum time (ms) that a call for a given topic may aggregate messages.
      */
-    public RestProducer(String kafkaUrl, int ageMillis, SchemaRetriever schemaRetriever) {
+    public RestProducer(URL kafkaUrl, int ageMillis, SchemaRetriever schemaRetriever) {
         this.kafkaUrl = kafkaUrl;
         this.ageMillis = ageMillis;
-        httpClient = HttpClientBuilder.create().build();
         cache = new ConcurrentHashMap<>();
         this.schemaRetriever = schemaRetriever;
         this.encoderFactory = EncoderFactory.get();
         this.isClosed = false;
         this.recordQueue = new ArrayDeque<>(QUEUE_CAPACITY);
         this.lastOffsetsSent = new ConcurrentHashMap<>();
-        this.currentOffset = new AtomicLong(1L);
     }
 
     /**
@@ -115,7 +104,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
                     Record lastRecord = records.get(records.size() - 1);
                     lastOffsetsSent.put(lastRecord.topic, lastRecord.offset);
                 } else {
-                    logger.error("Failed to send records to topic " + records.get(0).topic, exception);
+                    logger.error("Failed to send records to topic {}: {}", records.get(0).topic, exception.toString());
                 }
                 synchronized (this) {
                     this.recordQueue.remove();
@@ -148,16 +137,17 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
      * @param value value with schema
      */
     @Override
-    public long send(String topic, String key, GenericRecord value) {
+    public void send(long offset, String topic, String key, GenericRecord value) {
         List<Record> batch = cache.get(topic);
         if (batch == null) {
+            //noinspection Convert2Diamond
             batch = cache.putIfAbsent(topic, new ArrayList<Record>());
             if (batch == null) {
                 batch = cache.get(topic);
             }
         }
 
-        Record record = new Record(this.currentOffset.getAndIncrement(), topic, key, value);
+        Record record = new Record(offset, topic, key, value);
 
         synchronized (this) {
             if (!batch.isEmpty() && !batch.get(0).value.getSchema().equals(value.getSchema())) {
@@ -169,8 +159,6 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
                 enqueue(batch);
             }
         }
-
-        return record.offset;
     }
 
     @Override
@@ -201,7 +189,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             request.value_schema_id = metadata.getId();
         } else {
             logger.warn("Cannot get value schema, submitting data to the schema-less topic.");
-            request.value_schema = mapper.writeValueAsString(metadata.getSchema());
+            request.value_schema = metadata.getSchema().toString();
             topic = "schemaless-value";
         }
         metadata = schemaRetriever.getOrSetSchemaMetadata(topic, false, Schema.create(Schema.Type.STRING));
@@ -232,19 +220,14 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             throw new IllegalArgumentException("Cannot encode values", e);
         }
         // Post to Kafka REST server
-        HttpPost post = new HttpPost(kafkaUrl + "/topics/" + topic);
-        post.setEntity(new StringEntity(data, KAFKA_CONTENT_TYPE));
-        post.setHeader(new BasicHeader("Accept", "application/vnd.kafka.v1+json, application/vnd.kafka+json, application/json"));
-        HttpResponse postResponse = httpClient.execute(post);
-
-        String content = IO.readInputStream(postResponse.getEntity().getContent());
+        HttpResponse response = HttpClient.request(new URL(kafkaUrl, "topics/" + topic), "POST", data);
 
         // Evaluate the result
-        if (postResponse.getStatusLine().getStatusCode() < 400) {
-            logger.debug("Added message to topic {}: {} -> {}", topic, data, content);
+        if (response.getStatusCode() < 400) {
+            logger.debug("Added message to topic {}: {} -> {}", topic, data, response.getContent());
         } else {
-            logger.error("FAILED to transmit message {} -> {}", data, content);
-            throw new IOException("Failed to submit: " + content);
+            logger.error("FAILED to transmit message {} -> {}", data, response.getContent());
+            throw new IOException("Failed to submit: " + response.getContent());
         }
     }
 
@@ -323,7 +306,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, MalformedURLException {
         System.out.println(System.currentTimeMillis());
         int numberOfDevices = 1;
         if (args.length > 0) {
@@ -335,7 +318,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         RestProducer[] senders = new RestProducer[1];
         SchemaRetriever schemaRetriever = new SchemaRegistryRetriever("http://radar-test.thehyve.net:8081");
         SchemaRetriever localSchemaRetriever =  new LocalSchemaRetriever();
-        senders[0] = new RestProducer("http://radar-test.thehyve.net:8082", 1000, schemaRetriever);
+        senders[0] = new RestProducer(new URL("http://radar-test.thehyve.net:8082"), 1000, schemaRetriever);
         senders[0].start();
         for (int i = 0; i < numberOfDevices; i++) {
             threads[i] = new MockDevice(senders[0], "device" + i, localSchemaRetriever);

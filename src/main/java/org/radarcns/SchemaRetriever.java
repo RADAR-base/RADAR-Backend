@@ -59,7 +59,7 @@ public abstract class SchemaRetriever {
         try {
             return getSchemaMetadata(topic, ofValue);
         } catch (IOException ex) {
-            logger.debug("Schema for {} value was not yet added.", topic);
+            logger.warn("Schema for {} value was not yet added to the schema registry.", topic);
         }
 
         ParsedSchemaMetadata metadata = new ParsedSchemaMetadata(null, null, schema);

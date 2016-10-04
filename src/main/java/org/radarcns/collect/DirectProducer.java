@@ -20,7 +20,6 @@ import java.util.Properties;
 public class DirectProducer<K, V> implements KafkaSender<K, V> {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducer.class);
     private final KafkaProducer<K, V> producer;
-    private long currentOffset;
     private final Map<String, Long> offsetsSent;
 
     public DirectProducer() {
@@ -32,17 +31,14 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         props.put("schema.registry.url", "http://ubuntu:8081");
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "ubuntu:9092");
         producer = new KafkaProducer<>(props);
-        this.currentOffset = 0L;
         this.offsetsSent = new HashMap<>();
     }
 
     @Override
-    public long send(String topic, K key, V value) {
+    public void send(long offset, String topic, K key, V value) {
         producer.send(new ProducerRecord<>(topic, key, value));
 
-        long offset = currentOffset++;
         offsetsSent.put(topic, offset);
-        return offset;
     }
 
     @Override
