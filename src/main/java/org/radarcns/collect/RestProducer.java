@@ -90,7 +90,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
                 synchronized (this) {
                     long nextHeartbeatEvent = lastConnection + HEARTBEAT_TIMEOUT_MILLIS;
                     long now = System.currentTimeMillis();
-                    while (!this.isClosed && this.recordQueue.isEmpty() && nextHeartbeatEvent < now) {
+                    while (!this.isClosed && this.recordQueue.isEmpty() && nextHeartbeatEvent > now) {
                         wait(nextHeartbeatEvent - now);
                         now = System.currentTimeMillis();
                     }
