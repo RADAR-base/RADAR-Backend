@@ -88,8 +88,11 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         try {
             while (true) {
                 synchronized (this) {
-                    while (!this.isClosed && this.recordQueue.isEmpty()) {
-                        wait(HEARTBEAT_TIMEOUT_MILLIS);
+                    long nextHeartbeatEvent = lastConnection + HEARTBEAT_TIMEOUT_MILLIS;
+                    long now = System.currentTimeMillis();
+                    while (!this.isClosed && this.recordQueue.isEmpty() && nextHeartbeatEvent < now) {
+                        wait(nextHeartbeatEvent - now);
+                        now = System.currentTimeMillis();
                     }
                     if (this.isClosed) {
                         break;
