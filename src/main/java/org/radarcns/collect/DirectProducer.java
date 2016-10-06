@@ -43,7 +43,13 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
 
     @Override
     public long getLastSentOffset(String topic) {
-        return offsetsSent.get(topic);
+        Long offset = offsetsSent.get(topic);
+        return offset == null ? -1L : offset;
+    }
+
+    @Override
+    public void resetLastSentOffset() {
+        offsetsSent.clear();
     }
 
     @Override

@@ -8,9 +8,14 @@ public interface KafkaSender<K, V> {
     void send(long offset, String topic, K key, V value);
 
     /**
-     * Get the latest offsets actually sent for a given topic.
+     * Get the latest offsets actually sent for a given topic. Returns -1L for unknown offsets.
      */
     long getLastSentOffset(String topic);
+
+    /**
+     * Resets all offsets.
+     */
+    void resetLastSentOffset();
 
     /**
      * Flush all remaining messages.

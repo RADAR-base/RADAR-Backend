@@ -43,11 +43,16 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
     private final int ageMillis;
     private final EncoderFactory encoderFactory;
     private final SchemaRetriever schemaRetriever;
+    private final int maxBatchSize;
     private boolean isClosed;
     private final Queue<List<Record>> recordQueue;
     private final static int RETRIES = 3;
     private final static int QUEUE_CAPACITY = 100;
     private final Map<String, Long> lastOffsetsSent;
+    private final static long HEARTBEAT_TIMEOUT_MILLIS = 60000L;
+    private final static long HEARTBEAT_TIMEOUT_MARGIN = 10000L;
+    private long lastConnection;
+    private boolean wasDisconnected;
 
     /**
      * Create a REST producer that caches some values
@@ -55,8 +60,10 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
      * @param kafkaUrl base Kafka REST service URL.
      * @param schemaRetriever retriever of the registry metadata.
      * @param ageMillis maximum time (ms) that a call for a given topic may aggregate messages.
+     * @param maxBatchSize maximum number of records per batch.
      */
-    public RestProducer(URL kafkaUrl, int ageMillis, SchemaRetriever schemaRetriever) {
+    public RestProducer(URL kafkaUrl, int ageMillis, int maxBatchSize, SchemaRetriever schemaRetriever) {
+        super("Kafka REST Producer");
         this.kafkaUrl = kafkaUrl;
         this.ageMillis = ageMillis;
         cache = new ConcurrentHashMap<>();
@@ -65,6 +72,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         this.isClosed = false;
         this.recordQueue = new ArrayDeque<>(QUEUE_CAPACITY);
         this.lastOffsetsSent = new ConcurrentHashMap<>();
+        this.wasDisconnected = true;
+        this.maxBatchSize = maxBatchSize;
     }
 
     /**
@@ -80,42 +89,96 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             while (true) {
                 synchronized (this) {
                     while (!this.isClosed && this.recordQueue.isEmpty()) {
-                        wait();
+                        wait(HEARTBEAT_TIMEOUT_MILLIS);
                     }
                     if (this.isClosed) {
                         break;
                     }
-                    records = this.recordQueue.element();
+                    records = this.recordQueue.peek();
                 }
-                opsSent.add(records.size());
+                if (records != null) {
+                    opsSent.add(records.size());
+                }
                 opsRequests.add(1);
 
                 IOException exception = null;
                 for (int i = 0; i < RETRIES; i++) {
                     try {
                         exception = null;
-                        send(records);
+                        if (records != null) {
+                            send(records);
+                        } else {
+                            HttpClient.request(kafkaUrl, "HEAD", null);
+                        }
                         break;
                     } catch (IOException ex) {
                         exception = ex;
                     }
                 }
-                if (exception == null) {
-                    Record lastRecord = records.get(records.size() - 1);
-                    lastOffsetsSent.put(lastRecord.topic, lastRecord.offset);
-                } else {
-                    logger.error("Failed to send records to topic {}: {}", records.get(0).topic, exception.toString());
-                }
                 synchronized (this) {
-                    this.recordQueue.remove();
+                    if (exception == null) {
+                        lastConnection = System.currentTimeMillis();
+                        if (records != null) {
+                            Record lastRecord = records.get(records.size() - 1);
+                            lastOffsetsSent.put(lastRecord.topic, lastRecord.offset);
+                        }
+                        this.recordQueue.remove();
+                    } else {
+                        lastConnection = 0L;
+                        if (records != null) {
+                            logger.error("Failed to send records to topic {}: {}", records.get(0).topic, exception.toString());
+                        } else {
+                            logger.error("Failed to send heartbeat signal: {}", exception.toString());
+                        }
+                        this.recordQueue.clear();
+                        this.cache.clear();
+                    }
                     notifyAll();
                 }
-                logger.debug("Sending {} messages in {} requests per second",
+
+                logger.info("Sending {} messages in {} requests per second",
                         (int)Math.round(opsSent.getAverage()),
                         (int)Math.round(opsRequests.getAverage()));
             }
         } catch (InterruptedException e) {
             // exit loop
+        }
+    }
+
+    @Override
+    public void resetLastSentOffset() {
+        lastOffsetsSent.clear();
+    }
+
+    public synchronized boolean isConnected() {
+        if (this.wasDisconnected) {
+            return false;
+        }
+        if (System.currentTimeMillis() - lastConnection > HEARTBEAT_TIMEOUT_MILLIS + HEARTBEAT_TIMEOUT_MARGIN) {
+            this.wasDisconnected = true;
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean resetConnection() {
+        if (isConnected()) {
+            return true;
+        }
+        try {
+            HttpClient.request(kafkaUrl, "HEAD", null);
+            synchronized (this) {
+                lastConnection = System.currentTimeMillis();
+                this.wasDisconnected = false;
+            }
+            return true;
+        } catch (IOException ex) {
+            synchronized (this) {
+                lastConnection = 0L;
+                this.wasDisconnected = true;
+            }
+            return false;
         }
     }
 
@@ -150,12 +213,15 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         Record record = new Record(offset, topic, key, value);
 
         synchronized (this) {
+            if (!this.isConnected()) {
+                throw new IllegalStateException("Cannot records to unconnected producer.");
+            }
             if (!batch.isEmpty() && !batch.get(0).value.getSchema().equals(value.getSchema())) {
                 enqueue(batch);
             }
             batch.add(record);
 
-            if (System.currentTimeMillis() - batch.get(0).milliTimeAdded >= this.ageMillis) {
+            if (batch.size() >= maxBatchSize || System.currentTimeMillis() - batch.get(0).milliTimeAdded >= this.ageMillis) {
                 enqueue(batch);
             }
         }
@@ -163,7 +229,8 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
 
     @Override
     public long getLastSentOffset(String topic) {
-        return this.lastOffsetsSent.get(topic);
+        Long offset = this.lastOffsetsSent.get(topic);
+        return offset != null ? offset : -1L;
     }
 
     /**
@@ -227,7 +294,13 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             logger.debug("Added message to topic {}: {} -> {}", topic, data, response.getContent());
         } else {
             logger.error("FAILED to transmit message {} -> {}", data, response.getContent());
-            throw new IOException("Failed to submit: " + response.getContent());
+            throw new IOException("Failed to submit (HTTP status code " + response.getStatusCode() + "): " + response.getContent());
+        }
+    }
+
+    public synchronized void triggerFlush() {
+        for (List<Record> records : cache.values()) {
+            enqueue(records);
         }
     }
 
@@ -243,6 +316,12 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         }
     }
 
+    public synchronized void triggerClose() {
+        triggerFlush();
+        this.isClosed = true;
+        this.notifyAll();
+    }
+
     @Override
     public void close() throws InterruptedException {
         flush();
@@ -250,7 +329,6 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
             this.isClosed = true;
             this.notifyAll();
         }
-        join();
     }
 
     private String encode(GenericRecord value) throws IOException {
@@ -318,7 +396,7 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         RestProducer[] senders = new RestProducer[1];
         SchemaRetriever schemaRetriever = new SchemaRegistryRetriever("http://radar-test.thehyve.net:8081");
         SchemaRetriever localSchemaRetriever =  new LocalSchemaRetriever();
-        senders[0] = new RestProducer(new URL("http://radar-test.thehyve.net:8082"), 1000, schemaRetriever);
+        senders[0] = new RestProducer(new URL("http://radar-test.thehyve.net:8082"), 1000, 250, schemaRetriever);
         senders[0].start();
         for (int i = 0; i < numberOfDevices; i++) {
             threads[i] = new MockDevice(senders[0], "device" + i, localSchemaRetriever);
