@@ -48,11 +48,6 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public void resetLastSentOffset() {
-        offsetsSent.clear();
-    }
-
-    @Override
     public void flush() {
         producer.flush();
     }

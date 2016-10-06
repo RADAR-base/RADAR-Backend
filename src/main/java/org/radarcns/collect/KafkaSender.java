@@ -13,11 +13,6 @@ public interface KafkaSender<K, V> {
     long getLastSentOffset(String topic);
 
     /**
-     * Resets all offsets.
-     */
-    void resetLastSentOffset();
-
-    /**
      * Flush all remaining messages.
      */
     void flush() throws InterruptedException;

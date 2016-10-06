@@ -148,11 +148,6 @@ public class RestProducer extends Thread implements KafkaSender<String, GenericR
         }
     }
 
-    @Override
-    public void resetLastSentOffset() {
-        lastOffsetsSent.clear();
-    }
-
     public synchronized boolean isConnected() {
         if (this.wasDisconnected) {
             return false;
