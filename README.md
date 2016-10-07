@@ -42,4 +42,4 @@ Code should be formatted using the [Google Java Code Style Guide](https://google
 
 ## Source
 
-This is a re-elaborated version of this [work]{https://github.com/confluentinc/examples/tree/kafka-0.10.0.1-cp-3.0.1/kafka-clients}
+This is a re-elaborated version of this code at https://github.com/confluentinc/examples
