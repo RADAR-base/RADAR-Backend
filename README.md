@@ -10,10 +10,10 @@ This test case implements a Sessionization: a basic step to prepare website clic
 
 This example demonstrates 4 important design patterns:
 
-Consuming records from a topic, filtering or modifying them and producing them to a new topic
-Partitioning data based on meaningful fields to allow more efficient processing later
-Consuming and producing Avro records using the Avro serializers
-Consuming messages using groups
+- Consuming records from a topic, filtering or modifying them and producing them to a new topic
+- Partitioning data based on meaningful fields to allow more efficient processing later
+- Consuming and producing Avro records using the Avro serializers
+- Consuming messages using groups
 
 ## Quickstart 
 
