@@ -12,7 +12,7 @@ public class SessioniserGroupAMO extends ConsumerGroupRadar {
     private Sessioniser sessioniser;
 
     public SessioniserGroupAMO(int numThread){
-        super(numThread);
+        super(numThread,"GroupAMO");
 
         this.sessioniser = new Sessioniser();
         initiWorkers();

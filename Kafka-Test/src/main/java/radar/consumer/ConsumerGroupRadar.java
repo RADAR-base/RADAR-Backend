@@ -8,7 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
+import radar.utils.RadarThreadFactoryBuilder;
 
 /**
  * Created by Francesco Nobilia on 06/10/2016.
@@ -23,12 +28,23 @@ public abstract class ConsumerGroupRadar implements Runnable{
     private ExecutorService executor;
     private List<ConsumerRadar> workers;
 
+    private String poolName;
+
+    public ConsumerGroupRadar(int numThreads, String poolName) throws InvalidParameterException{
+        this(numThreads);
+
+        if((poolName != null) && (poolName.length() > 0)){
+            this.poolName = poolName+"-Consumer";
+        }
+    }
+
     public ConsumerGroupRadar(int numThreads) throws InvalidParameterException{
         if(numThreads < 1){
             throw new InvalidParameterException("A group must contain at least 2 elements");
         }
 
         this.numThreads = numThreads;
+        this.poolName = "GroupPool-Consumer";
     }
 
     public void initiWorkers(){
@@ -56,7 +72,13 @@ public abstract class ConsumerGroupRadar implements Runnable{
                     "invoked. For example at the end of the derived class's constructor!");
         }
 
-        executor = Executors.newFixedThreadPool(numThreads);
+        ThreadFactory threadFactory = new RadarThreadFactoryBuilder()
+                .setNamePrefix(poolName)
+                .setDaemon(false)
+                .setPriority(Thread.NORM_PRIORITY)
+                .build();
+
+        executor = Executors.newFixedThreadPool(numThreads,threadFactory);
         workers.forEach(worker -> executor.submit(worker));
     }
 
