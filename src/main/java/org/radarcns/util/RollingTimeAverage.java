@@ -3,12 +3,21 @@ package org.radarcns.util;
 import java.util.Deque;
 import java.util.LinkedList;
 
+/**
+ * Get the average of a set of values collected in a sliding time window of fixed duration.
+ *
+ * At least one value is needed to get an average.
+ */
 public class RollingTimeAverage {
     private final long window;
     private TimeCount firstTime;
     private double total;
     private Deque<TimeCount> deque;
 
+    /**
+     * A rolling time average with a sliding time window of fixed duration.
+     * @param timeWindowMillis duration of the time window.
+     */
     public RollingTimeAverage(long timeWindowMillis) {
         this.window = timeWindowMillis;
         this.total = 0d;
@@ -16,6 +25,12 @@ public class RollingTimeAverage {
         this.deque = new LinkedList<>();
     }
 
+    /** Whether values have already been added. */
+    public boolean hasAverage() {
+        return firstTime != null;
+    }
+
+    /** Add a new value. */
     public void add(double x) {
         if (firstTime == null) {
             firstTime = new TimeCount(x);
@@ -25,11 +40,19 @@ public class RollingTimeAverage {
         total += x;
     }
 
+    /**
+     * Get the average value per second over a sliding time window of fixed size.
+     *
+     * It takes one value before the window started as a baseline, and adds all values in the
+     * window. It then divides by the total time window from the first value (outside/before the
+     * window) to the last value (at the end of the window).
+     * @return average value per second
+     */
     public double getAverage() {
         long now = System.currentTimeMillis();
         long currentWindowStart = now - window;
 
-        if (this.firstTime == null) {
+        if (!hasAverage()) {
             throw new IllegalStateException("Cannot get average without values");
         }
 

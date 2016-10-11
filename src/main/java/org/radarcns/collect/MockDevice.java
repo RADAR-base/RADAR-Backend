@@ -88,7 +88,11 @@ public class MockDevice extends Thread {
         int hertz = topicFrequency.get(topic);
         if (hertz > 0 && timeStep % (hertz_modulus / hertz) == 0) {
             GenericRecord avroRecord = topic.createSimpleRecord(System.currentTimeMillis() / 1000d + timeStep * timeDriftFactor, values);
-            sender.send(System.currentTimeMillis(), topic.getName(), deviceId, avroRecord);
+            try {
+                sender.send(topic, System.currentTimeMillis(), deviceId, avroRecord);
+            } catch (IOException e) {
+                logger.warn("Failed to send message to topic {}", topic.getName(), e);
+            }
         }
     }
 

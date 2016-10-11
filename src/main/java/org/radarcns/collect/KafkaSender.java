@@ -1,24 +1,57 @@
 package org.radarcns.collect;
 
-public interface KafkaSender<K, V> {
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Properties;
+
+public interface KafkaSender<K, V> extends Closeable {
+    /**
+     * Configure any properties. Must be called before anything else.
+     */
+    void configure(Properties properties);
+
     /**
      * Send a message to Kafka eventually. Given offset must be strictly monotonically increasing
      * for subsequent calls.
      */
-    void send(long offset, String topic, K key, V value);
+    void send(Topic topic, long offset, K key, V value) throws IOException;
+
+    /**
+     * Send a message to Kafka eventually.
+     *
+     * Contained offsets must be strictly monotonically increasing
+     * for subsequent calls.
+     */
+    void send(RecordList<K, V> records) throws IOException;
 
     /**
      * Get the latest offsets actually sent for a given topic. Returns -1L for unknown offsets.
      */
-    long getLastSentOffset(String topic);
+    long getLastSentOffset(Topic topic);
+
+    /**
+     * If the sender is no longer connected, try to reconnect.
+     * @return whether the connection has been restored.
+     */
+    boolean resetConnection();
+
+    /**
+     * Whether the sender is connected to the Kafka system.
+     */
+    boolean isConnected();
+
+    /**
+     * Clears any messages still in cache.
+     */
+    void clear();
 
     /**
      * Flush all remaining messages.
      */
-    void flush() throws InterruptedException;
+    void flush() throws IOException;
 
     /**
      * Close the connection.
      */
-    void close() throws InterruptedException;
+    void close() throws IOException;
 }

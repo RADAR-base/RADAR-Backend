@@ -10,11 +10,19 @@ import java.io.IOException;
 
 public class Topic {
     private final String name;
-    private Schema schema;
+    private final Schema schema;
+    private final static Schema keySchema = Schema.create(Schema.Type.STRING);
 
     public Topic(String name, SchemaRetriever retriever) throws IOException {
+        if (name == null) {
+            throw new IllegalArgumentException("Name may not be null");
+        }
         this.name = name;
         this.schema = retriever.getSchemaMetadata(getName(), true).getSchema();
+    }
+
+    public Schema getKeySchema() {
+        return keySchema;
     }
 
     public Schema getValueSchema() {
@@ -46,12 +54,11 @@ public class Topic {
 
         Topic topic = (Topic) o;
 
-        return name != null ? name.equals(topic.name) : topic.name == null;
-
+        return name.equals(topic.name) && schema.equals(topic.schema);
     }
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return name.hashCode();
     }
 }

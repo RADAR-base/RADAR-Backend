@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Objects;
+import java.util.zip.GZIPOutputStream;
 
 public class HttpClient {
     private final static Logger logger = LoggerFactory.getLogger(HttpClient.class);
@@ -36,11 +37,12 @@ public class HttpClient {
                 } else {
                     byte[] bytes = data.getBytes("UTF-8");
                     urlConnection.setRequestProperty("Content-Type", "application/vnd.kafka.avro.v1+json; charset=utf-8");
+                    urlConnection.setRequestProperty("Content-Encoding", "gzip");
                     urlConnection.setDoOutput(true);
-                    urlConnection.setFixedLengthStreamingMode(bytes.length);
+                    urlConnection.setChunkedStreamingMode(0);
                     urlConnection.connect();
 
-                    try (OutputStream out = urlConnection.getOutputStream()) {
+                    try (OutputStream out = new GZIPOutputStream(urlConnection.getOutputStream())) {
                         out.write(bytes);
                     }
                 }
