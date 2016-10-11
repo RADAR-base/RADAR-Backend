@@ -7,3 +7,4 @@
 *.iml
 .DS_Store
 /build/
+.gradletasknamecache
