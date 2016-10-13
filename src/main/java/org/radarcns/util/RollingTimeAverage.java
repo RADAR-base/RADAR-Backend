@@ -60,7 +60,14 @@ public class RollingTimeAverage {
             total -= this.firstTime.value;
             this.firstTime = this.deque.removeFirst();
         }
-        return 1000d * total / (now - this.firstTime.time);
+        if (this.deque.isEmpty() || this.firstTime.time >= currentWindowStart) {
+            return 1000d * total / (now - this.firstTime.time);
+        } else {
+            long time = this.deque.getLast().time - currentWindowStart;
+            double removedValue = this.firstTime.value + this.deque.getFirst().value * (currentWindowStart - this.firstTime.time) / (this.deque.getFirst().time - firstTime.time);
+            double value = (total - removedValue) / time;
+            return 1000d * value;
+        }
     }
 
     static class TimeCount {
