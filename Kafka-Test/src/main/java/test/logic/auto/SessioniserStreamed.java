@@ -8,10 +8,10 @@ import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import radar.consumer.commit.auto.StreamConsumer;
-import test.logic.Sessioniser;
 import radar.utils.KafkaProperties;
 import radar.utils.RadarConfig;
 import radar.utils.RadarUtils;
+import test.logic.Sessioniser;
 
 /**
  * Created by Francesco Nobilia on 27/09/2016.

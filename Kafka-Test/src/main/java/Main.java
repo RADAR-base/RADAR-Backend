@@ -1,5 +1,6 @@
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -9,7 +10,8 @@ import JavaSessionize.avro.LogLine;
 import radar.avro.User;
 import radar.consumer.commit.auto.StreamConsumer;
 import radar.consumer.commit.auto.StreamConsumerGroup;
-import test.producer.SimpleProducer;
+import radar.sink.mongoDB.MongoDBSinkRadar;
+import radar.utils.RadarConfig;
 import test.logic.Sessioniser;
 import test.logic.auto.SessioniserGroupWorker;
 import test.logic.auto.SessioniserStreamed;
@@ -17,7 +19,8 @@ import test.logic.synch.SessioniserALO;
 import test.logic.synch.SessioniserAMO;
 import test.logic.synch.SessioniserGroupALO;
 import test.logic.synch.SessioniserGroupAMO;
-import radar.utils.RadarConfig;
+import test.producer.SimpleProducer;
+import test.stream.ActiveUser;
 
 /**
  * Created by francesco on 05/09/16.
@@ -32,8 +35,8 @@ public class Main {
         STREAMED, ALO, AMO, GROUP_STREAM, GROUP_AMO, GROUP_ALO
     }
     final static int sequence = 10;
-    final static long sleep = 60000;
-    private static TestCase test = TestCase.GROUP_ALO;
+    final static long sleep = 20000;
+    private static TestCase test = TestCase.ALO;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 
@@ -51,21 +54,33 @@ public class Main {
     private static Sessioniser sessioniser;
     private static int numThread = 3;
 
+    private static MongoDBSinkRadar mongoDBSink;
+
+    private static ActiveUser activeUser;
+
     private static Thread producerThread;
     private static Thread consumerThread;
+    private static Thread connectorThread;
+    private static Thread streamThread;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException,IOException {
         go();
         sleep();
         finish();
     }
 
-    private static void go(){
+    private static void go() throws IOException{
         producerThread = getProducer();
         producerThread.start();
 
         consumerThread = getConsumer();
         consumerThread.start();
+
+        streamThread = getStream();
+        streamThread.start();
+
+        connectorThread = getConnector();
+        connectorThread.start();
     }
 
     private static void finish() throws InterruptedException{
@@ -92,6 +107,14 @@ public class Main {
                 sessioniserGroupAMO.shutdown();
                 break;
             default:break;
+        }
+
+        if(mongoDBSink != null){
+            mongoDBSink.shutdown();
+        }
+
+        if(activeUser != null){
+            activeUser.shutdown();
         }
     }
 
@@ -187,5 +210,25 @@ public class Main {
             default:
                 return null;
         }
+    }
+
+    private static Thread getConnector(){
+        Thread thread;
+
+        mongoDBSink = new MongoDBSinkRadar();
+        thread = new Thread(mongoDBSink);
+        thread.setName("MongoDB-Sink");
+
+        return thread;
+    }
+
+    private static Thread getStream() throws IOException{
+        Thread thread;
+
+        activeUser = new ActiveUser();
+        thread = new Thread(activeUser);
+        thread.setName("Streaming");
+
+        return thread;
     }
 }

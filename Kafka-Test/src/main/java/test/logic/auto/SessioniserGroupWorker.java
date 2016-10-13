@@ -4,8 +4,8 @@ import org.apache.log4j.Logger;
 
 import kafka.message.MessageAndMetadata;
 import radar.consumer.commit.auto.StreamConsumer;
-import test.producer.SimpleProducer;
 import test.logic.Sessioniser;
+import test.producer.SimpleProducer;
 
 /**
  * Created by Francesco Nobilia on 04/10/2016.

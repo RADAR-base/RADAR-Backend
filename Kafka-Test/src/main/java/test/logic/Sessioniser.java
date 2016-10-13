@@ -13,10 +13,10 @@ import javax.annotation.Nonnull;
 import JavaSessionize.avro.LogLine;
 import kafka.message.MessageAndMetadata;
 import radar.avro.User;
-import test.producer.SimpleProducer;
-import test.state.SessionState;
 import radar.utils.RadarConfig;
 import radar.utils.RadarUtils;
+import test.producer.SimpleProducer;
+import test.state.SessionState;
 
 /**
  * Implement the auto for tracking web site users' sessions

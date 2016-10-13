@@ -8,6 +8,7 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.log4j.Logger;
 
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.Nonnull;
@@ -25,15 +26,46 @@ public abstract class ConsumerALO<K,V> extends ConsumerRadar {
 
     private final static Logger log = Logger.getLogger(ConsumerALO.class);
 
-    public final RadarConfig config;
+    public RadarConfig config;
 
-    private final KafkaConsumer<K,V> consumer;
-    private final CountDownLatch shutdownLatch;
+    private KafkaConsumer<K,V> consumer;
+    private RadarConfig.PlatformTopics topics;
+
+    private CountDownLatch shutdownLatch;
 
     public ConsumerALO() {
+        init(null,null,null);
+    }
+
+    public ConsumerALO(String clientID) {
+        init(clientID,null,null);
+    }
+
+    public ConsumerALO(RadarConfig.PlatformTopics topics) {
+        init(null,topics,null);
+    }
+
+    public ConsumerALO(String clientID, RadarConfig.PlatformTopics topics) {
+        init(clientID,topics,null);
+    }
+
+    public ConsumerALO(RadarConfig.PlatformTopics topics, Properties properties) {
+        init(null,topics,properties);
+    }
+
+    public ConsumerALO(String clientID, RadarConfig.PlatformTopics topics, Properties properties) {
+        init(clientID,topics,properties);
+    }
+
+    private void init(String clientID, RadarConfig.PlatformTopics topics, Properties properties){
         config = new RadarConfig();
-        consumer = new KafkaConsumer(KafkaProperties.getSelfCommitConsumer(true));
         shutdownLatch = new CountDownLatch(1);
+
+        properties = (properties == null) ? KafkaProperties.getSelfCommitConsumer(true,clientID) : properties;
+
+        consumer = new KafkaConsumer(properties);
+
+        this.topics = (topics == null) ? RadarConfig.PlatformTopics.all_in : topics;
     }
 
     /**
@@ -61,7 +93,7 @@ public abstract class ConsumerALO<K,V> extends ConsumerRadar {
      */
     public void run() {
         try {
-            consumer.subscribe(config.getTopicList(RadarConfig.PlatformTopics.all_in));
+            consumer.subscribe(config.getTopicList(topics));
 
             while (true) {
                 ConsumerRecords<K,V> records = consumer.poll(Long.MAX_VALUE);

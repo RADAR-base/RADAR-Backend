@@ -11,8 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-
 import radar.utils.RadarThreadFactoryBuilder;
 
 /**
@@ -48,11 +46,13 @@ public abstract class ConsumerGroupRadar implements Runnable{
     }
 
     public void initiWorkers(){
+        log.trace("initiWorkers");
         workers = getWorkerList();
         workersCreated = true;
     }
 
     private List<ConsumerRadar> getWorkerList(){
+        log.trace("getWorkerList");
         List<ConsumerRadar> list = new LinkedList<>();
 
         for(int i=0; i<numThreads; i++){
@@ -66,6 +66,7 @@ public abstract class ConsumerGroupRadar implements Runnable{
 
     @Override
     public void run() {
+        log.trace("run");
 
         if(!workersCreated){
             throw new IllegalGenerationException("Before starting the group, initWorkers has to be" +
@@ -83,6 +84,8 @@ public abstract class ConsumerGroupRadar implements Runnable{
     }
 
     public void shutdown() throws InterruptedException {
+        log.trace("shutdown");
+
         if(executor != null){
             executor.shutdown();
         }

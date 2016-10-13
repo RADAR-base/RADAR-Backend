@@ -20,8 +20,8 @@ import javax.annotation.Nonnull;
 
 import JavaSessionize.avro.LogLine;
 import radar.avro.User;
-import test.event.EventGenerator;
 import radar.utils.KafkaProperties;
+import test.event.EventGenerator;
 
 /**
  * Created by Francesco Nobilia on 26/09/2016.

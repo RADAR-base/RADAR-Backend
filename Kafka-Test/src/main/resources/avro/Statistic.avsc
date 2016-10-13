@@ -1,0 +1,8 @@
+{"namespace": "radar.avro",
+  "type": "record",
+  "name": "Statistic",
+  "fields": [
+    {"name": "ip", "type": "string"},
+    {"name": "device", "type": "string"}
+  ]
+}
