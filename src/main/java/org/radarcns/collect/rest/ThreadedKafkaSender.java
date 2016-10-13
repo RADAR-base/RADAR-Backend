@@ -187,19 +187,19 @@ public class ThreadedKafkaSender<K, V> extends Thread implements KafkaSender<K, 
      * @throws IllegalStateException if the producer is not connected.
      */
     @Override
-    public void send(Topic topic, long offset, K key, V value) {
+    public void send(Topic topic, long offset, K key, V value) throws IOException {
         RecordList<K, V> recordList = new RecordList<>(topic);
         recordList.add(offset, key, value);
         send(recordList);
     }
 
     @Override
-    public synchronized void send(RecordList<K, V> records) {
+    public synchronized void send(RecordList<K, V> records) throws IOException {
         if (records.isEmpty()) {
             return;
         }
         if (!isConnected()) {
-            throw new IllegalStateException("Producer is not connected");
+            throw new IOException("Producer is not connected");
         }
         recordQueue.add(records);
         logger.debug("Queue size: {}", recordQueue.size());

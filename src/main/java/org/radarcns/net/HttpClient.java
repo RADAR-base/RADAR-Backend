@@ -37,12 +37,11 @@ public class HttpClient {
                 } else {
                     byte[] bytes = data.getBytes("UTF-8");
                     urlConnection.setRequestProperty("Content-Type", "application/vnd.kafka.avro.v1+json; charset=utf-8");
-                    urlConnection.setRequestProperty("Content-Encoding", "gzip");
                     urlConnection.setDoOutput(true);
                     urlConnection.setChunkedStreamingMode(0);
                     urlConnection.connect();
 
-                    try (OutputStream out = new GZIPOutputStream(urlConnection.getOutputStream())) {
+                    try (OutputStream out = urlConnection.getOutputStream()) {
                         out.write(bytes);
                     }
                 }

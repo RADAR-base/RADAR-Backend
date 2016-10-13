@@ -32,7 +32,7 @@ public class BatchedKafkaSender<K, V> implements KafkaSender<K, V> {
     public void send(Topic topic, long offset, K key, V value) throws IOException {
         RecordList<K, V> batch;
         if (!this.isConnected()) {
-            throw new IllegalStateException("Cannot send records to unconnected producer.");
+            throw new IOException("Cannot send records to unconnected producer.");
         }
         batch = cache.get(topic);
         if (batch == null) {

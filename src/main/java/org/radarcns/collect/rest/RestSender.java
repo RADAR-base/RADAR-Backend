@@ -115,7 +115,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
             lastOffsetsSent.put(topic, records.getLastOffset());
         } else {
             logger.error("FAILED to transmit message {} -> {}", data, response.getContent());
-            throw new IllegalStateException("Failed to submit (HTTP status code " + response.getStatusCode() + "): " + response.getContent());
+            throw new IOException("Failed to submit (HTTP status code " + response.getStatusCode() + "): " + response.getContent());
         }
     }
 
