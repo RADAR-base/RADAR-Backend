@@ -1,5 +1,6 @@
 package org.radarcns.collect;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.radarcns.SchemaRetriever;
 import org.slf4j.Logger;
@@ -66,16 +67,25 @@ public class MockDevice extends Thread {
 
     public void run() {
         lastSleep = System.nanoTime();
+        Schema.Field x = acceleration.getValueField("x");
+        Schema.Field y = acceleration.getValueField("y");
+        Schema.Field z = acceleration.getValueField("z");
+        Schema.Field batteryLevel = battery.getValueField("batteryLevel");
+        Schema.Field bloodVolumePulse = bvp.getValueField("bloodVolumePulse");
+        Schema.Field electroDermalActivity = eda.getValueField("electroDermalActivity");
+        Schema.Field interBeatInterval = ibi.getValueField("interBeatInterval");
+        Schema.Field temperatureField = temperature.getValueField("temperature");
+
         try {
             for (int t = 0; t < Integer.MAX_VALUE; t++) {
                 for (int i = 1; i <= hertz_modulus; i++) {
-                    sendIfNeeded(i, acceleration, "x", 15f, "y", -15f, "z", 64f);
-                    sendIfNeeded(i, battery, "batteryLevel", 1f - (batteryDecayFactor*t % 1));
-                    sendIfNeeded(i, bvp, "bloodVolumePulse", 80.0f);
-                    sendIfNeeded(i, eda, "electroDermalActivity", 0.026897f);
-                    sendIfNeeded(i, ibi, "interBeatInterval", 0.921917f);
+                    sendIfNeeded(i, acceleration, x, 15f, y, -15f, z, 64f);
+                    sendIfNeeded(i, battery, batteryLevel, 1f - (batteryDecayFactor*t % 1));
+                    sendIfNeeded(i, bvp, bloodVolumePulse, 80.0f);
+                    sendIfNeeded(i, eda, electroDermalActivity, 0.026897f);
+                    sendIfNeeded(i, ibi, interBeatInterval, 0.921917f);
                     sendIfNeeded(i, tags);
-                    sendIfNeeded(i, temperature, "temperature", 37.0f);
+                    sendIfNeeded(i, temperature, temperatureField, 37.0f);
                     sleep();
                 }
             }
