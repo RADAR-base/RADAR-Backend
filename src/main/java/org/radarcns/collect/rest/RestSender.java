@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -61,8 +62,8 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
                 return;
         }
         // Initialize empty Kafka REST proxy request
-        KafkaRestRequest request = new KafkaRestRequest();
-        ObjectMapper mapper = new ObjectMapper();
+        final KafkaRestRequest request = new KafkaRestRequest();
+        final ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         // Get schema IDs
@@ -99,22 +100,20 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
             }
         }
 
-        // Convert request to JSON
-        String data;
-        try {
-            data = mapper.writeValueAsString(request);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Cannot encode values", e);
-        }
         // Post to Kafka REST server
-        HttpResponse response = HttpClient.request(new URL(kafkaUrl, "topics/" + sendTopic), "POST", data);
+        HttpResponse response = HttpClient.request(new URL(kafkaUrl, "topics/" + sendTopic), "POST", new HttpClient.HttpOutputstreamWriter() {
+            @Override
+            public void handleOutput(OutputStream out) throws IOException {
+                mapper.writeValue(out, request);
+            }
+        }, null);
 
         // Evaluate the result
         if (response.getStatusCode() < 400) {
-            logger.debug("Added message to topic {}: {} -> {}", sendTopic, data, response.getContent());
+            logger.debug("Added message to topic {} -> {}", sendTopic, response.getContent());
             lastOffsetsSent.put(topic, records.getLastOffset());
         } else {
-            logger.error("FAILED to transmit message {} -> {}", data, response.getContent());
+            logger.error("FAILED to transmit message: {}", response.getContent());
             throw new IOException("Failed to submit (HTTP status code " + response.getStatusCode() + "): " + response.getContent());
         }
     }
@@ -132,7 +131,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
 
     public boolean isConnected() {
         try {
-            HttpResponse response = HttpClient.request(kafkaUrl, "HEAD", null);
+            HttpResponse response = HttpClient.head(kafkaUrl, null);
             if (response.getStatusCode() < 400) {
                 return true;
             } else {
