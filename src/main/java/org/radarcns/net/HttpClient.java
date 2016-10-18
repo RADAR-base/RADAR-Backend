@@ -105,7 +105,7 @@ public class HttpClient {
         setProperties(urlConnection, requestProperties, false, false);
         urlConnection.setRequestMethod("HEAD");
 
-        urlConnection.setDoInput(false);
+        urlConnection.setDoInput(true);
         urlConnection.setDoOutput(false);
         try {
             urlConnection.connect();

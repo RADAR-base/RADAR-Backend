@@ -175,6 +175,7 @@ public class ThreadedKafkaSender<K, V> extends Thread implements KafkaSender<K, 
 
     @Override
     public void configure(Properties properties) {
+        this.resetConnection();
         start();
         sender.configure(properties);
     }
@@ -265,7 +266,7 @@ public class ThreadedKafkaSender<K, V> extends Thread implements KafkaSender<K, 
 
         logger.info("Simulating the load of " + numberOfDevices);
         MockDevice[] threads = new MockDevice[numberOfDevices];
-        KafkaSender[] senders = new ThreadedKafkaSender[1];
+        KafkaSender[] senders = new KafkaSender[1];
         SchemaRetriever schemaRetriever = new SchemaRegistryRetriever("http://radar-test.thehyve.net:8081");
         SchemaRetriever localSchemaRetriever =  new LocalSchemaRetriever();
 
