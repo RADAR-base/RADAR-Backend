@@ -14,17 +14,33 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Helper class to make HTTP requests.
+ *
+ * Its default request properties are set to communicate with a Kafka REST Proxy using Avro with
+ * JSON.
+ */
 public class HttpClient {
     private final static Logger logger = LoggerFactory.getLogger(HttpClient.class);
     public final static String KAFKA_REST_ACCEPT_ENCODING = "application/vnd.kafka.v1+json, application/vnd.kafka+json, application/json";
     public final static String KAFKA_REST_AVRO_ENCODING = "application/vnd.kafka.avro.v1+json; charset=utf-8";
 
-    public interface HttpOutputstreamWriter {
-        /** Write any output without closing the stream. */
-        void handleOutput(OutputStream out) throws IOException;
-    }
-
-    public static HttpResponse request(URL url, String method, HttpOutputstreamWriter writer, Map<String, String> requestProperties) throws IOException {
+    /**
+     * Make an HTTP request, using given writer to write the contents of the request.
+     *
+     * By default, the writer must output Kafka Avro JSON in UTF-8 encoding.
+     *
+     * @param url URL to make request to
+     * @param method HTTP method
+     * @param writer writer to handle writing the OutputStream of the request contents
+     * @param requestProperties additional HTTP request properties, possibly null.
+     * @return response of the HTTP request; check the status code to see if the request was successful.
+     * @throws IOException if the HTTP request fails.
+     */
+    public static HttpResponse request(URL url, String method, HttpOutputStreamHandler writer, Map<String, String> requestProperties) throws IOException {
+        if (Objects.equals(method, "HEAD")) {
+            throw new IllegalArgumentException("Cannot write output with a HEAD request.");
+        }
         String responseContent = null;
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         setProperties(urlConnection, requestProperties, true, true);
@@ -77,6 +93,13 @@ public class HttpClient {
         }
     }
 
+    /**
+     * Makes a HTTP HEAD request
+     * @param url URL to make request to
+     * @param requestProperties additional HTTP request properties, possibly null.
+     * @return response of the HTTP request; check the status code to see if the request was successful.
+     * @throws IOException if the HTTP request fails.
+     */
     public static HttpResponse head(URL url, Map<String, String> requestProperties) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         setProperties(urlConnection, requestProperties, false, false);
@@ -96,6 +119,19 @@ public class HttpClient {
         }
     }
 
+
+    /**
+     * Make an HTTP request, using given writer to write the contents of the request.
+     *
+     * By default, the data must contain Kafka Avro JSON in UTF-8 encoding.
+     *
+     * @param url URL to make request to
+     * @param method HTTP method
+     * @param data data to send. If null, no data will be sent.
+     * @param requestProperties additional HTTP request properties, possibly null.
+     * @return response of the HTTP request; check the status code to see if the request was successful.
+     * @throws IOException if the HTTP request fails.
+     */
     public static HttpResponse request(URL url, String method, String data, Map<String, String> requestProperties) throws IOException {
         if (Objects.equals(method, "HEAD")) {
             return head(url, requestProperties);

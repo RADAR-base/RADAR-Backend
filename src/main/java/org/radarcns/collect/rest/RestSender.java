@@ -1,7 +1,6 @@
 package org.radarcns.collect.rest;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.avro.Schema;
@@ -12,6 +11,7 @@ import org.radarcns.collect.Record;
 import org.radarcns.collect.RecordList;
 import org.radarcns.collect.Topic;
 import org.radarcns.net.HttpClient;
+import org.radarcns.net.HttpOutputStreamHandler;
 import org.radarcns.net.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
         }
 
         // Post to Kafka REST server
-        HttpResponse response = HttpClient.request(new URL(kafkaUrl, "topics/" + sendTopic), "POST", new HttpClient.HttpOutputstreamWriter() {
+        HttpResponse response = HttpClient.request(new URL(kafkaUrl, "topics/" + sendTopic), "POST", new HttpOutputStreamHandler() {
             @Override
             public void handleOutput(OutputStream out) throws IOException {
                 mapper.writeValue(out, request);
