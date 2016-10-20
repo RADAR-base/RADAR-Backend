@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import javax.annotation.Nonnull;
-
 /**
  * Created by Francesco Nobilia on 26/09/2016.
  */
@@ -112,7 +110,7 @@ public class RadarConfig {
      * @return the topic name
      * @throws NullPointerException either the property has not been set up or the type does not exist
      */
-    public String getTopic(@Nonnull PlatformTopics topic) throws NullPointerException {
+    public String getTopic(PlatformTopics topic) throws NullPointerException {
         String param = null;
 
         switch (topic){
@@ -138,7 +136,7 @@ public class RadarConfig {
      * @return List containing topic names
      * @throws NullPointerException either the property has not been set up or the type does not exist
      */
-    public List<String> getTopicList(@Nonnull PlatformTopics topic) throws NullPointerException {
+    public List<String> getTopicList(PlatformTopics topic) throws NullPointerException {
         String param = null;
 
         switch (topic){

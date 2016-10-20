@@ -1,9 +1,9 @@
-package test.logic.synch;
+package org.radarcns.test.logic.synch;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import radar.consumer.commit.synch.ConsumerALO;
-import test.logic.Sessioniser;
+import org.radarcns.consumer.ConsumerALO;
+import org.radarcns.test.logic.Sessioniser;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.

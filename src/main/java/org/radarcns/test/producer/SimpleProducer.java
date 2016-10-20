@@ -1,4 +1,4 @@
-package test.producer;
+package org.radarcns.test.producer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
@@ -18,10 +18,10 @@ import java.util.Date;
 
 import javax.annotation.Nonnull;
 
-import JavaSessionize.avro.LogLine;
-import radar.avro.User;
-import radar.utils.KafkaProperties;
-import test.event.EventGenerator;
+import radar.User;
+import JavaSessionize.LogLine;
+import org.radarcns.utils.KafkaProperties;
+import org.radarcns.test.event.EventGenerator;
 
 /**
  * Created by Francesco Nobilia on 26/09/2016.

@@ -1,26 +1,21 @@
+package org.radarcns;
+
 import org.apache.log4j.Logger;
+import radar.User;
+import JavaSessionize.LogLine;
+import org.radarcns.sink.mongoDB.MongoDBSinkRadar;
+import org.radarcns.test.logic.Sessioniser;
+import org.radarcns.test.logic.synch.SessioniserALO;
+import org.radarcns.test.logic.synch.SessioniserAMO;
+import org.radarcns.test.logic.synch.SessioniserGroupALO;
+import org.radarcns.test.logic.synch.SessioniserGroupAMO;
+import org.radarcns.test.producer.SimpleProducer;
+import org.radarcns.test.stream.ActiveUser;
+import org.radarcns.utils.RadarConfig;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import JavaSessionize.avro.LogLine;
-import radar.avro.User;
-import radar.consumer.commit.auto.StreamConsumer;
-import radar.consumer.commit.auto.StreamConsumerGroup;
-import radar.sink.mongoDB.MongoDBSinkRadar;
-import radar.utils.RadarConfig;
-import test.logic.Sessioniser;
-import test.logic.auto.SessioniserGroupWorker;
-import test.logic.auto.SessioniserStreamed;
-import test.logic.synch.SessioniserALO;
-import test.logic.synch.SessioniserAMO;
-import test.logic.synch.SessioniserGroupALO;
-import test.logic.synch.SessioniserGroupAMO;
-import test.producer.SimpleProducer;
-import test.stream.ActiveUser;
 
 /**
  * Created by francesco on 05/09/16.
@@ -32,15 +27,13 @@ public class Main {
 
     //Test case
     private enum TestCase {
-        STREAMED, ALO, AMO, GROUP_STREAM, GROUP_AMO, GROUP_ALO
+        ALO, AMO, GROUP_AMO, GROUP_ALO
     }
     final static int sequence = 10;
     final static long sleep = 20000;
     private static TestCase test = TestCase.ALO;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
-
-    private static SessioniserStreamed sessioniserStreamed;
 
     private static SessioniserAMO sessioniserAMO;
 
@@ -50,7 +43,6 @@ public class Main {
 
     private static SessioniserGroupAMO sessioniserGroupAMO;
 
-    private static StreamConsumerGroup sessioniserStreamedGroup;
     private static Sessioniser sessioniser;
     private static int numThread = 3;
 
@@ -87,18 +79,11 @@ public class Main {
         shutdown.set(true);
 
         switch (test){
-            case STREAMED:
-                sessioniserStreamed.shutdown();
-                break;
             case ALO:
                 sessioniserALO.shutdown();
                 break;
             case AMO:
                 sessioniserAMO.shutdown();
-                break;
-            case GROUP_STREAM:
-                sessioniserStreamedGroup.shutdown();
-                sessioniser.shutdown();
                 break;
             case GROUP_ALO:
                 sessioniserGroupALO.shutdown();
@@ -171,11 +156,6 @@ public class Main {
     private static Thread getConsumer(){
         Thread thread;
         switch (test){
-            case STREAMED:
-                sessioniserStreamed = new SessioniserStreamed();
-                thread = new Thread(sessioniserStreamed);
-                thread.setName("Consumer-Streamed");
-                return thread;
             case ALO:
                 sessioniserALO = new SessioniserALO();
                 thread = new Thread(sessioniserALO);
@@ -185,17 +165,6 @@ public class Main {
                 sessioniserAMO = new SessioniserAMO();
                 thread = new Thread(sessioniserAMO);
                 thread.setName("Consumer-AMO");
-                return thread;
-            case GROUP_STREAM:
-                sessioniser = new Sessioniser();
-                List<StreamConsumer> workers = new LinkedList<>();
-                for(int i=0; i<numThread; i++){
-                    workers.add(i,new SessioniserGroupWorker(sessioniser));
-                }
-
-                sessioniserStreamedGroup = new StreamConsumerGroup(3,workers);
-                thread = new Thread(sessioniserStreamedGroup);
-                thread.setName("ConsumerGroup-STREAMED");
                 return thread;
             case GROUP_ALO:
                 sessioniserGroupALO = new SessioniserGroupALO(numThread);

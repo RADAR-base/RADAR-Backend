@@ -1,4 +1,4 @@
-{"namespace": "JavaSessionize.avro",
+{"namespace": "JavaSessionize",
   "type": "record",
   "name": "LogLine",
   "fields": [

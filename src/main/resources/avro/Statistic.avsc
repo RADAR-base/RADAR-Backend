@@ -1,4 +1,4 @@
-{"namespace": "radar.avro",
+{"namespace": "radar",
   "type": "record",
   "name": "Statistic",
   "fields": [

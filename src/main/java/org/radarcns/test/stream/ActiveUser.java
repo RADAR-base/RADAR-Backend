@@ -1,4 +1,4 @@
-package test.stream;
+package org.radarcns.test.stream;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serde;
@@ -6,15 +6,17 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Window;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import radar.stream.StreamRadar;
+import org.radarcns.stream.StreamRadar;
 
 /**
  * Created by Francesco Nobilia on 11/10/2016.
@@ -44,8 +46,13 @@ public class ActiveUser extends StreamRadar {
         final KStream<GenericRecord, GenericRecord> sessions = builder.stream("sessionized_clicks");
 
         KStream<String, Long> samplesCount = sessions
-                .map((key, value) -> new KeyValue<>(value.get("ip").toString(),value.get("ip").toString()))
-                .countByKey(stringSerde,"Counts")
+                .map(new KeyValueMapper<GenericRecord, GenericRecord, KeyValue<String, String>>() {
+                    @Override
+                    public KeyValue<String, String> apply(GenericRecord key, GenericRecord value) {
+                        return new KeyValue<>(value.get("ip").toString(), value.get("ip").toString());
+                    }
+                })
+                .countByKey(stringSerde, "Counts")
                 .toStream();
 
         samplesCount.to(stringSerde, longSerde, "streams-wordcount-output");
@@ -63,13 +70,21 @@ public class ActiveUser extends StreamRadar {
 
         final long timeWindow = 10000; //min*sec*millisec
 
-        sessions.map((k,v) -> {
-                    return KeyValue.pair(v.get("ip").toString(),v);
+        sessions.map(new KeyValueMapper<GenericRecord, GenericRecord, KeyValue<String, GenericRecord>>() {
+                    @Override
+                    public KeyValue<String, GenericRecord> apply(GenericRecord k, GenericRecord v) {
+                        return KeyValue.pair(v.get("ip").toString(), v);
+                    }
                 })
                 .countByKey(TimeWindows.of("radar-window", timeWindow), stringSerde)
                 //Change the key adding the information for the current window
                 //.toStream((k, v) -> String.format("%s %s", frame(k.window()), k.key()))
-                .toStream((k, v) -> String.format("%s",k.key()))
+                .toStream(new KeyValueMapper<Windowed<String>, Long, String>() {
+                    @Override
+                    public String apply(Windowed<String> k, Long v) {
+                        return String.format("%s", k.key());
+                    }
+                })
                 .to(stringSerde, longSerde, "streams-wordcount-output");
 
         return builder;

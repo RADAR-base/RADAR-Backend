@@ -3,6 +3,8 @@ plugins {
     id 'java'
     // enable gradle run and jar packaging with fixed main class
     id 'application'
+    id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
+    id 'idea'
 }
 
 mainClassName = 'org.radarcns.collect.rest.ThreadedKafkaSender'
@@ -35,7 +37,15 @@ dependencies {
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: '3.0.1'
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    compile group: 'com.boundary', name: 'high-scale-lib', version: '1.0.6'
 }
+
+task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
+    source("src/main/resources/avro")
+    outputDir = file("build/avro")
+}
+
+compileJava.source(generateAvro.outputs)
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.0'

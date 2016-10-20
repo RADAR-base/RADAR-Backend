@@ -1,4 +1,4 @@
-package radar.sink.mongoDB;
+package org.radarcns.sink.mongoDB;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -13,9 +13,9 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import radar.consumer.ConsumerRadar;
-import radar.sink.SinkRadar;
-import radar.utils.RadarConfig;
+import org.radarcns.consumer.ConsumerRadar;
+import org.radarcns.sink.SinkRadar;
+import org.radarcns.utils.RadarConfig;
 
 /**
  * Created by Francesco Nobilia on 10/10/2016.

@@ -3,7 +3,7 @@ package org.radarcns.test.event;
 import java.util.Date;
 import java.util.Random;
 
-import JavaSessionize.avro.LogLine;
+import JavaSessionize.LogLine;
 
 /**
  * Simple web traffic generator

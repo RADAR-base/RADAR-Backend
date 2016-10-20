@@ -1,7 +1,5 @@
 package org.radarcns.test.logic;
 
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.specific.SpecificData;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.log4j.Logger;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -10,9 +8,9 @@ import java.util.Arrays;
 
 import javax.annotation.Nonnull;
 
-import JavaSessionize.avro.LogLine;
-import kafka.message.MessageAndMetadata;
-import org.radarcns.avro.User;
+import radar.User;
+import JavaSessionize.LogLine;
+
 import org.radarcns.utils.RadarConfig;
 import org.radarcns.utils.RadarUtils;
 import org.radarcns.test.producer.SimpleProducer;
@@ -45,23 +43,7 @@ public class Sessioniser {
      * @throws NullPointerException no input
      */
     public void execute(@Nonnull ConsumerRecord<Object,Object> record){
-        if(record == null){
-            throw new NullPointerException("No input has been provided");
-        }
-
         execute(record,this.producer);
-    }
-
-    /**
-     * @param record Kafka message currently consumed
-     * @throws NullPointerException no input
-     */
-    public void execute(@Nonnull MessageAndMetadata<Object, Object> record) {
-        if (record == null) {
-            throw new NullPointerException("No input has been provided");
-        }
-
-        execute(record, this.producer);
     }
 
     /**
@@ -69,16 +51,7 @@ public class Sessioniser {
      * @param inputProducer to send back into KafKa the result, if null
      * @throws NullPointerException no input
      */
-    public void execute(@Nonnull ConsumerRecord<Object,Object> record, SimpleProducer inputProducer){
-
-        if(record == null){
-            throw new NullPointerException("No record has been provided");
-        }
-
-        if(inputProducer == null){
-            throw new NullPointerException("No producer has been provided");
-        }
-
+    public void execute(@Nonnull ConsumerRecord<Object,Object> record, @Nonnull SimpleProducer inputProducer){
         log.debug("Involved schemas are: "+ Arrays.toString(RadarUtils.getSchemaName(record)));
 
         log.debug("Topic:"+record.topic()+" - Partition: "+record.partition()+" Offset: "+record.offset());
@@ -93,34 +66,6 @@ public class Sessioniser {
     }
 
     /**
-     * @param record Kafka message currently consumed
-     * @param inputProducer to send back into KafKa the result, if null
-     * @throws NullPointerException no input
-     */
-    public void execute(@Nonnull MessageAndMetadata<Object, Object> record, SimpleProducer inputProducer){
-
-        if(record == null){
-            throw new NullPointerException("No input has been provided");
-        }
-
-        log.debug("Topic:"+record.topic()+" - Partition: "+record.partition()+" Offset: "+record.offset());
-
-        GenericRecord genericKey = (GenericRecord) record.key();
-        User user = (User) SpecificData.get().deepCopy(User.SCHEMA$, genericKey);
-
-        GenericRecord genericEvent = (GenericRecord) record.message();
-        LogLine event = (LogLine) SpecificData.get().deepCopy(LogLine.SCHEMA$, genericEvent);
-
-        log.debug("Key: "+user.toString()+" - Value: "+event.toString());
-
-        if(inputProducer == null){
-            inputProducer = this.producer;
-        }
-
-        execute(event,user,inputProducer);
-    }
-
-    /**
      * Implement the auto to check if two consecutive connections belong to the same session
      * @param event history of current web navigation
      * @param user
@@ -128,15 +73,6 @@ public class Sessioniser {
      * @throws NullPointerException no input
      */
     public void execute(@Nonnull LogLine event, @Nonnull User user, @Nonnull SimpleProducer inputProducer) {
-
-        if (event == null) {
-            throw new NullPointerException("Event is null");
-        }
-
-        if (user == null) {
-            throw new NullPointerException("User is null");
-        }
-
         RadarConfig config = new RadarConfig();
 
         SessionState oldState = state.get(user.getIp());

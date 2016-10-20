@@ -1,4 +1,4 @@
-package test.state;
+package org.radarcns.test.state;
 
 /**
  * Implement the session state of a web client

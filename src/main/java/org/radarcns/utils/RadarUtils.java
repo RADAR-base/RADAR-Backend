@@ -5,8 +5,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.log4j.Logger;
 
-import javax.annotation.Nonnull;
-
 /**
  * Created by Francesco Nobilia on 04/10/2016.
  */
@@ -19,7 +17,7 @@ public class RadarUtils {
      * @throws NullPointerException no input
      * @return {key schema, value schema} it might contain null values if no schema has been used
      */
-    public static String[] getSchemaName(@Nonnull ConsumerRecord<Object,Object> record){
+    public static String[] getSchemaName(ConsumerRecord<Object,Object> record){
 
         if(record == null){
             throw new NullPointerException("Record is null");
