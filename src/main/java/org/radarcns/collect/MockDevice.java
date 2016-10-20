@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MockDevice extends Thread {
     private final static Logger logger = LoggerFactory.getLogger(MockDevice.class);
@@ -29,6 +30,7 @@ public class MockDevice extends Thread {
     private final float batteryDecayFactor;
     private final float timeDriftFactor;
     private long lastSleep;
+    private final static AtomicLong offset = new AtomicLong(0);
 
     public MockDevice(KafkaSender<String, GenericRecord> sender, String deviceId, SchemaRetriever schemaRetriever) {
         this.deviceId = deviceId;
@@ -99,7 +101,7 @@ public class MockDevice extends Thread {
         if (hertz > 0 && timeStep % (hertz_modulus / hertz) == 0) {
             GenericRecord avroRecord = topic.createSimpleRecord(System.currentTimeMillis() / 1000d + timeStep * timeDriftFactor, values);
             try {
-                sender.send(topic, System.currentTimeMillis(), deviceId, avroRecord);
+                sender.send(topic, offset.incrementAndGet(), deviceId, avroRecord);
             } catch (IOException e) {
                 logger.warn("Failed to send message to topic {}", topic.getName(), e);
             }
