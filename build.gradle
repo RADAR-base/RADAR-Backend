@@ -47,6 +47,12 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 
 compileJava.source(generateAvro.outputs)
 
+idea {
+    module {
+        sourceDirs += file("build/avro")
+    }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '3.0'
 }
