@@ -18,32 +18,29 @@ public class RadarConfig {
 
     //Enumerate all possible topics
     public enum TopicGroup {
-        in, out, all_in, mongo_sink
+        in("topic.in"), out("topic.out"), all_in("topic.in.list"),
+        mongo_sink("mongo.db.sink.topic.list");
+
+        private final String param;
+
+        TopicGroup(String param) {
+            this.param = param;
+        }
+
+        public String getParam() {
+            return param;
+        }
     }
 
     public RadarConfig() {
+        String configFile = "configuration/config.properties";
         prop = new Properties();
 
-        InputStream input = null;
-
-        try {
-
-            File file = new File(getClass().getClassLoader().getResource("configuration/config.properties").getFile());
-            input = new FileInputStream(file);
-
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(configFile)){
             // load a properties file
-            prop.load(input);
-
+            prop.load(in);
         } catch (IOException io) {
             io.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -52,18 +49,7 @@ public class RadarConfig {
      * @throws NullPointerException if the property has not been set up
      */
     public String getKafkaListener() throws NullPointerException {
-        String port = prop.getProperty("kafka.port");
-        String host = prop.getProperty("kafka.listener");
-
-        if(host == null){
-            throw new NullPointerException("Kafka listener path is missing");
-        }
-
-        if(port == null){
-            return host;
-        }
-
-        return host+":"+port;
+        return getHostAndPort("kafka.listener", "kafka.port");
     }
 
     /**
@@ -71,18 +57,7 @@ public class RadarConfig {
      * @throws NullPointerException if the property has not been set up
      */
     public String getZooKeeperURL() throws NullPointerException {
-        String port = prop.getProperty("zookeeper.port");
-        String host = prop.getProperty("zookeeper.listener");
-
-        if(host == null){
-            throw new NullPointerException("ZooKeeper URL is null");
-        }
-
-        if(port == null){
-            return host;
-        }
-
-        return host+":"+port;
+        return getHostAndPort("zookeeper.listener", "zookeeper.port");
     }
 
     /**
@@ -90,76 +65,34 @@ public class RadarConfig {
      * @throws NullPointerException if the property has not been set up
      */
     public String getSchemaRegistryURL() throws NullPointerException {
-        String port = prop.getProperty("schemaregistry.port");
-        String host = prop.getProperty("schemaregistry.url");
-
-        if(host == null){
-            throw new NullPointerException("SchemaRegistry URL is null");
-        }
-
-        if(port == null){
-            return host;
-        }
-
-        return host+":"+port;
+        return getHostAndPort("schemaregistry.url", "schemaregistry.port");
     }
 
     /**
      * @param topic states which topic you want to retrieve
      * @return the topic name
-     * @throws NullPointerException either the property has not been set up or the type does not exist
+     * @throws NullPointerException either the property has not been set up or the type does not
+     *                              exist
      */
     public String getTopic(TopicGroup topic) throws NullPointerException {
-        String param = null;
-
         switch (topic){
             case in:
-                param = "topic.in";
-                break;
             case out:
-                param = "topic.out";
-                break;
+                return getOrThrow(topic.getParam());
+            default:
+                throw new NullPointerException("topic " + topic + " is not a single topic");
         }
-
-        String topicName = prop.getProperty(param);
-
-        if(topicName == null){
-            throw new NullPointerException("AvroTopic is null");
-        }
-
-        return topicName;
     }
 
     /**
      * @param topic states which list of topics you want to retrieve
      * @return List containing topic names
-     * @throws NullPointerException either the property has not been set up or the type does not exist
+     * @throws NullPointerException either the property has not been set up or the type does not
+     *                              exist
      */
     public List<String> getTopicList(TopicGroup topic) throws NullPointerException {
-        String param = null;
-
-        switch (topic){
-            case in:
-                param = "topic.in";
-                break;
-            case out:
-                param = "topic.out";
-                break;
-            case all_in:
-                param = "topic.list.in";
-                break;
-            case mongo_sink:
-                param = "mongo.db.sink.topic.list";
-                break;
-        }
-
-        String value = prop.getProperty(param);
-
-        if(value == null){
-            throw new NullPointerException("AvroTopic list is null");
-        }
-
-        return Arrays.asList(value.split(","));
+        String[] topics = getOrThrow(topic.getParam()).split(",");
+        return Arrays.asList(topics);
     }
 
     /**
@@ -167,13 +100,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getClientID() throws NullPointerException {
-        String value = prop.getProperty("client.id");
-
-        if(value == null){
-            throw new NullPointerException("Client.id is null");
-        }
-
-        return value;
+        return getOrThrow("client.id");
     }
 
     /**
@@ -181,13 +108,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getGroupID() throws NullPointerException {
-        String value = prop.getProperty("group.id");
-
-        if(value == null){
-            throw new NullPointerException("Group.id is null");
-        }
-
-        return value;
+        return getOrThrow("group.id");
     }
 
     /**
@@ -195,13 +116,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getAutoCommitInterval() throws NullPointerException {
-        String value = prop.getProperty("auto.commit.interval.ms");
-
-        if(value == null){
-            throw new NullPointerException("Auto.commit.interval.ms is null");
-        }
-
-        return value;
+        return getOrThrow("auto.commit.interval.ms");
     }
 
     /**
@@ -209,27 +124,15 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getSessionTimeout() throws NullPointerException {
-        String value = prop.getProperty("session.timeout.ms");
-
-        if(value == null){
-            throw new NullPointerException("Session.timeout.ms is null");
-        }
-
-        return value;
+        return getOrThrow("session.timeout.ms");
     }
 
     /**
      * @return the number of thread for MongoDB Sink
      * @throws NullPointerException the property has not been set up
      */
-    public int getMongoDBThreads() throws NullPointerException {
-        String value = prop.getProperty("mongo.db.num.threads");
-
-        if(value == null){
-            throw new NullPointerException("No thread has been specified for the MongoDB Sink");
-        }
-
-        return Integer.valueOf(value);
+    public int getMongoDBThreads() throws NumberFormatException, NullPointerException {
+        return Integer.valueOf(getOrThrow("mongo.db.num.threads"));
     }
 
     /**
@@ -237,13 +140,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getMongoDbUsr() throws NullPointerException {
-        String value = prop.getProperty("mongo.db.usr");
-
-        if(value == null){
-            throw new NullPointerException("mongo.db.usr is null");
-        }
-
-        return value;
+        return getOrThrow("mongo.db.usr");
     }
 
     /**
@@ -251,13 +148,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public char[] getMongoDbPwd() throws NullPointerException {
-        String value = prop.getProperty("mongo.db.pwd");
-
-        if(value == null){
-            throw new NullPointerException("mongo.db.pwd is null");
-        }
-
-        return value.toCharArray();
+        return getOrThrow("mongo.db.pwd").toCharArray();
     }
 
     /**
@@ -265,13 +156,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getMongoDbDatabaseName() throws NullPointerException {
-        String value = prop.getProperty("mongo.db.dbname");
-
-        if(value == null){
-            throw new NullPointerException("mongo.db.dbname is null");
-        }
-
-        return value;
+        return getOrThrow("mongo.db.dbname");
     }
 
     /**
@@ -279,13 +164,7 @@ public class RadarConfig {
      * @throws NullPointerException the property has not been set up
      */
     public String getMongoDbServer() throws NullPointerException {
-        String value = prop.getProperty("mongo.db.server");
-
-        if(value == null){
-            throw new NullPointerException("mongo.db.dbname is null");
-        }
-
-        return value;
+        return getOrThrow("mongo.db.server");
     }
 
     /**
@@ -296,12 +175,27 @@ public class RadarConfig {
      * @throws NumberFormatException the property is cannot be parsed as an integer.
      */
     public int getSessionTimeWindow() throws NullPointerException, NumberFormatException {
-        String value = prop.getProperty("session.length.ms");
+        return Integer.valueOf(getOrThrow("session.length.ms"));
+    }
+
+    private String getOrThrow(String property) throws NullPointerException {
+        String value = prop.getProperty(property);
 
         if (value == null){
-            throw new NullPointerException("session.length.ms is null");
+            throw new NullPointerException(property + " is null");
         }
 
-        return Integer.valueOf(value);
+        return value;
+    }
+
+    private String getHostAndPort(String hostProperty, String portProperty) {
+        String host = getOrThrow(hostProperty);
+        String port = prop.getProperty(portProperty);
+
+        if (port != null) {
+            return host + ":" + port;
+        } else {
+            return host;
+        }
     }
 }
