@@ -1,4 +1,4 @@
-package org.radarcns.utils;
+package org.radarcns.util;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;

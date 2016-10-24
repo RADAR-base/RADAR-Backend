@@ -14,7 +14,7 @@ public interface KafkaSender<K, V> extends Closeable {
      * Send a message to Kafka eventually. Given offset must be strictly monotonically increasing
      * for subsequent calls.
      */
-    void send(Topic topic, long offset, K key, V value) throws IOException;
+    void send(AvroTopic topic, long offset, K key, V value) throws IOException;
 
     /**
      * Send a message to Kafka eventually.
@@ -27,7 +27,7 @@ public interface KafkaSender<K, V> extends Closeable {
     /**
      * Get the latest offsets actually sent for a given topic. Returns -1L for unknown offsets.
      */
-    long getLastSentOffset(Topic topic);
+    long getLastSentOffset(AvroTopic topic);
 
     /**
      * If the sender is no longer connected, try to reconnect.

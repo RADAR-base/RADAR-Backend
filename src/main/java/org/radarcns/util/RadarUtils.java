@@ -1,16 +1,17 @@
-package org.radarcns.utils;
+package org.radarcns.util;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 04/10/2016.
  */
 public class RadarUtils {
 
-    private final static Logger log = Logger.getLogger(RadarUtils.class);
+    private final static Logger log = LoggerFactory.getLogger(RadarUtils.class);
 
     /**
      * @param record Kafka message of witch you want to know the associated Schema

@@ -1,4 +1,4 @@
-package org.radarcns.utils.avro;
+package org.radarcns.util.avro;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Deserializer;

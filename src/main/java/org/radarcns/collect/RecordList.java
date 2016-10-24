@@ -8,9 +8,9 @@ import java.util.List;
 
 public class RecordList<K, V> implements Iterable<Record<K,V>> {
     private final List<Record<K, V>> records;
-    private final Topic topic;
+    private final AvroTopic topic;
 
-    public RecordList(Topic topic) {
+    public RecordList(AvroTopic topic) {
         this.topic = topic;
         records = new ArrayList<>();
     }
@@ -19,7 +19,7 @@ public class RecordList<K, V> implements Iterable<Record<K,V>> {
         records.add(new Record(offset, key, value));
     }
 
-    public Topic getTopic() {
+    public AvroTopic getTopic() {
         return topic;
     }
 

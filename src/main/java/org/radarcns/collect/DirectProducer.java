@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.radarcns.SchemaRetriever;
+import org.radarcns.test.producer.MockDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ import java.util.Properties;
 public class DirectProducer<K, V> implements KafkaSender<K, V> {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducer.class);
     private KafkaProducer<K, V> producer;
-    private final Map<Topic, Long> offsetsSent;
+    private final Map<AvroTopic, Long> offsetsSent;
 
     public DirectProducer() {
         producer = null;
@@ -42,7 +43,7 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public void send(Topic topic, long offset, K key, V value) {
+    public void send(AvroTopic topic, long offset, K key, V value) {
         if (producer == null) {
             throw new IllegalStateException("#configure() was not called.");
         }
@@ -56,7 +57,7 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
         if (producer == null) {
             throw new IllegalStateException("#configure() was not called.");
         }
-        Topic topic = records.getTopic();
+        AvroTopic topic = records.getTopic();
         for (Record<K, V> record : records) {
             producer.send(new ProducerRecord<>(topic.getName(), record.key, record.value));
         }
@@ -64,7 +65,7 @@ public class DirectProducer<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public long getLastSentOffset(Topic topic) {
+    public long getLastSentOffset(AvroTopic topic) {
         Long offset = offsetsSent.get(topic);
         return offset == null ? -1L : offset;
     }

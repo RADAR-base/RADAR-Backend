@@ -5,7 +5,7 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 
 import java.io.IOException;
 
-import org.radarcns.utils.KafkaProperties;
+import org.radarcns.util.KafkaProperties;
 
 /**
  * Created by Francesco Nobilia on 11/10/2016.

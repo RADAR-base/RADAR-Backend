@@ -8,7 +8,7 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -20,15 +20,16 @@ import javax.annotation.Nonnull;
 
 import radar.User;
 import JavaSessionize.LogLine;
-import org.radarcns.utils.KafkaProperties;
+import org.radarcns.util.KafkaProperties;
 import org.radarcns.test.event.EventGenerator;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 26/09/2016.
  */
 public class SimpleProducer {
 
-    private final static Logger log = Logger.getLogger(SimpleProducer.class);
+    private final static Logger log = LoggerFactory.getLogger(SimpleProducer.class);
 
     private final KafkaProducer producer;
 
@@ -56,11 +57,6 @@ public class SimpleProducer {
      * @param key
      */
     public void send(@Nonnull String topic, @Nonnull Object key, @Nonnull final Object message){
-
-        if(topic == null || key == null || message == null){
-            throw new NullPointerException("You are trying to send a null message");
-        }
-
         ProducerRecord<Object, Object> record = new ProducerRecord<Object, Object>(topic, key, message);
 
         log.info("["+topic+"]"+key.toString()+" - "+message.toString());
@@ -97,7 +93,7 @@ public class SimpleProducer {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
         GenericRecord avroRecord = new GenericData.Record(schema);
-        avroRecord.put("f1", dateFormat.format(new Date()).toString());
+        avroRecord.put("f1", dateFormat.format(new Date()));
 
         return avroRecord;
     }

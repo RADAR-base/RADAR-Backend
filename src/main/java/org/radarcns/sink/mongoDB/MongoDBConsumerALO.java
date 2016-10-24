@@ -8,8 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.bson.Document;
 import org.radarcns.consumer.ConsumerALO;
 import org.radarcns.util.Serialization;
-import org.radarcns.utils.KafkaProperties;
-import org.radarcns.utils.RadarConfig;
+import org.radarcns.util.KafkaProperties;
+import org.radarcns.util.RadarConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +25,12 @@ public class MongoDBConsumerALO extends ConsumerALO<byte[],byte[]> {
 
     //Can be instantiated only be mongoDB sink classes
     protected MongoDBConsumerALO(MongoDatabase database){
-        super(RadarConfig.PlatformTopics.mongo_sink,KafkaProperties.getSelfCommitSerdeGroupConsumer());
+        super(RadarConfig.TopicGroup.mongo_sink,KafkaProperties.getSelfCommitSerdeGroupConsumer());
         initCollection(database);
     }
 
     protected MongoDBConsumerALO(String clientID,MongoDatabase database){
-        super(clientID, RadarConfig.PlatformTopics.mongo_sink, KafkaProperties.getSelfCommitSerdeGroupConsumer(clientID,null));
+        super(clientID, RadarConfig.TopicGroup.mongo_sink, KafkaProperties.getSelfCommitSerdeGroupConsumer(clientID,null));
         initCollection(database);
     }
 

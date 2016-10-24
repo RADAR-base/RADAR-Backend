@@ -1,17 +1,17 @@
 package org.radarcns;
 
-import org.apache.log4j.Logger;
 import radar.User;
 import JavaSessionize.LogLine;
 import org.radarcns.sink.mongoDB.MongoDBSinkRadar;
-import org.radarcns.test.logic.Sessioniser;
 import org.radarcns.test.logic.synch.SessioniserALO;
 import org.radarcns.test.logic.synch.SessioniserAMO;
 import org.radarcns.test.logic.synch.SessioniserGroupALO;
 import org.radarcns.test.logic.synch.SessioniserGroupAMO;
 import org.radarcns.test.producer.SimpleProducer;
 import org.radarcns.test.stream.ActiveUser;
-import org.radarcns.utils.RadarConfig;
+import org.radarcns.util.RadarConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
 
-    private final static Logger log = Logger.getLogger(Main.class);
+    private final static Logger log = LoggerFactory.getLogger(Main.class);
 
     //Test case
     private enum TestCase {
@@ -43,17 +43,11 @@ public class Main {
 
     private static SessioniserGroupAMO sessioniserGroupAMO;
 
-    private static Sessioniser sessioniser;
-    private static int numThread = 3;
+    private final static int numThread = 3;
 
     private static MongoDBSinkRadar mongoDBSink;
 
     private static ActiveUser activeUser;
-
-    private static Thread producerThread;
-    private static Thread consumerThread;
-    private static Thread connectorThread;
-    private static Thread streamThread;
 
     public static void main(String[] args) throws InterruptedException,IOException {
         go();
@@ -62,16 +56,16 @@ public class Main {
     }
 
     private static void go() throws IOException{
-        producerThread = getProducer();
+        Thread producerThread = getProducer();
         producerThread.start();
 
-        consumerThread = getConsumer();
+        Thread consumerThread = getConsumer();
         consumerThread.start();
 
-        streamThread = getStream();
+        Thread streamThread = getStream();
         streamThread.start();
 
-        connectorThread = getConnector();
+        Thread connectorThread = getConnector();
         connectorThread.start();
     }
 
@@ -122,6 +116,8 @@ public class Main {
 
                 int offset = 0;
 
+                int sleepUpperBound = prop.getSessionTimeWindow() + 1000;
+
                 while(!shutdown.get()) {
 
                     for (; offset < sequence; offset++) {
@@ -130,13 +126,10 @@ public class Main {
                         User key = (User) temp[0];
                         LogLine value = (LogLine) temp[1];
 
-                        producer.send(prop.getTopic(RadarConfig.PlatformTopics.in),key,value);
+                        producer.send(prop.getTopic(RadarConfig.TopicGroup.in),key,value);
 
                         try {
-                            int upperBound = Integer.valueOf(prop.getSessionTimeWindow().toString()).intValue();
-                            upperBound += 1000;
-                            long sleepInterval = (long) r.nextInt(upperBound);
-                            Thread.sleep(sleepInterval);
+                            Thread.sleep(r.nextInt(sleepUpperBound));
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

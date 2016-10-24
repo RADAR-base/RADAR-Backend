@@ -1,22 +1,20 @@
 package org.radarcns.collect.rest;
 
+import org.radarcns.collect.AvroTopic;
 import org.radarcns.collect.KafkaSender;
 import org.radarcns.collect.RecordList;
-import org.radarcns.collect.Topic;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class BatchedKafkaSender<K, V> implements KafkaSender<K, V> {
     private final KafkaSender<K, V> sender;
     private final int ageMillis;
     private final int maxBatchSize;
-    private final Map<Topic, RecordList<K, V>> cache;
+    private final Map<AvroTopic, RecordList<K, V>> cache;
 
     public BatchedKafkaSender(KafkaSender<K, V> sender, int ageMillis, int maxBatchSize) {
         this.sender = sender;
@@ -31,7 +29,7 @@ public class BatchedKafkaSender<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public void send(Topic topic, long offset, K key, V value) throws IOException {
+    public void send(AvroTopic topic, long offset, K key, V value) throws IOException {
         RecordList<K, V> batch;
         if (!this.isConnected()) {
             throw new IOException("Cannot send records to unconnected producer.");
@@ -57,7 +55,7 @@ public class BatchedKafkaSender<K, V> implements KafkaSender<K, V> {
 
     @Override
     public void send(RecordList<K, V> records) throws IOException {
-        Topic topic = records.getTopic();
+        AvroTopic topic = records.getTopic();
         RecordList<K, V> batch;
         synchronized (this) {
             batch = cache.get(topic);
@@ -82,7 +80,7 @@ public class BatchedKafkaSender<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public long getLastSentOffset(Topic topic) {
+    public long getLastSentOffset(AvroTopic topic) {
         return sender.getLastSentOffset(topic);
     }
 

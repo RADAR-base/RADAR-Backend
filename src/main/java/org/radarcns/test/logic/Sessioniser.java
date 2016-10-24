@@ -1,7 +1,7 @@
 package org.radarcns.test.logic;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 import java.util.Arrays;
@@ -11,10 +11,11 @@ import javax.annotation.Nonnull;
 import radar.User;
 import JavaSessionize.LogLine;
 
-import org.radarcns.utils.RadarConfig;
-import org.radarcns.utils.RadarUtils;
+import org.radarcns.util.RadarConfig;
+import org.radarcns.util.RadarUtils;
 import org.radarcns.test.producer.SimpleProducer;
 import org.radarcns.test.state.SessionState;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implement the auto for tracking web site users' sessions
@@ -22,7 +23,7 @@ import org.radarcns.test.state.SessionState;
  */
 public class Sessioniser {
 
-    private final static Logger log = Logger.getLogger(Sessioniser.class);
+    private final static Logger log = LoggerFactory.getLogger(Sessioniser.class);
 
     private final NonBlockingHashMap<String,SessionState> state;
 
@@ -54,7 +55,7 @@ public class Sessioniser {
     public void execute(@Nonnull ConsumerRecord<Object,Object> record, @Nonnull SimpleProducer inputProducer){
         log.debug("Involved schemas are: "+ Arrays.toString(RadarUtils.getSchemaName(record)));
 
-        log.debug("Topic:"+record.topic()+" - Partition: "+record.partition()+" Offset: "+record.offset());
+        log.debug("AvroTopic:"+record.topic()+" - Partition: "+record.partition()+" Offset: "+record.offset());
 
         User user = (User) record.key();
 
@@ -78,7 +79,7 @@ public class Sessioniser {
         SessionState oldState = state.get(user.getIp());
         int sessionId = 0;
         if (oldState == null) {
-            state.put(user.getIp().toString(), new SessionState(event.getTimestamp(), 0));
+            state.put(user.getIp(), new SessionState(event.getTimestamp(), 0));
         } else {
             sessionId = oldState.getSessionId();
 
@@ -87,11 +88,11 @@ public class Sessioniser {
             }
 
             SessionState newState = new SessionState(event.getTimestamp(), sessionId);
-            state.put(user.getIp().toString(), newState);
+            state.put(user.getIp(), newState);
         }
         event.setSessionid(sessionId);
 
-        inputProducer.send(config.getTopic(RadarConfig.PlatformTopics.out), user, event);
+        inputProducer.send(config.getTopic(RadarConfig.TopicGroup.out), user, event);
     }
 
 }

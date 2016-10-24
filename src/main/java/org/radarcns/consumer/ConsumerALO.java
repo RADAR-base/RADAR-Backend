@@ -6,13 +6,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.errors.WakeupException;
-import org.apache.log4j.Logger;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import org.radarcns.utils.KafkaProperties;
-import org.radarcns.utils.RadarConfig;
+import org.radarcns.util.KafkaProperties;
+import org.radarcns.util.RadarConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.
@@ -21,12 +22,12 @@ import org.radarcns.utils.RadarConfig;
  */
 public abstract class ConsumerALO<K,V> extends ConsumerRadar {
 
-    private final static Logger log = Logger.getLogger(ConsumerALO.class);
+    private final static Logger log = LoggerFactory.getLogger(ConsumerALO.class);
 
     public RadarConfig config;
 
     private KafkaConsumer<K,V> consumer;
-    private RadarConfig.PlatformTopics topics;
+    private RadarConfig.TopicGroup topics;
 
     private CountDownLatch shutdownLatch;
 
@@ -38,23 +39,23 @@ public abstract class ConsumerALO<K,V> extends ConsumerRadar {
         init(clientID,null,null);
     }
 
-    public ConsumerALO(RadarConfig.PlatformTopics topics) {
+    public ConsumerALO(RadarConfig.TopicGroup topics) {
         init(null,topics,null);
     }
 
-    public ConsumerALO(String clientID, RadarConfig.PlatformTopics topics) {
+    public ConsumerALO(String clientID, RadarConfig.TopicGroup topics) {
         init(clientID,topics,null);
     }
 
-    public ConsumerALO(RadarConfig.PlatformTopics topics, Properties properties) {
+    public ConsumerALO(RadarConfig.TopicGroup topics, Properties properties) {
         init(null,topics,properties);
     }
 
-    public ConsumerALO(String clientID, RadarConfig.PlatformTopics topics, Properties properties) {
+    public ConsumerALO(String clientID, RadarConfig.TopicGroup topics, Properties properties) {
         init(clientID,topics,properties);
     }
 
-    private void init(String clientID, RadarConfig.PlatformTopics topics, Properties properties){
+    private void init(String clientID, RadarConfig.TopicGroup topics, Properties properties){
         config = new RadarConfig();
         shutdownLatch = new CountDownLatch(1);
 
@@ -62,7 +63,7 @@ public abstract class ConsumerALO<K,V> extends ConsumerRadar {
 
         consumer = new KafkaConsumer(properties);
 
-        this.topics = (topics == null) ? RadarConfig.PlatformTopics.all_in : topics;
+        this.topics = (topics == null) ? RadarConfig.TopicGroup.all_in : topics;
     }
 
     /**

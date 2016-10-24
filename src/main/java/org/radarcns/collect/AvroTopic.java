@@ -6,27 +6,34 @@ import org.apache.avro.generic.GenericRecord;
 import org.radarcns.SchemaRetriever;
 
 import java.io.IOException;
-import java.util.List;
 
+import javax.annotation.Nonnull;
 
-public class Topic {
+/** AvroTopic with schema */
+public class AvroTopic {
     private final String name;
-    private final Schema schema;
-    private final static Schema keySchema = Schema.create(Schema.Type.STRING);
+    private final Schema valueSchema;
+    private final Schema keySchema;
     private final Schema.Field timeField;
     private final Schema.Field timeReceivedField;
 
-    public Topic(String name, SchemaRetriever retriever) throws IOException {
+    public AvroTopic(@Nonnull String name, SchemaRetriever retriever) throws IOException {
+        this(name, Schema.create(Schema.Type.STRING),
+                retriever.getSchemaMetadata(name, true).getSchema());
+    }
+
+    public AvroTopic(String name, Schema keySchema, Schema valueSchema) {
         if (name == null) {
             throw new IllegalArgumentException("Name may not be null");
         }
         this.name = name;
-        this.schema = retriever.getSchemaMetadata(getName(), true).getSchema();
-        this.timeField = schema.getField("time");
-        this.timeReceivedField = schema.getField("timeReceived");
+        this.keySchema = keySchema;
+        this.valueSchema = valueSchema;
+        this.timeField = this.valueSchema.getField("time");
         if (timeField == null) {
             throw new IllegalArgumentException("Schema must have time as its first field");
         }
+        this.timeReceivedField = this.valueSchema.getField("timeReceived");
         if (timeReceivedField == null) {
             throw new IllegalArgumentException("Schema must have timeReceived as its second field");
         }
@@ -37,19 +44,19 @@ public class Topic {
     }
 
     public Schema getValueSchema() {
-        return schema;
+        return valueSchema;
     }
 
-    public Schema.Field getValueField(String name) {
-        Schema.Field field = schema.getField(name);
+    public Schema.Field getValueField(@Nonnull String name) {
+        Schema.Field field = valueSchema.getField(name);
         if (field == null) {
-            throw new IllegalArgumentException("Field " + name + " not in value schema");
+            throw new IllegalArgumentException("Field " + name + " not in value valueSchema");
         }
         return field;
     }
 
-    public GenericRecord createSimpleRecord(double time, Object... values) {
-        GenericRecord avroRecord = new GenericData.Record(schema);
+    public GenericRecord createValueRecord(double time, Object... values) {
+        GenericRecord avroRecord = new GenericData.Record(valueSchema);
         avroRecord.put(timeField.pos(), time);
         avroRecord.put(timeReceivedField.pos(), System.currentTimeMillis() / 1000.0);
         for (int i = 0; i < values.length; i += 2) {
@@ -58,7 +65,8 @@ public class Topic {
             } else if (values[i] instanceof String) {
                 avroRecord.put((String) values[i], values[i + 1]);
             } else {
-                throw new IllegalArgumentException("Record key " + values[i] + " is not a Schema.Field or String");
+                throw new IllegalArgumentException("Record key " + values[i] +
+                        " is not a Schema.Field or String");
             }
         }
         return avroRecord;
@@ -73,9 +81,10 @@ public class Topic {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Topic topic = (Topic) o;
+        AvroTopic topic = (AvroTopic) o;
 
-        return name.equals(topic.name) && schema.equals(topic.schema);
+        return name.equals(topic.name) && keySchema.equals(topic.keySchema) &&
+                valueSchema.equals(topic.valueSchema);
     }
 
     @Override

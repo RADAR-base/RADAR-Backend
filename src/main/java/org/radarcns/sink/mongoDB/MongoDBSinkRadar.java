@@ -6,7 +6,7 @@ import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.bson.Document;
 
 import java.security.InvalidParameterException;
@@ -15,7 +15,8 @@ import java.util.List;
 
 import org.radarcns.consumer.ConsumerRadar;
 import org.radarcns.sink.SinkRadar;
-import org.radarcns.utils.RadarConfig;
+import org.radarcns.util.RadarConfig;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 10/10/2016.
@@ -24,7 +25,7 @@ import org.radarcns.utils.RadarConfig;
 
 public class MongoDBSinkRadar extends SinkRadar{
 
-    private final static Logger log = Logger.getLogger(MongoDBSinkRadar.class);
+    private final static Logger log = LoggerFactory.getLogger(MongoDBSinkRadar.class);
 
     /*
      * The number of MongoClient must be limited since it is a connection pool (BP singleton).

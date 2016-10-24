@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema;
 import org.radarcns.ParsedSchemaMetadata;
 import org.radarcns.SchemaRetriever;
+import org.radarcns.collect.AvroTopic;
 import org.radarcns.collect.KafkaSender;
 import org.radarcns.collect.Record;
 import org.radarcns.collect.RecordList;
-import org.radarcns.collect.Topic;
 import org.radarcns.net.HttpClient;
 import org.radarcns.net.HttpOutputStreamHandler;
 import org.radarcns.net.HttpResponse;
@@ -29,7 +29,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
     private final URL kafkaUrl;
     private final AvroEncoder<K> keyEncoder;
     private final AvroEncoder<V> valueEncoder;
-    private final ConcurrentHashMap<Topic, Long> lastOffsetsSent;
+    private final ConcurrentHashMap<AvroTopic, Long> lastOffsetsSent;
 
     public RestSender(URL kafkaUrl, SchemaRetriever schemaRetriever, AvroEncoder<K> keyEncoder, AvroEncoder<V> valueEncoder) {
         this.kafkaUrl = kafkaUrl;
@@ -45,7 +45,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public void send(Topic topic, long offset, K key, V value) throws IOException {
+    public void send(AvroTopic topic, long offset, K key, V value) throws IOException {
         RecordList<K, V> records = new RecordList<>(topic);
         records.add(offset, key, value);
         send(records);
@@ -67,7 +67,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         // Get schema IDs
-        Topic topic = records.getTopic();
+        AvroTopic topic = records.getTopic();
         Schema valueSchema = topic.getValueSchema();
         String sendTopic = topic.getName();
 
@@ -90,10 +90,13 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
 
         // Encode Avro records
         request.records = new ArrayList<>(records.size());
+        AvroEncoder.AvroWriter<K> keyWriter = keyEncoder.writer(topic.getKeySchema());
+        AvroEncoder.AvroWriter<V> valueWriter = valueEncoder.writer(topic.getValueSchema());
+
         for (Record<K, V> record : records) {
             try {
-                String rawKey = keyEncoder.encode(record.key, topic.getKeySchema());
-                String rawValue = valueEncoder.encode(record.value, topic.getValueSchema());
+                String rawKey = keyWriter.encode(record.key);
+                String rawValue = valueWriter.encode(record.value);
                 request.records.add(new RawRecord(rawKey, rawValue));
             } catch (IOException e) {
                 throw new IllegalArgumentException("Cannot encode record", e);
@@ -119,7 +122,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
     }
 
     @Override
-    public long getLastSentOffset(Topic topic) {
+    public long getLastSentOffset(AvroTopic topic) {
         Long offset = lastOffsetsSent.get(topic);
         return offset == null ? -1L : offset;
     }

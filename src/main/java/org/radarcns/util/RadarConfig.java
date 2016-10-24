@@ -1,4 +1,4 @@
-package org.radarcns.utils;
+package org.radarcns.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,12 +17,11 @@ public class RadarConfig {
     private Properties prop;
 
     //Enumerate all possible topics
-    public enum PlatformTopics {
+    public enum TopicGroup {
         in, out, all_in, mongo_sink
     }
 
     public RadarConfig() {
-
         prop = new Properties();
 
         InputStream input = null;
@@ -110,7 +109,7 @@ public class RadarConfig {
      * @return the topic name
      * @throws NullPointerException either the property has not been set up or the type does not exist
      */
-    public String getTopic(PlatformTopics topic) throws NullPointerException {
+    public String getTopic(TopicGroup topic) throws NullPointerException {
         String param = null;
 
         switch (topic){
@@ -125,7 +124,7 @@ public class RadarConfig {
         String topicName = prop.getProperty(param);
 
         if(topicName == null){
-            throw new NullPointerException("Topic is null");
+            throw new NullPointerException("AvroTopic is null");
         }
 
         return topicName;
@@ -136,7 +135,7 @@ public class RadarConfig {
      * @return List containing topic names
      * @throws NullPointerException either the property has not been set up or the type does not exist
      */
-    public List<String> getTopicList(PlatformTopics topic) throws NullPointerException {
+    public List<String> getTopicList(TopicGroup topic) throws NullPointerException {
         String param = null;
 
         switch (topic){
@@ -157,7 +156,7 @@ public class RadarConfig {
         String value = prop.getProperty(param);
 
         if(value == null){
-            throw new NullPointerException("Topic list is null");
+            throw new NullPointerException("AvroTopic list is null");
         }
 
         return Arrays.asList(value.split(","));
@@ -291,16 +290,18 @@ public class RadarConfig {
 
     /**
      * Business function
-     * @return the time-window length to consider two events as part of the same session
+     * @return the time-window length to consider two events as part of the same session, positive
+     *         and smaller than Integer.MAX_VALUE.
      * @throws NullPointerException the property has not been set up
+     * @throws NumberFormatException the property is cannot be parsed as an integer.
      */
-    public Long getSessionTimeWindow() throws NullPointerException {
+    public int getSessionTimeWindow() throws NullPointerException, NumberFormatException {
         String value = prop.getProperty("session.length.ms");
 
-        if(value == null){
+        if (value == null){
             throw new NullPointerException("session.length.ms is null");
         }
 
-        return Long.valueOf(value);
+        return Integer.valueOf(value);
     }
 }

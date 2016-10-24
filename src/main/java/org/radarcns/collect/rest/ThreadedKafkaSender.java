@@ -2,12 +2,12 @@ package org.radarcns.collect.rest;
 
 import org.apache.avro.generic.GenericRecord;
 import org.radarcns.SchemaRetriever;
+import org.radarcns.collect.AvroTopic;
 import org.radarcns.collect.KafkaSender;
 import org.radarcns.collect.LocalSchemaRetriever;
-import org.radarcns.collect.MockDevice;
+import org.radarcns.test.producer.MockDevice;
 import org.radarcns.collect.RecordList;
 import org.radarcns.collect.SchemaRegistryRetriever;
-import org.radarcns.collect.Topic;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +188,7 @@ public class ThreadedKafkaSender<K, V> extends Thread implements KafkaSender<K, 
      * @throws IllegalStateException if the producer is not connected.
      */
     @Override
-    public void send(Topic topic, long offset, K key, V value) throws IOException {
+    public void send(AvroTopic topic, long offset, K key, V value) throws IOException {
         RecordList<K, V> recordList = new RecordList<>(topic);
         recordList.add(offset, key, value);
         send(recordList);
@@ -208,7 +208,7 @@ public class ThreadedKafkaSender<K, V> extends Thread implements KafkaSender<K, 
     }
 
     @Override
-    public long getLastSentOffset(Topic topic) {
+    public long getLastSentOffset(AvroTopic topic) {
         return this.sender.getLastSentOffset(topic);
     }
 
