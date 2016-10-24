@@ -1,0 +1,8 @@
+{"namespace": "radarcns",
+  "type": "record",
+  "name": "ValueRadar",
+  "fields": [
+    {"name": "timestamp", "type": "string"},
+    {"name": "value", "type": "double"}
+  ]
+}

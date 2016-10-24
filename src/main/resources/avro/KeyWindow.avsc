@@ -1,0 +1,10 @@
+{"namespace": "radarcns",
+  "type": "record",
+  "name": "KeyWindow",
+  "fields": [
+    {"name": "userID", "type": "string"},
+    {"name": "sourceID", "type": "string"},
+    {"name": "start", "type": "long"},
+    {"name": "end", "type": "long"}
+  ]
+}

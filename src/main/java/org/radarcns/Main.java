@@ -1,21 +1,26 @@
 package org.radarcns;
 
-import radar.User;
-import JavaSessionize.LogLine;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.radarcns.sink.mongoDB.MongoDBSinkRadar;
+import org.radarcns.stream.ValueCollector;
+import org.radarcns.test.logic.Sessioniser;
 import org.radarcns.test.logic.synch.SessioniserALO;
 import org.radarcns.test.logic.synch.SessioniserAMO;
 import org.radarcns.test.logic.synch.SessioniserGroupALO;
 import org.radarcns.test.logic.synch.SessioniserGroupAMO;
 import org.radarcns.test.producer.SimpleProducer;
-import org.radarcns.test.stream.ActiveUser;
+import org.radarcns.test.stream.Statistics;
 import org.radarcns.util.RadarConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
+import radarcns.KeyRadar;
+import radarcns.ValueRadar;
 
 /**
  * Created by francesco on 05/09/16.
@@ -23,14 +28,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
 
-    private final static Logger log = LoggerFactory.getLogger(Main.class);
+    private final static Logger log = Logger.getLogger(Main.class);
 
     //Test case
     private enum TestCase {
         ALO, AMO, GROUP_AMO, GROUP_ALO
     }
     final static int sequence = 10;
-    final static long sleep = 20000;
+    final static long sleep = 10000;
     private static TestCase test = TestCase.ALO;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -43,11 +48,17 @@ public class Main {
 
     private static SessioniserGroupAMO sessioniserGroupAMO;
 
-    private final static int numThread = 3;
+    private static Sessioniser sessioniser;
+    private static int numThread = 3;
 
     private static MongoDBSinkRadar mongoDBSink;
 
-    private static ActiveUser activeUser;
+    private static Statistics statistics;
+
+    private static Thread producerThread;
+    private static Thread consumerThread;
+    private static Thread connectorThread;
+    private static Thread streamThread;
 
     public static void main(String[] args) throws InterruptedException,IOException {
         go();
@@ -56,23 +67,23 @@ public class Main {
     }
 
     private static void go() throws IOException{
-        Thread producerThread = getProducer();
+        producerThread = getProducer();
         producerThread.start();
 
-        Thread consumerThread = getConsumer();
-        consumerThread.start();
+        /*consumerThread = getConsumer();
+        consumerThread.start();*/
 
-        Thread streamThread = getStream();
+        streamThread = getStream();
         streamThread.start();
 
-        Thread connectorThread = getConnector();
-        connectorThread.start();
+        /*connectorThread = getConnector();
+        connectorThread.start();*/
     }
 
     private static void finish() throws InterruptedException{
         shutdown.set(true);
 
-        switch (test){
+        /*switch (test){
             case ALO:
                 sessioniserALO.shutdown();
                 break;
@@ -86,14 +97,14 @@ public class Main {
                 sessioniserGroupAMO.shutdown();
                 break;
             default:break;
-        }
+        }*/
 
         if(mongoDBSink != null){
             mongoDBSink.shutdown();
         }
 
-        if(activeUser != null){
-            activeUser.shutdown();
+        if(statistics != null){
+            statistics.shutdown();
         }
     }
 
@@ -116,25 +127,24 @@ public class Main {
 
                 int offset = 0;
 
-                int sleepUpperBound = prop.getSessionTimeWindow() + 1000;
+                KeyRadar key = new KeyRadar("user","device");
+                ValueCollector collector = new ValueCollector();
 
                 while(!shutdown.get()) {
 
                     for (; offset < sequence; offset++) {
-                        Object[] temp = producer.testResourceSchema();
 
-                        User key = (User) temp[0];
-                        LogLine value = (LogLine) temp[1];
+                        java.util.Date date= new java.util.Date();
+                        String timestamp = new Timestamp(date.getTime()).toString();
+                        ValueRadar value = new ValueRadar(timestamp,r.nextDouble());
 
-                        producer.send(prop.getTopic(RadarConfig.TopicGroup.in),key,value);
+                        collector.add(value);
 
-                        try {
-                            Thread.sleep(r.nextInt(sleepUpperBound));
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        producer.send("input-statistic",key,value);
                     }
                 }
+
+                System.out.println(collector);
 
                 producer.shutdown();
             }
@@ -187,8 +197,8 @@ public class Main {
     private static Thread getStream() throws IOException{
         Thread thread;
 
-        activeUser = new ActiveUser();
-        thread = new Thread(activeUser);
+        statistics = new Statistics();
+        thread = new Thread(statistics);
         thread.setName("Streaming");
 
         return thread;

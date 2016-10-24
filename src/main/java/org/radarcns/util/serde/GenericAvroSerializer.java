@@ -1,4 +1,4 @@
-package org.radarcns.util.avro;
+package org.radarcns.util.serde;
 
 /**
  * Created by Francesco Nobilia on 12/10/2016.

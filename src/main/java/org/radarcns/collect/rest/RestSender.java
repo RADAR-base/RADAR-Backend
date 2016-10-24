@@ -75,7 +75,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
         if (metadata.getId() != null) {
             request.value_schema_id = metadata.getId();
         } else {
-            logger.warn("Cannot get value schema, submitting data to the schema-less topic.");
+            logger.warn("Cannot get value schema, submitting serde to the schema-less topic.");
             request.value_schema = metadata.getSchema().toString();
             sendTopic = "schemaless-value";
         }
@@ -83,7 +83,7 @@ public class RestSender<K, V> implements KafkaSender<K, V> {
         if (metadata.getId() != null) {
             request.key_schema_id = metadata.getId();
         } else {
-            logger.warn("Cannot get key schema, submitting data to the schema-less topic.");
+            logger.warn("Cannot get key schema, submitting serde to the schema-less topic.");
             request.key_schema = metadata.getSchema().toString();
             sendTopic = "schemaless-key";
         }

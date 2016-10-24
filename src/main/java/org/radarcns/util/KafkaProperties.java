@@ -9,7 +9,8 @@ import java.util.Properties;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
-import org.radarcns.util.avro.GenericAvroSerde;
+
+import org.radarcns.util.serde.SpecificAvroSerde;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.
@@ -55,7 +56,7 @@ public class KafkaProperties {
         props.put("schema.registry.url",config.getSchemaRegistryURL());
 
         if(avroReader) {
-            props.put("specific.avro.reader", true);
+            props.put("specific.serde.reader", true);
         }
 
         return props;
@@ -152,8 +153,8 @@ public class KafkaProperties {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.getKafkaListener());
         props.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, config.getZooKeeperURL());
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryURL());
-        props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
-        props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+        props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
 
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 

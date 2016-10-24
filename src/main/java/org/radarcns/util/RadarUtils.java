@@ -3,8 +3,12 @@ package org.radarcns.util;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import radarcns.KeyRadar;
+import radarcns.KeyWindow;
 
 /**
  * Created by Francesco Nobilia on 04/10/2016.
@@ -45,5 +49,9 @@ public class RadarUtils {
         }
 
         return array;
+    }
+
+    public static KeyWindow getWindowed(Windowed<KeyRadar> window){
+        return new KeyWindow(window.key().getSourceID(),window.key().getUserID(),window.window().start(),window.window().end());
     }
 }

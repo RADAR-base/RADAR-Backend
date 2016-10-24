@@ -3,7 +3,7 @@ package org.radarcns.collect.rest;
 import java.util.List;
 
 /**
- * Structure of a Kafka REST request to upload data
+ * Structure of a Kafka REST request to upload serde
  */
 public class KafkaRestRequest {
     public String key_schema;

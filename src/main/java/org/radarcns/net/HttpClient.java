@@ -23,7 +23,7 @@ import java.util.Objects;
 public class HttpClient {
     private final static Logger logger = LoggerFactory.getLogger(HttpClient.class);
     public final static String KAFKA_REST_ACCEPT_ENCODING = "application/vnd.kafka.v1+json, application/vnd.kafka+json, application/json";
-    public final static String KAFKA_REST_AVRO_ENCODING = "application/vnd.kafka.avro.v1+json; charset=utf-8";
+    public final static String KAFKA_REST_AVRO_ENCODING = "application/vnd.kafka.serde.v1+json; charset=utf-8";
 
     /**
      * Make an HTTP request, using given writer to write the contents of the request.
@@ -123,11 +123,11 @@ public class HttpClient {
     /**
      * Make an HTTP request, using given writer to write the contents of the request.
      *
-     * By default, the data must contain Kafka Avro JSON in UTF-8 encoding.
+     * By default, the serde must contain Kafka Avro JSON in UTF-8 encoding.
      *
      * @param url URL to make request to
      * @param method HTTP method
-     * @param data data to send. If null, no data will be sent.
+     * @param data serde to send. If null, no serde will be sent.
      * @param requestProperties additional HTTP request properties, possibly null.
      * @return response of the HTTP request; check the status code to see if the request was successful.
      * @throws IOException if the HTTP request fails.

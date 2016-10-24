@@ -1,8 +1,13 @@
-{"namespace": "radar",
+{"namespace": "radarcns",
   "type": "record",
   "name": "Statistic",
   "fields": [
-    {"name": "ip", "type": "string"},
-    {"name": "device", "type": "string"}
+    {"name": "min", "type": "double"},
+    {"name": "max", "type": "double"},
+    {"name": "sum", "type": "double"},
+    {"name": "count", "type": "double"},
+    {"name": "avg", "type": "double"},
+    {"name": "quartile", "type": {"type": "array", "items": "double"}},
+    {"name": "iqr", "type": "double"}
   ]
 }
