@@ -8,8 +8,8 @@ plugins {
 }
 
 mainClassName = 'org.radarcns.collect.rest.ThreadedKafkaSender'
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
 run {
     if ( project.hasProperty("appArgs") ) {

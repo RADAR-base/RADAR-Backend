@@ -46,12 +46,7 @@ public class ActiveUser extends StreamRadar {
         final KStream<GenericRecord, GenericRecord> sessions = builder.stream("sessionized_clicks");
 
         KStream<String, Long> samplesCount = sessions
-                .map(new KeyValueMapper<GenericRecord, GenericRecord, KeyValue<String, String>>() {
-                    @Override
-                    public KeyValue<String, String> apply(GenericRecord key, GenericRecord value) {
-                        return new KeyValue<>(value.get("ip").toString(), value.get("ip").toString());
-                    }
-                })
+                .map((key, value) -> new KeyValue<>(value.get("ip").toString(), value.get("ip").toString()))
                 .countByKey(stringSerde, "Counts")
                 .toStream();
 
@@ -70,21 +65,11 @@ public class ActiveUser extends StreamRadar {
 
         final long timeWindow = 10000; //min*sec*millisec
 
-        sessions.map(new KeyValueMapper<GenericRecord, GenericRecord, KeyValue<String, GenericRecord>>() {
-                    @Override
-                    public KeyValue<String, GenericRecord> apply(GenericRecord k, GenericRecord v) {
-                        return KeyValue.pair(v.get("ip").toString(), v);
-                    }
-                })
+        sessions.map((k, v) -> KeyValue.pair(v.get("ip").toString(), v))
                 .countByKey(TimeWindows.of("radar-window", timeWindow), stringSerde)
                 //Change the key adding the information for the current window
                 //.toStream((k, v) -> String.format("%s %s", frame(k.window()), k.key()))
-                .toStream(new KeyValueMapper<Windowed<String>, Long, String>() {
-                    @Override
-                    public String apply(Windowed<String> k, Long v) {
-                        return String.format("%s", k.key());
-                    }
-                })
+                .toStream((k, v) -> String.format("%s", k.key()))
                 .to(stringSerde, longSerde, "streams-wordcount-output");
 
         return builder;
