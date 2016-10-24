@@ -21,50 +21,10 @@ import org.slf4j.LoggerFactory;
  * implementing a self commit policy
  */
 public abstract class ConsumerAMO<K,V> extends ConsumerRadar{
-
     private final static Logger log = LoggerFactory.getLogger(ConsumerAMO.class);
 
-    public RadarConfig config;
-
-    private KafkaConsumer<K,V> consumer;
-    private RadarConfig.TopicGroup topics;
-    private String clientID;
-
-    private CountDownLatch shutdownLatch;
-
-    public ConsumerAMO() {
-        init(null,null,null);
-    }
-
-    public ConsumerAMO(String clientID) {
-        init(clientID,null,null);
-    }
-
-    public ConsumerAMO(RadarConfig.TopicGroup topics) {
-        init(null,topics,null);
-    }
-
-    public ConsumerAMO(String clientID, RadarConfig.TopicGroup topics) {
-        init(clientID,topics,null);
-    }
-
-    public ConsumerAMO(RadarConfig.TopicGroup topics, Properties properties) {
-        init(null,topics,properties);
-    }
-
     public ConsumerAMO(String clientID, RadarConfig.TopicGroup topics, Properties properties) {
-        init(clientID,topics,properties);
-    }
-
-    private void init(String clientID, RadarConfig.TopicGroup topics, Properties properties){
-        config = new RadarConfig();
-        shutdownLatch = new CountDownLatch(1);
-
-        properties = (properties == null) ? KafkaProperties.getSelfCommitConsumer(true,clientID) : properties;
-
-        consumer = new KafkaConsumer(properties);
-
-        this.topics = (topics == null) ? RadarConfig.TopicGroup.all_in : topics;
+        super(clientID,topics,properties);
     }
 
     /**
@@ -72,6 +32,15 @@ public abstract class ConsumerAMO<K,V> extends ConsumerRadar{
      * @param record Kafka message currently consumed
      */
     public abstract void process(ConsumerRecord<K,V> record);
+
+    protected void pollMessages() {
+        ConsumerRecords<K,V> records = consumer.poll(Long.MAX_VALUE);
+        if(doCommitSync()) {
+            for (ConsumerRecord record : records) {
+                process(record);
+            }
+        }
+    }
 
     /**
      * Commit the current partition state
@@ -86,44 +55,8 @@ public abstract class ConsumerAMO<K,V> extends ConsumerRadar{
         }
     }
 
-    /**
-     * Consume a list of Kafka Topics
-     */
-    public void run() {
-        try {
-            consumer.subscribe(config.getTopicList(topics));
-
-            while (true) {
-                ConsumerRecords<K,V> records = consumer.poll(Long.MAX_VALUE);
-                if(doCommitSync()) {
-                    for (ConsumerRecord record : records) {
-                        process(record);
-                    }
-                }
-            }
-        } catch (WakeupException e) {
-            // ignore, we're closing
-        } catch (SerializationException e) {
-            log.error("Message cannot be serialised", e);
-            //TODO
-        }
-        catch (Exception e) {
-            log.error("Unexpected error", e);
-        } finally {
-            consumer.close();
-            shutdownLatch.countDown();
-        }
-    }
-
-    /**
-     * Shutdown the consumer and force the commit.
-     * Derived classes must override and call through to the super class's implementation of this
-     * method.
-     */
     public void shutdown() throws InterruptedException {
-        consumer.wakeup();
-        shutdownLatch.await();
-
+        super.shutdown();
         log.info("SHUTDOWN");
     }
 }

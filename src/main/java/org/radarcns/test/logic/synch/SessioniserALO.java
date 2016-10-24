@@ -9,18 +9,15 @@ import org.radarcns.test.logic.Sessioniser;
  * Created by Francesco Nobilia on 29/09/2016.
  */
 public class SessioniserALO extends ConsumerALO<Object,Object> {
-
     private final Sessioniser sessioniser;
     private final boolean groupExecution;
 
     public SessioniserALO(){
-        super();
-        this.sessioniser = new Sessioniser();
-        this.groupExecution = false;
+        this(new Sessioniser());
     }
 
     public SessioniserALO(Sessioniser sessioniser){
-        super();
+        super(null, null, null);
         this.sessioniser = sessioniser;
         this.groupExecution = true;
     }

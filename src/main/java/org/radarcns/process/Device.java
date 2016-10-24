@@ -1,4 +1,4 @@
-package org.radarcns;
+package org.radarcns.process;
 
 public class Device {
     private final String id;

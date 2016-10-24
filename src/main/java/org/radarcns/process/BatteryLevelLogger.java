@@ -1,6 +1,5 @@
 package org.radarcns.process;
 
-import org.radarcns.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

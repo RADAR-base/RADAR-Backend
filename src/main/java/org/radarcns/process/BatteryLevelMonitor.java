@@ -6,7 +6,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.Device;
 
 import java.util.ArrayList;
 import java.util.Collections;

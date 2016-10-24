@@ -49,12 +49,12 @@ public class MongoDBSinkRadar extends SinkRadar{
     }
 
     public MongoDBSinkRadar(String poolName) throws InvalidParameterException {
-        super(new RadarConfig().getMongoDBThreads(), ((poolName == null) || (poolName.length()==0) ? "MongoDBSinkRadar" : poolName));
+        super(new RadarConfig().getMongoDBThreads(), ((poolName == null) || (poolName.isEmpty()) ? "MongoDBSinkRadar" : poolName));
         initSink(poolName);
     }
 
     public MongoDBSinkRadar(int numThreads, String poolName) throws InvalidParameterException {
-        super(numThreads, ((poolName == null) || (poolName.length()==0) ? "MongoDBSinkRadar" : poolName));
+        super(numThreads, ((poolName == null) || (poolName.isEmpty()) ? "MongoDBSinkRadar" : poolName));
         initSink(poolName);
     }
 
@@ -62,7 +62,7 @@ public class MongoDBSinkRadar extends SinkRadar{
         log.trace("InitSink");
         radarConfig = new RadarConfig();
 
-        this.clientID = ((clientID==null) || (clientID.length()==0) ? "MongoDBSinkRadar" : clientID);
+        this.clientID = ((clientID==null) || (clientID.isEmpty()) ? "MongoDBSinkRadar" : clientID);
 
         initMongoDBConnection();
 
