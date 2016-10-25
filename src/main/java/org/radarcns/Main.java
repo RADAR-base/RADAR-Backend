@@ -138,6 +138,8 @@ public class Main {
                         String timestamp = new Timestamp(date.getTime()).toString();
                         ValueRadar value = new ValueRadar(timestamp,r.nextDouble());
 
+                        empatica_e4_inter_beat_interval heart_interval = new em
+
                         collector.add(value);
 
                         producer.send("input-statistic",key,value);

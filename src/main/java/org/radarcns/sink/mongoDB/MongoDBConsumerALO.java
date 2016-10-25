@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.errors.SerializationException;
 import org.bson.Document;
 import org.radarcns.consumer.ConsumerALO;
 import org.radarcns.util.Serialization;
@@ -17,24 +18,13 @@ import org.slf4j.LoggerFactory;
  * Created by Francesco Nobilia on 29/09/2016.
  */
 public class MongoDBConsumerALO extends ConsumerALO<byte[],byte[]> {
-
     private final static Logger log = LoggerFactory.getLogger(MongoDBConsumerALO.class);
 
-    private MongoDatabase database;
-    private MongoCollection collection;
-
-    //Can be instantiated only be mongoDB sink classes
-    protected MongoDBConsumerALO(MongoDatabase database){
-        super(RadarConfig.TopicGroup.mongo_sink,KafkaProperties.getSelfCommitSerdeGroupConsumer());
-        initCollection(database);
-    }
+    private final MongoDatabase database;
+    private final MongoCollection collection;
 
     protected MongoDBConsumerALO(String clientID,MongoDatabase database){
         super(clientID, RadarConfig.TopicGroup.mongo_sink, KafkaProperties.getSelfCommitSerdeGroupConsumer(clientID,null));
-        initCollection(database);
-    }
-
-    private void initCollection(MongoDatabase database){
         this.database = database;
         this.collection = this.database.getCollection("monitor");
     }
@@ -68,8 +58,7 @@ public class MongoDBConsumerALO extends ConsumerALO<byte[],byte[]> {
     }
 
     @Override
-    public void shutdown() throws InterruptedException{
-        super.shutdown();
+    protected void handleSerializationError(SerializationException e) {
+        log.error("Cannot deserialize", e);
     }
-
 }
