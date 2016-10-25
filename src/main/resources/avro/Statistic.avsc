@@ -1,6 +1,7 @@
-{"namespace": "radarcns",
+{"namespace": "org.radarcns",
   "type": "record",
   "name": "Statistic",
+  "doc": "Result of data aggregation.",
   "fields": [
     {"name": "min", "type": "double"},
     {"name": "max", "type": "double"},

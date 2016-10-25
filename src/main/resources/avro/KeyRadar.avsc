@@ -1,8 +1,0 @@
-{"namespace": "radarcns",
-  "type": "record",
-  "name": "KeyRadar",
-  "fields": [
-    {"name": "userID", "type": "string"},
-    {"name": "sourceID", "type": "string"}
-  ]
-}

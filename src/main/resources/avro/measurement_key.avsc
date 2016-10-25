@@ -1,5 +1,5 @@
 {
-  "namespace": "org.radarcns",
+  "namespace": "org.radarcns.key",
   "type": "record",
   "name": "MeasurementKey",
   "doc": "Measurement key in the RADAR-CNS project",

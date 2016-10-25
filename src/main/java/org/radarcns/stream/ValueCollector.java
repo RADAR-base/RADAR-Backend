@@ -1,12 +1,10 @@
 package org.radarcns.stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.radarcns.Statistic;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-
-import radarcns.Statistic;
-import radarcns.ValueRadar;
 
 /**
  * Created by Francesco Nobilia on 21/10/2016.
@@ -20,16 +18,9 @@ public class ValueCollector {
     private Double quartile[] = new Double[3];
     private double iqr = 0;
 
-    private String init;
-    private String end;
-
     private LinkedList<Double> list = new LinkedList<>();
 
-    public ValueCollector add(ValueRadar value){
-
-        list.addLast(value.getValue().doubleValue());
-
-        updateTimestamp(value);
+    public ValueCollector add(Double value){
 
         updateMin(value);
         updateMax(value);
@@ -41,33 +32,28 @@ public class ValueCollector {
         return this;
     }
 
-    private void updateTimestamp(ValueRadar value){
-        if(init == null){
-            init = value.getTimestamp().toString();
-        }
-        end = value.getTimestamp().toString();
-    }
-
-    private void updateMin(ValueRadar value){
-        if(min > value.getValue().doubleValue()){
-            min = value.getValue().doubleValue();
+    private void updateMin(double value){
+        if(min > value){
+            min = value;
         }
     }
 
-    private void updateMax(ValueRadar value){
-        if(max < value.getValue().doubleValue()){
-            max = value.getValue().doubleValue();
+    private void updateMax(double value){
+        if(max < value){
+            max = value;
         }
     }
 
-    private void updateAvg(ValueRadar value){
+    private void updateAvg(double value){
         count++;
-        sum += value.getValue().doubleValue();
+        sum += value;
 
         avg = sum / count;
     }
 
-    private void updateQuartile(ValueRadar value){
+    private void updateQuartile(double value){
+        list.addLast(value);
+
         double[] data = new double[list.size()];
         for(int i = 0; i < list.size(); i++) data[i] = list.get(i);
 
@@ -90,8 +76,6 @@ public class ValueCollector {
                 ", avg=" + avg +
                 ", quartile=" + Arrays.toString(quartile) +
                 ", iqr=" + iqr +
-                ", init='" + init + '\'' +
-                ", end='" + end + '\'' +
                 ", list=" + list +
                 '}';
     }

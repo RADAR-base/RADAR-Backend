@@ -1,6 +1,7 @@
-{"namespace": "radarcns",
+{"namespace": "org.radarcns.key",
   "type": "record",
-  "name": "KeyWindow",
+  "name": "WindowedKey",
+  "doc": "Windowed key in the RADAR-CNS project",
   "fields": [
     {"name": "userID", "type": "string"},
     {"name": "sourceID", "type": "string"},
