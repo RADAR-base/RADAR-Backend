@@ -11,10 +11,15 @@ mainClassName = 'org.radarcns.Main'
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.kafkaVersion = '0.10.0.1'
+ext.kafkaVersion = '0.10.0.1-cp1'
 ext.confluentVersion = '3.0.1'
 ext.slf4jVersion = '1.7.21'
 ext.log4jVersion = '2.7'
+ext.mongodbVersion = '3.3.0'
+ext.findbugsVersion = '3.0.1'
+ext.boundaryVersion = '1.0.6'
+ext.mathVersion = '3.0'
+ext.gsonVersion = '1.7.2'
 
 run {
     if ( project.hasProperty("appArgs") ) {
@@ -41,11 +46,11 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafkaVersion
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
-    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.3.0'
-    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    compile group: 'com.boundary', name: 'high-scale-lib', version: '1.0.6'
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodbVersion
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
+    compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
+    compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+    compile group: 'com.google.code.gson', name: 'gson', version: gsonVersion
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
