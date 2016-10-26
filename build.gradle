@@ -1,13 +1,10 @@
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
-    // enable gradle run and jar packaging with fixed main class
-    id 'application'
     id 'idea'
-    id 'com.commercehub.gradle.plugin.avro-base:' version '0.8.0'
+    id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
 }
 
-mainClassName = 'org.radarcns.Main'
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
@@ -20,12 +17,6 @@ ext.findbugsVersion = '3.0.1'
 ext.boundaryVersion = '1.0.6'
 ext.mathVersion = '3.0'
 ext.gsonVersion = '1.7.2'
-
-run {
-    if ( project.hasProperty("appArgs") ) {
-        args Eval.me(appArgs)
-    }
-}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
