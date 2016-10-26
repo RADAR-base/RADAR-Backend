@@ -5,15 +5,15 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
+
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.StreamRadar;
+
+import java.io.IOException;
 import org.radarcns.stream.ValueCollector;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerde;
-
-import java.io.IOException;
-
 /**
  * Created by Francesco Nobilia on 11/10/2016.
  */

@@ -4,15 +4,6 @@ A Java backend using Confluent Platform to investigate how to process streaming 
 
 In the `org.radarcns` package there are the abstraction classes that can be implemented for easily create Kafka Consumer and Kafka Consumers Group. Data exchange relies on Apache Avro. We manage keys and values serialised by Avro, the using schemas aveilable at /resources/avro
 
-The `org.radarcns.collect` package contains classes that produce data for the Kafka framework to process. In the `src/resources` directory the Avro schemas used to generate data are stored.
-
-## Usage
-
-To run the application with 100 mock devices, with Kafka server radar-test.thehyve.net, run
-
-```shell
-./gradlew run -PappArgs="['100']"
-
 ## Test case
 
 This test case implements a Sessionization: a basic step to prepare website click to be analysed. It tries to detect whether two consecutive visits from the same IP address belong to the same session or not. The involved Kafka messages contain keys and values serialized in Avro.
