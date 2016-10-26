@@ -43,7 +43,7 @@ public class JsonDeserializer<T> implements Deserializer<T> {
         try {
             return reader.readValue(jsonFactory.createParser(bytes), deserializedClass);
         } catch (IOException e) {
-            logger.error("Failed to deserialize value for topic " + topic);
+            logger.error("Failed to deserialize value for topic {}", topic, e);
             return null;
         }
     }
