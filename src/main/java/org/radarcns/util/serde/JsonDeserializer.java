@@ -4,21 +4,26 @@ package org.radarcns.util.serde;
  * Created by Francesco Nobilia on 21/10/2016.
  */
 
-import com.google.gson.Gson;
-import org.apache.kafka.common.serialization.Deserializer;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
+import org.apache.kafka.common.serialization.Deserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.util.Map;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
+    private final static Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
+    private final static ObjectReader reader = new ObjectMapper().reader();
+    private final static JsonFactory jsonFactory = new JsonFactory();
 
-    private Gson gson = new Gson();
     private Class<T> deserializedClass;
 
     public JsonDeserializer(Class<T> deserializedClass) {
         this.deserializedClass = deserializedClass;
-    }
-
-    public JsonDeserializer() {
     }
 
     @Override
@@ -30,13 +35,17 @@ public class JsonDeserializer<T> implements Deserializer<T> {
     }
 
     @Override
-    public T deserialize(String s, byte[] bytes) {
+    public T deserialize(String topic, byte[] bytes) {
         if(bytes == null){
             return null;
         }
 
-        return gson.fromJson(new String(bytes),deserializedClass);
-
+        try {
+            return reader.readValue(jsonFactory.createParser(bytes), deserializedClass);
+        } catch (IOException e) {
+            logger.error("Failed to deserialize value for topic " + topic);
+            return null;
+        }
     }
 
     @Override
