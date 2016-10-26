@@ -18,7 +18,7 @@ public class RadarConfig {
 
     //Enumerate all possible topics
     public enum TopicGroup {
-        in("topic.in"), out("topic.out"), all_in("topic.in.list"),
+        in("topic.in"), out("topic.out"), all_in("topic.list.in"),
         mongo_sink("mongo.db.sink.topic.list");
 
         private final String param;
