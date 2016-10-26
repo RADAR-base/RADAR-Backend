@@ -4,8 +4,8 @@
   "name": "EmpaticaE4InterBeatInterval",
   "doc": "Time between individuals heart beats extracted from the BVP signal. You can compute the heart rate as (60 / ibi).",
   "fields": [
-    {"name": "time", "type": "long", "doc": "device timestamp in UTC (s)"},
-    {"name": "timeReceived", "type": "long", "doc": "device receiver timestamp in UTC (s)"},
+    {"name": "time", "type": "double", "doc": "device timestamp in UTC (s)"},
+    {"name": "timeReceived", "type": "double", "doc": "device receiver timestamp in UTC (s)"},
     {"name": "interBeatInterval", "type": "float", "doc": "the duration (s) of the detected inter-beat interval (i.e., the distance in seconds from the previous beat)"}
   ]
 }
