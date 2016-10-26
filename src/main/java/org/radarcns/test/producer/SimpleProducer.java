@@ -1,28 +1,17 @@
 package org.radarcns.test.producer;
 
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Parser;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.radarcns.util.KafkaProperties;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.annotation.Nonnull;
-
-import radar.User;
-import JavaSessionize.LogLine;
-import org.radarcns.util.KafkaProperties;
-import org.radarcns.test.event.EventGenerator;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 26/09/2016.
@@ -78,58 +67,6 @@ public class SimpleProducer {
     public void shutdown(){
         producer.close();
         log.info("SHUTDOWN");
-    }
-
-
-    /**
-     * @return new record serialised by the hardcoded AVRO schema
-     */
-    public GenericRecord testDataHardcodedSchema(){
-        String schemaString = "{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}";
-
-        Parser parser = new Parser();
-        Schema schema = parser.parse(schemaString);
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-
-        GenericRecord avroRecord = new GenericData.Record(schema);
-        avroRecord.put("f1", dateFormat.format(new Date()));
-
-        return avroRecord;
-    }
-
-    /**
-     * @return new LogLine serialised by the AVRO schema stored inside resources
-     */
-    public LogLine testDataResourceSchema(){
-        return EventGenerator.getNext();
-    }
-
-    /**
-     * @return new User serialised by the AVRO schema stored inside resources
-     */
-    public User testKeyResourceSchema(){
-        User user = new User();
-
-        user.setName("Francesco");
-        user.setSurname("Nobilia");
-        user.setDevice("Mac Book Pro");
-        user.setIp(getHost());
-
-        return user;
-    }
-
-    /**
-     * @return {key-message}={User-LogLine} items have been serialised by the AVRO schema
-     * stored inside resources
-     */
-    public Object[] testResourceSchema(){
-        Object[] event = new Object[2];
-
-        event[1] = EventGenerator.getNext();
-        event[0] = new User("Francesco","Nobilia","Mac Book Pro",((LogLine) event[1]).getIp());
-
-        return event;
     }
 
 }

@@ -8,9 +8,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.errors.SerializationException;
 import org.bson.Document;
 import org.radarcns.consumer.ConsumerALO;
-import org.radarcns.util.Serialization;
 import org.radarcns.util.KafkaProperties;
 import org.radarcns.util.RadarConfig;
+import org.radarcns.util.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

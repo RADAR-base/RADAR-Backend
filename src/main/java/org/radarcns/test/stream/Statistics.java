@@ -5,19 +5,14 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
-
-import java.io.IOException;
-
-
+import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
+import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.StreamRadar;
 import org.radarcns.stream.ValueCollector;
 import org.radarcns.util.RadarUtils;
-import org.radarcns.util.serde.JsonDeserializer;
-import org.radarcns.util.serde.JsonSerializer;
 import org.radarcns.util.serde.RadarSerde;
 
-import radarcns.KeyRadar;
-import radarcns.ValueRadar;
+import java.io.IOException;
 
 /**
  * Created by Francesco Nobilia on 11/10/2016.
@@ -36,13 +31,13 @@ public class Statistics extends StreamRadar {
     public KStreamBuilder getBuilder() throws IOException{
 
         Serde<ValueCollector> collectorSerde = new RadarSerde<>(ValueCollector.class).getSerde();
-        Serde<KeyRadar> keySerde = new RadarSerde<>(KeyRadar.class).getSerde();
+        Serde<MeasurementKey> keySerde = new RadarSerde<>(MeasurementKey.class).getSerde();
 
         final KStreamBuilder builder = new KStreamBuilder();
 
-        KStream<KeyRadar, ValueRadar> valueKStream =  builder.stream("input-statistic");
+        KStream<MeasurementKey,EmpaticaE4InterBeatInterval> valueKStream =  builder.stream("input-statistic");
         valueKStream.aggregateByKey(ValueCollector::new,
-                        (k, v, valueCollector) -> valueCollector.add(v),
+                        (k, v, valueCollector) -> valueCollector.add(RadarUtils.ibiToHR(v.getInterBeatInterval())),
                         TimeWindows.of("value-summaries", 10000),
                 keySerde,collectorSerde)
                 .toStream()

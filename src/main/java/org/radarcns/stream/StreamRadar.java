@@ -2,10 +2,9 @@ package org.radarcns.stream;
 
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.radarcns.util.KafkaProperties;
 
 import java.io.IOException;
-
-import org.radarcns.util.KafkaProperties;
 
 /**
  * Created by Francesco Nobilia on 11/10/2016.

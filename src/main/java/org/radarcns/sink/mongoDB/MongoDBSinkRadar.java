@@ -6,17 +6,16 @@ import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
-import org.slf4j.Logger;
 import org.bson.Document;
+import org.radarcns.consumer.ConsumerRadar;
+import org.radarcns.sink.SinkRadar;
+import org.radarcns.util.RadarConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.radarcns.consumer.ConsumerRadar;
-import org.radarcns.sink.SinkRadar;
-import org.radarcns.util.RadarConfig;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 10/10/2016.

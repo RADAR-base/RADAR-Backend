@@ -5,6 +5,7 @@ package org.radarcns.util.serde;
  */
 
 import com.google.gson.Gson;
+
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.nio.charset.Charset;

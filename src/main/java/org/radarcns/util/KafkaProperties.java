@@ -3,14 +3,13 @@ package org.radarcns.util;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.streams.StreamsConfig;
+import org.radarcns.util.serde.SpecificAvroSerde;
 
 import java.util.Properties;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
-
-import org.radarcns.util.serde.SpecificAvroSerde;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.
