@@ -3,6 +3,9 @@ package org.radarcns.util;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.key.WindowedKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,5 +48,15 @@ public class RadarUtils {
         }
 
         return array;
+    }
+
+    public static WindowedKey getWindowed(Windowed<MeasurementKey> window){
+        return new WindowedKey(window.key().getUserId(),window.key().getSourceId(),window.window().start(),window.window().end());
+    }
+
+    public static double floatToDouble(float input){
+        Float f = new Float(input);
+        Double d = new Double(f.toString());
+        return d.doubleValue();
     }
 }

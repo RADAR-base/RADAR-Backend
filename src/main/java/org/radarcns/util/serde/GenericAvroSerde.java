@@ -1,4 +1,4 @@
-package org.radarcns.util.avro;
+package org.radarcns.util.serde;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -26,7 +26,7 @@ public class GenericAvroSerde implements Serde<GenericRecord> {
     }
 
     public GenericAvroSerde(SchemaRegistryClient client) {
-        this(client, Collections.<String,Object>emptyMap());
+        this(client, Collections.emptyMap());
     }
 
     public GenericAvroSerde(SchemaRegistryClient client, Map<String, ?> props) {

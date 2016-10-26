@@ -1,10 +1,17 @@
-.gradle/
-.idea/tasks.xml
-.idea/misc.xml
-.idea/workspace.xml
-.idea/gradle.xml
-.idea/libraries/
+# Intellij
+.idea/
 *.iml
+*.iws
+
+# Mac
 .DS_Store
-/build/
+
+# Maven
+log/
+
+# Gradle
+.gradle/
 .gradletasknamecache
+
+# Build
+/build/
