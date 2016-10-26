@@ -3,12 +3,12 @@
   "name": "Statistic",
   "doc": "Result of data aggregation.",
   "fields": [
-    {"name": "min", "type": "double"},
-    {"name": "max", "type": "double"},
-    {"name": "sum", "type": "double"},
-    {"name": "count", "type": "double"},
-    {"name": "avg", "type": "double"},
+    {"name": "min", "type": "double", "default": "+Infinity"},
+    {"name": "max", "type": "double", "default": "-Infinity"},
+    {"name": "sum", "type": "double", "default": "0.0"},
+    {"name": "count", "type": "double", "default": "0.0"},
+    {"name": "avg", "type": "double", "default": "0.0"},
     {"name": "quartile", "type": {"type": "array", "items": "double"}},
-    {"name": "iqr", "type": "double"}
+    {"name": "iqr", "type": "double",  "default": "0.0"}
   ]
 }

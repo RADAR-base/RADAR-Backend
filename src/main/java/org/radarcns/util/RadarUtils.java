@@ -1,13 +1,23 @@
 package org.radarcns.util;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.radarcns.Statistic;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
+import org.radarcns.stream.ValueCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.apache.avro.Schema.parse;
 
 /**
  * Created by Francesco Nobilia on 04/10/2016.
@@ -61,15 +71,7 @@ public class RadarUtils {
     }
 
     public static double ibiToHR(float input){
-        double d = floatToDouble(input);
-
-        double normaliser = 60;
-        double result = normaliser/d;
-
-        log.debug("with normaliser {}",result);
-        log.debug("w/o normaliser {}",(60d)/d);
-        log.debug("equal? {}",((60d)/d == result));
-
-        return (60d)/d;
+        return (60d)/floatToDouble(input);
     }
+
 }

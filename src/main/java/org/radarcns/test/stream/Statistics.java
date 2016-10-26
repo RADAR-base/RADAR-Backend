@@ -14,6 +14,8 @@ import java.io.IOException;
 import org.radarcns.stream.ValueCollector;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerde;
+import org.radarcns.util.serde.SpecificAvroSerde;
+
 /**
  * Created by Francesco Nobilia on 11/10/2016.
  */
