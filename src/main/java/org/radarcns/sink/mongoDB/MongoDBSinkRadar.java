@@ -107,6 +107,7 @@ public class MongoDBSinkRadar extends SinkRadar{
     private boolean checkMongoConnection(){
         try {
             mongoClient.getDatabase("admin").runCommand(new Document("ping", 1));
+            log.trace("Connected to MongoDB");
             return true;
         } catch (MongoException e) {
             mongoClient.close();

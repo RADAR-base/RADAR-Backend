@@ -23,7 +23,7 @@ public class Main {
     private final static Logger log = Logger.getLogger(Main.class);
 
     final static int sequence = 10;
-    final static long sleep = 10000;
+    final static long sleep = 80000;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 
@@ -48,8 +48,8 @@ public class Main {
         streamThread = getStream();
         streamThread.start();
 
-        /*connectorThread = getConnector();
-        connectorThread.start();*/
+        connectorThread = getConnector();
+        connectorThread.start();
     }
 
     private static void finish() throws InterruptedException{
