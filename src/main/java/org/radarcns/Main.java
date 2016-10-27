@@ -23,7 +23,7 @@ public class Main {
     private final static Logger log = Logger.getLogger(Main.class);
 
     final static int sequence = 10;
-    final static long sleep = 80000;
+    final static long sleep = 8000;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 

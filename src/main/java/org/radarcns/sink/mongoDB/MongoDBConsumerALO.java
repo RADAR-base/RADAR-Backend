@@ -8,6 +8,9 @@ import com.mongodb.client.model.UpdateOptions;
 import org.apache.avro.specific.SpecificData;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.errors.SerializationException;
+import org.bson.BsonDouble;
+import org.bson.BsonDateTime;
+import org.bson.BsonInt64;
 import org.bson.Document;
 import org.omg.CORBA.Object;
 import org.radarcns.Statistic;
@@ -53,20 +56,26 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
         String mongoId = key.getUserID()+"-"+key.getSourceID()+"-"+key.getStart()+"-"+key.getEnd();
 
         LinkedList<Document> quartil = new LinkedList<>();
-        quartil.addLast(new Document("25", statistic.getQuartile().get(0)));
-        quartil.addLast(new Document("50", statistic.getQuartile().get(1)));
-        quartil.addLast(new Document("75", statistic.getQuartile().get(2)));
+        quartil.addLast(new Document("25", new BsonDouble(statistic.getQuartile().get(0))));
+        quartil.addLast(new Document("50", new BsonDouble(statistic.getQuartile().get(1))));
+        quartil.addLast(new Document("75", new BsonDouble(statistic.getQuartile().get(2))));
+
+
 
         Document doc = new Document("_id", mongoId)
-                                .append("min", statistic.getMin())
-                                .append("max", statistic.getMax())
-                                .append("sum", statistic.getSum())
-                                .append("count", statistic.getCount())
-                                .append("avg", statistic.getAvg())
-                                .append("quartile", statistic.getAvg())
-                                .append("iqr", statistic.getIqr())
-                                .append("start", key.getStart())
-                                .append("end", key.getEnd());
+                                //.append("user", new BsonInt64(key.getUserID()))
+                                //.append("source", new BsonInt64(key.getSourceID()))
+                                .append("user", key.getUserID())
+                                .append("source", key.getSourceID())
+                                .append("min", new BsonDouble(statistic.getMin()))
+                                .append("max", new BsonDouble(statistic.getMax()))
+                                .append("sum", new BsonDouble(statistic.getSum()))
+                                .append("count", new BsonDouble(statistic.getCount()))
+                                .append("avg", new BsonDouble(statistic.getAvg()))
+                                .append("quartile", quartil)
+                                .append("iqr", new BsonDouble(statistic.getIqr()))
+                                .append("start", new BsonDateTime(key.getStart()))
+                                .append("end", new BsonDateTime(key.getEnd()));
 
         try{
             collection.replaceOne(eq("_id", mongoId),doc,(new UpdateOptions()).upsert(true));
