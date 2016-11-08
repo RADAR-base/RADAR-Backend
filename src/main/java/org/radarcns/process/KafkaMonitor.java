@@ -55,8 +55,9 @@ public abstract class KafkaMonitor {
      * Call to actually create the consumer.
      */
     protected void configure(Properties properties) {
-        this.properties.putAll(properties);
-        consumer = new KafkaConsumer<>(this.properties);
+//        this.properties.putAll(properties);
+//        consumer = new KafkaConsumer<>(this.properties);
+        consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(topics);
     }
 
