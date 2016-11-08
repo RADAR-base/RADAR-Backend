@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
@@ -54,7 +55,8 @@ public abstract class KafkaMonitor {
      * Call to actually create the consumer.
      */
     protected void configure(Properties properties) {
-        consumer = new KafkaConsumer<>(properties);
+        this.properties.putAll(properties);
+        consumer = new KafkaConsumer<>(this.properties);
         consumer.subscribe(topics);
     }
 

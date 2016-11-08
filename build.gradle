@@ -36,10 +36,13 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafkaVersion
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
+    compile (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion
+    ){exclude group: 'org.apache.hive'}
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodbVersion
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+//    testCompile group: 'org.slf4j', name:'slf4j-api', version: slf4jVersion
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
