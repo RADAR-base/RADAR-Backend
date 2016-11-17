@@ -1,7 +1,9 @@
 package org.radarcns.sink.mongoDB;
 
 import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 
@@ -55,10 +57,10 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
 
         String mongoId = key.getUserID()+"-"+key.getSourceID()+"-"+key.getStart()+"-"+key.getEnd();
 
-        LinkedList<Document> quartil = new LinkedList<>();
-        quartil.addLast(new Document("25", new BsonDouble(statistic.getQuartile().get(0))));
-        quartil.addLast(new Document("50", new BsonDouble(statistic.getQuartile().get(1))));
-        quartil.addLast(new Document("75", new BsonDouble(statistic.getQuartile().get(2))));
+        LinkedList<Document> quartile = new LinkedList<>();
+        quartile.addLast(new Document("25", new BsonDouble(statistic.getQuartile().get(0))));
+        quartile.addLast(new Document("50", new BsonDouble(statistic.getQuartile().get(1))));
+        quartile.addLast(new Document("75", new BsonDouble(statistic.getQuartile().get(2))));
 
 
 
@@ -72,7 +74,7 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
                                 .append("sum", new BsonDouble(statistic.getSum()))
                                 .append("count", new BsonDouble(statistic.getCount()))
                                 .append("avg", new BsonDouble(statistic.getAvg()))
-                                .append("quartile", quartil)
+                                .append("quartile", quartile)
                                 .append("iqr", new BsonDouble(statistic.getIqr()))
                                 .append("start", new BsonDateTime(key.getStart()))
                                 .append("end", new BsonDateTime(key.getEnd()));
@@ -81,7 +83,6 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
             collection.replaceOne(eq("_id", mongoId),doc,(new UpdateOptions()).upsert(true));
             log.trace("[{} - {}] has been written in {} collection",
                     key, statistic, collection.getNamespace().getCollectionName().toString());
-
         } catch (MongoException e){
             log.error("Failed to insert record in MongoDB", e);
             log.error("Error on writing [{} - {}] in {} collection",

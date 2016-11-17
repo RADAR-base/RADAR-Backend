@@ -23,7 +23,7 @@ public class Main {
     private final static Logger log = Logger.getLogger(Main.class);
 
     final static int sequence = 10;
-    final static long sleep = 8000;
+    final static long sleep = 240000;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 
@@ -42,25 +42,25 @@ public class Main {
     }
 
     private static void go() throws IOException{
+        connectorThread = getConnector();
+        connectorThread.start();
+
         producerThread = getProducer();
         producerThread.start();
 
         streamThread = getStream();
         streamThread.start();
-
-        connectorThread = getConnector();
-        connectorThread.start();
     }
 
     private static void finish() throws InterruptedException{
         shutdown.set(true);
 
-        if(mongoDBSink != null){
-            mongoDBSink.shutdown();
-        }
-
         if(statistics != null){
             statistics.shutdown();
+        }
+
+        if(mongoDBSink != null){
+            mongoDBSink.shutdown();
         }
     }
 
@@ -81,29 +81,35 @@ public class Main {
 
                 Random r = new Random();
 
-                int offset = 0;
-
                 MeasurementKey key = new MeasurementKey("user","device");
-                ValueCollector collector = new ValueCollector();
 
                 while(!shutdown.get()) {
 
-                    for (; offset < sequence; offset++) {
+                    ValueCollector collector = new ValueCollector();
+                    for (int offset=0; offset < sequence; offset++) {
 
                         java.util.Date date= new java.util.Date();
 
                         double timestamp = new Double(new Long(date.getTime()).toString());
                         timestamp = timestamp / 1000d;
 
-                        EmpaticaE4InterBeatInterval value = new EmpaticaE4InterBeatInterval(timestamp,timestamp,r.nextFloat());
+                        float minX = 0.3f;
+                        float maxX = 1.0f;
+                        float mockHR = r.nextFloat() * (maxX - minX) + minX;
+
+                        EmpaticaE4InterBeatInterval value = new EmpaticaE4InterBeatInterval(timestamp,timestamp,mockHR);
 
                         collector.add(RadarUtils.ibiToHR(value.getInterBeatInterval()));
 
                         producer.send("input-statistic",key,value);
                     }
+                    System.out.println(collector);
+                    try{
+                        Thread.sleep(12000);
+                    }catch(InterruptedException e){
+                        log.error("Got interrupted in main thread!",e);
+                    }
                 }
-
-                System.out.println(collector);
 
                 producer.shutdown();
             }
