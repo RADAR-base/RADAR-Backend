@@ -1,34 +1,15 @@
 package org.radarcns.sink.mongoDB;
 
-import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
 
-import org.apache.avro.specific.SpecificData;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.errors.SerializationException;
-import org.bson.BsonDouble;
-import org.bson.BsonDateTime;
-import org.bson.BsonInt64;
-import org.bson.Document;
-import org.omg.CORBA.Object;
-import org.radarcns.Statistic;
 import org.radarcns.consumer.ConsumerALO;
-import org.radarcns.key.WindowedKey;
 import org.radarcns.util.KafkaProperties;
 import org.radarcns.util.RadarConfig;
-import org.radarcns.util.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.
@@ -52,7 +33,7 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
 
         log.trace("{}",record.toString());
 
-        WindowedKey key = (WindowedKey) SpecificData.get().deepCopy(WindowedKey.SCHEMA$, record.key());
+        /*WindowedKey key = (WindowedKey) SpecificData.get().deepCopy(WindowedKey.SCHEMA$, record.key());
         Statistic statistic = (Statistic) SpecificData.get().deepCopy(Statistic.SCHEMA$, record.value());
 
         String mongoId = key.getUserID()+"-"+key.getSourceID()+"-"+key.getStart()+"-"+key.getEnd();
@@ -87,7 +68,7 @@ public class MongoDBConsumerALO extends ConsumerALO<Object,Object> {
             log.error("Failed to insert record in MongoDB", e);
             log.error("Error on writing [{} - {}] in {} collection",
                     key, statistic, collection.getNamespace().getCollectionName().toString());
-        }
+        }*/
     }
 
     @Override

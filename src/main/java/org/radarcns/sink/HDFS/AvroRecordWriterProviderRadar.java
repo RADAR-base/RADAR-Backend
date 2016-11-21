@@ -1,9 +1,5 @@
 package org.radarcns.sink.HDFS;
 
-import io.confluent.connect.avro.AvroData;
-import io.confluent.connect.hdfs.RecordWriter;
-import io.confluent.connect.hdfs.RecordWriterProvider;
-import io.confluent.connect.hdfs.avro.AvroRecordWriterProvider;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -19,6 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+
+import io.confluent.connect.avro.AvroData;
+import io.confluent.connect.hdfs.RecordWriter;
+import io.confluent.connect.hdfs.RecordWriterProvider;
+import io.confluent.connect.hdfs.avro.AvroRecordWriterProvider;
 
 /**
  * Created by nivethika on 7-11-16.

@@ -1,7 +1,7 @@
-package org.radarcns.stream;
+package org.radarcns.stream.collector;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.radarcns.Statistic;
+import org.radarcns.aggregator.DoubleAggegator;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.LinkedList;
 /**
  * Created by Francesco Nobilia on 21/10/2016.
  */
-public class ValueCollector {
+public class DoubleValueCollector {
     private double min = Double.MAX_VALUE;
     private double max = Double.MIN_VALUE;
     private double sum = 0;
@@ -20,7 +20,7 @@ public class ValueCollector {
 
     private LinkedList<Double> list = new LinkedList<>();
 
-    public ValueCollector add(Double value){
+    public DoubleValueCollector add(Double value){
 
         updateMin(value);
         updateMax(value);
@@ -68,7 +68,7 @@ public class ValueCollector {
 
     @Override
     public String toString() {
-        return "ValueCollector{" +
+        return "DoubleValueCollector{" +
                 "min=" + min +
                 ", max=" + max +
                 ", sum=" + sum +
@@ -80,7 +80,7 @@ public class ValueCollector {
                 '}';
     }
 
-    public Statistic convertInAvro(){
-        return new Statistic(min,max,sum,count,avg,Arrays.asList(quartile),iqr);
+    public DoubleAggegator convertInAvro(){
+        return new DoubleAggegator(min,max,sum,count,avg,Arrays.asList(quartile),iqr);
     }
 }

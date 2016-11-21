@@ -7,6 +7,8 @@ import org.radarcns.util.serde.SpecificAvroSerde;
 
 import java.util.Properties;
 
+import javax.annotation.Nonnull;
+
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
@@ -140,13 +142,8 @@ public class KafkaProperties {
     /**
      * Return properties for a Stream
      */
-    public static Properties getStream() {
-        return getStream(null);
-    }
-    public static Properties getStream(String clientID) {
+    public static Properties getStream(@Nonnull String clientID) {
         Properties props = new Properties();
-
-        clientID = (clientID == null)||(clientID.length() < 0) ? config.getClientID() : clientID;
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientID);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.getKafkaListener());

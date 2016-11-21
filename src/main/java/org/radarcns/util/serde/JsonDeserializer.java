@@ -1,9 +1,5 @@
 package org.radarcns.util.serde;
 
-/**
- * Created by Francesco Nobilia on 21/10/2016.
- */
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;

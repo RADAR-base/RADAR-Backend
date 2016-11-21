@@ -1,6 +1,6 @@
-{"namespace": "org.radarcns",
+{"namespace": "org.radarcns.aggregator",
   "type": "record",
-  "name": "Statistic",
+  "name": "DoubleAggegator",
   "doc": "Result of data aggregation.",
   "fields": [
     {"name": "min", "type": "double", "default": "+Infinity"},
