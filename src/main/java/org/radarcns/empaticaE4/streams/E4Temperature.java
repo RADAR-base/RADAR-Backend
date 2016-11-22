@@ -22,6 +22,10 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
         super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID);
     }
 
+    public E4Temperature(String clientID,int numThread) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread);
+    }
+
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4Temperature> kstream, SensorTopic<EmpaticaE4Temperature> topic) throws IOException {

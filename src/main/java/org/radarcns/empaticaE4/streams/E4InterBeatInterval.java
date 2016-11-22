@@ -22,6 +22,10 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID);
     }
 
+    public E4InterBeatInterval(String clientID, int numThread) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID, numThread);
+    }
+
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream, SensorTopic<EmpaticaE4InterBeatInterval> topic) throws IOException {
         kstream.aggregateByKey(DoubleValueCollector::new,

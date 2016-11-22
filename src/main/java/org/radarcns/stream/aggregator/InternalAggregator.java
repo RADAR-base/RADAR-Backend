@@ -25,7 +25,18 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         this.topic = topic;
         this.clientID = clientID;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID));
+        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,1));
+    }
+
+    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID, @Nonnull int numThread) throws IOException{
+        if(numThread < 1){
+            throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
+        }
+
+        this.topic = topic;
+        this.clientID = clientID;
+
+        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,numThread));
     }
 
     private KStreamBuilder getBuilder() throws IOException{
@@ -54,6 +65,11 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
     @Override
     public String getClientID(){
         return this.clientID;
+    }
+
+    @Override
+    public String getName(){
+        return getClientID();
     }
 
     @Override

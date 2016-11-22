@@ -15,16 +15,10 @@ public class E4InternalTopics implements InternalTopics {
 
     private final InternalTopic<DoubleAggegator> heartRateTopic;
 
-    private final static Object syncObject = new Object();
-    private static E4InternalTopics instance = null;
+    private static E4InternalTopics instance = new E4InternalTopics();
 
     protected static E4InternalTopics getInstance() {
-        synchronized (syncObject) {
-            if (instance == null) {
-                instance = new E4InternalTopics();
-            }
-            return instance;
-        }
+        return instance;
     }
 
     private E4InternalTopics() {

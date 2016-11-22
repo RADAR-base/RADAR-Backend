@@ -25,6 +25,9 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID);
     }
 
+    public E4HeartRate(String clientID, int numThread) throws IOException {
+        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,numThread);
+    }
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream, InternalTopic<DoubleAggegator> topic) throws IOException {

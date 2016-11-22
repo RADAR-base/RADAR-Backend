@@ -22,6 +22,9 @@ public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroD
         super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID);
     }
 
+    public E4ElectroDermalActivity(String clientID, int numThread) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,numThread);
+    }
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream, SensorTopic<EmpaticaE4ElectroDermalActivity> topic) throws IOException {

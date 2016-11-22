@@ -10,19 +10,13 @@ import java.util.Set;
  */
 public class E4Topics implements DeviceTopics {
 
-    private final static Object syncObject = new Object();
-    private static E4Topics instance = null;
+    private static E4Topics instance = new E4Topics();
 
-    private static E4SensorTopics sensorTopics = null;
-    private static E4InternalTopics internalTopics = null;
+    private static E4SensorTopics sensorTopics = E4SensorTopics.getInstance();
+    private static E4InternalTopics internalTopics = E4InternalTopics.getInstance();
 
     public static E4Topics getInstance() {
-        synchronized (syncObject) {
-            if (instance == null) {
-                instance = new E4Topics();
-            }
-            return instance;
-        }
+        return instance;
     }
 
     @Override
@@ -36,20 +30,10 @@ public class E4Topics implements DeviceTopics {
     }
 
     public E4SensorTopics getSensorTopics() {
-        synchronized (syncObject) {
-            if (sensorTopics == null) {
-                sensorTopics = E4SensorTopics.getInstance();
-            }
-            return sensorTopics;
-        }
+        return sensorTopics;
     }
 
     public E4InternalTopics getInternalTopics() {
-        synchronized (syncObject) {
-            if (internalTopics == null) {
-                internalTopics = E4InternalTopics.getInstance();
-            }
-            return internalTopics;
-        }
+        return internalTopics;
     }
 }

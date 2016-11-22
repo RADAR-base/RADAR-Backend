@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.log4j.Logger;
 import org.radarcns.empaticaE4.EmpaticaE4BatteryLevel;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -18,8 +19,14 @@ import java.io.IOException;
  */
 public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
 
+    private final static Logger log = Logger.getLogger(E4BatteryLevel.class);
+
     public E4BatteryLevel(String clientID) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID);
+    }
+
+    public E4BatteryLevel(String clientID, int numThread) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,numThread);
     }
 
 

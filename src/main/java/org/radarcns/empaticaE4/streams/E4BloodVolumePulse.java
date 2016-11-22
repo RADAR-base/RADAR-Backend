@@ -22,6 +22,10 @@ public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePu
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(), clientID);
     }
 
+    public E4BloodVolumePulse(String clientID, int numThread) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(), clientID, numThread);
+    }
+
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream, SensorTopic<EmpaticaE4BloodVolumePulse> topic) throws IOException {
         kstream.aggregateByKey(DoubleValueCollector::new,

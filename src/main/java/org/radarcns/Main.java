@@ -2,17 +2,10 @@ package org.radarcns;
 
 import org.apache.log4j.Logger;
 import org.radarcns.empaticaE4.E4Worker;
-import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
-import org.radarcns.empaticaE4.streams.E4InterBeatInterval;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.empaticaE4.streams.E4BloodVolumePulse;
 import org.radarcns.sink.mongoDB.MongoDBSinkRadar;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.test.producer.SimpleProducer;
-import org.radarcns.util.RadarConfig;
-import org.radarcns.util.RadarUtils;
 
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -23,7 +16,7 @@ public class Main {
 
     private final static Logger log = Logger.getLogger(Main.class);
 
-    final static long sleep = 3600;
+    final static long sleep = 3600*2;
 
     private final static AtomicBoolean shutdown = new AtomicBoolean(false);
 
@@ -31,36 +24,51 @@ public class Main {
 
     private static Thread connectorThread;
 
+    private static Thread tsThread;
+    private static E4BloodVolumePulse ebvp;
+
     public static void main(String[] args) throws InterruptedException,IOException {
+        log.trace("Init");
         go();
         sleep();
         finish();
+        log.trace("Finish");
+
+        /*Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                streams.close();
+            }
+        }));*/
     }
 
     private static void go() throws IOException{
-        /*connectorThread = getConnector();
-        connectorThread.start();*/
-
-        E4Worker.getSingletonInstance().start();
-
+        log.trace("Init");
+        E4Worker.getInstance().start();
+        //E4Worker.getGroupInstance(2).start();
+        log.trace("Finish");
     }
 
     private static void finish() throws InterruptedException, IOException {
-        shutdown.set(true);
+        log.trace("Init");
 
         if(mongoDBSink != null){
             mongoDBSink.shutdown();
         }
 
-        E4Worker.getSingletonInstance().shutdown();
+        E4Worker.getInstance().shutdown();
+
+        log.trace("Finish");
     }
 
     private static void sleep(){
+        log.trace("Init");
         try{
             Thread.sleep(sleep);
         }catch(InterruptedException e){
             log.error("Got interrupted in main thread!",e);
         }
+        log.trace("Finish");
     }
 
     private static Thread getConnector(){

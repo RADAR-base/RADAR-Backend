@@ -28,16 +28,10 @@ public class E4SensorTopics implements SensorTopics {
     private final SensorTopic<EmpaticaE4SensorStatus> sensorStatusTopic;
     private final SensorTopic<EmpaticaE4Temperature> temperatureTopic;
 
-    private final static Object syncObject = new Object();
-    private static E4SensorTopics instance = null;
+    private static E4SensorTopics instance = new E4SensorTopics();
 
     protected static E4SensorTopics getInstance() {
-        synchronized (syncObject) {
-            if (instance == null) {
-                instance = new E4SensorTopics();
-            }
-            return instance;
-        }
+        return instance;
     }
 
     private E4SensorTopics() {

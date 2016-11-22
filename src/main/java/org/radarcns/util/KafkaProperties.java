@@ -142,7 +142,7 @@ public class KafkaProperties {
     /**
      * Return properties for a Stream
      */
-    public static Properties getStream(@Nonnull String clientID) {
+    public static Properties getStream(@Nonnull String clientID, @Nonnull int numThread) {
         Properties props = new Properties();
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientID);
@@ -151,6 +151,7 @@ public class KafkaProperties {
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryURL());
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
 
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
