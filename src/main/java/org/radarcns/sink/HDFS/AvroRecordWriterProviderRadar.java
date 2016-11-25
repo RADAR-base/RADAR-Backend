@@ -52,10 +52,13 @@ public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
 
         org.apache.avro.Schema avroValueSchema = avroData.fromConnectSchema(valueSchema);
         org.apache.avro.Schema avroKeySchema = avroData.fromConnectSchema(keySchema);
+        final String name = avroValueSchema.getName();
 
-        final org.apache.avro.Schema combinedSchema = org.apache.avro.Schema.createRecord(Arrays.asList(
-                new org.apache.avro.Schema.Field(keyFieldName , org.apache.avro.Schema.createUnion(Arrays.asList(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.NULL), avroKeySchema)), "keySchema" , null)
-                ,new org.apache.avro.Schema.Field(valueFieldName , org.apache.avro.Schema.createUnion(Arrays.asList(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.NULL), avroValueSchema)), "valueSchema" , null)));
+        final org.apache.avro.Schema combinedSchema = org.apache.avro.Schema.createRecord("combinedSchema"+name, "combined key value record", "org.radarcns.empaticaE4", false);
+        combinedSchema.setFields((Arrays.asList(
+                new org.apache.avro.Schema.Field(keyFieldName , avroKeySchema, "keySchema" , null)
+                ,new org.apache.avro.Schema.Field(valueFieldName , avroValueSchema, "valueSchema" , null))));
+
 
         final FSDataOutputStream out = path.getFileSystem(conf).create(path);
 
@@ -67,6 +70,15 @@ public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
                 log.trace("Sink record: {}", record.toString());
                 Object value = avroData.fromConnectData(valueSchema, record.value());
                 Object key = avroData.fromConnectData(keySchema, record.key());
+
+                if(value instanceof NonRecordContainer)
+                {
+                    value = ((NonRecordContainer) value).getValue();
+                }
+                if(key instanceof NonRecordContainer)
+                {
+                    key = ((NonRecordContainer) key).getValue();
+                }
 
                 GenericRecord combinedRecord = new GenericData.Record(combinedSchema);
                 combinedRecord.put(keyFieldName , key);
