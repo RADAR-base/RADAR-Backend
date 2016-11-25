@@ -2,8 +2,13 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'idea'
+    id 'application'
     id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
 }
+
+version = '1.0'
+
+mainClassName = 'org.radarcns.Main'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -16,6 +21,12 @@ ext.mongodbVersion = '3.3.0'
 ext.findbugsVersion = '3.0.1'
 ext.boundaryVersion = '1.0.6'
 ext.mathVersion = '3.0'
+
+run {
+    if ( project.hasProperty("appArgs") ) {
+        args Eval.me(appArgs)
+    }
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -50,11 +61,34 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
     outputDir = file("build/avro")
 }
 
+//create a single Jar with all dependencies
+/*task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'RADAR-CNS Back-End',
+                'Implementation-Version': version,
+                'Main-Class': 'org.radarcns.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}*/
+
 compileJava.source(generateAvro.outputs)
 
 idea {
     module {
         sourceDirs += file("build/avro")
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'RADAR-CNS Back-End',
+                    'Implementation-Version': version,
+                    'Main-Class': mainClassName
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 

@@ -1,9 +1,0 @@
-{"namespace": "org.radarcns",
-  "type": "record",
-  "name": "BusinessValue",
-  "doc": "restructured value iof each business topic",
-  "fields": [
-    {"name": "timestamp", "type": "long"},
-    {"name": "value", "type": "double"}
-  ]
-}

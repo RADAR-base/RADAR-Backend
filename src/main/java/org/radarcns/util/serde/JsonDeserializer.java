@@ -1,9 +1,7 @@
 package org.radarcns.util.serde;
 
-/**
- * Created by Francesco Nobilia on 21/10/2016.
- */
-
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -17,10 +15,20 @@ import java.util.Map;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
     private final static Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
-    private final static ObjectReader reader = new ObjectMapper().reader();
+    private final static ObjectReader reader = getFieldMapper().reader();
     private final static JsonFactory jsonFactory = new JsonFactory();
 
     private Class<T> deserializedClass;
+
+    private static ObjectMapper getFieldMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
+        return mapper;
+    }
+
 
     public JsonDeserializer(Class<T> deserializedClass) {
         this.deserializedClass = deserializedClass;

@@ -3,17 +3,11 @@ package org.radarcns.consumer;
 import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.errors.WakeupException;
+import org.radarcns.util.RadarConfig;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-
-import org.radarcns.util.KafkaProperties;
-import org.radarcns.util.RadarConfig;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Francesco Nobilia on 29/09/2016.

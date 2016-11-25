@@ -1,9 +1,5 @@
 package org.radarcns.util.serde;
 
-/**
- * Created by Francesco Nobilia on 21/10/2016.
- */
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,13 +13,17 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 public class JsonSerializer<T> implements Serializer<T> {
+    
     private final static Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
+    
     private final static ObjectWriter writer = getFieldMapper().writer();
 
     private static ObjectMapper getFieldMapper() {
         ObjectMapper mapper = new ObjectMapper();
+
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
         return mapper;
     }
 

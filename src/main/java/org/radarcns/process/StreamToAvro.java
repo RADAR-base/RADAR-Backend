@@ -1,12 +1,10 @@
 package org.radarcns.process;
 
-import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class StreamToAvro extends KafkaMonitor {
