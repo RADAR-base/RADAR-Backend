@@ -6,34 +6,35 @@ Currently only the Empatica E4 is supported.
 
 # Generalisation
 
-The Kafka Streams concept has been generalised. [MasterAggregator]() defines the stream master while [AggregatorWorker]() represents the stream slave. The master stream creates, starts and stops a list of stream slave. Two types of slave stream have been defined:
-- [SensorAggregator]() consumes and aggregates topics without performing any transformations
-- [InternalAggregator]() modifies incoming data producing a new information
+The Kafka Streams concept has been generalised. [MasterAggregator][1] defines the stream master while [AggregatorWorker][2] represents the stream slave. The master stream creates, starts and stops a list of stream slave. Two types of slave stream have been defined:
+- [SensorAggregator][3] consumes and aggregates topics without performing any transformations
+- [InternalAggregator][4] modifies incoming data producing a new information
 While the classical Kafka Consumer requires two implementations to support standalone and group executions, the stream slave definition provides both behaviours with one implementation.
 
-While the former consumes [SensorTopic<V>](), the latter reads [InternalTopic<O>](). These topics are a specialisation of [AvroTopic<K,V>]().
-- [SensorTopic<V>]() defines a set of topic used to consume and aggregate data as is
-- [InternalTopic<O>]() delineates a set of topic used to consume and aggregate transformed data
-[SensorTopics]() and [InternalTopics]() drive the developer to the implementation of sets of topics containing only one topic type. To improve the flexibility, these sets are then unified by [DeviceTopics](). All these set should be defined following the [Factory Method Pattern](https://en.wikipedia.org/wiki/Factory_method_pattern). It should be used for each element that has to be unique within the application (e.g. [MasterAggregator]())
+While the former consumes [SensorTopic<V>][5], the latter reads [InternalTopic<O>][6]. These topics are a specialisation of [AvroTopic<K,V>]().
+- [SensorTopic<V>][5] defines a set of topic used to consume and aggregate data as is
+- [InternalTopic<O>][6] delineates a set of topic used to consume and aggregate transformed data
+[SensorTopics][7] and [InternalTopics][8] drive the developer to the implementation of sets of topics containing only one topic type. To improve the flexibility, these sets are then unified by [DeviceTopics][9]. All these set should be defined following the [Factory Method Pattern](https://en.wikipedia.org/wiki/Factory_method_pattern). It should be used for each element that has to be unique within the application (e.g. [MasterAggregator][1])
 
-[DeviceTimestampExtractor]() implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic APACHE Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor]() works with the entire set of sensor schemas currently available.
+[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic APACHE Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
 
 ## Empatica E4
 
-[E4Worker]() is the [MasterAggregator](). [E4SensorTopics]() and [E4InternalTopics]() are respectively [SensorTopics]() and [InternalTopics](). [E4Topics]() (i.e. [DeviceTopics]()) are consumed by:
-- [E4Acceleration](): it aggregates data coming from accelerometer
-- [E4BatteryLevel](): it aggregates battery level information
-- [E4BloodVolumePulse](): it aggregates blood volume pulse data
-- [E4ElectroDermalActivity](): it aggregates electrodermal activity informations
-- [E4HeartRate](): starting from the inter beat interval, this aggregator computes the heart rate value  (i.e. [InternalAggregator]())
-- [E4InterBeatInterval](): it aggregates inter beat interval data
+[E4Worker][11] is the [MasterAggregator][1]. [E4SensorTopics][12] and [E4InternalTopics][13] are respectively [SensorTopics][7] and [InternalTopics][8]. [E4Topics][14] (i.e. [DeviceTopics][9]) are consumed by:
+- [E4Acceleration][15]: it aggregates data coming from accelerometer
+- [E4BatteryLevel][16]: it aggregates battery level information
+- [E4BloodVolumePulse][17]: it aggregates blood volume pulse data
+- [E4ElectroDermalActivity][18]: it aggregates electrodermal activity informations
+- [E4HeartRate][19]: starting from the inter beat interval, this aggregator computes the heart rate value  (i.e. [InternalAggregator][4])
+- [E4InterBeatInterval][20]: it aggregates inter beat interval data
+- [E4Temperature][21]: it aggregates data coming form temperature sensor
 
 ## Contributing
 
 To add additional devices, make the following steps (see the `org.radarcns.empaticaE4` package as an example):
-- create [SensorTopics]() and if needed [InternalTopics]() then unify them in [DeviceTopics]()
-- for each topic create either [SensorAggregator]() or [InternalAggregator]()
-- define your [MasterAggregator]()
+- create [SensorTopics][7] and if needed [InternalTopics][8] then unify them in [DeviceTopics][9]
+- for each topic create either [SensorAggregator][3] or [InternalAggregator][4]
+- define your [MasterAggregator][1]
 
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html).
 
@@ -110,3 +111,25 @@ $ java -jar radarbackend-1.0.jar /Users/francesco/Desktop/radar-test/log/fra.log
   - android_empatica_e4_sensor_status_output
   - android_empatica_e4_temperature
   - android_empatica_e4_temperature_output
+
+  [1]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/MasterAggregator.java
+  [2]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/AggregatorWorker.java
+  [3]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/SensorAggregator.java
+  [4]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/InternalAggregator.java
+  [5]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/sensor/SensorTopic.java
+  [6]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/Internal/InternalTopic.java
+  [7]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/sensor/SensorTopics.java
+  [8]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/Internal/InternalTopics.java
+  [9]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/device/DeviceTopics.java
+  [10]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/DeviceTimestampExtractor.java
+  [11]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/E4Worker.java
+  [12]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/topic/E4SensorTopics.java
+  [13]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/topic/E4InternalTopics.java
+  [14]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/topic/E4Topics.java
+  [15]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4Acceleration.java
+  [16]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4BatteryLevel.java
+  [17]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4BloodVolumePulse.java
+  [18]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4ElectroDermalActivity.java
+  [19]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4HeartRate.java
+  [20]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4InterBeatInterval.java
+  [21]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empaticaE4/streams/E4Temperature.java
