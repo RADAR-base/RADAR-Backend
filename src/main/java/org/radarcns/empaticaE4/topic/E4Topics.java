@@ -2,7 +2,9 @@ package org.radarcns.empaticaE4.topic;
 
 import org.radarcns.topic.device.DeviceTopics;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,21 +14,26 @@ public class E4Topics implements DeviceTopics {
 
     private static E4Topics instance = new E4Topics();
 
-    private static E4SensorTopics sensorTopics = E4SensorTopics.getInstance();
-    private static E4InternalTopics internalTopics = E4InternalTopics.getInstance();
+    private static final E4SensorTopics sensorTopics = E4SensorTopics.getInstance();
+    private static final E4InternalTopics internalTopics = E4InternalTopics.getInstance();
 
     public static E4Topics getInstance() {
         return instance;
     }
 
+    private E4Topics(){}
+
     @Override
-    public Set<String> getTopicNames() {
+    public List<String> getTopicNames() {
         Set<String> set = new HashSet<>();
 
         set.addAll(E4InternalTopics.getInstance().getTopicNames());
         set.addAll(E4SensorTopics.getInstance().getTopicNames());
 
-        return set;
+        ArrayList<String> list = new ArrayList<>(set);
+        list.sort(String::compareTo);
+
+        return list;
     }
 
     public E4SensorTopics getSensorTopics() {

@@ -1,10 +1,10 @@
 package org.radarcns.topic.device;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by Francesco Nobilia on 17/11/2016.
  */
 public interface DeviceTopics {
-    Set<String> getTopicNames();
+    List<String> getTopicNames();
 }

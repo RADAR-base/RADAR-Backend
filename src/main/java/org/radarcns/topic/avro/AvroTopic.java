@@ -69,13 +69,5 @@ public abstract class AvroTopic <K extends SpecificRecord, V extends SpecificRec
         return new RadarSerde<>(keyClass).getSerde();
     }
 
-    public Serde<DoubleValueCollector> getDoubleCollectorSerde() {
-        return doubelCollectorSerde;
-    }
-
-    public Serde<MeasurementKey> getMeasurementKeySerde() {
-        return measurementKeySerde;
-    }
-
     public abstract Collection<String> getAllTopicNames();
 }

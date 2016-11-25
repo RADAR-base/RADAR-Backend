@@ -6,10 +6,12 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.empaticaE4.EmpaticaE4Temperature;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
+import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
@@ -18,12 +20,12 @@ import java.io.IOException;
  */
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
 
-    public E4Temperature(String clientID) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID);
+    public E4Temperature(String clientID, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,master);
     }
 
-    public E4Temperature(String clientID,int numThread) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread);
+    public E4Temperature(String clientID,int numThread, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread,master);
     }
 
 
@@ -32,7 +34,7 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
         kstream.aggregateByKey(DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getTemperature())),
                 TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(),topic.getDoubleCollectorSerde())
+                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

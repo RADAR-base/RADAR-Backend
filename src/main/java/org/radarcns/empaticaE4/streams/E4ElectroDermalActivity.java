@@ -6,10 +6,12 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.empaticaE4.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
+import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
@@ -18,12 +20,12 @@ import java.io.IOException;
  */
 public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroDermalActivity> {
 
-    public E4ElectroDermalActivity(String clientID) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID);
+    public E4ElectroDermalActivity(String clientID, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,master);
     }
 
-    public E4ElectroDermalActivity(String clientID, int numThread) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,numThread);
+    public E4ElectroDermalActivity(String clientID, int numThread, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,numThread,master);
     }
 
     @Override
@@ -31,7 +33,7 @@ public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroD
         kstream.aggregateByKey(DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getElectroDermalActivity())),
                 TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(),topic.getDoubleCollectorSerde())
+                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

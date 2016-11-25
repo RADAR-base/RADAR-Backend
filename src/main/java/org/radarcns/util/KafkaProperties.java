@@ -3,6 +3,7 @@ package org.radarcns.util;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.processor.TimestampExtractor;
 import org.radarcns.util.serde.SpecificAvroSerde;
 
 import java.util.Properties;
@@ -154,6 +155,14 @@ public class KafkaProperties {
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
 
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        return props;
+    }
+
+    public static Properties getStream(@Nonnull String clientID, @Nonnull int numThread, @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
+        Properties props = getStream(clientID,numThread);
+
+        props.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, timestampExtractor.getName());
 
         return props;
     }

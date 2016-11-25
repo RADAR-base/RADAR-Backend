@@ -27,7 +27,6 @@ public class SensorTopic<V extends SpecificRecord> extends AvroTopic<Measurement
         Collection<String> collection = new LinkedList<>();
 
         collection.add(getInputTopic());
-        collection.add(getInProgessTopic());
         collection.add(getOutputTopic());
 
         return collection;

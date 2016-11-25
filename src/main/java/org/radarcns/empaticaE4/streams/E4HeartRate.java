@@ -8,9 +8,11 @@ import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.InternalAggregator;
+import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.Internal.InternalTopic;
 import org.radarcns.util.RadarUtils;
+import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
@@ -21,12 +23,12 @@ import java.io.IOException;
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,DoubleAggegator> {
 
-    public E4HeartRate(String clientID) throws IOException {
-        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID);
+    public E4HeartRate(String clientID, MasterAggregator master) throws IOException {
+        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,master);
     }
 
-    public E4HeartRate(String clientID, int numThread) throws IOException {
-        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,numThread);
+    public E4HeartRate(String clientID, int numThread, MasterAggregator master) throws IOException {
+        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,numThread,master);
     }
 
     @Override
@@ -35,9 +37,10 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
         kstream.aggregateByKey(DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.ibiToHR(v.getInterBeatInterval())),
                 TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getMeasurementKeySerde(),topic.getDoubleCollectorSerde())
+                RadarSerdes.getInstance().getMeasurementKeySerde(),RadarSerdes.getInstance().getDoubelCollector())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
+
 }

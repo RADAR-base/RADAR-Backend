@@ -4,10 +4,11 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.log4j.Logger;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.KafkaProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -16,41 +17,35 @@ import javax.annotation.Nonnull;
 /**
  * Created by Francesco Nobilia on 11/10/2016.
  */
-public abstract class SensorAggregator<V extends SpecificRecord> implements AggregatorRadar {
+public abstract class SensorAggregator<V extends SpecificRecord> implements AggregatorWorker {
 
-    private final static Logger log = Logger.getLogger(SensorAggregator.class);
+    private final static Logger log = LoggerFactory.getLogger(SensorAggregator.class);
 
     private final String clientID;
     private KafkaStreams streams;
     private final SensorTopic<V> topic;
 
-    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID) throws IOException{
-        log.trace("Init");
-        this.topic = topic;
-        this.clientID = clientID;
+    private final MasterAggregator master;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,1));
-
-        log.trace("Finish");
+    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull MasterAggregator master) throws IOException{
+        this(topic,clientID,1,master);
     }
 
-    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull int numThread) throws IOException{
-        log.trace("Init");
-
+    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull int numThread, @Nonnull MasterAggregator master) throws IOException{
         if(numThread < 1){
             throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
         }
 
         this.topic = topic;
         this.clientID = clientID;
+        this.master = master;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,numThread));
+        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,numThread,DeviceTimestampExtractor.class));
 
-        log.trace("Finish");
+        log.info("Creating {} stream",clientID);
     }
 
     private KStreamBuilder getBuilder() throws IOException{
-        log.trace("Init");
         KStreamBuilder builder = new KStreamBuilder();
 
         log.trace(topic.getInputTopic());
@@ -59,7 +54,8 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
         setStream(valueKStream, topic);
 
-        log.trace("Finish");
+        log.info("Creating the builder for {} stream",clientID);
+
         return builder;
     }
 
@@ -67,16 +63,18 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
     @Override
     public void run() {
-        log.trace("Init");
+        log.info("Starting {} stream",clientID);
         streams.start();
-        log.trace("Finish");
+
+        master.notifyStartedStream(clientID);
     }
 
     @Override
     public void shutdown(){
-        log.trace("Init");
+        log.info("Shutting down {} stream",clientID);
         streams.close();
-        log.trace("Finish");
+
+        master.notifyClosedStream(clientID);
     }
 
     @Override
@@ -91,13 +89,11 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
     @Override
     public Thread getThread() {
-        log.trace("Init");
         Thread thread;
 
         thread = new Thread(this);
         thread.setName(this.clientID);
 
-        log.trace("Finish");
         return thread;
     }
 }

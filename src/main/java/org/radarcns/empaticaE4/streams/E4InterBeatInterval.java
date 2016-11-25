@@ -6,10 +6,12 @@ import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
+import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
@@ -18,12 +20,12 @@ import java.io.IOException;
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
 
-    public E4InterBeatInterval(String clientID) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID);
+    public E4InterBeatInterval(String clientID, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID,master);
     }
 
-    public E4InterBeatInterval(String clientID, int numThread) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID, numThread);
+    public E4InterBeatInterval(String clientID, int numThread, MasterAggregator master) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(), clientID, numThread,master);
     }
 
     @Override
@@ -31,7 +33,7 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
         kstream.aggregateByKey(DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getInterBeatInterval())),
                 TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(),topic.getDoubleCollectorSerde())
+                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
