@@ -76,9 +76,16 @@ $ gradle clean
 $ gradle jar
 ```
 - copy your jar in your server
+- modify `radar.yml` file
+⋅⋅* specify in which mode you want to run the application. The two alternatives are `standalone` and `high_performance`. The former starts one thread for each streams without checking the priority, the latter starts as many thread as the related priority value
+⋅⋅* insert Zookeeper server information
+⋅⋅* insert Broker server information
+⋅⋅* insert Schema-Registry location
+⋅⋅* insert `log_path`, it must be a folder [OPTIONAL]
+- copy `radar.yml` in the same folder where you have copied the jar
 - run your jar
 ```shell
-$ java -jar radarbackend-1.0.jar <LOG-FILE> <NUM-THREAD>
+$ java -jar radarbackend-1.0.jar <CONFIG-FILE>
 ```
 
 ### NOTE
@@ -87,14 +94,16 @@ $ java -jar radarbackend-1.0.jar <LOG-FILE> <NUM-THREAD>
 - commands to start Zookeeper, Kafka, Schema Registry and Rest Proxy have to be run one per shell
 - if you have not modified the out-of-the-box configuration files of Confluent `<ZOOKEEPER-HOST>:<ZOOKEEPER-PORT>` values `localhost:2181`
 - the `radarbackend-<VERSION>.jar` file is located in `/project-root/build/lib`
-- `<LOG-FILE>` and `<NUM-THREAD>` are optional, if not provided the application starts in standalone mode and creates a log file in the same folder of the jar file. Possible alternatives are
+- `<CONFIG-FILE>` is optional, if not provided your config file has to be located in the same folder of your jar
 ```shell
 # Default
 $ java -jar radarbackend-1.0.jar
 
 # Custom
-$ java -jar radarbackend-1.0.jar /Users/francesco/Desktop/radar-test/log/fra.log 1
+$ java -jar radarbackend-1.0.jar /Users/francesco/Desktop/radar-test/config/radar.yml
 ```
+- the default log path is the jar folder
+- threads priorities value must be bigger than 0
 - if `AUTO.CREATE.TOPICS.ENABLE` is `FALSE` in your server.properties, before starting you must create the following topics manually: 
   - android_empatica_e4_acceleration
   - android_empatica_e4_acceleration_output

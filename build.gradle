@@ -21,6 +21,7 @@ ext.mongodbVersion = '3.3.0'
 ext.findbugsVersion = '3.0.1'
 ext.boundaryVersion = '1.0.6'
 ext.mathVersion = '3.0'
+ext.snakeyamlVersion='1.17'
 
 run {
     if ( project.hasProperty("appArgs") ) {
@@ -53,6 +54,7 @@ dependencies {
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
+    compile group: 'org.yaml', name: 'snakeyaml', version: snakeyamlVersion
 //    testCompile group: 'org.slf4j', name:'slf4j-api', version: slf4jVersion
 }
 

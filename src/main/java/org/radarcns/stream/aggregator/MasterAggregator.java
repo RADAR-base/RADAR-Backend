@@ -1,5 +1,6 @@
 package org.radarcns.stream.aggregator;
 
+import org.radarcns.config.PropertiesRadar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,31 +20,39 @@ public abstract class MasterAggregator {
     private final String nameSensor;
     private final AtomicInteger currentStream;
 
-    protected MasterAggregator(int numThread, String nameSensor) throws IOException{
-        if(numThread < 1){
-            throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
+    protected MasterAggregator(boolean standalone, String nameSensor) throws IOException{
+        if(!standalone){
+            checkThreadParams();
         }
 
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
-        if(numThread == 1){
+        int lowPriority = 1;
+        int normalPriority = 1;
+        int highPriority = 1;
+
+        if(standalone){
             log.info("[{}] STANDALONE MODE",nameSensor);
         }
         else{
-            log.info("[{}] GROUP MODE: the number of threads per stream is {}",nameSensor,numThread);
+            log.info("[{}] GROUP MODE: {}",nameSensor,PropertiesRadar.getInstance().infoThread());
+
+            lowPriority = PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.LOW);
+            normalPriority = PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.NORMAL);
+            highPriority = PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.HIGH);
         }
 
         announceTopics(log);
 
         list = new LinkedList<>();
 
-        createWorker(list, numThread);
+        createWorker(list, lowPriority, normalPriority, highPriority);
 
         log.info("Creating MasterAggregator instance for {}",nameSensor);
     }
 
-    protected abstract void createWorker(List<AggregatorWorker> list, int numThread) throws IOException;
+    protected abstract void createWorker(List<AggregatorWorker> list, int low, int normal, int high) throws IOException;
 
     protected abstract void announceTopics(Logger log);
 
@@ -68,6 +77,33 @@ public abstract class MasterAggregator {
 
     public void notifyClosedStream(String stream){
         int current = currentStream.decrementAndGet();
-        log.info("[{}] {} is closed. {} streams are now running",nameSensor,stream,current);
+
+        if(current == 0){
+            log.info("[{}] {} is closed. All streams have been terminated",nameSensor,stream);
+        }
+        else{
+            log.info("[{}] {} is closed. {} streams are still running",nameSensor,stream,current);
+        }
+    }
+
+    private void checkThreadParams(){
+        if(PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.HIGH) < 1) {
+            log.error("Invalid parameter: {} priority threads are {}",
+                    PropertiesRadar.Priority.HIGH,
+                    PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.HIGH));
+            throw new IllegalStateException("The number of high priority threads must be an integer bigger than 0");
+        }
+        if(PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.NORMAL) < 1) {
+            log.error("Invalid parameter: {} priority threads are {}",
+                    PropertiesRadar.Priority.NORMAL,
+                    PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.NORMAL));
+            throw new IllegalStateException("The number of normal priority threads must be an integer bigger than 0");
+        }
+        if(PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.LOW) < 1) {
+            log.error("Invalid parameter: {} priority threads are {}",
+                    PropertiesRadar.Priority.LOW,
+                    PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.LOW));
+            throw new IllegalStateException("The number of low priority threads must be an integer bigger than 0");
+        }
     }
 }
