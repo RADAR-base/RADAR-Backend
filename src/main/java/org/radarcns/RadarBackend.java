@@ -1,7 +1,7 @@
 package org.radarcns;
 
+import org.radarcns.config.PropertiesRadar;
 import org.radarcns.empaticaE4.E4Worker;
-import org.radarcns.util.RadarConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,40 +14,26 @@ public class RadarBackend {
 
     private final static Logger log = LoggerFactory.getLogger(RadarBackend.class);
 
-    private static int numThread;
-
     public RadarBackend(String[] args){
         config(args);
         application();
     }
 
     private static void config(String[] args){
-        System.out.println("Updating configuration");
+        System.out.println("Loading configuration");
 
-        if(args.length == 0){
-            System.out.println("DEFAULT CONFIGURATION");
-
-            numThread = 1;
+        try {
+            PropertiesRadar.load(args.length == 0 ? null : args[0]);
         }
-        else if(args.length < 2){
-            throw new IllegalArgumentException("Missing parameters \n" +
-                    " - input 1: log path \n" +
-                    " - input 2: number of concurrent threads for each stream");
-        }
-        else{
-            RadarConfig radarConfig = new RadarConfig();
-
-            try {
-                radarConfig.updateLog4jConfiguration(args[0]);
-            } catch (Exception e) {
-                System.out.println("FATAL ERROR: application is shutting down");
-                System.exit(0);
-            }
-
-            numThread = Integer.parseInt(args[1]);
+        catch (Exception e) {
+            System.out.println("FATAL ERROR: application is shutting down");
+            System.out.println(e.toString());
+            System.exit(0);
         }
 
         System.out.println("Configuration successfully updated");
+
+        log.info(PropertiesRadar.getInstance().info());
     }
 
     private static void application(){
@@ -55,6 +41,7 @@ public class RadarBackend {
             go();
         } catch (IOException e) {
             log.error("FATAL ERROR! The current instance cannot start",e);
+            System.exit(0);
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
@@ -69,12 +56,7 @@ public class RadarBackend {
     private static void go() throws IOException{
         log.info("STARTING");
 
-        if(numThread == 1) {
-            E4Worker.getInstance().start();
-        }
-        else {
-            E4Worker.getInstance(numThread).start();
-        }
+        E4Worker.getInstance().start();
 
         log.info("STARTED");
     }

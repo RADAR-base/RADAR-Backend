@@ -1,5 +1,6 @@
 package org.radarcns.empaticaE4;
 
+import org.radarcns.config.PropertiesRadar;
 import org.radarcns.empaticaE4.streams.E4Acceleration;
 import org.radarcns.empaticaE4.streams.E4BatteryLevel;
 import org.radarcns.empaticaE4.streams.E4BloodVolumePulse;
@@ -27,41 +28,31 @@ public class E4Worker extends MasterAggregator{
     public static E4Worker getInstance() throws IOException{
         synchronized (syncObject) {
             if (instance == null) {
-                instance = new E4Worker(1);
+                instance = new E4Worker(PropertiesRadar.getInstance().isStandalone());
             }
         }
 
         return instance;
     }
 
-    public static E4Worker getInstance(int numThread) throws IOException{
-        synchronized (syncObject) {
-            if (instance == null) {
-                instance = new E4Worker(numThread);
-            }
-        }
-
-        return instance;
-    }
-
-    private E4Worker(int numThread) throws IOException{
-        super(numThread,"Empatica E4");
+    private E4Worker(boolean standalone) throws IOException{
+        super(standalone,"Empatica E4");
     }
 
     @Override
     protected void announceTopics(Logger log){
-        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n - " +
-                E4Topics.getInstance().getTopicNames().stream().map(Object::toString).collect(Collectors.joining("\n - ")));
+        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n  - " +
+                E4Topics.getInstance().getTopicNames().stream().map(Object::toString).collect(Collectors.joining("\n  - ")));
     }
 
     @Override
-    protected void createWorker(List<AggregatorWorker> list, int numThread) throws IOException{
-        list.add(new E4Acceleration("E4Acceleration",numThread,this));
-        list.add(new E4BatteryLevel("E4BatteryLevel",numThread,this));
-        list.add(new E4BloodVolumePulse("E4BloodVolumePulse",numThread,this));
-        list.add(new E4ElectroDermalActivity("E4ElectroDermalActivity",numThread,this));
-        list.add(new E4HeartRate("E4HeartRate",numThread,this));
-        list.add(new E4InterBeatInterval("E4InterBeatInterval",numThread,this));
-        list.add(new E4Temperature("E4Temperature",numThread,this));
+    protected void createWorker(List<AggregatorWorker> list, int low, int normal, int high) throws IOException{
+        list.add(new E4Acceleration("E4Acceleration",high,this));
+        list.add(new E4BatteryLevel("E4BatteryLevel",low,this));
+        list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this));
+        list.add(new E4ElectroDermalActivity("E4ElectroDermalActivity",normal,this));
+        list.add(new E4HeartRate("E4HeartRate",high,this));
+        list.add(new E4InterBeatInterval("E4InterBeatInterval",high,this));
+        list.add(new E4Temperature("E4Temperature",high,this));
     }
 }

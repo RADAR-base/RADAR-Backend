@@ -20,6 +20,7 @@ import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.RecordWriter;
 import io.confluent.connect.hdfs.RecordWriterProvider;
 import io.confluent.connect.hdfs.avro.AvroRecordWriterProvider;
+import io.confluent.kafka.serializers.NonRecordContainer;
 
 /**
  * Created by nivethika on 7-11-16.

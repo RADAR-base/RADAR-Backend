@@ -4,9 +4,9 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.topic.sensor.SensorTopic;
-import org.radarcns.util.KafkaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         this.clientID = clientID;
         this.master = master;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperties.getStream(clientID,numThread,DeviceTimestampExtractor.class));
+        streams = new KafkaStreams(getBuilder(), KafkaProperty.getStream(clientID,numThread,DeviceTimestampExtractor.class));
 
         log.info("Creating {} stream",clientID);
     }

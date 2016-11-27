@@ -1,11 +1,8 @@
 package org.radarcns.util;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -19,7 +16,7 @@ public class RadarConfig {
 
     private final static Logger log = LoggerFactory.getLogger(RadarConfig.class);
 
-    //Properties from file config.properties
+    //PropertiesRadar from file config.properties
     private Properties prop;
 
     //Enumerate all possible topics
@@ -203,37 +200,5 @@ public class RadarConfig {
         } else {
             return host;
         }
-    }
-
-    public void updateLog4jConfiguration(String logFile) throws Exception {
-
-        File file = new File(logFile.substring(0,logFile.lastIndexOf('/')));
-        String message = null;
-        if(!file.exists()){
-            message = "User Log file does not exist";
-        }
-        else if(!file.isDirectory()){
-            message = "User Log file is invalid";
-        }
-        if(message != null){
-            log.error(message);
-            throw new IllegalArgumentException(message);
-        }
-
-        Properties props = new Properties();
-        try {
-            InputStream configStream = getClass().getResourceAsStream( "/log4j.properties");
-            props.load(configStream);
-            configStream.close();
-        } catch (IOException e) {
-            System.out.println("Error during configuration file loading");
-            throw e;
-        }
-        props.setProperty("log4j.appender.file.File", logFile);
-        LogManager.resetConfiguration();
-        PropertyConfigurator.configure(props);
-
-        System.out.println("Log path has been correctly configured to "+logFile);
-        System.out.println("All future messages will be redirected to the log file");
     }
 }
