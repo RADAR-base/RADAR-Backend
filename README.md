@@ -67,7 +67,7 @@ $ bin/kafka-topics.sh --create --zookeeper <ZOOKEEPER-HOST>:<ZOOKEEPER-PORT> --r
 ## Radar application
 
 This is a Gradle project, to execute the following step
-- open your shell inside the project folder
+1. open your shell inside the project folder
 ```shell
 # Clean
 $ gradle clean
@@ -75,15 +75,15 @@ $ gradle clean
 # Build
 $ gradle jar
 ```
-- copy your jar in your server
-- modify `radar.yml` file
-⋅⋅* specify in which mode you want to run the application. The two alternatives are `standalone` and `high_performance`. The former starts one thread for each streams without checking the priority, the latter starts as many thread as the related priority value
-⋅⋅* insert Zookeeper server information
-⋅⋅* insert Broker server information
-⋅⋅* insert Schema-Registry location
-⋅⋅* insert `log_path`, it must be a folder [OPTIONAL]
-- copy `radar.yml` in the same folder where you have copied the jar
-- run your jar
+2. copy your jar in your server
+3. modify `radar.yml` file
+  1. specify in which mode you want to run the application. The two alternatives are `standalone` and `high_performance`. The former starts one thread for each streams without checking the priority, the latter starts as many thread as the related priority value
+  1. insert Zookeeper server information
+  2. insert Broker server information
+  3. insert Schema-Registry location
+  4. insert `log_path`, it must be a folder [OPTIONAL]
+4. copy `radar.yml` in the same folder where you have copied the jar
+5. run your jar
 ```shell
 $ java -jar radarbackend-1.0.jar <CONFIG-FILE>
 ```
