@@ -1,3 +1,9 @@
 language: java
+# Update to the latest version of Java 8
+sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 jdk:
   - oraclejdk8
