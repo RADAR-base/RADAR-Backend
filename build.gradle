@@ -30,14 +30,16 @@ run {
     }
 }
 
+configurations { codacy }
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
-    maven {
-        url 'http://packages.confluent.io/maven/'
-    }
+    maven { url 'http://packages.confluent.io/maven/' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -49,32 +51,22 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafkaVersion
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
-    compile (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion
-    ){exclude group: 'org.apache.hive'}
+    compile (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion) {
+        exclude group: 'org.apache.hive'
+    }
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodbVersion
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeyamlVersion
-//    testCompile group: 'org.slf4j', name:'slf4j-api', version: slf4jVersion
+
+    codacy 'com.github.codacy:codacy-coverage-reporter:-SNAPSHOT'
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
     source("src/main/resources/avro")
     outputDir = file("build/avro")
 }
-
-//create a single Jar with all dependencies
-/*task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'RADAR-CNS Back-End',
-                'Implementation-Version': version,
-                'Main-Class': 'org.radarcns.Main'
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}*/
 
 compileJava.source(generateAvro.outputs)
 
@@ -101,6 +93,12 @@ jacocoTestReport {
         csv.enabled false
         html.enabled false
     }
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+    main = 'com.codacy.CodacyCoverageReporter'
+    classpath = configurations.codacy
+    args = ['-l', 'Java', '-r', '${buildDir}/reports/jacoco/test/jacocoTestReport.xml']
 }
 
 task wrapper(type: Wrapper) {
