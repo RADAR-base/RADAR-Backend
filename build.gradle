@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'application'
     id 'com.commercehub.gradle.plugin.avro-base' version '0.8.0'
+    id 'jacoco'
 }
 
 version = '1.0'
@@ -91,6 +92,14 @@ jar {
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled false
     }
 }
 
