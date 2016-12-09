@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by Francesco Nobilia on 21/10/2016.
+ * Java class to aggregate data using Kafka Streams. Double Array is the base unit
  */
 public class DoubleArrayCollector {
     private ArrayList<Double> min = new ArrayList<>();
@@ -24,6 +24,9 @@ public class DoubleArrayCollector {
 
     private int size = 0;
 
+    /**
+     * @param value: new sample that has to be analysed
+     */
     public DoubleArrayCollector add(Double[] value){
 
         if(size == 0){
@@ -43,6 +46,9 @@ public class DoubleArrayCollector {
         return this;
     }
 
+    /**
+     * @param value: new sample that update min values
+     */
     private void updateMin(Double[] value){
         if(min.isEmpty()){
             for(int i=0; i<value.length; i++){
@@ -58,6 +64,9 @@ public class DoubleArrayCollector {
         }
     }
 
+    /**
+     * @param value: new sample that update max values
+     */
     private void updateMax(Double[] value){
         if(max.isEmpty()){
             for(int i=0; i<value.length; i++){
@@ -73,6 +82,9 @@ public class DoubleArrayCollector {
         }
     }
 
+    /**
+     * @param value: new sample that update average values
+     */
     private void updateAvg(Double[] value){
         if(count.isEmpty() && sum.isEmpty() && avg.isEmpty()){
             for(int i=0; i<value.length; i++){
@@ -92,6 +104,9 @@ public class DoubleArrayCollector {
         }
     }
 
+    /**
+     * @param value: new sample that update quartiles values
+     */
     private void updateQuartile(Double[] value){
         if(list.isEmpty()){
             for(int i=0; i<value.length; i++){
@@ -151,6 +166,9 @@ public class DoubleArrayCollector {
                 '}';
     }
 
+    /**
+     * @return the Avro equivalent class represented by org.radarcns.aggregator.DoubleArrayAggegator
+     */
     public DoubleArrayAggegator convertInAvro(){
         return new DoubleArrayAggegator(min,max,sum,count,avg,quartile,iqr);
     }

@@ -1,4 +1,4 @@
-package org.radarcns.topic.Internal;
+package org.radarcns.topic.internal;
 
 import org.apache.avro.specific.SpecificRecord;
 

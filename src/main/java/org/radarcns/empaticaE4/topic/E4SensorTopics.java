@@ -15,7 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by Francesco Nobilia on 17/11/2016.
+ * Entire set of Empatica E4 SensorTopic
+ * @see org.radarcns.topic.sensor.SensorTopic
  */
 public class E4SensorTopics implements SensorTopics {
 

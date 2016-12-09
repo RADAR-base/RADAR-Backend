@@ -16,7 +16,7 @@ import org.radarcns.util.serde.RadarSerdes;
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Definition of Kafka Stream for aggregating data collected by Empatica E4 Acceleromete
  */
 public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 

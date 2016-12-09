@@ -16,7 +16,7 @@ import org.radarcns.util.serde.RadarSerdes;
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
 

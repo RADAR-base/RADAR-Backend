@@ -11,14 +11,24 @@ import java.util.LinkedList;
 import javax.annotation.Nonnull;
 
 /**
- * Created by Francesco Nobilia on 18/11/2016.
+ * Specialisation of AvroTopic representing topics used to aggregate data.
+ * Since it describes the computation from the initial point of view. The topic key is org.radarcns.key.MeasurementKey
+ * @see org.radarcns.topic.avro.AvroTopic
+ * @see org.radarcns.key.MeasurementKey
  */
 public class SensorTopic<V extends SpecificRecord> extends AvroTopic<MeasurementKey,V> {
 
+    /**
+     * @param name: name of the input topic
+     * @param valueClass: java class representing the record
+     */
     public SensorTopic(@Nonnull String name, @Nonnull Class<V> valueClass) {
         super(name,MeasurementKey.class,valueClass);
     }
 
+    /**
+    * @return tha input topic name
+    */
     public String getInputTopic(){
         return super.getName();
     }

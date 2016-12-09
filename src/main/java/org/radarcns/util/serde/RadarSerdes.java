@@ -6,7 +6,7 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
- * Created by Francesco Nobilia on 17/11/2016.
+ * Set of Serde usefull for Kafka Streams
  */
 public class RadarSerdes{
 

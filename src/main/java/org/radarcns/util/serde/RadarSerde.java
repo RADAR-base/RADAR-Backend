@@ -7,7 +7,7 @@ import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
 import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
 /**
- * Created by Francesco Nobilia on 24/10/2016.
+ * It generates the jsonSerializer and jsonDeserializer for the given input class
  */
 public class RadarSerde<T> {
 

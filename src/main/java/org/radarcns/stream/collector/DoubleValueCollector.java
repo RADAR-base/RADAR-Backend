@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
- * Created by Francesco Nobilia on 21/10/2016.
+ * Java class to aggregate data using Kafka Streams. Double is the base unit
  */
 public class DoubleValueCollector {
     private double min = Double.MAX_VALUE;
@@ -20,6 +20,9 @@ public class DoubleValueCollector {
 
     private LinkedList<Double> list = new LinkedList<>();
 
+    /**
+     * @param value: new sample that has to be analysed
+     */
     public DoubleValueCollector add(Double value){
 
         updateMin(value);
@@ -32,18 +35,27 @@ public class DoubleValueCollector {
         return this;
     }
 
+    /**
+     * @param value: new sample that update min value
+     */
     private void updateMin(double value){
         if(min > value){
             min = value;
         }
     }
 
+    /**
+     * @param value: new sample that update max value
+     */
     private void updateMax(double value){
         if(max < value){
             max = value;
         }
     }
 
+    /**
+     * @param value: new sample that update average value
+     */
     private void updateAvg(double value){
         count++;
         sum += value;
@@ -51,6 +63,9 @@ public class DoubleValueCollector {
         avg = sum / count;
     }
 
+    /**
+     * @param value: new sample that update quartiles value
+     */
     private void updateQuartile(double value){
         list.addLast(value);
 
@@ -80,6 +95,9 @@ public class DoubleValueCollector {
                 '}';
     }
 
+    /**
+     * @return the Avro equivalent class represented by org.radarcns.aggregator.DoubleAggegator
+     */
     public DoubleAggegator convertInAvro(){
         return new DoubleAggegator(min,max,sum,count,avg,Arrays.asList(quartile),iqr);
     }

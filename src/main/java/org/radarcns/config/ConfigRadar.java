@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by Francesco Nobilia on 10/11/2016.
+ * POJO representing the yml file
  */
 public class ConfigRadar {
 

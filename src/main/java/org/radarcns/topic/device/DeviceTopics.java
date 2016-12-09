@@ -3,7 +3,7 @@ package org.radarcns.topic.device;
 import java.util.List;
 
 /**
- * Created by Francesco Nobilia on 17/11/2016.
+ * Abstraction of topics list
  */
 public interface DeviceTopics {
     List<String> getTopicNames();

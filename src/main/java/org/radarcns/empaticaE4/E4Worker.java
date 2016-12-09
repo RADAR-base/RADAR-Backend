@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by Francesco Nobilia on 21/11/2016.
+ * Singleton MasterAggregator for Empatica E4
+ * @see org.radarcns.stream.aggregator.MasterAggregator
  */
 public class E4Worker extends MasterAggregator{
 
