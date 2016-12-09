@@ -2,14 +2,15 @@ package org.radarcns.empaticaE4.topic;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.aggregator.DoubleAggegator;
-import org.radarcns.topic.Internal.InternalTopic;
-import org.radarcns.topic.Internal.InternalTopics;
+import org.radarcns.topic.internal.InternalTopic;
+import org.radarcns.topic.internal.InternalTopics;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by Francesco Nobilia on 17/11/2016.
+ * Entire set of Empatica E4 InternalTopic
+ * @see org.radarcns.topic.internal.InternalTopic
  */
 public class E4InternalTopics implements InternalTopics {
 

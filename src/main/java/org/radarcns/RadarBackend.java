@@ -7,19 +7,24 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 /**
- * Created by Francesco Nobilia on 24/11/2016.
+ * Core class that initialises configurations and then start all needed Kafka streams
  */
 public class RadarBackend {
 
     private final static Logger log = LoggerFactory.getLogger(RadarBackend.class);
 
-    public RadarBackend(String[] args){
+    public RadarBackend(@Nonnull String[] args){
         config(args);
         application();
     }
 
-    private static void config(String[] args){
+    /**
+    * @param args: are the array of Strings given in input to the jar file
+    */
+    private static void config(@Nonnull String[] args){
         System.out.println("Loading configuration");
 
         try {
@@ -36,6 +41,9 @@ public class RadarBackend {
         log.info(PropertiesRadar.getInstance().info());
     }
 
+    /**
+     * It starts streams and sets a ShutdownHook to close streams while closing the application
+     */
     private static void application(){
         try {
             go();
@@ -53,6 +61,10 @@ public class RadarBackend {
         }));
     }
 
+    /**
+     * Start here all needed MasterAggregator
+     * @see org.radarcns.stream.aggregator.MasterAggregator
+     */
     private static void go() throws IOException{
         log.info("STARTING");
 
@@ -61,6 +73,10 @@ public class RadarBackend {
         log.info("STARTED");
     }
 
+    /**
+     * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
+     * @see org.radarcns.stream.aggregator.MasterAggregator
+     */
     private static void finish() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");
 

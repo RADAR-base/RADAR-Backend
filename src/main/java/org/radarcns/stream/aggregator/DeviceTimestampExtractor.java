@@ -10,15 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by Francesco Nobilia on 24/11/2016.
+ * Custom TimestampExtractor for TimeWindows Streams.
  */
 public class DeviceTimestampExtractor implements TimestampExtractor {
 
     private final static Logger log = LoggerFactory.getLogger(DeviceTimestampExtractor.class);
 
-    /*private long testInit = -1;
-    private long testLast = -1;*/
-
+    /**
+     * Return the timeReceived value converted in long.
+     * timeReceived is the timestamp at which the device has collected the sample.
+     * @throws RuntimeException if timeReceived is not present inside the analysed record
+     */
     @Override
     public long extract(ConsumerRecord<Object, Object> record) {
 
@@ -29,17 +31,6 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
         Schema.Field field = recordSchema.getField("timeReceived");
 
             if(value.get(field.pos()) instanceof Double){
-
-                /*if(testInit == -1){
-                    testInit = RadarUtils.doubleToLong((Double) value.get(field.pos()));
-                }
-                testLast = RadarUtils.doubleToLong((Double) value.get(field.pos()));
-
-                Date dateInit = new Date((new Timestamp(testInit)).getTime());
-                Date dateEnd = new Date((new Timestamp(testLast)).getTime());
-
-                log.info("Init is {} and last seen is {}",dateInit.toString(),dateEnd.toString());*/
-
                 return RadarUtils.doubleToLong((Double) value.get(field.pos()));
             }
             else{

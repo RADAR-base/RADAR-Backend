@@ -16,7 +16,7 @@ import org.radarcns.util.serde.RadarSerdes;
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Definition of Kafka Stream for aggregating data about Empatica E4 battery level
  */
 public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
 

@@ -1,7 +1,7 @@
 package org.radarcns.config;
 
 /**
- * Created by Francesco Nobilia on 25/11/2016.
+ * POJO representing a Server configuration
  */
 public class Server {
 

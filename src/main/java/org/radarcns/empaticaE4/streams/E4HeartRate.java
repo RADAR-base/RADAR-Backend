@@ -10,16 +10,14 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.InternalAggregator;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.topic.Internal.InternalTopic;
+import org.radarcns.topic.internal.InternalTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
- * This Internal consumes the Empatica E4 topic for E4InterBeatInterval sensor and
- * trasform it in a Heart Rate value
+ * Definition of Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,DoubleAggegator> {
 

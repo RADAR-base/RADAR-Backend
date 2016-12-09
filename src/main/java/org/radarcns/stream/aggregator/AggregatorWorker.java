@@ -1,7 +1,7 @@
 package org.radarcns.stream.aggregator;
 
 /**
- * Created by Francesco Nobilia on 21/11/2016.
+ * Runnable abstraction of Kafka Stream Handler
  */
 public interface AggregatorWorker extends Runnable {
     Thread getThread();

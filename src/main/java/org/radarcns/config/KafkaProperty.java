@@ -11,13 +11,13 @@ import javax.annotation.Nonnull;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
-/**
- * Created by Francesco Nobilia on 27/11/2016.
- */
+// TODO this class should substitute org.radarcns.util.RadarConfig
 public class KafkaProperty {
 
     /**
-     * Return properties for a Stream
+     * @param clientID: useful for debugging
+     * @param numThread: number of threads to execute stream processing
+     * @return Properties for a Kafka Stream
      */
     public static Properties getStream(@Nonnull String clientID, @Nonnull int numThread) {
         Properties props = new Properties();
@@ -35,6 +35,12 @@ public class KafkaProperty {
         return props;
     }
 
+    /**
+     * @param clientID: useful for debugging
+     * @param numThread: number of threads to execute stream processing
+     * @param timestampExtractor: custom timestamp extract that overrides the out-of-the-box
+     * @return Properties for a Kafka Stream
+     */
     public static Properties getStream(@Nonnull String clientID, @Nonnull int numThread, @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
         Properties props = getStream(clientID,numThread);
 
