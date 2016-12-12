@@ -31,10 +31,12 @@ public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream, SensorTopic<EmpaticaE4BatteryLevel> topic) throws IOException {
-        kstream.aggregateByKey(DoubleValueCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getBatteryLevel())),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

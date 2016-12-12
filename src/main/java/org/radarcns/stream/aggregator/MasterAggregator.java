@@ -117,6 +117,18 @@ public abstract class MasterAggregator {
     }
 
     /**
+     * Function used by AggregatorWorker to notify a crash and trigger a forced shutdown.
+     * @param stream: the name of the stream that is crashed. Useful for debug purpose
+     */
+    public void notifyCrashedStream(@Nonnull String stream){
+        log.warn("[{}] {} is crashed",nameSensor,stream);
+
+        log.info("Forcing shutdown of {}",nameSensor);
+
+        //TODO implement forcing shutdown
+    }
+
+    /**
      * It checks if the priority params specified by the user can be used or not.
      * TODO: this check can be moved in the org.radarcns.config.PropertiesRadar class.
      * TODO: A valuable enhancement is checking whether the involved topics have as many partitions as the number of starting threads

@@ -52,7 +52,6 @@ public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedK
         Collection<String> collection = new LinkedList<>();
 
         collection.add(source);
-        //collection.add(getInProgessTopic());
         collection.add(getOutputTopic());
 
         return collection;

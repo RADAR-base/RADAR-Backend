@@ -10,8 +10,6 @@ import org.radarcns.stream.collector.DoubleValueCollector;
  */
 public class RadarSerdes{
 
-    private final Serde<MeasurementKey> measurementKeySerde;
-
     private final Serde<DoubleValueCollector> doubelCollector;
     private final Serde<DoubleArrayCollector> doubelArrayCollector;
 
@@ -22,13 +20,8 @@ public class RadarSerdes{
     }
 
     private RadarSerdes() {
-        measurementKeySerde = new RadarSerde<>(MeasurementKey.class).getSerde();
         doubelCollector = new RadarSerde<>(DoubleValueCollector.class).getSerde();
         doubelArrayCollector = new RadarSerde<>(DoubleArrayCollector.class).getSerde();
-    }
-
-    public Serde<MeasurementKey> getMeasurementKeySerde() {
-        return measurementKeySerde;
     }
 
     public Serde<DoubleValueCollector> getDoubelCollector() {

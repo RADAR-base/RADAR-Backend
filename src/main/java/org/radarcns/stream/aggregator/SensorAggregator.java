@@ -57,6 +57,8 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
         streams = new KafkaStreams(getBuilder(), KafkaProperty.getStream(clientID,numThread,DeviceTimestampExtractor.class));
 
+        streams.setUncaughtExceptionHandler(this);
+
         log.info("Creating {} stream",clientID);
     }
 
@@ -131,5 +133,18 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         thread.setName(this.clientID);
 
         return thread;
+    }
+
+    /**
+     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * terminating due to an exception.
+     */
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+
+        master.notifyCrashedStream(clientID);
+
+        //TODO find a better solution based on the exception
     }
 }

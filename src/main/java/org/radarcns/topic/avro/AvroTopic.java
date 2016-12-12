@@ -24,9 +24,9 @@ public abstract class AvroTopic <K extends SpecificRecord, V extends SpecificRec
     private final Class<K> keyClass;
     private final Class<V> valueClass;
 
-    //Enumerate all possible topics suffix
+    //Enumerate all possible suffix
     private enum Suffix {
-        in_progress("in_progress"), output("output");
+        output("output"), store("store");
 
         private final String param;
 
@@ -63,17 +63,17 @@ public abstract class AvroTopic <K extends SpecificRecord, V extends SpecificRec
     public abstract String getInputTopic();
 
     /**
-     * @return the name of the topic used to aggregate data consumed from this topic
-     */
-    public String getInProgessTopic(){
-        return name+"_"+ Suffix.in_progress;
-    }
-
-    /**
      * @return the name of the topic used to write results of data aggregation
      */
     public String getOutputTopic(){
         return name+"_"+ Suffix.output;
+    }
+
+    /**
+     * @return the State Store name for the given topic
+     */
+    public String getStateStoreName(){
+        return name+"_"+ Suffix.store;
     }
 
     /**

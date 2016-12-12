@@ -132,5 +132,18 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
 
         return thread;
     }
+
+    /**
+     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * terminating due to an exception.
+     */
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+
+        master.notifyCrashedStream(clientID);
+
+        //TODO find a better solution based on the exception
+    }
 }
 

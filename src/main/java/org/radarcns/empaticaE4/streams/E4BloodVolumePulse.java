@@ -30,10 +30,12 @@ public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePu
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream, SensorTopic<EmpaticaE4BloodVolumePulse> topic) throws IOException {
-        kstream.aggregateByKey(DoubleValueCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getBloodVolumePulse())),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

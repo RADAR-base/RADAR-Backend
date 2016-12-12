@@ -14,8 +14,8 @@ mainClassName = 'org.radarcns.Main'
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.kafkaVersion = '0.10.0.1-cp1'
-ext.confluentVersion = '3.0.1'
+ext.kafkaVersion = '0.10.1.0-cp2'
+ext.confluentVersion = '3.1.1'
 ext.slf4jVersion = '1.7.21'
 ext.log4jVersion = '2.7'
 ext.mongodbVersion = '3.3.0'
@@ -61,6 +61,9 @@ dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeyamlVersion
 
     codacy 'com.github.codacy:codacy-coverage-reporter:-SNAPSHOT'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.slf4j:slf4j-simple:1.7.21'
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {

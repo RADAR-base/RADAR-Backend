@@ -3,7 +3,7 @@ package org.radarcns.stream.aggregator;
 /**
  * Runnable abstraction of Kafka Stream Handler
  */
-public interface AggregatorWorker extends Runnable {
+public interface AggregatorWorker extends Runnable, Thread.UncaughtExceptionHandler {
     Thread getThread();
 
     String getName();

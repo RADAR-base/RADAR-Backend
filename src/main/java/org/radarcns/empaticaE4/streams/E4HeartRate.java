@@ -31,11 +31,12 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream, InternalTopic<DoubleAggegator> topic) throws IOException {
-
-        kstream.aggregateByKey(DoubleValueCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.ibiToHR(v.getInterBeatInterval())),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                RadarSerdes.getInstance().getMeasurementKeySerde(),RadarSerdes.getInstance().getDoubelCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
