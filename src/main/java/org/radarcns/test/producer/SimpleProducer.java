@@ -13,17 +13,14 @@ import java.net.UnknownHostException;
 
 import javax.annotation.Nonnull;
 
-/**
- * Created by Francesco Nobilia on 26/09/2016.
- */
 public class SimpleProducer {
 
     private final static Logger log = LoggerFactory.getLogger(SimpleProducer.class);
 
-    private final KafkaProducer producer;
+    private final KafkaProducer<Object, Object> producer;
 
     public SimpleProducer(){
-        producer = new KafkaProducer(KafkaProperties.getSimpleProducer());
+        producer = new KafkaProducer<>(KafkaProperties.getSimpleProducer());
     }
 
     /**
@@ -46,7 +43,7 @@ public class SimpleProducer {
      * @param key
      */
     public void send(@Nonnull String topic, @Nonnull Object key, @Nonnull final Object message){
-        ProducerRecord<Object, Object> record = new ProducerRecord<Object, Object>(topic, key, message);
+        ProducerRecord<Object, Object> record = new ProducerRecord<>(topic, key, message);
 
         log.info("["+topic+"]"+key.toString()+" - "+message.toString());
 

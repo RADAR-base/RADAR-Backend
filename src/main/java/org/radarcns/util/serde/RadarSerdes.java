@@ -1,7 +1,6 @@
 package org.radarcns.util.serde;
 
 import org.apache.kafka.common.serialization.Serde;
-import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 

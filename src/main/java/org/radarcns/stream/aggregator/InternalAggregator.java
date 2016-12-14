@@ -16,8 +16,8 @@ import javax.annotation.Nonnull;
 
 /**
  * Runnable abstraction of a Kafka stream that consumes Internal Topic
- * The generic I is the Java class representing the consumed message
- * The generic O is the Java class representing the aggregated results
+ * @param <I> consumed message type
+ * @param <O> aggregated results type
  * @see org.radarcns.topic.internal.InternalTopic
  * @see org.radarcns.config.KafkaProperty
  * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor

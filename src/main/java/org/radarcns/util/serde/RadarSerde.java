@@ -20,7 +20,7 @@ public class RadarSerde<T> {
     }
 
     public Serde<T> getSerde(){
-        return Serdes.serdeFrom(jsonSerializer,jsonDeserializer);
+        return Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
     }
 
     public Serde<Windowed<T>> getWindowed(){

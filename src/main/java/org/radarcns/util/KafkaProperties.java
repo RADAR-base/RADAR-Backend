@@ -14,9 +14,6 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 
-/**
- * Created by Francesco Nobilia on 29/09/2016.
- */
 public class KafkaProperties {
 
     private static RadarConfig config = new RadarConfig();

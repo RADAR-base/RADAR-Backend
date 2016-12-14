@@ -1,4 +1,4 @@
-package org.radarcns.sink.HDFS;
+package org.radarcns.sink.hdfs;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;

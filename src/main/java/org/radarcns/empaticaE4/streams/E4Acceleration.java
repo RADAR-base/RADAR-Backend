@@ -9,7 +9,6 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
@@ -33,7 +32,7 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4Acceleration> kstream, SensorTopic<EmpaticaE4Acceleration> topic) throws IOException {
         kstream.groupByKey().aggregate(
-                DoubleArrayCollector::new,
+                () -> new DoubleArrayCollector(3),
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.accelerationToArray(v)),
                 TimeWindows.of(10 * 1000L),
                 RadarSerdes.getInstance().getDoubelArrayCollector(),

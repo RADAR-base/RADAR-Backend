@@ -27,11 +27,13 @@ public class RadarThreadFactoryBuilder {
 
     public RadarThreadFactoryBuilder setPriority(int priority) {
         if (priority < Thread.MIN_PRIORITY) {
-            throw new IllegalArgumentException("Thread priority " + priority + " must be >= " + Thread.MIN_PRIORITY);
+            throw new IllegalArgumentException("Thread priority " + priority
+                    + " must be >= " + Thread.MIN_PRIORITY);
         }
 
 		if (priority > Thread.MAX_PRIORITY) {
-            throw new IllegalArgumentException("Thread priority " + priority + " must be <= " + Thread.MAX_PRIORITY);
+            throw new IllegalArgumentException("Thread priority " + priority
+                    + " must be <= " + Thread.MAX_PRIORITY);
         }
 
 		this.priority = priority;
@@ -44,27 +46,20 @@ public class RadarThreadFactoryBuilder {
 
     private static ThreadFactory build(RadarThreadFactoryBuilder builder) {
         final String namePrefix = builder.namePrefix;
-        final Boolean daemon = builder.daemon;
-        final Integer priority = builder.priority;
+        final boolean daemon = builder.daemon;
+        final int priority = builder.priority;
 
         final AtomicLong count = new AtomicLong(0);
 
-        return new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                Thread thread = new Thread(runnable);
-                if (namePrefix != null) {
-                    thread.setName(namePrefix + "-" + count.getAndIncrement());
-                }
-                if (daemon != null) {
-                    thread.setDaemon(daemon);
-                }
-                if (priority != null) {
-                    thread.setPriority(priority);
-                }
-                return thread;
+        return runnable -> {
+            Thread thread = new Thread(runnable);
+            if (namePrefix != null) {
+                thread.setName(namePrefix + "-" + count.getAndIncrement());
             }
+            thread.setDaemon(daemon);
+            thread.setPriority(priority);
+
+            return thread;
         };
     }
-
 }

@@ -10,9 +10,11 @@ import org.radarcns.key.WindowedKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by Francesco Nobilia on 04/10/2016.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.primitives.Doubles.asList;
+
 public class RadarUtils {
 
     private final static Logger log = LoggerFactory.getLogger(RadarUtils.class);
@@ -23,7 +25,6 @@ public class RadarUtils {
      * @return {key schema, value schema} it might contain null values if no schema has been used
      */
     public static String[] getSchemaName(ConsumerRecord<Object,Object> record){
-
         if(record == null){
             throw new NullPointerException("Record is null");
         }
@@ -56,27 +57,18 @@ public class RadarUtils {
     }
 
     public static double floatToDouble(float input){
-        Float f = new Float(input);
-        Double d = new Double(f.toString());
-        return d.doubleValue();
-    }
-
-    public static long doubleToLong(double input){
-        long output = (long) input;
-        return output;
+        return Double.parseDouble(String.valueOf(input));
     }
 
     public static double ibiToHR(float input){
         return (60d)/floatToDouble(input);
     }
 
-    public static Double[] accelerationToArray(EmpaticaE4Acceleration value){
-        Double array[] = {
+    public static double[] accelerationToArray(EmpaticaE4Acceleration value){
+        return new double[] {
                 floatToDouble(value.getX()),
                 floatToDouble(value.getY()),
                 floatToDouble(value.getY())};
-
-        return array;
     }
 
 }

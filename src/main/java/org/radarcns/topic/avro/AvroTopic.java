@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
  * <li>a topic where temporary results are stored before the end of the time window (e.g. in_progress)</li>
  * <li>an output topic that persists the aggregated results (e.g. input topic)</li>
  */
-public abstract class AvroTopic <K extends SpecificRecord, V extends SpecificRecord> {
+public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     private final String name;
     private final Class<K> keyClass;
     private final Class<V> valueClass;

@@ -1,4 +1,4 @@
-package org.radarcns.sink.HDFS;
+package org.radarcns.sink.hdfs;
 
 import io.confluent.connect.hdfs.RecordWriterProvider;
 import io.confluent.connect.hdfs.avro.AvroFormat;

@@ -11,29 +11,28 @@ import java.util.LinkedList;
 import javax.annotation.Nonnull;
 
 /**
- * Specialisation of AvroTopic representing topics used to aggregate data.
- * Since it describes the computation from the initial point of view. The topic key is org.radarcns.key.MeasurementKey
+ * Specialisation of AvroTopic representing topics used to aggregate data. Since it describes the
+ * computation from the initial point of view. The topic key is org.radarcns.key.MeasurementKey
+ *
  * @see org.radarcns.topic.avro.AvroTopic
  * @see org.radarcns.key.MeasurementKey
  */
-public class SensorTopic<V extends SpecificRecord> extends AvroTopic<MeasurementKey,V> {
+public class SensorTopic<V extends SpecificRecord> extends AvroTopic<MeasurementKey, V> {
 
     /**
      * @param name: name of the input topic
      * @param valueClass: java class representing the record
      */
     public SensorTopic(@Nonnull String name, @Nonnull Class<V> valueClass) {
-        super(name,MeasurementKey.class,valueClass);
+        super(name, MeasurementKey.class, valueClass);
     }
 
-    /**
-    * @return tha input topic name
-    */
-    public String getInputTopic(){
+    /** @return tha input topic name */
+    public String getInputTopic() {
         return super.getName();
     }
 
-    public Collection<String> getAllTopicNames(){
+    public Collection<String> getAllTopicNames() {
         Collection<String> collection = new LinkedList<>();
 
         collection.add(getInputTopic());
