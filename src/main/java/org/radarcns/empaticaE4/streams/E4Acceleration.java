@@ -9,6 +9,7 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
@@ -16,7 +17,7 @@ import org.radarcns.util.serde.RadarSerdes;
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Definition of Kafka Stream for aggregating data collected by Empatica E4 Acceleromete
  */
 public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 
@@ -31,10 +32,12 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4Acceleration> kstream, SensorTopic<EmpaticaE4Acceleration> topic) throws IOException {
-        kstream.aggregateByKey(DoubleArrayCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleArrayCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.accelerationToArray(v)),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelArrayCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelArrayCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

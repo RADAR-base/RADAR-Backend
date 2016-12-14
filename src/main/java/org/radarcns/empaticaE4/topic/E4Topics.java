@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by Francesco Nobilia on 18/11/2016.
+ * Singleton class representing the list of Empatica E4 topics
  */
 public class E4Topics implements DeviceTopics {
 
@@ -36,10 +36,16 @@ public class E4Topics implements DeviceTopics {
         return list;
     }
 
+    /**
+     * @return an instance of E4SensorTopics
+     */
     public E4SensorTopics getSensorTopics() {
         return sensorTopics;
     }
 
+    /**
+     * @return an instance of E4InternalTopics
+     */
     public E4InternalTopics getInternalTopics() {
         return internalTopics;
     }

@@ -6,11 +6,9 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
- * Created by Francesco Nobilia on 17/11/2016.
+ * Set of Serde usefull for Kafka Streams
  */
 public class RadarSerdes{
-
-    private final Serde<MeasurementKey> measurementKeySerde;
 
     private final Serde<DoubleValueCollector> doubelCollector;
     private final Serde<DoubleArrayCollector> doubelArrayCollector;
@@ -22,13 +20,8 @@ public class RadarSerdes{
     }
 
     private RadarSerdes() {
-        measurementKeySerde = new RadarSerde<>(MeasurementKey.class).getSerde();
         doubelCollector = new RadarSerde<>(DoubleValueCollector.class).getSerde();
         doubelArrayCollector = new RadarSerde<>(DoubleArrayCollector.class).getSerde();
-    }
-
-    public Serde<MeasurementKey> getMeasurementKeySerde() {
-        return measurementKeySerde;
     }
 
     public Serde<DoubleValueCollector> getDoubelCollector() {

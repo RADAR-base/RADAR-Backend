@@ -10,16 +10,14 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.InternalAggregator;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.topic.Internal.InternalTopic;
+import org.radarcns.topic.internal.InternalTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
- * This Internal consumes the Empatica E4 topic for E4InterBeatInterval sensor and
- * trasform it in a Heart Rate value
+ * Definition of Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,DoubleAggegator> {
 
@@ -33,11 +31,12 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream, InternalTopic<DoubleAggegator> topic) throws IOException {
-
-        kstream.aggregateByKey(DoubleValueCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.ibiToHR(v.getInterBeatInterval())),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                RadarSerdes.getInstance().getMeasurementKeySerde(),RadarSerdes.getInstance().getDoubelCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

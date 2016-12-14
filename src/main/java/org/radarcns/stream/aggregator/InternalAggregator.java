@@ -6,7 +6,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.topic.Internal.InternalTopic;
+import org.radarcns.topic.internal.InternalTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,12 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Runnable abstraction of a Kafka stream that consumes Internal Topic
+ * The generic I is the Java class representing the consumed message
+ * The generic O is the Java class representing the aggregated results
+ * @see org.radarcns.topic.internal.InternalTopic
+ * @see org.radarcns.config.KafkaProperty
+ * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor
  */
 public abstract class InternalAggregator<I,O extends SpecificRecord> implements AggregatorWorker {
 
@@ -27,10 +32,21 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
 
     private final MasterAggregator master;
 
+    /**
+     * @param topic: kafka topic that will be consumed
+     * @param clientID: useful to debug usign the Kafka log
+     * @param master: pointer to the MasterAggregator useful to call the notification functions
+     */
     public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID, @Nonnull MasterAggregator master) throws IOException{
         this(topic,clientID,1,master);
     }
 
+    /**
+     * @param topic: kafka topic that will be consumed
+     * @param clientID: useful to debug usign the Kafka log
+     * @param numThread: number of threads to execute stream processing
+     * @param master: pointer to the MasterAggregator useful to call the notification functions
+     */
     public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID, @Nonnull int numThread, @Nonnull MasterAggregator master) throws IOException{
         if(numThread < 1){
             throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
@@ -45,6 +61,9 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         log.info("Creating {} stream",clientID);
     }
 
+    /**
+     * @return KStreamBuilder used to instantiate the Kafka Streams
+     */
     private KStreamBuilder getBuilder() throws IOException{
 
         final KStreamBuilder builder = new KStreamBuilder();
@@ -58,8 +77,14 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         return builder;
     }
 
-    protected abstract void setStream(KStream<MeasurementKey,I> kstream, InternalTopic<O> topic) throws IOException;
+    /**
+     * @implSpec it defines the stream computation
+     */
+    protected abstract void setStream(@Nonnull KStream<MeasurementKey,I> kstream, @Nonnull InternalTopic<O> topic) throws IOException;
 
+    /**
+     * It starts the stream and notify the MasterAggregator
+     */
     @Override
     public void run() {
         log.info("Starting {} stream",clientID);
@@ -68,6 +93,9 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         master.notifyStartedStream(clientID);
     }
 
+    /**
+     * It closes the stream and notify the MasterAggregator
+     */
     @Override
     public void shutdown(){
         log.info("Shutting down {} stream",clientID);
@@ -76,16 +104,25 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         master.notifyClosedStream(clientID);
     }
 
+    /**
+     * @return the streams' client ID
+     */
     @Override
     public String getClientID(){
         return this.clientID;
     }
 
+    /**
+     * @return the streams' name
+     */
     @Override
     public String getName(){
         return getClientID();
     }
 
+    /**
+     * @return a Thread ready to run the current instance of InternalAggregator
+     */
     @Override
     public Thread getThread() {
         Thread thread;
@@ -94,6 +131,19 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
         thread.setName(this.clientID);
 
         return thread;
+    }
+
+    /**
+     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * terminating due to an exception.
+     */
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+
+        master.notifyCrashedStream(clientID);
+
+        //TODO find a better solution based on the exception
     }
 }
 

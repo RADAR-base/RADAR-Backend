@@ -14,8 +14,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
- * Created by Francesco Nobilia on 10/11/2016.
+ * Java Singleton class for handling the yml config file
  */
 public class PropertiesRadar {
 
@@ -48,7 +51,14 @@ public class PropertiesRadar {
         return instance.config;
     }
 
-    public static void load(String pathFile) throws Exception {
+    /**
+     * @param pathFile: location of configuration file. If null, it tries to check whether there is
+     *                  a configuration file in the same location of its jar
+     * @throws IllegalStateException if an instance is already available. You cannot load twice a singleton class
+     * @throws IllegalArgumentException if either the pathFile does not point to a valid config file
+     *                                  or the pathFile is null and there is any valid config file in the same jar location
+     */
+    public static void load(@Nullable String pathFile) throws Exception {
 
         String message = "USER CONFIGURATION";
 
@@ -56,6 +66,7 @@ public class PropertiesRadar {
             throw new IllegalStateException("Property class has been already loaded");
         }
 
+        //If pathFile is null
         if(Strings.isNullOrEmpty(pathFile)){
             pathFile = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
             pathFile = pathFile.substring(0,pathFile.lastIndexOf('/') + 1)+ nameConfigFile;
@@ -90,7 +101,12 @@ public class PropertiesRadar {
         }
     }
 
-    private PropertiesRadar(String pathFile) throws IOException{
+    /**
+     * @param pathFile: location of yml file is going to be loaded
+     * @throws IOException if the file does not exist or it does not respect the ConfigRadar java class
+     * @see org.radarcns.config.ConfigRadar
+     */
+    private PropertiesRadar(@Nonnull String pathFile) throws IOException{
         try{
             Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(pathFile));
@@ -102,7 +118,11 @@ public class PropertiesRadar {
         }
     }
 
-    private static void updateLog4jConfiguration(String logPath) throws Exception {
+    /**
+     * @param logPath: new log file defined by the user
+     * @throws IllegalArgumentException if logPath is null or is not a valid file
+     */
+    private static void updateLog4jConfiguration(@Nonnull String logPath) throws Exception {
         String message = null;
 
         if(Strings.isNullOrEmpty(logPath)){

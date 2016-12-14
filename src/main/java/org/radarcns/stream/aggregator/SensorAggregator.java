@@ -15,7 +15,11 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Runnable abstraction of a Kafka stream that consumes Sensor Topic.
+ * The generic V is the Java class representing the consumed message
+ * @see org.radarcns.topic.sensor.SensorTopic
+ * @see org.radarcns.config.KafkaProperty
+ * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor
  */
 public abstract class SensorAggregator<V extends SpecificRecord> implements AggregatorWorker {
 
@@ -27,10 +31,21 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
     private final MasterAggregator master;
 
+    /**
+     * @param topic: kafka topic that will be consumed
+     * @param clientID: useful to debug usign the Kafka log
+     * @param master: pointer to the MasterAggregator useful to call the notification functions
+     */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull MasterAggregator master) throws IOException{
         this(topic,clientID,1,master);
     }
 
+    /**
+     * @param topic: kafka topic that will be consumed
+     * @param clientID: useful to debug usign the Kafka log
+     * @param numThread: number of threads to execute stream processing
+     * @param master: pointer to the MasterAggregator useful to call the notification functions
+     */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull int numThread, @Nonnull MasterAggregator master) throws IOException{
         if(numThread < 1){
             throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
@@ -42,9 +57,14 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
 
         streams = new KafkaStreams(getBuilder(), KafkaProperty.getStream(clientID,numThread,DeviceTimestampExtractor.class));
 
+        streams.setUncaughtExceptionHandler(this);
+
         log.info("Creating {} stream",clientID);
     }
 
+    /**
+     * @return KStreamBuilder used to instantiate the Kafka Streams
+     */
     private KStreamBuilder getBuilder() throws IOException{
         KStreamBuilder builder = new KStreamBuilder();
 
@@ -59,8 +79,14 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         return builder;
     }
 
-    protected abstract void setStream(KStream<MeasurementKey,V> kstream, SensorTopic<V> topic) throws IOException;
+    /**
+     * @implSpec it defines the stream computation
+     */
+    protected abstract void setStream(@Nonnull KStream<MeasurementKey,V> kstream, @Nonnull SensorTopic<V> topic) throws IOException;
 
+    /**
+     * It starts the stream and notify the MasterAggregator
+     */
     @Override
     public void run() {
         log.info("Starting {} stream",clientID);
@@ -69,6 +95,9 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         master.notifyStartedStream(clientID);
     }
 
+    /**
+     * It closes the stream and notify the MasterAggregator
+     */
     @Override
     public void shutdown(){
         log.info("Shutting down {} stream",clientID);
@@ -77,16 +106,25 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         master.notifyClosedStream(clientID);
     }
 
+    /**
+     * @return the streams' client ID
+     */
     @Override
     public String getClientID(){
         return this.clientID;
     }
 
+    /**
+     * @return the streams' name
+     */
     @Override
     public String getName(){
         return getClientID();
     }
 
+    /**
+     * @return a Thread ready to run the current instance of SensorAggregator
+     */
     @Override
     public Thread getThread() {
         Thread thread;
@@ -95,5 +133,18 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         thread.setName(this.clientID);
 
         return thread;
+    }
+
+    /**
+     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * terminating due to an exception.
+     */
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+
+        master.notifyCrashedStream(clientID);
+
+        //TODO find a better solution based on the exception
     }
 }

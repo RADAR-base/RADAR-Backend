@@ -16,7 +16,7 @@ import org.radarcns.util.serde.RadarSerdes;
 import java.io.IOException;
 
 /**
- * Created by Francesco Nobilia on 11/10/2016.
+ * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4
  */
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
 
@@ -31,10 +31,12 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
 
     @Override
     protected void setStream(KStream<MeasurementKey, EmpaticaE4Temperature> kstream, SensorTopic<EmpaticaE4Temperature> topic) throws IOException {
-        kstream.aggregateByKey(DoubleValueCollector::new,
+        kstream.groupByKey().aggregate(
+                DoubleValueCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getTemperature())),
-                TimeWindows.of(topic.getInProgessTopic(), 10000),
-                topic.getKeySerde(), RadarSerdes.getInstance().getDoubelCollector())
+                TimeWindows.of(10 * 1000L),
+                RadarSerdes.getInstance().getDoubelCollector(),
+                topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

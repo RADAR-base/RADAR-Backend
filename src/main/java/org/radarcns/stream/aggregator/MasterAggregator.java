@@ -9,8 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nonnull;
+
 /**
- * Created by Francesco Nobilia on 24/11/2016.
+ * Abstraction of a set of AggregatorWorker
+ * @see org.radarcns.stream.aggregator.AggregatorWorker
  */
 public abstract class MasterAggregator {
 
@@ -20,7 +23,11 @@ public abstract class MasterAggregator {
     private final String nameSensor;
     private final AtomicInteger currentStream;
 
-    protected MasterAggregator(boolean standalone, String nameSensor) throws IOException{
+    /**
+     * @param standalone: true means that the aggregator will assign one thread per stream
+     * @param nameSensor: the name of the device that produced data that will be consumed. Only for debug
+     */
+    protected MasterAggregator(boolean standalone,@Nonnull String nameSensor) throws IOException{
         if(!standalone){
             checkThreadParams();
         }
@@ -52,16 +59,31 @@ public abstract class MasterAggregator {
         log.info("Creating MasterAggregator instance for {}",nameSensor);
     }
 
-    protected abstract void createWorker(List<AggregatorWorker> list, int low, int normal, int high) throws IOException;
+    /**
+     * Function called by the constructor to populate the AggregatorWorker list
+     * @param list:
+     * @param low,normal,high: are the three available priority levels that can be used to start kafka streams
+     */
+    protected abstract void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high) throws IOException;
 
-    protected abstract void announceTopics(Logger log);
+    /**
+     * Informative function to log the topics list that the application is going to use
+     * @param log: the logger instance that will be used to notify the user
+     */
+    protected abstract void announceTopics(@Nonnull Logger log);
 
+    /**
+     * It starts all AggregatorWorkers controlled by this MasterAggregator
+     */
     public void start(){
         log.info("Starting all streams for {}",nameSensor);
 
         list.forEach( v -> v.getThread().start());
     }
 
+    /**
+     * It stops all AggregatorWorkers controlled by this MasterAggregator
+     */
     public void shutdown() throws InterruptedException {
         log.info("Shutting down all streams for {}",nameSensor);
 
@@ -70,12 +92,20 @@ public abstract class MasterAggregator {
         }
     }
 
-    public void notifyStartedStream(String stream){
+    /**
+     * Informative function used by AggregatorWorker to notify that it has started its managed stream
+     * @param stream: the name of the stream that has been started. Useful for debug purpose
+     */
+    public void notifyStartedStream(@Nonnull String stream){
         int current = currentStream.incrementAndGet();
         log.info("[{}] {} is started. {}/{} streams are now running",nameSensor,stream,current,list.size());
     }
 
-    public void notifyClosedStream(String stream){
+    /**
+     * Informative function used by AggregatorWorker to notify that it has closed its managed stream
+     * @param stream: the name of the stream that has been closed. Useful for debug purpose
+     */
+    public void notifyClosedStream(@Nonnull String stream){
         int current = currentStream.decrementAndGet();
 
         if(current == 0){
@@ -86,6 +116,23 @@ public abstract class MasterAggregator {
         }
     }
 
+    /**
+     * Function used by AggregatorWorker to notify a crash and trigger a forced shutdown.
+     * @param stream: the name of the stream that is crashed. Useful for debug purpose
+     */
+    public void notifyCrashedStream(@Nonnull String stream){
+        log.warn("[{}] {} is crashed",nameSensor,stream);
+
+        log.info("Forcing shutdown of {}",nameSensor);
+
+        //TODO implement forcing shutdown
+    }
+
+    /**
+     * It checks if the priority params specified by the user can be used or not.
+     * TODO: this check can be moved in the org.radarcns.config.PropertiesRadar class.
+     * TODO: A valuable enhancement is checking whether the involved topics have as many partitions as the number of starting threads
+     */
     private void checkThreadParams(){
         if(PropertiesRadar.getInstance().threadsByPriority(PropertiesRadar.Priority.HIGH) < 1) {
             log.error("Invalid parameter: {} priority threads are {}",

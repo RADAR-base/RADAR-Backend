@@ -57,8 +57,8 @@ public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
 
         final org.apache.avro.Schema combinedSchema = org.apache.avro.Schema.createRecord("combinedSchema"+name, "combined key value record", "org.radarcns.empaticaE4", false);
         combinedSchema.setFields((Arrays.asList(
-                new org.apache.avro.Schema.Field(keyFieldName , avroKeySchema, "keySchema" , null)
-                ,new org.apache.avro.Schema.Field(valueFieldName , avroValueSchema, "valueSchema" , null))));
+                new org.apache.avro.Schema.Field(keyFieldName , avroKeySchema, "keySchema" , (Object)null)
+                ,new org.apache.avro.Schema.Field(valueFieldName , avroValueSchema, "valueSchema" , (Object)null))));
 
 
         final FSDataOutputStream out = path.getFileSystem(conf).create(path);
