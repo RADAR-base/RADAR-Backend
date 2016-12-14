@@ -18,5 +18,9 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="radarbackend_main" target="1.8" />
+      <module name="radarbackend_test" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
