@@ -2,13 +2,10 @@ package org.radarcns.topic.avro;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serde;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.serde.RadarSerde;
 
-import java.util.Collection;
-
 import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Set of Avro Topics
@@ -16,13 +13,13 @@ import javax.annotation.Nonnull;
  * The generic V is the topic record
  * It defines:<ul>
  * <li>a source topic containing collected data(e.g. input topic)</li>
- * <li>a topic where temporary results are stored before the end of the time window (e.g. in_progress)</li>
+ * <li>a topic where temporary results are stored before the end of the time window
+ *     (e.g. in_progress)</li>
  * <li>an output topic that persists the aggregated results (e.g. input topic)</li>
  */
 public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     private final String name;
     private final Class<K> keyClass;
-    private final Class<V> valueClass;
 
     //Enumerate all possible suffix
     private enum Suffix {
@@ -44,9 +41,9 @@ public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificReco
      * @param keyClass the java class representing the key
      * @param valueClass the java class representing the record
      */
-    public AvroTopic(@Nonnull String name, @Nonnull Class<K> keyClass, @Nonnull Class<V> valueClass) {
+    public AvroTopic(@Nonnull String name, @Nonnull Class<K> keyClass,
+                     @Nonnull Class<V> valueClass) {
         this.name = name;
-        this.valueClass = valueClass;
         this.keyClass = keyClass;
     }
 

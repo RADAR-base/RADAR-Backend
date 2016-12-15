@@ -10,9 +10,8 @@ import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
  * It generates the jsonSerializer and jsonDeserializer for the given input class
  */
 public class RadarSerde<T> {
-
-    private JsonSerializer<T> jsonSerializer;
-    private JsonDeserializer<T> jsonDeserializer;
+    private final JsonSerializer<T> jsonSerializer;
+    private final JsonDeserializer<T> jsonDeserializer;
 
     public RadarSerde(Class<T> type) {
         this.jsonSerializer = new JsonSerializer<>();

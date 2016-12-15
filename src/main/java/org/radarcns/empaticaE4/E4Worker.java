@@ -13,6 +13,7 @@ import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,6 @@ import java.util.stream.Collectors;
  * @see org.radarcns.stream.aggregator.MasterAggregator
  */
 public class E4Worker extends MasterAggregator{
-
     private final static Object syncObject = new Object();
     private static E4Worker instance = null;
 
@@ -31,9 +31,8 @@ public class E4Worker extends MasterAggregator{
             if (instance == null) {
                 instance = new E4Worker(PropertiesRadar.getInstance().isStandalone());
             }
+            return instance;
         }
-
-        return instance;
     }
 
     private E4Worker(boolean standalone) throws IOException{
@@ -41,13 +40,13 @@ public class E4Worker extends MasterAggregator{
     }
 
     @Override
-    protected void announceTopics(Logger log){
-        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n  - " +
-                E4Topics.getInstance().getTopicNames().stream().map(Object::toString).collect(Collectors.joining("\n  - ")));
+    protected void announceTopics(@Nonnull Logger log){
+        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n  - {}",
+                String.join("\n  - ", E4Topics.getInstance().getTopicNames()));
     }
 
     @Override
-    protected void createWorker(List<AggregatorWorker> list, int low, int normal, int high) throws IOException{
+    protected void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high) throws IOException {
         list.add(new E4Acceleration("E4Acceleration",high,this));
         list.add(new E4BatteryLevel("E4BatteryLevel",low,this));
         list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this));

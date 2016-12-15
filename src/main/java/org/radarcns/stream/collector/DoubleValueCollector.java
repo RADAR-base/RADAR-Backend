@@ -89,31 +89,31 @@ public class DoubleValueCollector {
         return new DoubleAggegator(min, max, sum, count, avg, getQuartile(), iqr);
     }
 
-    double getMin() {
+    public double getMin() {
         return min;
     }
 
-    double getMax() {
+    public double getMax() {
         return max;
     }
 
-    double getSum() {
+    public double getSum() {
         return sum;
     }
 
-    double getCount() {
+    public double getCount() {
         return count;
     }
 
-    double getAvg() {
+    public double getAvg() {
         return avg;
     }
 
-    List<Double> getQuartile() {
+    public List<Double> getQuartile() {
         return Doubles.asList(quartile);
     }
 
-    double getIqr() {
+    public double getIqr() {
         return iqr;
     }
 }

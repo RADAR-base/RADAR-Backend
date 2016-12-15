@@ -96,8 +96,8 @@ public class PropertiesRadar {
         //  - mode can be standalone or high_performance
         //  - all thread priority must be bigger than 1
 
-        if(!Strings.isNullOrEmpty(instance.config.getLog_path())) {
-            updateLog4jConfiguration(instance.config.getLog_path());
+        if(!Strings.isNullOrEmpty(instance.config.getLogPath())) {
+            updateLog4jConfiguration(instance.config.getLogPath());
         }
     }
 

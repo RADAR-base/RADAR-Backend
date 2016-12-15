@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import javax.annotation.Nonnull;
 
@@ -23,7 +24,7 @@ import javax.annotation.Nonnull;
  */
 public abstract class SensorAggregator<V extends SpecificRecord> implements AggregatorWorker {
 
-    private final static Logger log = LoggerFactory.getLogger(SensorAggregator.class);
+    private static final Logger log = LoggerFactory.getLogger(SensorAggregator.class);
 
     private final String clientID;
     private KafkaStreams streams;
@@ -36,7 +37,8 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
      * @param clientID: useful to debug usign the Kafka log
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
-    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull MasterAggregator master) throws IOException{
+    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID,
+                            @Nonnull MasterAggregator master) throws IOException{
         this(topic,clientID,1,master);
     }
 
@@ -46,7 +48,9 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
      * @param numThread: number of threads to execute stream processing
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
-    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID, @Nonnull int numThread, @Nonnull MasterAggregator master) throws IOException{
+    public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID,
+                            @Nonnull int numThread,
+                            @Nonnull MasterAggregator master) throws IOException{
         if(numThread < 1){
             throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
         }
@@ -55,11 +59,13 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
         this.clientID = clientID;
         this.master = master;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperty.getStream(clientID,numThread,DeviceTimestampExtractor.class));
+        Properties streamProperties = KafkaProperty.getStream(
+                clientID, numThread, DeviceTimestampExtractor.class);
+        streams = new KafkaStreams(getBuilder(), streamProperties);
 
         streams.setUncaughtExceptionHandler(this);
 
-        log.info("Creating {} stream",clientID);
+        log.info("Creating {} stream", clientID);
     }
 
     /**
@@ -82,7 +88,8 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
     /**
      * @implSpec it defines the stream computation
      */
-    protected abstract void setStream(@Nonnull KStream<MeasurementKey,V> kstream, @Nonnull SensorTopic<V> topic) throws IOException;
+    protected abstract void setStream(@Nonnull KStream<MeasurementKey,V> kstream,
+                                      @Nonnull SensorTopic<V> topic) throws IOException;
 
     /**
      * It starts the stream and notify the MasterAggregator
@@ -100,7 +107,7 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
      */
     @Override
     public void shutdown(){
-        log.info("Shutting down {} stream",clientID);
+        log.info("Shutting down {} stream", clientID);
         streams.close();
 
         master.notifyClosedStream(clientID);
@@ -141,7 +148,7 @@ public abstract class SensorAggregator<V extends SpecificRecord> implements Aggr
      */
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+        log.error("Thread {} has been terminated due to {}", t.getName(), e.getMessage(), e);
 
         master.notifyCrashedStream(clientID);
 

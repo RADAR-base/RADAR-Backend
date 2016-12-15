@@ -23,7 +23,6 @@ import javax.annotation.Nonnull;
  * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor
  */
 public abstract class InternalAggregator<I,O extends SpecificRecord> implements AggregatorWorker {
-
     private final static Logger log = LoggerFactory.getLogger(InternalAggregator.class);
 
     private final String clientID;

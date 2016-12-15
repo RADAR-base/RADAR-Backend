@@ -12,9 +12,6 @@ import java.util.stream.Collectors;
  * POJO representing the yml file
  */
 public class ConfigRadar {
-
-    private final Logger logger = LoggerFactory.getLogger(ConfigRadar.class);
-
     private Date released;
     private String version;
     private String log_path;
