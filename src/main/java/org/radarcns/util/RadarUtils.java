@@ -48,7 +48,8 @@ public class RadarUtils {
     }
 
     public static WindowedKey getWindowed(Windowed<MeasurementKey> window){
-        return new WindowedKey(window.key().getUserId(),window.key().getSourceId(),window.window().start(),window.window().end());
+        return new WindowedKey(window.key().getUserId(), window.key().getSourceId(),
+                window.window().start(), window.window().end());
     }
 
     public static double floatToDouble(float input){

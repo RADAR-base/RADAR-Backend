@@ -13,6 +13,7 @@ import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -20,23 +21,21 @@ import java.io.IOException;
  */
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
 
-    public E4Temperature(String clientID, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,master);
-    }
-
     public E4Temperature(String clientID,int numThread, MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread,master);
     }
 
 
     @Override
-    protected void setStream(KStream<MeasurementKey, EmpaticaE4Temperature> kstream, SensorTopic<EmpaticaE4Temperature> topic) throws IOException {
-        kstream.groupByKey().aggregate(
-                DoubleValueCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getTemperature())),
-                TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubelCollector(),
-                topic.getStateStoreName())
+    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream,
+                             @Nonnull SensorTopic<EmpaticaE4Temperature> topic) throws IOException {
+        kstream.groupByKey()
+                .aggregate(
+                        DoubleValueCollector::new,
+                        (k, v, valueCollector) -> valueCollector.add(v.getTemperature()),
+                        TimeWindows.of(10 * 1000L),
+                        RadarSerdes.getInstance().getDoubleCollector(),
+                        topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

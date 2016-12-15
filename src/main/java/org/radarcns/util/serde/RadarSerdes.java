@@ -23,7 +23,7 @@ public class RadarSerdes{
         doubelArrayCollector = new RadarSerde<>(DoubleArrayCollector.class).getSerde();
     }
 
-    public Serde<DoubleValueCollector> getDoubelCollector() {
+    public Serde<DoubleValueCollector> getDoubleCollector() {
         return doubelCollector;
     }
 

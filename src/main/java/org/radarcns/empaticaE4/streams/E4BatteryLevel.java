@@ -13,30 +13,28 @@ import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
  * Definition of Kafka Stream for aggregating data about Empatica E4 battery level
  */
 public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
-
-    public E4BatteryLevel(String clientID, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,master);
-    }
-
     public E4BatteryLevel(String clientID, int numThread, MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,numThread,master);
     }
 
-
     @Override
-    protected void setStream(KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream, SensorTopic<EmpaticaE4BatteryLevel> topic) throws IOException {
-        kstream.groupByKey().aggregate(
-                DoubleValueCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getBatteryLevel())),
-                TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubelCollector(),
-                topic.getStateStoreName())
+    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream,
+                             @Nonnull SensorTopic<EmpaticaE4BatteryLevel> topic)
+            throws IOException {
+        kstream.groupByKey()
+                .aggregate(
+                    DoubleValueCollector::new,
+                    (k, v, valueCollector) -> valueCollector.add(v.getBatteryLevel()),
+                    TimeWindows.of(10 * 1000L),
+                    RadarSerdes.getInstance().getDoubleCollector(),
+                    topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.radarcns.util.RadarUtils.floatToDouble;
+
 /**
  * Java class to aggregate data using Kafka Streams. Double Array is the base unit
  */

@@ -13,6 +13,7 @@ import org.radarcns.topic.sensor.SensorTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -20,22 +21,23 @@ import java.io.IOException;
  */
 public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroDermalActivity> {
 
-    public E4ElectroDermalActivity(String clientID, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,master);
-    }
-
-    public E4ElectroDermalActivity(String clientID, int numThread, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),clientID,numThread,master);
+    public E4ElectroDermalActivity(String clientID, int numThread, MasterAggregator master)
+            throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),
+                clientID, numThread, master);
     }
 
     @Override
-    protected void setStream(KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream, SensorTopic<EmpaticaE4ElectroDermalActivity> topic) throws IOException {
-        kstream.groupByKey().aggregate(
-                DoubleValueCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(RadarUtils.floatToDouble(v.getElectroDermalActivity())),
-                TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubelCollector(),
-                topic.getStateStoreName())
+    protected void setStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream,
+            @Nonnull SensorTopic<EmpaticaE4ElectroDermalActivity> topic) throws IOException {
+        kstream.groupByKey()
+                .aggregate(
+                    DoubleValueCollector::new,
+                    (k, v, valueCollector) -> valueCollector.add(v.getElectroDermalActivity()),
+                    TimeWindows.of(10 * 1000L),
+                    RadarSerdes.getInstance().getDoubleCollector(),
+                    topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

@@ -14,6 +14,7 @@ import org.radarcns.topic.internal.InternalTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -21,22 +22,21 @@ import java.io.IOException;
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,DoubleAggegator> {
 
-    public E4HeartRate(String clientID, MasterAggregator master) throws IOException {
-        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,master);
-    }
-
     public E4HeartRate(String clientID, int numThread, MasterAggregator master) throws IOException {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,numThread,master);
     }
 
     @Override
-    protected void setStream(KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream, InternalTopic<DoubleAggegator> topic) throws IOException {
-        kstream.groupByKey().aggregate(
-                DoubleValueCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(RadarUtils.ibiToHR(v.getInterBeatInterval())),
-                TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubelCollector(),
-                topic.getStateStoreName())
+    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream,
+                             @Nonnull InternalTopic<DoubleAggegator> topic) throws IOException {
+        kstream.groupByKey()
+                .aggregate(
+                    DoubleValueCollector::new,
+                    (k, v, valueCollector) -> valueCollector.add(
+                            RadarUtils.ibiToHR(v.getInterBeatInterval())),
+                    TimeWindows.of(10 * 1000L),
+                    RadarSerdes.getInstance().getDoubleCollector(),
+                    topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());

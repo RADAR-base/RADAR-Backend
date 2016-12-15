@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.radarcns.util.RadarUtils.floatToDouble;
+
 /** Java class to aggregate data using Kafka Streams. Double is the base unit */
 public class DoubleValueCollector {
     private double min = Double.MAX_VALUE;
@@ -20,6 +22,10 @@ public class DoubleValueCollector {
     private double iqr = 0;
 
     private final List<Double> list = new ArrayList<>();
+
+    public DoubleValueCollector add(float value) {
+        return this.add(floatToDouble(value));
+    }
 
     /** @param value: new sample that has to be analysed */
     public DoubleValueCollector add(double value) {

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Singleton MasterAggregator for Empatica E4
