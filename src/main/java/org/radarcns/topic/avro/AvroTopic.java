@@ -1,25 +1,24 @@
 package org.radarcns.topic.avro;
 
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.common.serialization.Serde;
-import org.radarcns.util.serde.RadarSerde;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
  * Set of Avro Topics
- * The generic K is the topic key
- * The generic V is the topic record
  * It defines:<ul>
  * <li>a source topic containing collected data(e.g. input topic)</li>
  * <li>a topic where temporary results are stored before the end of the time window
  *     (e.g. in_progress)</li>
  * <li>an output topic that persists the aggregated results (e.g. input topic)</li>
+ * </ul>
+ * @param <K> topic key type
+ * @param <V> topic record type
  */
 public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     private final String name;
-    private final Class<K> keyClass;
 
     //Enumerate all possible suffix
     private enum Suffix {
@@ -44,7 +43,6 @@ public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificReco
     public AvroTopic(@Nonnull String name, @Nonnull Class<K> keyClass,
                      @Nonnull Class<V> valueClass) {
         this.name = name;
-        this.keyClass = keyClass;
     }
 
     /**
@@ -57,13 +55,15 @@ public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificReco
     /**
      * @return the name of the Input topic
      */
-    public abstract String getInputTopic();
+    public String getInputTopic() {
+        return this.name;
+    }
 
     /**
      * @return the name of the topic used to write results of data aggregation
      */
     public String getOutputTopic(){
-        return name+"_"+ Suffix.output;
+        return name + "_" + Suffix.output;
     }
 
     /**
@@ -74,14 +74,9 @@ public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificReco
     }
 
     /**
-     * @return a Serde that can be applied to the key object of the input topic
-     */
-    public Serde<? extends SpecificRecord> getKeySerde(){
-        return new RadarSerde<>(keyClass).getSerde();
-    }
-
-    /**
      * @return the collection of all used topic
      */
-    public abstract Collection<String> getAllTopicNames();
+    public Collection<String> getAllTopicNames() {
+        return Arrays.asList(getInputTopic(), getOutputTopic());
+    }
 }

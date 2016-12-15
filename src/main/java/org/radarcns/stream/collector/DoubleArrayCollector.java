@@ -35,7 +35,7 @@ public class DoubleArrayCollector {
 
     @Override
     public String toString() {
-        return Arrays.asList(aggregators).toString();
+        return Arrays.toString(aggregators);
     }
 
     /**
@@ -43,7 +43,12 @@ public class DoubleArrayCollector {
      */
     public DoubleArrayAggegator convertInAvro() {
         int len = aggregators.length;
-        List<Double> min = new ArrayList<>(len), max = new ArrayList<>(len), sum = new ArrayList<>(len), count = new ArrayList<>(len), avg = new ArrayList<>(len), iqr = new ArrayList<>(len);
+        List<Double> min = new ArrayList<>(len);
+        List<Double> max = new ArrayList<>(len);
+        List<Double> sum = new ArrayList<>(len);
+        List<Double> count = new ArrayList<>(len);
+        List<Double> avg = new ArrayList<>(len);
+        List<Double> iqr = new ArrayList<>(len);
         List<List<Double>> quartile = new ArrayList<>(len);
 
         for (DoubleValueCollector aggregator : aggregators) {

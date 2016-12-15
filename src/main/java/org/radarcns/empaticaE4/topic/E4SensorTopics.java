@@ -36,13 +36,20 @@ public class E4SensorTopics implements SensorTopics {
     }
 
     private E4SensorTopics() {
-        accelerationTopic = new SensorTopic<>("android_empatica_e4_acceleration", EmpaticaE4Acceleration.class);
-        batteryLevelTopic = new SensorTopic<>("android_empatica_e4_battery_level", EmpaticaE4BatteryLevel.class);
-        bloodVolumePulseTopic = new SensorTopic<>("android_empatica_e4_blood_volume_pulse", EmpaticaE4BloodVolumePulse.class);
-        electroDermalActivityTopic = new SensorTopic<>("android_empatica_e4_electrodermal_activity", EmpaticaE4ElectroDermalActivity.class);
-        interBeatIntervalTopic = new SensorTopic<>("android_empatica_e4_inter_beat_interval", EmpaticaE4InterBeatInterval.class);
-        sensorStatusTopic = new SensorTopic<>("android_empatica_e4_sensor_status", EmpaticaE4SensorStatus.class);
-        temperatureTopic = new SensorTopic<>("android_empatica_e4_temperature", EmpaticaE4Temperature.class);
+        accelerationTopic = new SensorTopic<>(
+                "android_empatica_e4_acceleration", EmpaticaE4Acceleration.class);
+        batteryLevelTopic = new SensorTopic<>(
+                "android_empatica_e4_battery_level", EmpaticaE4BatteryLevel.class);
+        bloodVolumePulseTopic = new SensorTopic<>(
+                "android_empatica_e4_blood_volume_pulse", EmpaticaE4BloodVolumePulse.class);
+        electroDermalActivityTopic = new SensorTopic<>(
+                "android_empatica_e4_electrodermal_activity", EmpaticaE4ElectroDermalActivity.class);
+        interBeatIntervalTopic = new SensorTopic<>(
+                "android_empatica_e4_inter_beat_interval", EmpaticaE4InterBeatInterval.class);
+        sensorStatusTopic = new SensorTopic<>(
+                "android_empatica_e4_sensor_status", EmpaticaE4SensorStatus.class);
+        temperatureTopic = new SensorTopic<>(
+                "android_empatica_e4_temperature", EmpaticaE4Temperature.class);
     }
 
     @Override

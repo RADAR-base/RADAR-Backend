@@ -5,6 +5,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.topic.avro.AvroTopic;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -18,31 +19,11 @@ import javax.annotation.Nonnull;
  * @see org.radarcns.key.MeasurementKey
  */
 public class SensorTopic<V extends SpecificRecord> extends AvroTopic<MeasurementKey, V> {
-
     /**
      * @param name: name of the input topic
      * @param valueClass: java class representing the record
      */
     public SensorTopic(@Nonnull String name, @Nonnull Class<V> valueClass) {
         super(name, MeasurementKey.class, valueClass);
-    }
-
-    /** @return tha input topic name */
-    public String getInputTopic() {
-        return super.getName();
-    }
-
-    public Collection<String> getAllTopicNames() {
-        Collection<String> collection = new LinkedList<>();
-
-        collection.add(getInputTopic());
-        collection.add(getOutputTopic());
-
-        return collection;
-    }
-
-    @Override
-    public Serde<MeasurementKey> getKeySerde(){
-        return (Serde<MeasurementKey>) super.getKeySerde();
     }
 }

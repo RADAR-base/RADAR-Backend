@@ -21,7 +21,7 @@ import java.util.List;
  * Singleton MasterAggregator for Empatica E4
  * @see org.radarcns.stream.aggregator.MasterAggregator
  */
-public class E4Worker extends MasterAggregator{
+public class E4Worker extends MasterAggregator {
     private final static Object syncObject = new Object();
     private static E4Worker instance = null;
 

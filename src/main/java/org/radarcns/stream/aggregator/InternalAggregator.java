@@ -36,8 +36,9 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
      * @param clientID: useful to debug usign the Kafka log
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
-    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID, @Nonnull MasterAggregator master) throws IOException{
-        this(topic,clientID,1,master);
+    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID,
+                              @Nonnull MasterAggregator master) throws IOException{
+        this(topic, clientID, 1, master);
     }
 
     /**
@@ -46,32 +47,36 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
      * @param numThread: number of threads to execute stream processing
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
-    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID, @Nonnull int numThread, @Nonnull MasterAggregator master) throws IOException{
-        if(numThread < 1){
-            throw new IllegalStateException("The number of concurrent threads must be bigger than 0");
+    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID,
+                              int numThread, @Nonnull MasterAggregator master)
+            throws IOException {
+        if (numThread < 1) {
+            throw new IllegalStateException(
+                    "The number of concurrent threads must be bigger than 0");
         }
 
         this.topic = topic;
         this.clientID = clientID;
         this.master = master;
 
-        streams = new KafkaStreams(getBuilder(), KafkaProperty.getStream(clientID,numThread,DeviceTimestampExtractor.class));
+        streams = new KafkaStreams(getBuilder(),
+                KafkaProperty.getStream(clientID, numThread, DeviceTimestampExtractor.class));
 
-        log.info("Creating {} stream",clientID);
+        streams.setUncaughtExceptionHandler(this);
+
+        log.info("Creating {} stream", clientID);
     }
 
     /**
      * @return KStreamBuilder used to instantiate the Kafka Streams
      */
     private KStreamBuilder getBuilder() throws IOException{
+        KStreamBuilder builder = new KStreamBuilder();
 
-        final KStreamBuilder builder = new KStreamBuilder();
-
-        KStream<MeasurementKey,I> valueKStream =  builder.stream(topic.getInputTopic());
-
+        KStream<MeasurementKey,I> valueKStream = builder.stream(topic.getInputTopic());
         setStream(valueKStream, topic);
 
-        log.info("Creating the builder for {} stream",clientID);
+        log.info("Creating the builder for {} stream", clientID);
 
         return builder;
     }
@@ -79,14 +84,15 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
     /**
      * @implSpec it defines the stream computation
      */
-    protected abstract void setStream(@Nonnull KStream<MeasurementKey,I> kstream, @Nonnull InternalTopic<O> topic) throws IOException;
+    protected abstract void setStream(@Nonnull KStream<MeasurementKey, I> kstream,
+                                      @Nonnull InternalTopic<O> topic) throws IOException;
 
     /**
      * It starts the stream and notify the MasterAggregator
      */
     @Override
     public void run() {
-        log.info("Starting {} stream",clientID);
+        log.info("Starting {} stream", clientID);
         streams.start();
 
         master.notifyStartedStream(clientID);
@@ -97,7 +103,7 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
      */
     @Override
     public void shutdown(){
-        log.info("Shutting down {} stream",clientID);
+        log.info("Shutting down {} stream", clientID);
         streams.close();
 
         master.notifyClosedStream(clientID);
@@ -138,7 +144,7 @@ public abstract class InternalAggregator<I,O extends SpecificRecord> implements 
      */
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        log.error("Thread {} has been terminated due to {}",t.getName(),e.getMessage(),e);
+        log.error("Thread {} has been terminated due to {}", t.getName(), e.getMessage(), e);
 
         master.notifyCrashedStream(clientID);
 

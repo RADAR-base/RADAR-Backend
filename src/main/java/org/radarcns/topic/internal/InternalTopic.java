@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
  * @see org.radarcns.key.WindowedKey
  * @see org.radarcns.key.MeasurementKey
  */
-public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedKey,V> {
+public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedKey, V> {
 
     private final String source;
 
@@ -45,23 +45,4 @@ public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedK
     public String getInputTopic(){
         return this.source;
     }
-
-
-    @Override
-    public Collection<String> getAllTopicNames(){
-        Collection<String> collection = new LinkedList<>();
-
-        collection.add(source);
-        collection.add(getOutputTopic());
-
-        return collection;
-    }
-
-    //Override needed since the superclass has WindowedKey as key while the input topic has MeasurementKey
-    @Override
-    public Serde<? extends SpecificRecord> getKeySerde(){
-        return new RadarSerde<>(MeasurementKey.class).getSerde();
-    }
-
-
 }

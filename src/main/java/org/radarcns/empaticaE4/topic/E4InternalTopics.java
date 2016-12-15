@@ -13,7 +13,6 @@ import java.util.Set;
  * @see org.radarcns.topic.internal.InternalTopic
  */
 public class E4InternalTopics implements InternalTopics {
-
     private final InternalTopic<DoubleAggegator> heartRateTopic;
 
     private static E4InternalTopics instance = new E4InternalTopics();
@@ -23,7 +22,9 @@ public class E4InternalTopics implements InternalTopics {
     }
 
     private E4InternalTopics() {
-        heartRateTopic = new InternalTopic<>("android_empatica_e4_inter_beat_interval","android_empatica_e4_heartrate", DoubleAggegator.class);
+        heartRateTopic = new InternalTopic<>(
+                "android_empatica_e4_inter_beat_interval",
+                "android_empatica_e4_heartrate", DoubleAggegator.class);
     }
 
     @Override
