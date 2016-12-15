@@ -16,9 +16,6 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * Created by Francesco Nobilia on 04/10/2016.
- */
 public abstract class ConsumerRadar<K, V> implements Runnable {
     private final static Logger log = LoggerFactory.getLogger(ConsumerRadar.class);
     public final RadarConfig config;
@@ -28,14 +25,14 @@ public abstract class ConsumerRadar<K, V> implements Runnable {
     protected final Properties properties;
 
     ConsumerRadar(String clientID, RadarConfig.TopicGroup topics, Properties properties) {
-        config = new RadarConfig();
+        config = RadarConfig.load(getClass().getClassLoader());
         shutdownLatch = new CountDownLatch(1);
 
         if (properties == null) {
-            properties = KafkaProperties.getSelfCommitConsumer(true,clientID);
+            properties = KafkaProperties.getSelfCommitConsumer(clientID);
         }
         this.properties = properties;
-        consumer = new KafkaConsumer(properties);
+        consumer = new KafkaConsumer<>(properties);
 
         if (topics == null) {
             topics = RadarConfig.TopicGroup.all_in;

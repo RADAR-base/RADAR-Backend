@@ -1,8 +1,10 @@
 package org.radarcns.process;
 
+import org.radarcns.key.MeasurementKey;
+
 public interface BatteryLevelListener {
     enum Status {
         NORMAL, LOW, CRITICAL, EMPTY;
     }
-    void batteryLevelStatusUpdated(Device device, Status status);
+    void batteryLevelStatusUpdated(MeasurementKey device, Status status);
 }

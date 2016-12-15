@@ -10,11 +10,6 @@ import org.radarcns.key.WindowedKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.primitives.Doubles.asList;
-
 public class RadarUtils {
 
     private final static Logger log = LoggerFactory.getLogger(RadarUtils.class);

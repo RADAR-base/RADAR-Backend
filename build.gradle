@@ -65,7 +65,6 @@ dependencies {
     codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.slf4j:slf4j-simple:1.7.21'
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {

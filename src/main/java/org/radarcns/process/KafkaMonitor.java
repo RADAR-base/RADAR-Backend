@@ -1,13 +1,14 @@
 package org.radarcns.process;
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
+import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +17,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 
 /**
  * Monitor a list of topics for anomalous behavior.
  */
-public abstract class KafkaMonitor {
+public abstract class KafkaMonitor<K, V> {
     protected final List<String> topics;
     private final static Logger logger = LoggerFactory.getLogger(KafkaMonitor.class);
 
@@ -35,16 +40,14 @@ public abstract class KafkaMonitor {
      * to call {@see configure()}.
      *
      * @param topics topics to monitor
-     * @param kafkaServers string with Kafka bootstrap servers
-     * @param schemaUrl Schema Registry URL
      */
-    public KafkaMonitor(List<String> topics, String kafkaServers, String schemaUrl) {
+    public KafkaMonitor(List<String> topics) {
+        RadarConfig config = RadarConfig.load(getClass().getClassLoader());
         properties = new Properties();
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, "1");
-        properties.setProperty("schema.registry.url", schemaUrl);
-        properties.setProperty("bootstrap.servers", kafkaServers);
+        properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
+        properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
+        properties.setProperty(CLIENT_ID_CONFIG, "1");
+        config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
         this.consumer = null;
         this.topics = topics;
@@ -54,10 +57,8 @@ public abstract class KafkaMonitor {
      * Call to actually create the consumer.
      */
     protected void configure(Properties properties) {
-//        this.properties.putAll(properties);
-//        consumer = new KafkaConsumer<>(this.properties);
-        consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(topics);
+        this.properties.putAll(properties);
+        consumer = new KafkaConsumer<>(this.properties);
     }
 
     /**
@@ -73,7 +74,7 @@ public abstract class KafkaMonitor {
         try {
             while (!isDone()) {
                 try {
-                    ConsumerRecords<String, GenericRecord> records = consumer.poll(Long.MAX_VALUE);
+                    ConsumerRecords<K, V> records = consumer.poll(Long.MAX_VALUE);
                     ops.add(records.count());
                     logger.info("Received {} records", records.count());
                     evaluateRecords(records);
@@ -119,7 +120,7 @@ public abstract class KafkaMonitor {
     }
 
     /** Evaluate the records that the monitor receives by overriding this function */
-    protected abstract void evaluateRecords(ConsumerRecords<String, GenericRecord> records);
+    protected abstract void evaluateRecords(ConsumerRecords<K, V> records);
 
     /**
      * Whether the monitoring is done.
