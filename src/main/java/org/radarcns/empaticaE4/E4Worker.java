@@ -22,7 +22,7 @@ import java.util.List;
  * @see org.radarcns.stream.aggregator.MasterAggregator
  */
 public class E4Worker extends MasterAggregator {
-    private final static Object syncObject = new Object();
+    private static final Object syncObject = new Object();
     private static E4Worker instance = null;
 
     public static E4Worker getInstance() throws IOException{

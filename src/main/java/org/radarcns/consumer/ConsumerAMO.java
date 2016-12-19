@@ -15,7 +15,7 @@ import java.util.Properties;
  * implementing a self commit policy
  */
 public abstract class ConsumerAMO<K,V> extends ConsumerRadar{
-    private final static Logger log = LoggerFactory.getLogger(ConsumerAMO.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsumerAMO.class);
 
     public ConsumerAMO(String clientID, RadarConfig.TopicGroup topics, Properties properties) {
         super(clientID,topics,properties);

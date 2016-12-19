@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
  */
 public class RadarBackend {
 
-    private final static Logger log = LoggerFactory.getLogger(RadarBackend.class);
+    private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
 
     public RadarBackend(@Nonnull String[] args){
         config(args);

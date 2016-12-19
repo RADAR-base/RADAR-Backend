@@ -17,7 +17,7 @@ import java.util.Properties;
  */
 public abstract class ConsumerALO<K,V> extends ConsumerRadar<K, V> {
 
-    private final static Logger log = LoggerFactory.getLogger(ConsumerALO.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsumerALO.class);
 
     public ConsumerALO(String clientID, RadarConfig.TopicGroup topics, Properties properties) {
         super(clientID,topics,properties);

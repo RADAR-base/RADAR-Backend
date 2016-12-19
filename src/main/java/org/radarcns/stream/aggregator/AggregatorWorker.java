@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public abstract class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord,
         T extends AvroTopic<K, V>> implements Runnable, Thread.UncaughtExceptionHandler {
-    private final static Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
+    private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
 
     private final String clientID;
     private final KafkaStreams streams;

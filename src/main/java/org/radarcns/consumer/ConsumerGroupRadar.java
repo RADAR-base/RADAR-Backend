@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class ConsumerGroupRadar implements Runnable{
 
-    private final static Logger log = LoggerFactory.getLogger(ConsumerGroupRadar.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsumerGroupRadar.class);
 
     private boolean workersCreated = false;
 

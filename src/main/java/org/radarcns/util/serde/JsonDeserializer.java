@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.util.Map;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
-    private final static Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
-    private final static ObjectReader reader = getFieldMapper().reader();
-    private final static JsonFactory jsonFactory = new JsonFactory();
+    private static final Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
+    private static final ObjectReader reader = getFieldMapper().reader();
+    private static final JsonFactory jsonFactory = new JsonFactory();
 
     private Class<T> deserializedClass;
 

@@ -21,7 +21,7 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
     private final Set<MeasurementKey> isLow;
     private final Set<MeasurementKey> isCritical;
     private final List<BatteryLevelListener> listeners;
-    private final static Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
     public BatteryLevelMonitor(String topic) {
         super(Collections.singletonList(topic));

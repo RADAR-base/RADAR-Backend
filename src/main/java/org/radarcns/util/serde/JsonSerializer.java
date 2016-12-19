@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class JsonSerializer<T> implements Serializer<T> {
     
-    private final static Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
     
-    private final static ObjectWriter writer = getFieldMapper().writer();
+    private static final ObjectWriter writer = getFieldMapper().writer();
 
     private static ObjectMapper getFieldMapper() {
         ObjectMapper mapper = new ObjectMapper();

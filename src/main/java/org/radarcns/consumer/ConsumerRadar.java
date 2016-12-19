@@ -17,7 +17,7 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class ConsumerRadar<K, V> implements Runnable {
-    private final static Logger log = LoggerFactory.getLogger(ConsumerRadar.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsumerRadar.class);
     public final RadarConfig config;
     protected final KafkaConsumer<K,V> consumer;
     protected final RadarConfig.TopicGroup topics;

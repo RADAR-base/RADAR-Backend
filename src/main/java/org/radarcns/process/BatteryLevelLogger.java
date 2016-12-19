@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BatteryLevelLogger implements BatteryLevelListener {
-    private final static Logger logger = LoggerFactory.getLogger(BatteryLevelLogger.class);
+    private static final Logger logger = LoggerFactory.getLogger(BatteryLevelLogger.class);
 
     @Override
     public void batteryLevelStatusUpdated(MeasurementKey device, Status status) {

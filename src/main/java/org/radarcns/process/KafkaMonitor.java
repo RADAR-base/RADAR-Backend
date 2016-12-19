@@ -28,7 +28,7 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
  */
 public abstract class KafkaMonitor<K, V> {
     protected final List<String> topics;
-    private final static Logger logger = LoggerFactory.getLogger(KafkaMonitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(KafkaMonitor.class);
 
     protected KafkaConsumer consumer;
     private final Properties properties;
