@@ -57,7 +57,7 @@ public class RadarUtils {
     }
 
     public static double ibiToHR(float input){
-        return (60d)/floatToDouble(input);
+        return 60d / floatToDouble(input);
     }
 
     public static double[] accelerationToArray(EmpaticaE4Acceleration value){
