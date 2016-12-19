@@ -22,7 +22,8 @@ public class DoubleArrayCollector {
     public DoubleArrayCollector add(double[] value) {
         if (collectors.length != value.length) {
             throw new IllegalArgumentException(
-                    "The length of current input differs from the length of the value used to instantiate this collector");
+                    "The length of current input differs from the length of the value used to "
+                    + "instantiate this collector");
         }
         for (int i = 0; i < collectors.length; i++) {
             collectors[i].add(value[i]);
