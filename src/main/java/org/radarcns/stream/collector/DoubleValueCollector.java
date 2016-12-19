@@ -1,9 +1,8 @@
 package org.radarcns.stream.collector;
 
 import com.google.common.primitives.Doubles;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.radarcns.aggregator.DoubleAggegator;
+import org.radarcns.aggregator.DoubleAggregator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,8 +90,8 @@ public class DoubleValueCollector {
     }
 
     /** @return the Avro equivalent class represented by org.radarcns.aggregator.DoubleAggegator */
-    public DoubleAggegator convertInAvro() {
-        return new DoubleAggegator(min, max, sum, count, avg, getQuartile(), iqr);
+    public DoubleAggregator convertInAvro() {
+        return new DoubleAggregator(min, max, sum, count, avg, getQuartile(), iqr);
     }
 
     public double getMin() {

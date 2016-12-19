@@ -1,7 +1,7 @@
 package org.radarcns.empaticaE4.topic;
 
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.aggregator.DoubleAggegator;
+import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.topic.internal.InternalTopic;
 import org.radarcns.topic.internal.InternalTopics;
 
@@ -13,7 +13,7 @@ import java.util.Set;
  * @see org.radarcns.topic.internal.InternalTopic
  */
 public class E4InternalTopics implements InternalTopics {
-    private final InternalTopic<DoubleAggegator> heartRateTopic;
+    private final InternalTopic<DoubleAggregator> heartRateTopic;
 
     private static E4InternalTopics instance = new E4InternalTopics();
 
@@ -24,7 +24,7 @@ public class E4InternalTopics implements InternalTopics {
     private E4InternalTopics() {
         heartRateTopic = new InternalTopic<>(
                 "android_empatica_e4_inter_beat_interval",
-                "android_empatica_e4_heartrate", DoubleAggegator.class);
+                "android_empatica_e4_heartrate", DoubleAggregator.class);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class E4InternalTopics implements InternalTopics {
         return set;
     }
 
-    public InternalTopic<DoubleAggegator> getHeartRateTopic() {
+    public InternalTopic<DoubleAggregator> getHeartRateTopic() {
         return heartRateTopic;
     }
 

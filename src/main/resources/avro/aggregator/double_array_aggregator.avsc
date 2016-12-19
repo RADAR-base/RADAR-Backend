@@ -1,6 +1,6 @@
 {"namespace": "org.radarcns.aggregator",
   "type": "record",
-  "name": "DoubleArrayAggegator",
+  "name": "DoubleArrayAggregator",
   "doc": "Result of data aggregation.",
   "fields": [
     {"name": "min", "type": {"type": "array", "items": "double"}},

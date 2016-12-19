@@ -3,7 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleAggegator;
+import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -20,15 +20,16 @@ import java.io.IOException;
 /**
  * Definition of Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
-public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,DoubleAggegator> {
+public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
 
     public E4HeartRate(String clientID, int numThread, MasterAggregator master) throws IOException {
-        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(),clientID,numThread,master);
+        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientID, numThread,
+                master);
     }
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream,
-                             @Nonnull InternalTopic<DoubleAggegator> topic) throws IOException {
+                             @Nonnull InternalTopic<DoubleAggregator> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
