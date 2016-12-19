@@ -4,6 +4,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Created by nivethika on 19-12-16.
  */
@@ -29,8 +31,11 @@ public class PropertiesRadarTest {
         PropertiesRadar.load(invalidPath);
 
         PropertiesRadar.load("radar.yml");
-    }
 
+        ConfigRadar config = PropertiesRadar.getInstance();
+
+        assertEquals("standalone", config.getMode());
+    }
 
 
 }
