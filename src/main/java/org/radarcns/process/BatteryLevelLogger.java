@@ -24,6 +24,9 @@ public class BatteryLevelLogger implements BatteryLevelListener {
                 logger.error("Battery of sensor {} of user {} is empty",
                         device.getSourceId(), device.getUserId());
                 break;
+            default:
+                // do nothing
+                break;
         }
     }
 }
