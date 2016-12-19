@@ -10,9 +10,9 @@ import java.util.LinkedList;
  */
 public class RollingTimeAverage {
     private final long window;
+    private final Deque<TimeCount> deque;
     private TimeCount firstTime;
     private double total;
-    private Deque<TimeCount> deque;
 
     /**
      * A rolling time average with a sliding time window of fixed duration.
@@ -56,18 +56,22 @@ public class RollingTimeAverage {
             throw new IllegalStateException("Cannot get average without values");
         }
 
-        while (!this.deque.isEmpty() && this.deque.getFirst().time < currentWindowStart) {
-            total -= this.firstTime.value;
-            this.firstTime = this.deque.removeFirst();
+        while (!deque.isEmpty() && deque.getFirst().time < currentWindowStart) {
+            total -= firstTime.value;
+            firstTime = deque.removeFirst();
         }
-        if (this.deque.isEmpty() || this.firstTime.time >= currentWindowStart) {
-            return 1000d * total / (now - this.firstTime.time);
+        double timeWindow;
+        double valueOutsideWindow;
+        if (deque.isEmpty() || firstTime.time >= currentWindowStart) {
+            timeWindow = now - firstTime.time;
+            valueOutsideWindow = 0d;
         } else {
-            long time = this.deque.getLast().time - currentWindowStart;
-            double removedValue = this.firstTime.value + this.deque.getFirst().value * (currentWindowStart - this.firstTime.time) / (this.deque.getFirst().time - firstTime.time);
-            double value = (total - removedValue) / time;
-            return 1000d * value;
+            timeWindow = deque.getLast().time - currentWindowStart;
+            double firstPartRatio = (currentWindowStart - firstTime.time)
+                    / (deque.getFirst().time - firstTime.time);
+            valueOutsideWindow = firstTime.value + deque.getFirst().value * firstPartRatio;
         }
+        return 1000d * (total - valueOutsideWindow) / timeWindow;
     }
 
     static class TimeCount {

@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.radarcns.Main;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
@@ -21,6 +22,7 @@ import javax.annotation.Nullable;
  * Java Singleton class for handling the yml config file
  */
 public class PropertiesRadar {
+    private static final Logger log = LoggerFactory.getLogger(PropertiesRadar.class);
 
     protected ConfigRadar config;
 
@@ -62,30 +64,29 @@ public class PropertiesRadar {
 
         String message = "USER CONFIGURATION";
 
-        if(instance != null){
+        if (instance != null) {
             throw new IllegalStateException("Property class has been already loaded");
         }
 
         //If pathFile is null
-        if(Strings.isNullOrEmpty(pathFile)){
+        if (Strings.isNullOrEmpty(pathFile)) {
             pathFile = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
             pathFile = pathFile.substring(0,pathFile.lastIndexOf('/') + 1)+ nameConfigFile;
             message = "DEFAULT CONFIGURATION";
         }
-        System.out.println(message);
-        System.out.println("Loading config file at "+pathFile);
+        log.info("{}: loading config file at {}", message, pathFile);
 
         File file = new File(pathFile);
 
         message = null;
-        if(!file.isFile()){
+        if (!file.isFile()) {
             message = "Config file is invalid";
         }
-        if(!file.exists()){
+        if (!file.exists()) {
             message = "Config file does not exist";
         }
-        if(message != null){
-            System.out.println(message);
+        if (message != null) {
+            log.error(message);
             throw new IllegalArgumentException(message);
         }
 
@@ -111,9 +112,8 @@ public class PropertiesRadar {
             Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(pathFile));
             this.config = yaml.loadAs(in, ConfigRadar.class);
-        }
-        catch (IOException ex){
-            System.out.println("Impossible load properties {}");
+        } catch (IOException ex){
+            log.error("Impossible load properties", ex);
             throw ex;
         }
     }
@@ -126,8 +126,8 @@ public class PropertiesRadar {
         String message = null;
 
         if(Strings.isNullOrEmpty(logPath)){
-            message = "Invalid log_path check your configuration file";
-            LoggerFactory.getLogger(PropertiesRadar.class).error(message);
+            message = "Invalid log_path - check your configuration file";
+            log.error(message);
             throw new IllegalArgumentException(message);
         }
 
@@ -143,7 +143,7 @@ public class PropertiesRadar {
             message = "User Log path is not a directory";
         }
         if(message != null){
-            LoggerFactory.getLogger(PropertiesRadar.class).error(message);
+            log.error(message);
             throw new IllegalArgumentException(message);
         }
 
@@ -155,14 +155,14 @@ public class PropertiesRadar {
             props.load(configStream);
             configStream.close();
         } catch (IOException e) {
-            System.out.println("Error during configuration file loading");
+            log.error("Error during configuration file loading", e);
             throw e;
         }
         props.setProperty("log4j.appender.file.File", logPath);
         LogManager.resetConfiguration();
         PropertyConfigurator.configure(props);
 
-        System.out.println("Log path has been correctly configured to "+logPath);
-        System.out.println("All future messages will be redirected to the log file");
+        log.info("Log path has been correctly configured to {}", logPath);
+        log.info("All future messages will be redirected to the log file");
     }
 }

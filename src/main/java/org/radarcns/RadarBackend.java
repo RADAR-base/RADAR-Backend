@@ -25,19 +25,16 @@ public class RadarBackend {
     * @param args: are the array of Strings given in input to the jar file
     */
     private static void config(@Nonnull String[] args){
-        System.out.println("Loading configuration");
+        log.info("Loading configuration");
 
         try {
             PropertiesRadar.load(args.length == 0 ? null : args[0]);
-        }
-        catch (Exception e) {
-            System.out.println("FATAL ERROR: application is shutting down");
-            System.out.println(e.toString());
-            System.exit(0);
+        } catch (Exception e) {
+            log.error("FATAL ERROR: application is shutting down", e);
+            System.exit(1);
         }
 
-        System.out.println("Configuration successfully updated");
-
+        log.info("Configuration successfully updated");
         log.info(PropertiesRadar.getInstance().info());
     }
 
