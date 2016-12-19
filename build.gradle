@@ -99,6 +99,12 @@ jacocoTestReport {
     }
 }
 
+task downloadDependencies(type: Exec) {
+    configurations.testRuntime.files
+    configurations.codacy.files
+    commandLine 'echo', 'Downloaded all dependencies'
+}
+
 task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
     main = 'com.codacy.CodacyCoverageReporter'
     classpath = configurations.codacy
