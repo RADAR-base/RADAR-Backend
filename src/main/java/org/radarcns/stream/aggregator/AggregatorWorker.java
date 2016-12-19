@@ -4,7 +4,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.topic.avro.AvroTopic;
+import org.radarcns.topic.AvroTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

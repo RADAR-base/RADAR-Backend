@@ -1,4 +1,4 @@
-package org.radarcns.topic.device;
+package org.radarcns.topic;
 
 import java.util.List;
 

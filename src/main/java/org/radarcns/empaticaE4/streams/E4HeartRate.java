@@ -10,7 +10,7 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.InternalAggregator;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.topic.internal.InternalTopic;
+import org.radarcns.topic.InternalTopic;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 

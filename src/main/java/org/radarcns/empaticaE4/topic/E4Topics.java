@@ -1,6 +1,6 @@
 package org.radarcns.empaticaE4.topic;
 
-import org.radarcns.topic.device.DeviceTopics;
+import org.radarcns.topic.DeviceTopics;
 
 import java.util.ArrayList;
 import java.util.HashSet;

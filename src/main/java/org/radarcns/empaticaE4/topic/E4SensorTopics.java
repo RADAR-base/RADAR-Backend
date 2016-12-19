@@ -8,15 +8,15 @@ import org.radarcns.empaticaE4.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.EmpaticaE4SensorStatus;
 import org.radarcns.empaticaE4.EmpaticaE4Temperature;
-import org.radarcns.topic.sensor.SensorTopic;
-import org.radarcns.topic.sensor.SensorTopics;
+import org.radarcns.topic.SensorTopic;
+import org.radarcns.topic.SensorTopics;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Entire set of Empatica E4 SensorTopic
- * @see org.radarcns.topic.sensor.SensorTopic
+ * @see SensorTopic
  */
 public class E4SensorTopics implements SensorTopics {
 

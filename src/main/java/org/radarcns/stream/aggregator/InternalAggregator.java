@@ -5,7 +5,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.topic.internal.InternalTopic;
+import org.radarcns.topic.InternalTopic;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.io.IOException;
  * Runnable abstraction of a Kafka stream that consumes Internal Topic
  * @param <I> consumed message type
  * @param <O> aggregated results type
- * @see org.radarcns.topic.internal.InternalTopic
+ * @see InternalTopic
  * @see org.radarcns.config.KafkaProperty
  * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor
  */

@@ -1,14 +1,7 @@
-package org.radarcns.topic.internal;
+package org.radarcns.topic;
 
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.common.serialization.Serde;
-import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.topic.avro.AvroTopic;
-import org.radarcns.util.serde.RadarSerde;
-
-import java.util.Collection;
-import java.util.LinkedList;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +11,7 @@ import javax.annotation.Nonnull;
  * Interval topic, we transform it in heart rate computing (60 / ibi), the results are then aggregated
  * and stored first inside in_progress topic and then in the output topic.
  * Since it describes the computation from the final point of view. The topic key is org.radarcns.key.WindowedKey
- * @see org.radarcns.topic.avro.AvroTopic
+ * @see AvroTopic
  * @see org.radarcns.key.WindowedKey
  * @see org.radarcns.key.MeasurementKey
  */
@@ -38,7 +31,7 @@ public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedK
     }
 
     /**
-     * @return the input topic. While org.radarcns.topic.sensor.SensorTopic uses the varibale name
+     * @return the input topic. While org.radarcns.topic.SensorTopic uses the varibale name
      * to generate the input topic, Internal topic uses the source variable.
      */
     @Override

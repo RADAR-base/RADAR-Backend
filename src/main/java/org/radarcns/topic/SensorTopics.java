@@ -1,4 +1,4 @@
-package org.radarcns.topic.sensor;
+package org.radarcns.topic;
 
 import org.apache.avro.specific.SpecificRecord;
 

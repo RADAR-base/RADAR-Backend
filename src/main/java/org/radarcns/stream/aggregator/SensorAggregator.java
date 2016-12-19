@@ -4,7 +4,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.topic.sensor.SensorTopic;
+import org.radarcns.topic.SensorTopic;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Runnable abstraction of a Kafka stream that consumes Sensor Topic.
  * @param <V> consumed and aggregated results type
- * @see org.radarcns.topic.sensor.SensorTopic
+ * @see SensorTopic
  * @see org.radarcns.config.KafkaProperty
  * @see org.radarcns.stream.aggregator.DeviceTimestampExtractor
  */
