@@ -15,7 +15,7 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer;
 
 public class GenericAvroSerializer implements Serializer<GenericRecord> {
 
-    KafkaAvroSerializer inner;
+    private final KafkaAvroSerializer inner;
 
     /**
      * Constructor used by Kafka Streams.

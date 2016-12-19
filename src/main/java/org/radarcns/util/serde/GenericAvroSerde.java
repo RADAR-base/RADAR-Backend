@@ -25,14 +25,6 @@ public class GenericAvroSerde implements Serde<GenericRecord> {
         inner = Serdes.serdeFrom(new GenericAvroSerializer(), new GenericAvroDeserializer());
     }
 
-    public GenericAvroSerde(SchemaRegistryClient client) {
-        this(client, Collections.emptyMap());
-    }
-
-    public GenericAvroSerde(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = Serdes.serdeFrom(new GenericAvroSerializer(client), new GenericAvroDeserializer(client, props));
-    }
-
     @Override
     public Serializer<GenericRecord> serializer() {
         return inner.serializer();

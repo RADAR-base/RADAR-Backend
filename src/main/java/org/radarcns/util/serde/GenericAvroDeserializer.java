@@ -14,21 +14,13 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 public class GenericAvroDeserializer implements Deserializer<GenericRecord> {
 
-    KafkaAvroDeserializer inner;
+    private final KafkaAvroDeserializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
     public GenericAvroDeserializer() {
         inner = new KafkaAvroDeserializer();
-    }
-
-    public GenericAvroDeserializer(SchemaRegistryClient client) {
-        inner = new KafkaAvroDeserializer(client);
-    }
-
-    public GenericAvroDeserializer(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = new KafkaAvroDeserializer(client, props);
     }
 
     @Override

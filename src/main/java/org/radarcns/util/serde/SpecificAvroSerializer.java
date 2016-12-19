@@ -15,21 +15,13 @@ import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFI
 
 public class SpecificAvroSerializer<T extends  org.apache.avro.specific.SpecificRecord> implements Serializer<T> {
 
-    KafkaAvroSerializer inner;
+    private final KafkaAvroSerializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
     public SpecificAvroSerializer() {
         inner = new KafkaAvroSerializer();
-    }
-
-    public SpecificAvroSerializer(SchemaRegistryClient client) {
-        inner = new KafkaAvroSerializer(client);
-    }
-
-    public SpecificAvroSerializer(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = new KafkaAvroSerializer(client, props);
     }
 
     @Override

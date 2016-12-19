@@ -16,7 +16,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 
 
 public class SpecificAvroSerde <T extends  org.apache.avro.specific.SpecificRecord> implements Serde<T> {
-
     private final Serde<T> inner;
 
     /**
@@ -24,14 +23,6 @@ public class SpecificAvroSerde <T extends  org.apache.avro.specific.SpecificReco
      */
     public SpecificAvroSerde() {
         inner = Serdes.serdeFrom(new SpecificAvroSerializer<>(), new SpecificAvroDeserializer<>());
-    }
-
-    public SpecificAvroSerde(SchemaRegistryClient client) {
-        this(client, Collections.emptyMap());
-    }
-
-    public SpecificAvroSerde(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = Serdes.serdeFrom(new SpecificAvroSerializer<>(client, props), new SpecificAvroDeserializer<>(client, props));
     }
 
     @Override

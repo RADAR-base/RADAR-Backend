@@ -15,22 +15,13 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 
 public class SpecificAvroDeserializer<T extends org.apache.avro.specific.SpecificRecord> implements Deserializer<T> {
-
-    KafkaAvroDeserializer inner;
+    private final KafkaAvroDeserializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
     public SpecificAvroDeserializer() {
         inner = new KafkaAvroDeserializer();
-    }
-
-    public SpecificAvroDeserializer(SchemaRegistryClient client) {
-        inner = new KafkaAvroDeserializer(client);
-    }
-
-    public SpecificAvroDeserializer(SchemaRegistryClient client, Map<String, ?> props) {
-        inner = new KafkaAvroDeserializer(client, props);
     }
 
     @Override
