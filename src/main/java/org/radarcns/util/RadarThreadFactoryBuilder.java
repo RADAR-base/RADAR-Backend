@@ -1,5 +1,6 @@
 package org.radarcns.util;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -12,10 +13,7 @@ public class RadarThreadFactoryBuilder {
     private boolean daemon = false;
     private int priority = Thread.NORM_PRIORITY;
 
-    public RadarThreadFactoryBuilder setNamePrefix(String namePrefix) {
-        if (namePrefix == null) {
-            throw new NullPointerException();
-        }
+    public RadarThreadFactoryBuilder setNamePrefix(@Nonnull String namePrefix) {
         this.namePrefix = namePrefix;
         return this;
     }
