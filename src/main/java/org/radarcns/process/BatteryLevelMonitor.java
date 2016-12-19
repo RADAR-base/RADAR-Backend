@@ -64,7 +64,7 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
                 if (newlyCritical) {
                     isLow.add(measurementKey);
                     for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey
+                        listener.batteryLevelStatusUpdated(measurementKey,
                                 BatteryLevelListener.Status.CRITICAL);
                     }
                 }
