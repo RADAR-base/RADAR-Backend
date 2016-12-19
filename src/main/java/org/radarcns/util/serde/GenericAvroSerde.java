@@ -6,10 +6,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
-import java.util.Collections;
 import java.util.Map;
-
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 
 /**
  * Created by Francesco Nobilia on 12/10/2016.

@@ -5,12 +5,11 @@ import org.radarcns.config.PropertiesRadar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nonnull;
 
 /**
  * Abstraction of a set of AggregatorWorker
@@ -20,7 +19,7 @@ import javax.annotation.Nonnull;
 public abstract class MasterAggregator {
     private static final Logger log = LoggerFactory.getLogger(MasterAggregator.class);
 
-    private static List<AggregatorWorker> list;
+    private final List<AggregatorWorker> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
 
@@ -54,7 +53,7 @@ public abstract class MasterAggregator {
 
         announceTopics(log);
 
-        list = new LinkedList<>();
+        list = new ArrayList<>();
 
         createWorker(list, lowPriority, normalPriority, highPriority);
 

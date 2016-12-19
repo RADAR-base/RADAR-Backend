@@ -3,13 +3,11 @@ package org.radarcns.util.serde;
 /**
  * Created by Francesco Nobilia on 21/10/2016.
  */
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
 
 import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 

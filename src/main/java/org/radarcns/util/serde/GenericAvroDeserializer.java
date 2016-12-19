@@ -4,13 +4,11 @@ package org.radarcns.util.serde;
  * Created by Francesco Nobilia on 12/10/2016.
  */
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Map;
-
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 public class GenericAvroDeserializer implements Deserializer<GenericRecord> {
 

@@ -12,6 +12,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class AvroRecordWriterProviderRadarTest {
     private AvroData avroData;
     private AvroRecordWriterProviderRadar provider;
@@ -36,6 +39,7 @@ public class AvroRecordWriterProviderRadarTest {
         writer.write(new SinkRecord("mine", 0, null, "withData",
                 SchemaBuilder.string().build(), "hi", 0));
         writer.close();
+        assertTrue(0 < outputFile.length());
     }
 
     @Test(expected = DataFileWriter.AppendWriteException.class)
@@ -45,5 +49,7 @@ public class AvroRecordWriterProviderRadarTest {
         RecordWriter<SinkRecord> writer = provider.getRecordWriter(conf, outputFile, record, avroData);
         writer.write(new SinkRecord("mine", 0, null, null,
                     SchemaBuilder.string().build(), "hi", 0));
+        writer.close();
+        assertEquals(0, outputFile.length());
     }
 }
