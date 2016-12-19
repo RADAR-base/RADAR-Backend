@@ -45,10 +45,13 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
             }
             MeasurementKey measurementKey;
             Schema keySchema = key.getSchema();
-            if (keySchema.getField("userId") != null && keySchema.getField("sourceId") != null) {
-                measurementKey = new MeasurementKey((String) key.get("userId"), (String) key.get("sourceId"));
+            if (keySchema.getField("userId") != null
+                    && keySchema.getField("sourceId") != null) {
+                measurementKey = new MeasurementKey((String) key.get("userId"),
+                        (String) key.get("sourceId"));
             } else {
-                logger.error("Failed to process record {} with wrong key type {}.", record, key.getSchema());
+                logger.error("Failed to process record {} with wrong key type {}.",
+                        record, key.getSchema());
                 return;
             }
             GenericRecord value = record.value();
@@ -61,20 +64,23 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
                 if (newlyCritical) {
                     isLow.add(measurementKey);
                     for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey, BatteryLevelListener.Status.CRITICAL);
+                        listener.batteryLevelStatusUpdated(measurementKey
+                                BatteryLevelListener.Status.CRITICAL);
                     }
                 }
             } else if (batteryLevel.floatValue() < 0.2) {
                 if (isLow.add(measurementKey)) {
                     for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey, BatteryLevelListener.Status.LOW);
+                        listener.batteryLevelStatusUpdated(measurementKey,
+                                BatteryLevelListener.Status.LOW);
                     }
                 }
             } else {
                 if (isLow.remove(measurementKey)) {
                     isCritical.remove(measurementKey);
                     for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey, BatteryLevelListener.Status.NORMAL);
+                        listener.batteryLevelStatusUpdated(measurementKey,
+                                BatteryLevelListener.Status.NORMAL);
                     }
                 }
             }

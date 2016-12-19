@@ -34,8 +34,8 @@ public class RadarThreadFactoryBuilder {
                     + " must be <= " + Thread.MAX_PRIORITY);
         }
 
-		this.priority = priority;
-		return this;
+        this.priority = priority;
+        return this;
     }
 
     public ThreadFactory build() {

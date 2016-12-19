@@ -40,7 +40,8 @@ public class E4Worker extends MasterAggregator {
 
     @Override
     protected void announceTopics(@Nonnull Logger log){
-        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n  - {}",
+        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
+                + "before starting: \n  - {}",
                 String.join("\n  - ", E4Topics.getInstance().getTopicNames()));
     }
 

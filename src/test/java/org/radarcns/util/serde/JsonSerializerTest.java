@@ -7,7 +7,8 @@ import org.radarcns.key.MeasurementKey;
 public class JsonSerializerTest extends TestCase {
     public void testSerialize() throws Exception {
         JsonSerializer<MeasurementKey> serializer = new JsonSerializer<>();
-        String result = new String(serializer.serialize("mytest", new MeasurementKey("user", "source")));
+        MeasurementKey key = new MeasurementKey("user", "source");
+        String result = new String(serializer.serialize("mytest", key));
         assertEquals("{\"userId\":\"user\",\"sourceId\":\"source\"}", result);
     }
 }

@@ -34,7 +34,8 @@ public class AvroRecordWriterProviderRadarTest {
     public void recordWriter() throws Exception {
         SinkRecord record = new SinkRecord("mine", 0, null, null,
                 SchemaBuilder.string().build(), "hi", 0);
-        RecordWriter<SinkRecord> writer = provider.getRecordWriter(conf, outputFile, record, avroData);
+        RecordWriter<SinkRecord> writer = provider.getRecordWriter(
+                conf, outputFile, record, avroData);
         writer.write(record);
         writer.write(new SinkRecord("mine", 0, null, "withData",
                 SchemaBuilder.string().build(), "hi", 0));
@@ -44,9 +45,10 @@ public class AvroRecordWriterProviderRadarTest {
 
     @Test(expected = DataFileWriter.AppendWriteException.class)
     public void recordWriterWrongSchema() throws Exception {
-        SinkRecord record = new SinkRecord("mine", 0, SchemaBuilder.string().build(), "something",
-                SchemaBuilder.string().build(), "hi", 0);
-        RecordWriter<SinkRecord> writer = provider.getRecordWriter(conf, outputFile, record, avroData);
+        SinkRecord record = new SinkRecord("mine", 0, SchemaBuilder.string().build(),
+                "something", SchemaBuilder.string().build(), "hi", 0);
+        RecordWriter<SinkRecord> writer = provider.getRecordWriter(
+                conf, outputFile, record, avroData);
         writer.write(new SinkRecord("mine", 0, null, null,
                     SchemaBuilder.string().build(), "hi", 0));
         writer.close();

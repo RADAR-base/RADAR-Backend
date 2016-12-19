@@ -7,8 +7,9 @@ import javax.annotation.Nonnull;
 
 /**
  * Specialisation of AvroTopic representing topics used to aggregate data. Since it describes the
- * computation from the initial point of view. The topic key is org.radarcns.key.MeasurementKey
+ * computation from the initial point of view. The topic key is {@link MeasurementKey}.
  *
+ * @param <V> type of record value.
  * @see AvroTopic
  * @see org.radarcns.key.MeasurementKey
  */
