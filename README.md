@@ -1,6 +1,7 @@
 # RADAR-CNS back-end
 
 [![Build Status](https://travis-ci.org/RADAR-CNS/RADAR-Backend.svg?branch=master)](https://travis-ci.org/RADAR-CNS/RADAR-Backend)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e21c0c25f43e4676a3c69bae444101ca)](https://www.codacy.com/app/RADAR-CNS/RADAR-Backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-Backend&amp;utm_campaign=Badge_Grade)
 
 A Java application based on Confluent Platform to standardise, analyse and persistent data collected by RADAR-CNS data sources. Data is consumed and produced in Apache Avro format using the schemas stored inside the RADAR-CNS [schema repository](https://github.com/RADAR-CNS/RADAR-Schemas).
 
