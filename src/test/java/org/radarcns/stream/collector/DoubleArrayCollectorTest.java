@@ -11,11 +11,10 @@ import static org.junit.Assert.assertEquals;
 public class DoubleArrayCollectorTest {
 
     private DoubleArrayCollector arrayCollector;
-    private int numOfElem =4;
 
     @Before
     public void setUp() {
-        this.arrayCollector = new DoubleArrayCollector(this.numOfElem);
+        this.arrayCollector = new DoubleArrayCollector(4);
     }
 
     @Test

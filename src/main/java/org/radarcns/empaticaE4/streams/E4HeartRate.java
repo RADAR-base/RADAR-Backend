@@ -13,7 +13,6 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.InternalTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
 import javax.annotation.Nonnull;
@@ -24,7 +23,7 @@ import java.io.IOException;
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
 
-    private RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
     public E4HeartRate(String clientID, int numThread, MasterAggregator master) throws IOException {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientID, numThread,
                 master);
@@ -37,12 +36,12 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
                 .aggregate(
                     DoubleValueCollector::new,
                     (k, v, valueCollector) -> valueCollector.add(
-                            utilities.ibiToHR(v.getInterBeatInterval())),
+                            UTILITIES.ibiToHR(v.getInterBeatInterval())),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 

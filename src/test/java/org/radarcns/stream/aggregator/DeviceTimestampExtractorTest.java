@@ -1,11 +1,9 @@
 package org.radarcns.stream.aggregator;
 
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,9 +32,9 @@ public class DeviceTimestampExtractorTest {
 
     @Test
     public void extract() {
-        String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", " +
-                "\"name\": \"TestTimeExtract\"," +
-                "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"double\"}]}";
+        String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", "
+                +"\"name\": \"TestTimeExtract\","
+                +"\"fields\": [{\"name\": \"timeReceived\", \"type\": \"double\"}]}";
         GenericRecord record = buildIndexedRecord(userSchema);
         double timeValue = 40880.051388;
         record.put("timeReceived", timeValue);
@@ -47,9 +45,9 @@ public class DeviceTimestampExtractorTest {
 
     @Test
     public void extractWithNotDoubleTimeReceived() {
-        String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", " +
-                "\"name\": \"TestTimeExtract\"," +
-                "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}";
+        String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", "
+                +"\"name\": \"TestTimeExtract\","
+                +"\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}";
         GenericRecord record = buildIndexedRecord(userSchema);
         double timeValue = 40880.051388;
         record.put("timeReceived", "timeValue");

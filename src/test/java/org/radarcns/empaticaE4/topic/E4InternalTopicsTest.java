@@ -4,12 +4,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.radarcns.topic.AvroTopic;
 import org.radarcns.topic.InternalTopic;
 
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by nivethika on 21-12-16.
@@ -38,6 +38,7 @@ public class E4InternalTopicsTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Topic something unknown");
         InternalTopic topic = this.internalTopics.getTopic("something");
+        assertNull(topic);
     }
 
     @Test

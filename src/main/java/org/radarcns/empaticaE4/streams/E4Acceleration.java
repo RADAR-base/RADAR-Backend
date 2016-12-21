@@ -23,7 +23,7 @@ import java.io.IOException;
  */
 public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 
-    private RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
     public E4Acceleration(String clientID, int numThread, MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(),clientID,numThread,master);
@@ -37,12 +37,12 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
         kstream.groupByKey()
                 .aggregate(
                     () -> new DoubleArrayCollector(3),
-                    (k, v, valueCollector) -> valueCollector.add(utilities.accelerationToArray(v)),
+                    (k, v, valueCollector) -> valueCollector.add(UTILITIES.accelerationToArray(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubelArrayCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k), v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k), v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }

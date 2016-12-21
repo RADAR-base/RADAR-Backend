@@ -23,7 +23,7 @@ import java.io.IOException;
  */
 public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
 
-    private RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
     public E4BatteryLevel(String clientID, int numThread, MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,numThread,master);
@@ -41,7 +41,7 @@ public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }

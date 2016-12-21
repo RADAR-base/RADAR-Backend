@@ -21,7 +21,7 @@ import java.io.IOException;
  * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4
  */
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
-    private RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
+    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
     public E4Temperature(String clientID,int numThread, MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread,master);
@@ -39,7 +39,7 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
                         RadarSerdes.getInstance().getDoubleCollector(),
                         topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utils.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }
