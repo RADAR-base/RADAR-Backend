@@ -10,6 +10,8 @@ import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.SensorTopic;
+import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
@@ -20,6 +22,8 @@ import java.io.IOException;
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
+
+    private RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4InterBeatInterval(String clientID, int numThread, MasterAggregator master)
             throws IOException{
@@ -39,7 +43,7 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(RadarUtils.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }
