@@ -1,7 +1,9 @@
 package org.radarcns;
 
-import org.radarcns.config.PropertiesRadar;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.empaticaE4.E4Worker;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ import javax.annotation.Nonnull;
 public class RadarBackend {
 
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
+    private static RadarPropertyHandler radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
 
     public RadarBackend(@Nonnull String[] args){
         config(args);
@@ -26,16 +29,15 @@ public class RadarBackend {
     */
     private static void config(@Nonnull String[] args){
         log.info("Loading configuration");
-
         try {
-            PropertiesRadar.load(args.length == 0 ? null : args[0]);
+            radarPropertyHandler.load(args.length == 0 ? null : args[0]);
         } catch (Exception e) {
             log.error("FATAL ERROR: application is shutting down", e);
             System.exit(1);
         }
 
         log.info("Configuration successfully updated");
-        log.info(PropertiesRadar.getInstance().info());
+        log.info(radarPropertyHandler.getRadarProperties().info());
     }
 
     /**
