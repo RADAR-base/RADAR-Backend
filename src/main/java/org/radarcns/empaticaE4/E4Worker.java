@@ -28,7 +28,8 @@ public class E4Worker extends MasterAggregator {
     public static E4Worker getInstance() throws IOException{
         synchronized (syncObject) {
             if (instance == null) {
-                instance = new E4Worker(RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties().isStandalone());
+                instance = new E4Worker(RadarSingletonFactory.getRadarPropertyHandler()
+                        .getRadarProperties().isStandalone());
             }
             return instance;
         }

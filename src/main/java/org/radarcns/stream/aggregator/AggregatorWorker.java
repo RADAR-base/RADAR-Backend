@@ -22,7 +22,8 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     private final String clientID;
     private final KafkaStreams streams;
     private final MasterAggregator master;
-    private KafkaProperty kafkaProperty = RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
+    private KafkaProperty kafkaProperty =
+            RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
 
     private final T topic;
 
@@ -110,5 +111,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
         return topic;
     }
 
-    protected void setKafkaProperty(KafkaProperty kafkaProperty) {this.kafkaProperty = kafkaProperty;}
+    protected void setKafkaProperty(KafkaProperty kafkaProperty) {
+        this.kafkaProperty = kafkaProperty;
+    }
 }

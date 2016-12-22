@@ -23,7 +23,8 @@ public abstract class MasterAggregator {
     private final List<AggregatorWorker> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
-    private ConfigRadar configRadar = RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
+    private ConfigRadar configRadar =
+            RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
 
     /**
      * @param standalone: true means that the aggregator will assign one thread per stream

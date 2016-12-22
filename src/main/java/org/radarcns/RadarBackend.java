@@ -1,6 +1,5 @@
 package org.radarcns;
 
-import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.empaticaE4.E4Worker;
 import org.radarcns.util.RadarSingletonFactory;
@@ -17,7 +16,8 @@ import javax.annotation.Nonnull;
 public class RadarBackend {
 
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
-    private static RadarPropertyHandler radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
+    private static RadarPropertyHandler radarPropertyHandler =
+            RadarSingletonFactory.getRadarPropertyHandler();
 
     public RadarBackend(@Nonnull String[] args){
         config(args);
