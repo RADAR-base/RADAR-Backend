@@ -24,6 +24,6 @@ public class RadarUtils implements RadarUtilities{
         return new double[] {
                 floatToDouble(value.getX()),
                 floatToDouble(value.getY()),
-                floatToDouble(value.getY())};
+                floatToDouble(value.getZ())};
     }
 }

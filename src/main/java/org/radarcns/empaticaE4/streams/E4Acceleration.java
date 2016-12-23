@@ -12,7 +12,6 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.topic.SensorTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
 import javax.annotation.Nonnull;

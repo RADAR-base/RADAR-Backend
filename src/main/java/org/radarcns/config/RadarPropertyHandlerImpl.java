@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Java Singleton class for handling the yml config file
+ * Java Singleton class for handling the yml config file. Implements @link{ RadarPropertyHandler}
  */
 public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     private ConfigRadar properties ;

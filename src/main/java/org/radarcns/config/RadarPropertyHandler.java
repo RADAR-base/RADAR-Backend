@@ -1,7 +1,7 @@
 package org.radarcns.config;
 
 /**
- * Created by nivethika on 21-12-16.
+ * Interface that handles YAML configuration file loading
  */
 public interface RadarPropertyHandler {
 
