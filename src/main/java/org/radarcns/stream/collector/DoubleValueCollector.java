@@ -3,12 +3,12 @@ package org.radarcns.stream.collector;
 import com.google.common.primitives.Doubles;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.radarcns.aggregator.DoubleAggregator;
+import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarUtilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.radarcns.util.RadarUtils.floatToDouble;
 
 /** Java class to aggregate data using Kafka Streams. Double is the base unit */
 public class DoubleValueCollector {
@@ -20,10 +20,12 @@ public class DoubleValueCollector {
     private final double[] quartile = new double[3];
     private double iqr = 0;
 
+    private final RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
+
     private final List<Double> list = new ArrayList<>();
 
     public DoubleValueCollector add(float value) {
-        return this.add(floatToDouble(value));
+        return this.add(utils.floatToDouble(value));
     }
 
     /** @param value: new sample that has to be analysed */

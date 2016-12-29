@@ -1,7 +1,6 @@
 package org.radarcns.config;
 
 import com.google.common.base.Strings;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.radarcns.Main;
@@ -9,67 +8,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /**
- * Java Singleton class for handling the yml config file
+ * Java Singleton class for handling the yml config file. Implements @link{ RadarPropertyHandler}
  */
-public class PropertiesRadar {
-    private static final Logger log = LoggerFactory.getLogger(PropertiesRadar.class);
-
-    protected ConfigRadar config;
-
+public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
+    private ConfigRadar properties ;
+    private KafkaProperty kafkaProperty;
     private static final String nameConfigFile = "radar.yml";
     private static final String nameLogFile = "backend.log";
 
-    private static PropertiesRadar instance;
+    private static final Logger log = LoggerFactory.getLogger(RadarPropertyHandlerImpl.class);
 
-    public enum Priority {
-        LOW("low"), NORMAL("normal"), HIGH("high");
-
-        private final String param;
-
-        Priority(String param) {
-            this.param = param;
-        }
-
-        public String getParam() {
-            return param;
-        }
-    }
-
-    public static ConfigRadar getInstance(){
-        if(instance == null){
+    @Override
+    public ConfigRadar getRadarProperties() {
+        if(properties == null){
             throw new IllegalStateException(
-                    "Property cannot be accessed without calling load() first");
+                    "Properties cannot be accessed without calling load() first");
         }
-
-        return instance.config;
+        return properties;
     }
 
-    /**
-     * @param pathFile: location of configuration file. If null, it tries to check whether there is
-     *                  a configuration file in the same location of its jar
-     * @throws IllegalStateException if an instance is already available. You cannot load twice a
-     *                               singleton class
-     * @throws IllegalArgumentException if either the pathFile does not point to a valid config file
-     *                                  or the pathFile is null and there is any valid config file
-     *                                  in the same jar location
-     */
-    public static void load(@Nullable String pathFile) throws Exception {
-
+    @Override
+    public void load(String pathFile) throws URISyntaxException, IOException {
         String message = "USER CONFIGURATION";
 
-        if (instance != null) {
-            throw new IllegalStateException("Property class has been already loaded");
+        if (properties != null) {
+            throw new IllegalStateException("Properties class has been already loaded");
         }
 
         //If pathFile is null
@@ -95,40 +68,46 @@ public class PropertiesRadar {
             throw new IllegalArgumentException(message);
         }
 
-        instance = new PropertiesRadar(pathFile);
+        properties = loadConfigRadar(pathFile);
 
         //TODO: add check to validate configuration file. Remember
         //  - log path can be only null, all others have to be stated
         //  - mode can be standalone or high_performance
         //  - all thread priority must be bigger than 1
 
-        if(!Strings.isNullOrEmpty(instance.config.getLog_path())) {
-            updateLog4jConfiguration(instance.config.getLog_path());
+        if(!Strings.isNullOrEmpty(getRadarProperties().getLog_path())) {
+            updateLog4jConfiguration(getRadarProperties().getLog_path());
         }
+
     }
 
-    /**
-     * @param pathFile: location of yml file is going to be loaded
-     * @throws IOException if the file does not exist or it does not respect the ConfigRadar java
-     *                     class
-     * @see org.radarcns.config.ConfigRadar
-     */
-    private PropertiesRadar(@Nonnull String pathFile) throws IOException{
+    @Override
+    public KafkaProperty getKafkaProperties() {
+        if(this.kafkaProperty==null)
+        {
+            this.kafkaProperty =new KafkaProperty(getRadarProperties());
+        }
+        return this.kafkaProperty;
+    }
+
+    private ConfigRadar loadConfigRadar(@Nonnull String pathFile) throws IOException{
+
         try{
             Yaml yaml = new Yaml();
             InputStream in = Files.newInputStream(Paths.get(pathFile));
-            this.config = yaml.loadAs(in, ConfigRadar.class);
+            return yaml.loadAs(in, ConfigRadar.class);
         } catch (IOException ex){
             log.error("Impossible load properties", ex);
             throw ex;
         }
     }
 
+
     /**
      * @param logPath: new log file defined by the user
      * @throws IllegalArgumentException if logPath is null or is not a valid file
      */
-    private static void updateLog4jConfiguration(@Nonnull String logPath) throws Exception {
+    private void updateLog4jConfiguration(@Nonnull String logPath) throws IllegalArgumentException, IOException  {
         String message = null;
 
         if(Strings.isNullOrEmpty(logPath)){
@@ -156,7 +135,7 @@ public class PropertiesRadar {
         logPath += nameLogFile;
 
         java.util.Properties props = new java.util.Properties();
-        try (InputStream in = instance.getClass().getResourceAsStream( "/log4j.properties")) {
+        try (InputStream in = this.getClass().getResourceAsStream( "/log4j.properties")) {
             props.load(in);
         } catch (IOException e) {
             log.error("Error during configuration file loading", e);

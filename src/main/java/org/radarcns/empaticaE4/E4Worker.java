@@ -1,6 +1,5 @@
 package org.radarcns.empaticaE4;
 
-import org.radarcns.config.PropertiesRadar;
 import org.radarcns.empaticaE4.streams.E4Acceleration;
 import org.radarcns.empaticaE4.streams.E4BatteryLevel;
 import org.radarcns.empaticaE4.streams.E4BloodVolumePulse;
@@ -11,6 +10,7 @@ import org.radarcns.empaticaE4.streams.E4Temperature;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -28,7 +28,8 @@ public class E4Worker extends MasterAggregator {
     public static E4Worker getInstance() throws IOException{
         synchronized (syncObject) {
             if (instance == null) {
-                instance = new E4Worker(PropertiesRadar.getInstance().isStandalone());
+                instance = new E4Worker(RadarSingletonFactory.getRadarPropertyHandler()
+                        .getRadarProperties().isStandalone());
             }
             return instance;
         }

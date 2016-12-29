@@ -1,0 +1,7 @@
+version: 1.0
+released: 2016-11-27
+
+#============================= Application =============================#
+somethingelse:
+#Possible value are standalone or high_performance
+mode: standalone

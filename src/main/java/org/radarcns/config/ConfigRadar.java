@@ -109,7 +109,7 @@ public class ConfigRadar {
         this.schema_registry = schema_registry;
     }
 
-    public Integer threadsByPriority(PropertiesRadar.Priority level){
+    public Integer threadsByPriority(RadarPropertyHandler.Priority level){
         return stream_priority.get(level.getParam());
     }
 

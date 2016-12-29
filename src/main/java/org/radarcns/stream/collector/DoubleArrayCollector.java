@@ -14,6 +14,9 @@ public class DoubleArrayCollector {
 
     public DoubleArrayCollector(int length) {
         collectors = new DoubleValueCollector[length];
+        for(int i=0; i<collectors.length ; i++) {
+            this.collectors[i] = new DoubleValueCollector();
+        }
     }
 
     /**

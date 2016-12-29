@@ -10,13 +10,15 @@ import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.SensorTopic;
-import org.radarcns.util.RadarUtils;
+import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePulse> {
+    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
     public E4BloodVolumePulse(String clientID, int numThread,
                               MasterAggregator master) throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(),
@@ -35,7 +37,7 @@ public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePu
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k, v) -> new KeyValue<>(RadarUtils.getWindowed(k), v.convertInAvro()))
+                .map((k, v) -> new KeyValue<>(UTILITIES.getWindowed(k), v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }

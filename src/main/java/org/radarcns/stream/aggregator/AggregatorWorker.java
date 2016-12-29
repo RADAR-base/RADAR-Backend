@@ -5,6 +5,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.topic.AvroTopic;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,8 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     private final String clientID;
     private final KafkaStreams streams;
     private final MasterAggregator master;
+    private KafkaProperty kafkaProperty =
+            RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
 
     private final T topic;
 
@@ -38,7 +41,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
                 getClientID(), getTopic().getInputTopic(), getTopic().getOutputTopic());
 
         this.streams = new KafkaStreams(getBuilder(),
-                KafkaProperty.getStream(getClientID(), numThreads, DeviceTimestampExtractor.class));
+                kafkaProperty.getStream(getClientID(), numThreads, DeviceTimestampExtractor.class));
         this.streams.setUncaughtExceptionHandler(this);
     }
 
@@ -106,5 +109,9 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
 
     protected T getTopic() {
         return topic;
+    }
+
+    protected void setKafkaProperty(KafkaProperty kafkaProperty) {
+        this.kafkaProperty = kafkaProperty;
     }
 }

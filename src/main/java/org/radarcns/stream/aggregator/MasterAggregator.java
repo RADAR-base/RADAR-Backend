@@ -1,7 +1,8 @@
 package org.radarcns.stream.aggregator;
 
 import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.PropertiesRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,8 @@ public abstract class MasterAggregator {
     private final List<AggregatorWorker> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
+    private ConfigRadar configRadar =
+            RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
 
     /**
      * @param standalone: true means that the aggregator will assign one thread per stream
@@ -43,12 +46,11 @@ public abstract class MasterAggregator {
         if (standalone) {
             log.info("[{}] STANDALONE MODE", nameSensor);
         } else {
-            log.info("[{}] GROUP MODE: {}", nameSensor, PropertiesRadar.getInstance().infoThread());
+            log.info("[{}] GROUP MODE: {}", nameSensor, this.configRadar.infoThread());
 
-            ConfigRadar props = PropertiesRadar.getInstance();
-            lowPriority = props.threadsByPriority(PropertiesRadar.Priority.LOW);
-            normalPriority = props.threadsByPriority(PropertiesRadar.Priority.NORMAL);
-            highPriority = props.threadsByPriority(PropertiesRadar.Priority.HIGH);
+            lowPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW);
+            normalPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL);
+            highPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH);
         }
 
         announceTopics(log);
@@ -140,28 +142,30 @@ public abstract class MasterAggregator {
      *       as the number of starting threads
      */
     private void checkThreadParams() {
-        ConfigRadar props = PropertiesRadar.getInstance();
+//        ConfigRadar props = PropertiesRadar.getInstance();
 
-        if (props.threadsByPriority(PropertiesRadar.Priority.HIGH) < 1) {
+        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH) < 1) {
             log.error("Invalid parameter: {} priority threads are {}",
-                    PropertiesRadar.Priority.HIGH,
-                    props.threadsByPriority(PropertiesRadar.Priority.HIGH));
+                    RadarPropertyHandler.Priority.HIGH,
+                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH));
             throw new IllegalStateException(
                     "The number of high priority threads must be an integer bigger than 0");
         }
-        if (props.threadsByPriority(PropertiesRadar.Priority.NORMAL) < 1) {
+        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL) < 1) {
             log.error("Invalid parameter: {} priority threads are {}",
-                    PropertiesRadar.Priority.NORMAL,
-                    props.threadsByPriority(PropertiesRadar.Priority.NORMAL));
+                    RadarPropertyHandler.Priority.NORMAL,
+                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL));
             throw new IllegalStateException(
                     "The number of normal priority threads must be an integer bigger than 0");
         }
-        if (props.threadsByPriority(PropertiesRadar.Priority.LOW) < 1) {
+        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW) < 1) {
             log.error("Invalid parameter: {} priority threads are {}",
-                    PropertiesRadar.Priority.LOW,
-                    props.threadsByPriority(PropertiesRadar.Priority.LOW));
+                    RadarPropertyHandler.Priority.LOW,
+                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW));
             throw new IllegalStateException(
                     "The number of low priority threads must be an integer bigger than 0");
         }
     }
+
+    protected void setConfigRadar(ConfigRadar configRadar) {this.configRadar = configRadar;}
 }
