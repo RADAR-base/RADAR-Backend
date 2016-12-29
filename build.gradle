@@ -5,6 +5,8 @@ plugins {
     id 'application'
     id 'com.commercehub.gradle.plugin.avro-base' version '0.9.0'
     id 'jacoco'
+    id 'pmd'
+    id 'checkstyle'
 }
 
 version = '1.0'
@@ -44,6 +46,13 @@ repositories {
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
 }
 
+idea {
+    module {
+        downloadSources = true
+        sourceDirs += file("build/avro")
+    }
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // The production code uses the SLF4J logging API at compile time
@@ -76,12 +85,6 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 
 compileJava.source(generateAvro.outputs)
 
-idea {
-    module {
-        sourceDirs += file("build/avro")
-    }
-}
-
 jar {
     manifest {
         attributes 'Implementation-Title': 'RADAR-CNS Back-End',
@@ -91,6 +94,23 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+checkstyle {
+    toolVersion '6.16'
+}
+
+pmd {
+    ignoreFailures = true
+
+    toolVersion = '5.5.2'
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+
+pmdTest {
+    ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
 jacocoTestReport {
