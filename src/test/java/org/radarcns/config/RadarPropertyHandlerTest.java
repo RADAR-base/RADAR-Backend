@@ -4,7 +4,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.radarcns.util.RadarSingletonFactory;
 import org.yaml.snakeyaml.error.YAMLException;
+
+import java.lang.reflect.Field;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -19,8 +22,10 @@ public class RadarPropertyHandlerTest {
     private RadarPropertyHandler propertyHandler ;
 
     @Before
-    public void setUp() {
+    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+
         this.propertyHandler = new RadarPropertyHandlerImpl();
+
     }
 
     @Rule
@@ -28,6 +33,9 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void getInstanceEmptyProperties() throws NoSuchFieldException, IllegalAccessException, SecurityException {
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(this.propertyHandler,null);
         exception.expect(IllegalStateException.class);
         exception.expectMessage("Properties cannot be accessed without calling load() first");
         propertyHandler.getRadarProperties();
@@ -35,6 +43,9 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void loadWithEmptyPath() throws Exception {
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(this.propertyHandler,null);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Config file does not exist");
         propertyHandler.load(null);
@@ -42,6 +53,9 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void loadWithInvalidFilePath() throws Exception {
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(this.propertyHandler,null);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Config file is invalid");
         String invalidPath = "/usr/";
@@ -50,6 +64,9 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void load() throws Exception {
+        Field propertiess = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        propertiess.setAccessible(true);
+        propertiess.set(this.propertyHandler,null);
         propertyHandler.load("radar.yml");
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
@@ -81,8 +98,8 @@ public class RadarPropertyHandlerTest {
         exception.expectMessage("Properties class has been already loaded");
         propertyHandler.load("radar.yml");
         propertyHandler.load("again.yml");
-        ConfigRadar properties = propertyHandler.getRadarProperties();
-        assertNotNull(properties);
+        ConfigRadar propertiesS = propertyHandler.getRadarProperties();
+        assertNotNull(propertiesS);
     }
 
     @Test
@@ -99,13 +116,15 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void loadWithInvalidLogPath() throws Exception{
-
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(this.propertyHandler,null);
         RadarPropertyHandlerImpl radarPropertyHandler = mock(RadarPropertyHandlerImpl.class);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("User Log path does not exist");
         ConfigRadar configs = mock(ConfigRadar.class);
         when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLog_path()).thenReturn("hack.log");
+        when(configs.getLog_path()).thenReturn("hack");
         doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
         radarPropertyHandler.load("radar.yml");
         verify(configs, times(2)).getLog_path();
@@ -128,8 +147,10 @@ public class RadarPropertyHandlerTest {
     }
 
     @Test
-    public void getKafkaPropertiesBeforeLoad()
-    {
+    public void getKafkaPropertiesBeforeLoad() throws IllegalAccessException, NoSuchFieldException {
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(this.propertyHandler,null);
         exception.expect(IllegalStateException.class);
         exception.expectMessage("Properties cannot be accessed without calling load() first");
         KafkaProperty property =propertyHandler.getKafkaProperties();
@@ -139,6 +160,9 @@ public class RadarPropertyHandlerTest {
     @Test
     public void getKafkaProperties() throws Exception
     {
+        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
+        properties.setAccessible(true);
+        properties.set(propertyHandler,null);
         propertyHandler.load("radar.yml");
         KafkaProperty property =propertyHandler.getKafkaProperties();
         assertNotNull(property);

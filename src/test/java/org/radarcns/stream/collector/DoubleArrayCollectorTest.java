@@ -14,7 +14,7 @@ public class DoubleArrayCollectorTest {
 
     @Before
     public void setUp() {
-        this.arrayCollector = new DoubleArrayCollector(4);
+        this.arrayCollector = new DoubleArrayCollector();
     }
 
     @Test
