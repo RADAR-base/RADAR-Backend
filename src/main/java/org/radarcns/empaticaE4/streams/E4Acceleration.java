@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4Acceleration;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -24,8 +25,8 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
-    public E4Acceleration(String clientID, int numThread, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(),clientID,numThread,master);
+    public E4Acceleration(String clientID, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(),clientID,numThread,master, kafkaProperties);
     }
 
 
@@ -35,7 +36,7 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
             throws IOException {
         kstream.groupByKey()
                 .aggregate(
-                    () -> new DoubleArrayCollector(3),
+                    DoubleArrayCollector::new,
                     (k, v, valueCollector) -> valueCollector.add(UTILITIES.accelerationToArray(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubelArrayCollector(),

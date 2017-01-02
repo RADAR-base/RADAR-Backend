@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4Temperature;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -23,8 +24,8 @@ import java.io.IOException;
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
-    public E4Temperature(String clientID,int numThread, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread,master);
+    public E4Temperature(String clientID,int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientID,numThread,master, kafkaProperties);
     }
 
 

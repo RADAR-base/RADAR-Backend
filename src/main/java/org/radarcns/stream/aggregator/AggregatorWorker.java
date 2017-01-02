@@ -15,20 +15,19 @@ import java.io.IOException;
 /**
  * Runnable abstraction of Kafka Stream Handler
  */
-public abstract class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord,
+public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord,
         T extends AvroTopic<K, V>> implements Runnable, Thread.UncaughtExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
-
+    private final int numThreads;
     private final String clientID;
-    private final KafkaStreams streams;
+    private KafkaStreams streams;
     private final MasterAggregator master;
-    private KafkaProperty kafkaProperty =
-            RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
+    private KafkaProperty kafkaProperty ;
 
     private final T topic;
 
     public AggregatorWorker(@Nonnull T topic, @Nonnull String clientID, int numThreads,
-                            @Nonnull MasterAggregator aggregator) throws IOException {
+                            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) throws IOException {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
@@ -37,19 +36,24 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
         this.clientID = clientID;
         this.master = aggregator;
         this.topic = topic;
+        this.numThreads = numThreads;
+        this.kafkaProperty =
+                kafkaProperty;
+        this.streams = initiateKafkaStream();
+    }
+
+    private KafkaStreams initiateKafkaStream() throws IOException {
         log.info("Creating the stream {} from topic {} to topic {}",
                 getClientID(), getTopic().getInputTopic(), getTopic().getOutputTopic());
-
-        this.streams = new KafkaStreams(getBuilder(),
+        KafkaStreams kafkaStreams = new KafkaStreams(getBuilder(),
                 kafkaProperty.getStream(getClientID(), numThreads, DeviceTimestampExtractor.class));
-        this.streams.setUncaughtExceptionHandler(this);
+        kafkaStreams.setUncaughtExceptionHandler(this);
+        return kafkaStreams;
     }
 
     /** Create a Kafka Stream builder */
-    protected abstract KStreamBuilder getBuilder() throws IOException;
-
-    public String getName() {
-        return clientID;
+    protected KStreamBuilder getBuilder() throws IOException{
+        return new KStreamBuilder();
     }
 
 

@@ -44,12 +44,13 @@ public class RadarConfig extends AbstractConfig {
     }
 
     public static RadarConfig load(ClassLoader classLoader) {
-        String configFile = "/configuration/config.properties";
+        String configFile = "configuration/config.properties";
         Properties prop = new Properties();
 
         try (InputStream in = classLoader.getResourceAsStream(configFile)) {
             // load a properties file
             prop.load(in);
+            in.close();
         } catch (IOException io) {
             io.printStackTrace();
         }

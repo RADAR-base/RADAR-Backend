@@ -20,7 +20,7 @@ public class DoubleValueCollector {
     private final double[] quartile = new double[3];
     private double iqr = 0;
 
-    private final RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
+    private transient final RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
 
     private final List<Double> list = new ArrayList<>();
 

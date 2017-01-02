@@ -4,6 +4,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.aggregator.DoubleAggregator;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -24,9 +25,9 @@ import java.io.IOException;
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
 
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
-    public E4HeartRate(String clientID, int numThread, MasterAggregator master) throws IOException {
+    public E4HeartRate(String clientID, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientID, numThread,
-                master);
+                master, kafkaProperties);
     }
 
     @Override

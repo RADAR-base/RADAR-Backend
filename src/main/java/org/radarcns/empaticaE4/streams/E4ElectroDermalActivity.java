@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -23,10 +24,10 @@ import java.io.IOException;
 public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroDermalActivity> {
 
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
-    public E4ElectroDermalActivity(String clientID, int numThread, MasterAggregator master)
+    public E4ElectroDermalActivity(String clientID, int numThread, MasterAggregator master, KafkaProperty kafkaProperties)
             throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),
-                clientID, numThread, master);
+                clientID, numThread, master, kafkaProperties);
     }
 
     @Override

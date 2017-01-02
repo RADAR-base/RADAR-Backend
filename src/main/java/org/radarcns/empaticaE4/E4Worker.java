@@ -1,5 +1,6 @@
 package org.radarcns.empaticaE4;
 
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.streams.E4Acceleration;
 import org.radarcns.empaticaE4.streams.E4BatteryLevel;
 import org.radarcns.empaticaE4.streams.E4BloodVolumePulse;
@@ -48,12 +49,13 @@ public class E4Worker extends MasterAggregator {
 
     @Override
     protected void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high) throws IOException {
-        list.add(new E4Acceleration("E4Acceleration",high,this));
-        list.add(new E4BatteryLevel("E4BatteryLevel",low,this));
-        list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this));
-        list.add(new E4ElectroDermalActivity("E4ElectroDermalActivity",normal,this));
-        list.add(new E4HeartRate("E4HeartRate",high,this));
-        list.add(new E4InterBeatInterval("E4InterBeatInterval",high,this));
-        list.add(new E4Temperature("E4Temperature",high,this));
+        KafkaProperty kafkaProperty = RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
+        list.add(new E4Acceleration("E4Acceleration",high,this,kafkaProperty));
+        list.add(new E4BatteryLevel("E4BatteryLevel",low,this,kafkaProperty));
+        list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this,kafkaProperty));
+        list.add(new E4ElectroDermalActivity("E4ElectroDermalActivity",normal,this,kafkaProperty));
+        list.add(new E4HeartRate("E4HeartRate",high,this,kafkaProperty));
+        list.add(new E4InterBeatInterval("E4InterBeatInterval",high,this,kafkaProperty));
+        list.add(new E4Temperature("E4Temperature",high,this,kafkaProperty));
     }
 }

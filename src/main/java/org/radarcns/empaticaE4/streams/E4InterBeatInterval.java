@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -24,10 +25,11 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
 
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
-    public E4InterBeatInterval(String clientID, int numThread, MasterAggregator master)
+    public E4InterBeatInterval(String clientID, int numThread, MasterAggregator master
+            , KafkaProperty kafkaProperties)
             throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
-                clientID, numThread,master);
+                clientID, numThread,master, kafkaProperties);
     }
 
     @Override

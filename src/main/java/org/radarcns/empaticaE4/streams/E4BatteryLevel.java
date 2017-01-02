@@ -3,6 +3,7 @@ package org.radarcns.empaticaE4.streams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.empaticaE4.EmpaticaE4BatteryLevel;
 import org.radarcns.empaticaE4.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
@@ -12,7 +13,6 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.topic.SensorTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.RadarUtils;
 import org.radarcns.util.serde.RadarSerdes;
 
 import javax.annotation.Nonnull;
@@ -25,8 +25,8 @@ public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
 
     private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
 
-    public E4BatteryLevel(String clientID, int numThread, MasterAggregator master) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,numThread,master);
+    public E4BatteryLevel(String clientID, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
+        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientID,numThread,master, kafkaProperties);
     }
 
     @Override

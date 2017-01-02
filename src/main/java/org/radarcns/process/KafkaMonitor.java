@@ -41,12 +41,12 @@ public abstract class KafkaMonitor<K, V> {
      *
      * @param topics topics to monitor
      */
-    public KafkaMonitor(List<String> topics) {
-        RadarConfig config = RadarConfig.load(getClass().getClassLoader());
+    public KafkaMonitor(List<String> topics, String clientID) {
+        RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         properties = new Properties();
         properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        properties.setProperty(CLIENT_ID_CONFIG, "1");
+        properties.setProperty(CLIENT_ID_CONFIG, clientID);
         config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
         this.consumer = null;
@@ -59,6 +59,7 @@ public abstract class KafkaMonitor<K, V> {
     protected void configure(Properties properties) {
         this.properties.putAll(properties);
         consumer = new KafkaConsumer<>(this.properties);
+        consumer.subscribe(topics);
     }
 
     /**
@@ -67,14 +68,14 @@ public abstract class KafkaMonitor<K, V> {
      * When a message is encountered that cannot be deserialized,
      * {@link #handleSerializationException()} is called.
      */
-    public void monitor() {
+    public void monitor(long timeout) {
         logger.info("Monitoring streams {}", topics);
         RollingTimeAverage ops = new RollingTimeAverage(20000);
 
         try {
             while (!isDone()) {
                 try {
-                    ConsumerRecords<K, V> records = consumer.poll(Long.MAX_VALUE);
+                    ConsumerRecords<K, V> records = consumer.poll(timeout);
                     ops.add(records.count());
                     logger.info("Received {} records", records.count());
                     evaluateRecords(records);

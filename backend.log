@@ -1,1398 +1,242 @@
-[2016-11-25 14:26:17 GMT] ERROR main Properties:36 - Impossible load properties /radar.yml
-[2016-11-25 14:30:20 GMT] ERROR main Properties:37 - Impossible load properties /radar.yml
-[2016-12-19 15:33:26 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:33:36 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:33:43 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:35:42 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:36:10 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:36:39 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:37:50 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:39:24 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:40:47 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:41:11 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 15:54:39 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 15:54:39 CET] ERROR Test worker PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:56:07 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 15:56:07 CET] ERROR Test worker PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:56:20 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 15:56:20 CET] ERROR Test worker PropertiesRadar:94 - Config file does not exist
-[2016-12-19 15:57:24 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:00:43 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:00:53 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:01:52 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:01:52 CET] ERROR Test worker PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:01:52 CET] ERROR Test worker PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:06:31 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:06:31 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:06:31 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:13:35 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:52:25 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:52:58 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-19 16:53:04 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:53:42 CET] ERROR Test worker PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:53:58 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:54:14 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:57:05 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:57:26 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 16:58:40 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 17:01:22 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 17:04:26 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-19 17:04:42 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 11:10:35 CET] INFO  main RadarBackend:28 - Loading configuration
-[2016-12-20 11:10:35 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 11:10:35 CET] ERROR main RadarBackend:33 - FATAL ERROR: application is shutting down
-java.lang.IllegalArgumentException: Config file does not exist
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:95)
-	at org.radarcns.RadarBackend.config(RadarBackend.java:31)
-	at org.radarcns.RadarBackend.<init>(RadarBackend.java:20)
-	at org.radarcns.Main.main(Main.java:10)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-[2016-12-20 12:04:33 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:05:46 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:06:14 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:06:45 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:06:45 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 12:09:28 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:09:28 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 12:09:37 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:09:37 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 12:37:45 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 12:37:45 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 13:36:44 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 13:36:44 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:36:44 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
+[2016-12-30 10:40:26 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 10:40:26 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 10:40:27 CET] INFO  main KafkaMonitor:81 - Received 4 records
+[2016-12-30 10:40:27 CET] ERROR main E4AggregatedAccelerationMonitor:54 - Failed to process record ConsumerRecord(topic = android_empatica_e4_acceleration_output, partition = 0, offset = 0, CreateTime = 1483090250000, checksum = 767914304, serialized key size = 37, serialized value size = 241, key = {"userID": "UserID_0", "sourceID": "SourceID_0", "start": 1483090250000, "end": 1483090260000}, value = {"min": [15.0, -15.0, 64.0], "max": [15.0, 4.9E-324, 64.0], "sum": [2475.0, -2475.0, 10560.0], "count": [165.0, 165.0, 165.0], "avg": [15.0, -15.0, 64.0], "quartile": [[15.0, 15.0, 15.0], [-15.0, -15.0, -15.0], [64.0, 64.0, 64.0]], "iqr": [0.0, 0.0, 0.0]}) with wrong key type {"type":"record","name":"WindowedKey","namespace":"org.radarcns.key","doc":"Windowed key in the RADAR-CNS project","fields":[{"name":"userID","type":{"type":"string","avro.java.string":"String"}},{"name":"sourceID","type":{"type":"string","avro.java.string":"String"}},{"name":"start","type":"long"},{"name":"end","type":"long"}]}.
+[2016-12-30 10:46:39 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 10:46:45 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 10:47:42 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 10:47:42 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 10:50:38 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 10:50:39 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 10:52:19 CET] INFO  main KafkaMonitor:81 - Received 0 records
+[2016-12-30 11:00:51 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 11:01:47 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 11:01:47 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 11:01:48 CET] INFO  main KafkaMonitor:81 - Received 4 records
+[2016-12-30 11:02:16 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 11:02:16 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 11:03:56 CET] INFO  main KafkaMonitor:81 - Received 0 records
+[2016-12-30 12:12:51 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
+
+[2016-12-30 12:12:52 CET] INFO  main KafkaMonitor:73 - Monitoring streams [android_empatica_e4_acceleration_output]
+[2016-12-30 12:16:43 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 12:21:56 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 12:24:25 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 12:27:53 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 12:34:42 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 13:55:55 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 13:59:22 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:00:46 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:04:58 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:10:53 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:13:22 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:15:52 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:18:33 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:23:08 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:27:49 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:43:44 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 14:43:44 CET] INFO  main RadarBackend:39 - Configuration successfully updated
+[2016-12-30 14:43:44 CET] INFO  main RadarBackend:40 - Settings{
   released=Sun Nov 27 01:00:00 CET 2016
   version='1.0'
   log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
+  mode='standalone'
+  zookeeper={
+    radar-test.thehyve.net:2181
+  }
+  broker={
+    radar-test.thehyve.net:9092
+  }
+  schema_registry={
+    http://radar-test.thehyve.net:8081
+  }
+  auto_commit_interval_ms=1000
+  session_timeout_ms=10000
+  streams_priority={
+    low=1 
+    normal=2 
+    high=4
+  }
 }
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
+[2016-12-30 14:43:44 CET] INFO  main RadarBackend:68 - STARTING
+[2016-12-30 14:43:44 CET] INFO  main MasterAggregator:47 - [Empatica E4] STANDALONE MODE
+[2016-12-30 14:43:44 CET] INFO  main MasterAggregator:45 - If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: 
+  - android_empatica_e4_acceleration
+  - android_empatica_e4_acceleration_output
+  - android_empatica_e4_battery_level
+  - android_empatica_e4_battery_level_output
+  - android_empatica_e4_blood_volume_pulse
+  - android_empatica_e4_blood_volume_pulse_output
+  - android_empatica_e4_electrodermal_activity
+  - android_empatica_e4_electrodermal_activity_output
+  - android_empatica_e4_heartrate_output
+  - android_empatica_e4_inter_beat_interval
+  - android_empatica_e4_inter_beat_interval_output
+  - android_empatica_e4_sensor_status
+  - android_empatica_e4_sensor_status_output
+  - android_empatica_e4_temperature
+  - android_empatica_e4_temperature_output
+[2016-12-30 14:43:46 CET] INFO  main MasterAggregator:62 - Creating MasterAggregator instance for Empatica E4
+[2016-12-30 14:43:46 CET] INFO  main MasterAggregator:84 - Starting all streams for Empatica E4
+[2016-12-30 14:43:46 CET] INFO  E4Acceleration MasterAggregator:105 - [Empatica E4] E4Acceleration is started. 1/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  E4BatteryLevel MasterAggregator:105 - [Empatica E4] E4BatteryLevel is started. 2/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  E4BloodVolumePulse MasterAggregator:105 - [Empatica E4] E4BloodVolumePulse is started. 3/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  E4ElectroDermalActivity MasterAggregator:105 - [Empatica E4] E4ElectroDermalActivity is started. 4/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  main RadarBackend:72 - STARTED
+[2016-12-30 14:43:46 CET] INFO  E4InterBeatInterval MasterAggregator:105 - [Empatica E4] E4InterBeatInterval is started. 5/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  E4HeartRate MasterAggregator:105 - [Empatica E4] E4HeartRate is started. 6/7 streams are now running
+[2016-12-30 14:43:46 CET] INFO  E4Temperature MasterAggregator:105 - [Empatica E4] E4Temperature is started. 7/7 streams are now running
+[2016-12-30 14:43:48 CET] ERROR StreamThread-5 ConsumerCoordinator:232 - User provided listener org.apache.kafka.streams.processor.internals.StreamThread$1 for group E4HeartRate failed on partition assignment
+java.lang.IllegalStateException: task [0_0] Log end offset should not change while restoring
+	at org.apache.kafka.streams.processor.internals.ProcessorStateManager.restoreActiveState(ProcessorStateManager.java:245)
+	at org.apache.kafka.streams.processor.internals.ProcessorStateManager.register(ProcessorStateManager.java:198)
+	at org.apache.kafka.streams.processor.internals.ProcessorContextImpl.register(ProcessorContextImpl.java:123)
+	at org.apache.kafka.streams.state.internals.RocksDBWindowStore.init(RocksDBWindowStore.java:206)
+	at org.apache.kafka.streams.state.internals.MeteredWindowStore.init(MeteredWindowStore.java:66)
+	at org.apache.kafka.streams.state.internals.CachingWindowStore.init(CachingWindowStore.java:64)
+	at org.apache.kafka.streams.processor.internals.AbstractTask.initializeStateStores(AbstractTask.java:81)
+	at org.apache.kafka.streams.processor.internals.StreamTask.<init>(StreamTask.java:120)
+	at org.apache.kafka.streams.processor.internals.StreamThread.createStreamTask(StreamThread.java:633)
+	at org.apache.kafka.streams.processor.internals.StreamThread.addStreamTasks(StreamThread.java:660)
+	at org.apache.kafka.streams.processor.internals.StreamThread.access$100(StreamThread.java:69)
+	at org.apache.kafka.streams.processor.internals.StreamThread$1.onPartitionsAssigned(StreamThread.java:124)
+	at org.apache.kafka.clients.consumer.internals.ConsumerCoordinator.onJoinComplete(ConsumerCoordinator.java:228)
+	at org.apache.kafka.clients.consumer.internals.AbstractCoordinator.joinGroupIfNeeded(AbstractCoordinator.java:313)
+	at org.apache.kafka.clients.consumer.internals.AbstractCoordinator.ensureActiveGroup(AbstractCoordinator.java:277)
+	at org.apache.kafka.clients.consumer.internals.ConsumerCoordinator.poll(ConsumerCoordinator.java:259)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.pollOnce(KafkaConsumer.java:1013)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.poll(KafkaConsumer.java:979)
+	at org.apache.kafka.streams.processor.internals.StreamThread.runLoop(StreamThread.java:407)
+	at org.apache.kafka.streams.processor.internals.StreamThread.run(StreamThread.java:242)
+[2016-12-30 14:43:49 CET] ERROR StreamThread-5 AggregatorWorker:103 - Thread StreamThread-5 has been terminated due to stream-thread [StreamThread-5] Failed to rebalance
+org.apache.kafka.streams.errors.StreamsException: stream-thread [StreamThread-5] Failed to rebalance
+	at org.apache.kafka.streams.processor.internals.StreamThread.runLoop(StreamThread.java:410)
+	at org.apache.kafka.streams.processor.internals.StreamThread.run(StreamThread.java:242)
+Caused by: java.lang.IllegalStateException: task [0_0] Log end offset should not change while restoring
+	at org.apache.kafka.streams.processor.internals.ProcessorStateManager.restoreActiveState(ProcessorStateManager.java:245)
+	at org.apache.kafka.streams.processor.internals.ProcessorStateManager.register(ProcessorStateManager.java:198)
+	at org.apache.kafka.streams.processor.internals.ProcessorContextImpl.register(ProcessorContextImpl.java:123)
+	at org.apache.kafka.streams.state.internals.RocksDBWindowStore.init(RocksDBWindowStore.java:206)
+	at org.apache.kafka.streams.state.internals.MeteredWindowStore.init(MeteredWindowStore.java:66)
+	at org.apache.kafka.streams.state.internals.CachingWindowStore.init(CachingWindowStore.java:64)
+	at org.apache.kafka.streams.processor.internals.AbstractTask.initializeStateStores(AbstractTask.java:81)
+	at org.apache.kafka.streams.processor.internals.StreamTask.<init>(StreamTask.java:120)
+	at org.apache.kafka.streams.processor.internals.StreamThread.createStreamTask(StreamThread.java:633)
+	at org.apache.kafka.streams.processor.internals.StreamThread.addStreamTasks(StreamThread.java:660)
+	at org.apache.kafka.streams.processor.internals.StreamThread.access$100(StreamThread.java:69)
+	at org.apache.kafka.streams.processor.internals.StreamThread$1.onPartitionsAssigned(StreamThread.java:124)
+	at org.apache.kafka.clients.consumer.internals.ConsumerCoordinator.onJoinComplete(ConsumerCoordinator.java:228)
+	at org.apache.kafka.clients.consumer.internals.AbstractCoordinator.joinGroupIfNeeded(AbstractCoordinator.java:313)
+	at org.apache.kafka.clients.consumer.internals.AbstractCoordinator.ensureActiveGroup(AbstractCoordinator.java:277)
+	at org.apache.kafka.clients.consumer.internals.ConsumerCoordinator.poll(ConsumerCoordinator.java:259)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.pollOnce(KafkaConsumer.java:1013)
+	at org.apache.kafka.clients.consumer.KafkaConsumer.poll(KafkaConsumer.java:979)
+	at org.apache.kafka.streams.processor.internals.StreamThread.runLoop(StreamThread.java:407)
+	... 1 more
+[2016-12-30 14:43:49 CET] WARN  StreamThread-5 MasterAggregator:131 - [Empatica E4] E4HeartRate is crashed
+[2016-12-30 14:43:49 CET] INFO  StreamThread-5 MasterAggregator:133 - Forcing shutdown of Empatica E4
+[2016-12-30 14:54:49 CET] INFO  Thread-15 RadarBackend:80 - SHUTTING DOWN
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:91 - Shutting down all streams for Empatica E4
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4Acceleration is closed. 6 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4BatteryLevel is closed. 5 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4BloodVolumePulse is closed. 4 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4ElectroDermalActivity is closed. 3 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4HeartRate is closed. 2 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4InterBeatInterval is closed. 1 streams are still running
+[2016-12-30 14:54:49 CET] INFO  Thread-15 MasterAggregator:118 - [Empatica E4] E4Temperature is closed. All streams have been terminated
+[2016-12-30 14:54:49 CET] INFO  Thread-15 RadarBackend:84 - FINISHED
+[2016-12-30 15:00:59 CET] INFO  main RadarConfig:180 - RadarConfig values: 
+	session.length.ms = 10000
+	topic.list.in = []
 
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:83)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:37:06 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
+[2016-12-30 15:00:59 CET] INFO  main KafkaMonitor:72 - Monitoring streams [android_empatica_e4_battery_level]
+[2016-12-30 15:26:24 CET] ERROR main RadarPropertyHandlerImpl:131 - User Log path does not exist
+[2016-12-30 15:27:27 CET] ERROR main RadarPropertyHandlerImpl:131 - User Log path does not exist
+[2016-12-30 15:39:15 CET] INFO  main RadarBackend:31 - Loading configuration
+[2016-12-30 15:39:15 CET] INFO  main RadarBackend:39 - Configuration successfully updated
+[2016-12-30 15:39:15 CET] INFO  main RadarBackend:40 - Settings{
   released=Sun Nov 27 01:00:00 CET 2016
   version='1.0'
   log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
+  mode='standalone'
+  zookeeper={
+    radar-test.thehyve.net:2181
+  }
+  broker={
+    radar-test.thehyve.net:9092
+  }
+  schema_registry={
+    http://radar-test.thehyve.net:8081
+  }
+  auto_commit_interval_ms=1000
+  session_timeout_ms=10000
+  streams_priority={
+    low=1 
+    normal=2 
+    high=4
+  }
 }
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:85)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:37:39 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 13:37:39 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:37:39 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:85)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:40:18 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:40:18 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:85)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:42:27 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:42:27 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:85)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:43:18 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:43:18 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:88)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:43:43 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 13:43:43 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:43:43 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:92)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:43:47 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 13:43:47 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:43:47 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:92)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 13:49:47 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 13:49:47 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 13:49:47 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:93)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 14:02:48 CET] ERROR main PropertiesRadar:153 - User Log path does not exist
-[2016-12-20 14:02:48 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:02:48 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:02:48 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:93)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 14:03:02 CET] ERROR main PropertiesRadar:153 - User Log path does not exist
-[2016-12-20 14:04:17 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:04:17 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:04:17 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 14:04:23 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:04:23 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:04:23 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 14:05:59 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:05:59 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:05:59 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runners.Suite.runChild(Suite.java:128)
-	at org.junit.runners.Suite.runChild(Suite.java:27)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 47 more
-[2016-12-20 14:06:06 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:06:06 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:06:06 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runners.Suite.runChild(Suite.java:128)
-	at org.junit.runners.Suite.runChild(Suite.java:27)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 47 more
-[2016-12-20 14:06:49 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:06:49 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:06:49 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runners.Suite.runChild(Suite.java:128)
-	at org.junit.runners.Suite.runChild(Suite.java:27)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 47 more
-[2016-12-20 14:07:16 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:07:16 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:07:16 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runners.Suite.runChild(Suite.java:128)
-	at org.junit.runners.Suite.runChild(Suite.java:27)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 47 more
-[2016-12-20 14:19:13 CET] ERROR main PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:19:13 CET] ERROR main PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:19:13 CET] ERROR main PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:117)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:42)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:262)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:84)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 39 more
-[2016-12-20 14:19:53 CET] ERROR Test worker PropertiesRadar:95 - Config file is invalid
-[2016-12-20 14:19:53 CET] ERROR Test worker PropertiesRadar:95 - Config file does not exist
-[2016-12-20 14:19:53 CET] ERROR Test worker PropertiesRadar:123 - Impossible load properties
-Cannot create property=somethingelse for JavaBean=Settings{
-  released=Sun Nov 27 01:00:00 CET 2016
-  version='1.0'
-  log_path='null'
-  mode='null'
-  zookeeper=null
-  broker=null
-  schema_registry=null
-  auto_commit_interval_ms=null
-  session_timeout_ms=null
-  streams_priority=null
-}
- in 'reader', line 1, column 1:
-    version: 1.0
-    ^
-Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
- in 'reader', line 5, column 15:
-    somethingelse:
-                  ^
-
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:313)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.construct(Constructor.java:190)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructYamlObject.construct(Constructor.java:346)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructObject(BaseConstructor.java:182)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.constructDocument(BaseConstructor.java:141)
-	at org.yaml.snakeyaml.constructor.BaseConstructor.getSingleData(BaseConstructor.java:127)
-	at org.yaml.snakeyaml.Yaml.loadFromReader(Yaml.java:450)
-	at org.yaml.snakeyaml.Yaml.loadAs(Yaml.java:444)
-	at org.radarcns.config.PropertiesRadar.<init>(PropertiesRadar.java:121)
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:99)
-	at org.radarcns.config.PropertiesRadarTest.loadInvalidYaml(PropertiesRadarTest.java:82)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.rules.ExpectedException$ExpectedExceptionStatement.evaluate(ExpectedException.java:239)
-	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.runTestClass(JUnitTestClassExecuter.java:114)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecuter.execute(JUnitTestClassExecuter.java:57)
-	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassProcessor.processTestClass(JUnitTestClassProcessor.java:66)
-	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:51)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:32)
-	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:93)
-	at com.sun.proxy.$Proxy2.processTestClass(Unknown Source)
-	at org.gradle.api.internal.tasks.testing.worker.TestWorker.processTestClass(TestWorker.java:109)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:35)
-	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-	at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:377)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:54)
-	at org.gradle.internal.concurrent.StoppableExecutorImpl$1.run(StoppableExecutorImpl.java:40)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
-	at java.lang.Thread.run(Thread.java:745)
-Caused by: org.yaml.snakeyaml.error.YAMLException: Unable to find property 'somethingelse' on class: org.radarcns.config.ConfigRadar
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:132)
-	at org.yaml.snakeyaml.introspector.PropertyUtils.getProperty(PropertyUtils.java:121)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.getProperty(Constructor.java:323)
-	at org.yaml.snakeyaml.constructor.Constructor$ConstructMapping.constructJavaBean2ndStep(Constructor.java:241)
-	... 55 more
-[2016-12-20 14:22:08 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 14:22:08 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 16:33:15 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 16:33:15 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 16:34:50 CET] INFO  main RadarBackend:28 - Loading configuration
-[2016-12-20 16:34:50 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 16:34:50 CET] ERROR main RadarBackend:33 - FATAL ERROR: application is shutting down
-java.lang.IllegalArgumentException: Config file does not exist
-	at org.radarcns.config.PropertiesRadar.load(PropertiesRadar.java:95)
-	at org.radarcns.RadarBackend.config(RadarBackend.java:31)
-	at org.radarcns.RadarBackend.<init>(RadarBackend.java:20)
-	at org.radarcns.Main.main(Main.java:10)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
-[2016-12-20 17:13:30 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "40880.051388"})
-[2016-12-20 17:14:49 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "40880.051388"})
-[2016-12-20 17:16:33 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "40880.051388"})
-[2016-12-20 17:16:41 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "40880.051388"})
-[2016-12-20 17:46:39 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 17:47:55 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 17:48:49 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 17:49:35 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 17:49:41 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 18:02:43 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 18:02:43 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 18:02:44 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-20 18:02:53 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-20 18:02:53 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-20 18:02:55 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-21 11:21:09 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-21 11:21:09 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-21 11:21:11 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-21 11:29:28 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-21 11:29:28 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-21 11:29:29 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-21 11:30:38 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-21 11:30:38 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-21 11:30:39 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-21 11:58:13 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-21 11:58:13 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-21 11:58:15 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
-[2016-12-21 12:13:37 CET] ERROR main PropertiesRadar:94 - Config file is invalid
-[2016-12-21 12:13:37 CET] ERROR main PropertiesRadar:94 - Config file does not exist
-[2016-12-21 12:13:38 CET] ERROR main DeviceTimestampExtractor:32 - timeReceived id not a Double in ConsumerRecord(topic = TESTTopic, partition = 3, offset = 30, NoTimestampType = -1, checksum = -1, serialized key size = -1, serialized value size = -1, key = null, value = {"timeReceived": "timeValue"})
+[2016-12-30 15:39:15 CET] INFO  main RadarBackend:68 - STARTING
+[2016-12-30 15:39:15 CET] INFO  main MasterAggregator:47 - [Empatica E4] STANDALONE MODE
+[2016-12-30 15:39:15 CET] INFO  main MasterAggregator:45 - If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: 
+  - android_empatica_e4_acceleration
+  - android_empatica_e4_acceleration_output
+  - android_empatica_e4_battery_level
+  - android_empatica_e4_battery_level_output
+  - android_empatica_e4_blood_volume_pulse
+  - android_empatica_e4_blood_volume_pulse_output
+  - android_empatica_e4_electrodermal_activity
+  - android_empatica_e4_electrodermal_activity_output
+  - android_empatica_e4_heartrate_output
+  - android_empatica_e4_inter_beat_interval
+  - android_empatica_e4_inter_beat_interval_output
+  - android_empatica_e4_sensor_status
+  - android_empatica_e4_sensor_status_output
+  - android_empatica_e4_temperature
+  - android_empatica_e4_temperature_output
+[2016-12-30 15:39:17 CET] INFO  main MasterAggregator:62 - Creating MasterAggregator instance for Empatica E4
+[2016-12-30 15:39:17 CET] INFO  main MasterAggregator:84 - Starting all streams for Empatica E4
+[2016-12-30 15:39:17 CET] INFO  E4Acceleration MasterAggregator:105 - [Empatica E4] E4Acceleration is started. 1/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  E4BatteryLevel MasterAggregator:105 - [Empatica E4] E4BatteryLevel is started. 2/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  E4BloodVolumePulse MasterAggregator:105 - [Empatica E4] E4BloodVolumePulse is started. 3/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  E4ElectroDermalActivity MasterAggregator:105 - [Empatica E4] E4ElectroDermalActivity is started. 4/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  E4HeartRate MasterAggregator:105 - [Empatica E4] E4HeartRate is started. 5/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  main RadarBackend:72 - STARTED
+[2016-12-30 15:39:17 CET] INFO  E4InterBeatInterval MasterAggregator:105 - [Empatica E4] E4InterBeatInterval is started. 6/7 streams are now running
+[2016-12-30 15:39:17 CET] INFO  E4Temperature MasterAggregator:105 - [Empatica E4] E4Temperature is started. 7/7 streams are now running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 RadarBackend:80 - SHUTTING DOWN
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:91 - Shutting down all streams for Empatica E4
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4Acceleration is closed. 6 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4BatteryLevel is closed. 5 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4BloodVolumePulse is closed. 4 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4ElectroDermalActivity is closed. 3 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4HeartRate is closed. 2 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:120 - [Empatica E4] E4InterBeatInterval is closed. 1 streams are still running
+[2016-12-30 15:41:29 CET] INFO  Thread-15 MasterAggregator:118 - [Empatica E4] E4Temperature is closed. All streams have been terminated
+[2016-12-30 15:41:29 CET] INFO  Thread-15 RadarBackend:84 - FINISHED
+[2017-01-02 11:34:39 CET] INFO  main RadarBackend:31 - Loading configuration
+[2017-01-02 11:35:46 CET] INFO  main RadarBackend:31 - Loading configuration
+[2017-01-02 11:37:55 CET] INFO  main RadarBackend:31 - Loading configuration
+[2017-01-02 11:40:11 CET] INFO  main RadarBackend:31 - Loading configuration
+[2017-01-02 11:42:50 CET] INFO  main RadarBackend:31 - Loading configuration
+[2017-01-02 11:45:52 CET] ERROR main RadarPropertyHandlerImpl:131 - User Log path does not exist

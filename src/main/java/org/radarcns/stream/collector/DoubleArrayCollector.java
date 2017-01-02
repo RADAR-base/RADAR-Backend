@@ -10,19 +10,18 @@ import java.util.List;
  * Java class to aggregate data using Kafka Streams. Double Array is the base unit
  */
 public class DoubleArrayCollector {
-    private final DoubleValueCollector[] collectors;
-
-    public DoubleArrayCollector(int length) {
-        collectors = new DoubleValueCollector[length];
-        for(int i=0; i<collectors.length ; i++) {
-            this.collectors[i] = new DoubleValueCollector();
-        }
-    }
-
+    private DoubleValueCollector[] collectors;
     /**
      * @param value: new sample that has to be analysed
      */
     public DoubleArrayCollector add(double[] value) {
+        if(collectors==null){
+            collectors = new DoubleValueCollector[value.length];
+            for(int i=0; i< value.length; i++ )
+            {
+                collectors[i] = new DoubleValueCollector();
+            }
+        }
         if (collectors.length != value.length) {
             throw new IllegalArgumentException(
                     "The length of current input differs from the length of the value used to "

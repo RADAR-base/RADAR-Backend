@@ -7,6 +7,7 @@ plugins {
     id 'jacoco'
     id 'pmd'
     id 'checkstyle'
+    id "com.avast.gradle.docker-compose" version "0.3.16"
 }
 
 version = '1.0'
@@ -34,7 +35,24 @@ run {
     }
 }
 
-configurations { codacy }
+sourceSets {
+    // Note that just declaring this sourceset creates two configurations.
+    integrationTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+        }
+        resources {
+            srcDir 'src/integrationTest/resources'
+        }
+    }
+}
+
+configurations {
+    codacy
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -113,11 +131,18 @@ pmdTest {
     ruleSetFiles = files("config/pmd/test_ruleset.xml")
 }
 
+task integrationTest(type:Test){
+    description = "Run integration tests (located in src/integrationTest/...)."
+    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    classpath = project.sourceSets.integrationTest.runtimeClasspath
+}
+
 jacocoTestReport {
+    executionData test, integrationTest
     reports {
         xml.enabled true
         csv.enabled false
-        html.enabled false
+        html.enabled true
     }
 }
 
@@ -137,3 +162,4 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
+

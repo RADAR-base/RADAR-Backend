@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_integrationTest.iml" group="radarbackend" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" group="radarbackend" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" group="radarbackend" />
     </modules>

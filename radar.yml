@@ -9,13 +9,13 @@ mode: standalone
 #============================== Zookeeper ==============================#
 #List of Zookeeper instances
 zookeeper:
-    - host: localhost
+    - host: radar-test.thehyve.net
       port: 2181
 
 #================================ Kafka ================================#
 #List of Kafka brokers
 broker:
-    - host: localhost
+    - host: radar-test.thehyve.net
       port: 9092
 
 #Kafka internal parameters
@@ -32,6 +32,6 @@ stream_priority:
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
 schema_registry:
-    - host: localhost
+    - host: radar-test.thehyve.net
       port: 8081
       protocol: http

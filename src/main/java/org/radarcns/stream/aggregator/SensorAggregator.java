@@ -3,6 +3,7 @@ package org.radarcns.stream.aggregator;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.topic.SensorTopic;
 
@@ -24,8 +25,8 @@ public abstract class SensorAggregator<V extends SpecificRecord>
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID,
-                            @Nonnull MasterAggregator master) throws IOException{
-        this(topic, clientID, 1, master);
+                            @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty) throws IOException{
+        this(topic, clientID, 1, master, kafkaProperty);
     }
 
     /**
@@ -35,13 +36,13 @@ public abstract class SensorAggregator<V extends SpecificRecord>
      * @param master: pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientID,
-                            @Nonnull int numThread, @Nonnull MasterAggregator master)
+                            @Nonnull int numThread, @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty)
             throws IOException {
-        super(topic, clientID, numThread, master);
+        super(topic, clientID, numThread, master, kafkaProperty);
     }
 
     protected KStreamBuilder getBuilder() throws IOException {
-        KStreamBuilder builder = new KStreamBuilder();
+        KStreamBuilder builder = super.getBuilder();
 
         KStream<MeasurementKey,V> valueKStream = builder.stream(getTopic().getInputTopic());
         setStream(valueKStream, getTopic());

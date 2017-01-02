@@ -24,7 +24,7 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
     private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
     public BatteryLevelMonitor(String topic) {
-        super(Collections.singletonList(topic));
+        super(Collections.singletonList(topic), "1");
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "battery_monitors");
@@ -92,8 +92,8 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
     }
 
     public static void main(String[] args) {
-        BatteryLevelMonitor monitor = new BatteryLevelMonitor("empatica_e4_battery_level");
+        BatteryLevelMonitor monitor = new BatteryLevelMonitor("android_empatica_e4_battery_level");
         monitor.addBatteryLevelListener(new BatteryLevelLogger());
-        monitor.monitor();
+        monitor.monitor(Long.MAX_VALUE);
     }
 }
