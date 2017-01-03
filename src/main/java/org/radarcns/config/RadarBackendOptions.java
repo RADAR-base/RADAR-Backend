@@ -14,7 +14,7 @@ public class RadarBackendOptions {
     private final CommandLine cli;
     private final String subCommand;
     private final String[] subCommandArgs;
-    public static Options OPTIONS = new Options()
+    public static final Options OPTIONS = new Options()
         .addOption("c", "config", true, "Configuration YAML file");
 
 
