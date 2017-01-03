@@ -1,5 +1,8 @@
 package org.radarcns.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +17,6 @@ import org.apache.log4j.PropertyConfigurator;
 import org.radarcns.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * Java Singleton class for handling the yml config file. Implements @link{ RadarPropertyHandler}
@@ -92,9 +94,11 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
   private ConfigRadar loadConfigRadar(@Nonnull String pathFile) throws IOException {
 
     try {
-      Yaml yaml = new Yaml();
+      ObjectMapper yamlObjectMapper = new ObjectMapper(new YAMLFactory());
+      yamlObjectMapper
+        .setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
       InputStream in = Files.newInputStream(Paths.get(pathFile));
-      return yaml.loadAs(in, ConfigRadar.class);
+      return yamlObjectMapper.readValue(in, ConfigRadar.class);
     } catch (IOException ex) {
       log.error("Impossible load properties", ex);
       throw ex;

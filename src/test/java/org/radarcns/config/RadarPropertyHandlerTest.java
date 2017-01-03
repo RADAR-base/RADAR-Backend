@@ -1,18 +1,21 @@
 package org.radarcns.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertTrue;
+
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.radarcns.util.RadarSingletonFactory;
-import org.yaml.snakeyaml.error.YAMLException;
-
-import java.lang.reflect.Field;
-
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
 
 /**
  * Created by nivethika on 19-12-16.
@@ -71,7 +74,7 @@ public class RadarPropertyHandlerTest {
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
         assertEquals("standalone", properties.getMode());
-        assertNull(properties.getLog_path());
+        assertTrue(properties.getLog_path().isEmpty());
         assertNotNull(properties.getBroker());
         assertNotNull(properties.getBrokerPath());
         assertNotNull(properties.getReleased());
@@ -87,7 +90,7 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void loadInvalidYaml() throws Exception {
-        exception.expect(YAMLException.class);
+        exception.expect(UnrecognizedPropertyException.class);
         propertyHandler.load("src/test/resources/config/invalidradar.yml");
     }
 
