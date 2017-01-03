@@ -2,6 +2,8 @@ package org.radarcns.util;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +18,8 @@ public class RadarConfig extends AbstractConfig {
     public static final long SESSION_TIME_WINDOW_DEFAULT = 10_000L;
 
     private static final ConfigDef CONFIG_DEF = new ConfigDef();
+    private static Logger logger = LoggerFactory.getLogger(RadarConfig.class);
+
     static {
         CONFIG_DEF.define(TopicGroup.all_in.getParam(), ConfigDef.Type.LIST, new ArrayList<>(),
                 ConfigDef.Importance.LOW, "List of topics to consume.");
@@ -50,9 +54,8 @@ public class RadarConfig extends AbstractConfig {
         try (InputStream in = classLoader.getResourceAsStream(configFile)) {
             // load a properties file
             prop.load(in);
-            in.close();
         } catch (IOException io) {
-            io.printStackTrace();
+            logger.warn("Cannot read properties file {}. Using defaults.", configFile, io);
         }
 
         return new RadarConfig(prop);
