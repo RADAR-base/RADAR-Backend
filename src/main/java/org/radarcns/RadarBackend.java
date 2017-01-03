@@ -16,23 +16,23 @@ import javax.annotation.Nonnull;
 public class RadarBackend {
 
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
-    private static RadarPropertyHandler radarPropertyHandler =
-            RadarSingletonFactory.getRadarPropertyHandler();
+    private static RadarPropertyHandler radarPropertyHandler = RadarSingletonFactory
+        .getRadarPropertyHandler();
 
-    public RadarBackend(@Nonnull String[] args){
+    public RadarBackend(@Nonnull String[] args) {
         config(args);
         application();
     }
 
     /**
-    * @param args: are the array of Strings given in input to the jar file
-    */
-    private static void config(@Nonnull String[] args){
+     * @param args: are the array of Strings given in input to the jar file
+     */
+    private static void config(@Nonnull String[] args) {
         log.info("Loading configuration");
         try {
             radarPropertyHandler.load(args.length == 0 ? null : args[0]);
-        } catch (Exception e) {
-            log.error("FATAL ERROR: application is shutting down", e);
+        } catch (Exception ex) {
+            log.error("FATAL ERROR: application is shutting down", ex);
             System.exit(1);
         }
 
@@ -43,28 +43,29 @@ public class RadarBackend {
     /**
      * It starts streams and sets a ShutdownHook to close streams while closing the application
      */
-    private static void application(){
+    private static void application() {
         try {
             go();
-        } catch (IOException e) {
-            log.error("FATAL ERROR! The current instance cannot start",e);
+        } catch (IOException exp) {
+            log.error("FATAL ERROR! The current instance cannot start", exp);
             System.exit(0);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 finish();
             } catch (Exception e) {
-                log.error("Impossible to finalise the shutdown hook",e);
+                log.error("Impossible to finalise the shutdown hook", e);
             }
         }));
     }
 
     /**
      * Start here all needed MasterAggregator
+     *
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
-    private static void go() throws IOException{
+    private static void go() throws IOException {
         log.info("STARTING");
 
         E4Worker.getInstance().start();
@@ -74,6 +75,7 @@ public class RadarBackend {
 
     /**
      * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
+     *
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
     private static void finish() throws InterruptedException, IOException {

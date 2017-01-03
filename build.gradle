@@ -26,7 +26,7 @@ ext.mongodbVersion = '3.3.0'
 ext.findbugsVersion = '3.0.1'
 ext.boundaryVersion = '1.0.6'
 ext.mathVersion = '3.0'
-ext.jacksonVersion='2.6.3'
+ext.jacksonVersion='2.8.5'
 ext.mockitoVersion = '2.2.29'
 
 run {
@@ -89,6 +89,7 @@ dependencies {
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
+    compile group: 'com.fasterxml.jackson.core' , name: 'jackson-databind' , version: jacksonVersion
 
     codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
 

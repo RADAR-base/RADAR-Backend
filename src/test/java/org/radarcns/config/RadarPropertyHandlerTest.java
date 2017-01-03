@@ -74,15 +74,15 @@ public class RadarPropertyHandlerTest {
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
         assertEquals("standalone", properties.getMode());
-        assertTrue(properties.getLog_path().isEmpty());
+        assertNull(properties.getLogPath());
         assertNotNull(properties.getBroker());
         assertNotNull(properties.getBrokerPath());
         assertNotNull(properties.getReleased());
-        assertNotNull(properties.getSchema_registry());
+        assertNotNull(properties.getSchemaRegistry());
         assertNotNull(properties.getSchemaRegistryPath());
         assertNotNull(properties.getZookeeper());
-        assertNotNull(properties.getAuto_commit_interval_ms());
-        assertNotNull(properties.getSession_timeout_ms());
+        assertNotNull(properties.getAutoCommitIntervalMs());
+        assertNotNull(properties.getSessionTimeoutMs());
         assertNotNull(properties.getZookeeperPath());
         assertNotNull(properties.getVersion());
 
@@ -110,11 +110,11 @@ public class RadarPropertyHandlerTest {
         RadarPropertyHandlerImpl radarPropertyHandler = mock(RadarPropertyHandlerImpl.class);
         ConfigRadar configs = mock(ConfigRadar.class);
         when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLog_path()).thenReturn("src/test");
+        when(configs.getLogPath()).thenReturn("src/test");
 
         doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
         radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLog_path();
+        verify(configs, times(2)).getLogPath();
     }
 
     @Test
@@ -127,10 +127,10 @@ public class RadarPropertyHandlerTest {
         exception.expectMessage("User Log path does not exist");
         ConfigRadar configs = mock(ConfigRadar.class);
         when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLog_path()).thenReturn("hack");
+        when(configs.getLogPath()).thenReturn("hack");
         doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
         radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLog_path();
+        verify(configs, times(2)).getLogPath();
 
     }
 
@@ -142,10 +142,10 @@ public class RadarPropertyHandlerTest {
         exception.expectMessage("User Log path is not a directory");
         ConfigRadar configs = mock(ConfigRadar.class);
         when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLog_path()).thenReturn("backend.log");
+        when(configs.getLogPath()).thenReturn("backend.log");
         doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
         radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLog_path();
+        verify(configs, times(2)).getLogPath();
 
     }
 
