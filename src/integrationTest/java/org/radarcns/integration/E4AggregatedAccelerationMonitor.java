@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
     private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
-    private boolean isDone =false;
 
     public E4AggregatedAccelerationMonitor(String topic, String clientID) {
         super(Collections.singletonList(topic),clientID);
@@ -37,7 +36,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
         if(records.count()==0)
         {
-            isDone=true;
+            shutdown();
             return;
         }
         assertTrue(records.count()>0);
@@ -82,9 +81,4 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             assertEquals((double)max.get(2), 64.0d, 0.0);
         }
     }
-
-    protected boolean isDone() {
-        return this.isDone;
-    }
-
 }
