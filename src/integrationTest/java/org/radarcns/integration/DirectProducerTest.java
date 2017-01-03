@@ -83,7 +83,7 @@ public class DirectProducerTest {
         String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts);
+        new RadarBackend(opts).application();
 
         Thread.sleep(numOfAggregatedRecords*11_000L);
 
