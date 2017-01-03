@@ -1,4 +1,4 @@
-//package org.radarcns.empaticaE4.streams;
+//package org.radarcns.empatica.streams;
 //
 //import org.apache.kafka.streams.kstream.KStream;
 //import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -10,9 +10,9 @@
 //import org.mortbay.util.IO;
 //import org.radarcns.config.ConfigRadar;
 //import org.radarcns.config.PropertiesRadar;
-//import org.radarcns.empaticaE4.EmpaticaE4Acceleration;
-//import org.radarcns.empaticaE4.topic.E4SensorTopics;
-//import org.radarcns.empaticaE4.topic.E4Topics;
+//import org.radarcns.empatica.EmpaticaE4Acceleration;
+//import org.radarcns.empatica.topic.E4SensorTopics;
+//import org.radarcns.empatica.topic.E4Topics;
 //import org.radarcns.key.MeasurementKey;
 //import org.radarcns.stream.aggregator.AggregatorWorker;
 //import org.radarcns.stream.aggregator.MasterAggregator;

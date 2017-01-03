@@ -1,22 +1,22 @@
 package org.radarcns.config;
 
 /**
- * POJO representing a Server configuration
+ * POJO representing a ServerConfig configuration
  */
-public class Server {
+public class ServerConfig {
 
     private String host;
     private Integer port;
     private String protocol;
 
-    public Server() {}
+    public ServerConfig() {}
 
-    public Server(String host, Integer port) {
+    public ServerConfig(String host, Integer port) {
         this.host = host;
         this.port = port;
     }
 
-    public Server(String host, Integer port, String protocol) {
+    public ServerConfig(String host, Integer port, String protocol) {
         this.host = host;
         this.port = port;
         this.protocol = protocol;
@@ -62,13 +62,13 @@ public class Server {
     @Override
     public String toString() {
         if(protocol == null || protocol.isEmpty()){
-            return "Server{" +
+            return "ServerConfig{" +
                     "host='" + host + '\'' +
                     ", port=" + port +
                     '}';
         }
 
-        return "Server{" +
+        return "ServerConfig{" +
                 "host='" + host + '\'' +
                 ", port=" + port +
                 ", protocol='" + protocol + '\'' +

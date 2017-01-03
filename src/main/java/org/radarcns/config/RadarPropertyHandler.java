@@ -1,5 +1,7 @@
 package org.radarcns.config;
 
+import java.io.IOException;
+
 /**
  * Interface that handles YAML configuration file loading
  */
@@ -21,7 +23,7 @@ public interface RadarPropertyHandler {
 
     ConfigRadar getRadarProperties();
 
-    void load(String pathFile) throws Exception;
+    void load(String pathFile) throws IOException;
 
     KafkaProperty getKafkaProperties();
 }

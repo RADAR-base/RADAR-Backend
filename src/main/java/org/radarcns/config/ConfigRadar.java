@@ -10,22 +10,21 @@ import java.util.stream.Collectors;
  * POJO representing the yml file
  */
 public class ConfigRadar {
-
     private Date released;
     private String version;
     @JsonProperty("log_path")
     private String logPath;
     private String mode;
-    private List<Server> zookeeper;
-    private List<Server> broker;
+    private List<ServerConfig> zookeeper;
+    private List<ServerConfig> broker;
     @JsonProperty("schema_registry")
-    private List<Server> schemaRegistry;
+    private List<ServerConfig> schemaRegistry;
     @JsonProperty("auto_commit_interval_ms")
     private Integer autoCommitIntervalMs;
     @JsonProperty("session_timeout_ms")
     private Integer sessionTimeoutMs;
     @JsonProperty("stream_priority")
-    private Map<String, Integer> streamPriority;
+    private Map<String,Integer> streamPriority;
 
     public ConfigRadar() {
     }
@@ -66,19 +65,19 @@ public class ConfigRadar {
         return mode;
     }
 
-    public List<Server> getZookeeper() {
+    public List<ServerConfig> getZookeeper() {
         return zookeeper;
     }
 
-    public void setZookeeper(List<Server> zookeeper) {
+    public void setZookeeper(List<ServerConfig> zookeeper) {
         this.zookeeper = zookeeper;
     }
 
-    public List<Server> getBroker() {
+    public List<ServerConfig> getBroker() {
         return broker;
     }
 
-    public void setBroker(List<Server> broker) {
+    public void setBroker(List<ServerConfig> broker) {
         this.broker = broker;
     }
 
@@ -106,35 +105,33 @@ public class ConfigRadar {
         this.streamPriority = streamPriority;
     }
 
-    public List<Server> getSchemaRegistry() {
+    public List<ServerConfig> getSchema_registry() {
         return schemaRegistry;
     }
 
-    public void setSchemaRegistry(List<Server> schemaRegistry) {
+    public void setSchema_registry(List<ServerConfig> schemaRegistry) {
         this.schemaRegistry = schemaRegistry;
     }
 
-    public Integer threadsByPriority(RadarPropertyHandler.Priority level) {
+    public Integer threadsByPriority(RadarPropertyHandler.Priority level){
         return streamPriority.get(level.getParam());
     }
 
-    public String getZookeeperPath() {
+    public String getZookeeperPath(){
         return zookeeper.get(0).getPath();
     }
 
-    public String getBrokerPath() {
+    public String getBrokerPath(){
         return broker.get(0).getPath();
     }
 
-    public String getSchemaRegistryPath() {
+    public String getSchemaRegistryPath(){
         return schemaRegistry.get(0).getPath();
     }
 
-    public String infoThread() {
+    public String infoThread(){
         String tab = "  ";
-        return "{" + "\n" + streamPriority
-                .keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + streamPriority
-                        .get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
+        return "{" + "\n" + streamPriority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + stream_priority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
     }
 
     @Override
@@ -149,7 +146,7 @@ public class ConfigRadar {
                 "  " + "schemaRegistry=" + schemaRegistry + "\n" +
                 "  " + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
                 "  " + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
-                "  " + "streams_priority=" + streamPriority + "\n" +
+                "  " + "streamPriority=" + streamPriority + "\n" +
                 '}';
     }
 
@@ -157,19 +154,17 @@ public class ConfigRadar {
 
         String tab = "  ";
 
-        return "Settings{" + "\n"
-                + tab + "released=" + released + "\n" + tab + "version='" + version + '\'' + "\n" +
-                tab + "logPath='" + logPath + '\'' + "\n" + tab + "mode='" + mode + '\'' + "\n" +
-                tab + "zookeeper={" + "\n" + zookeeper.stream().map(item -> tab + tab + item.info())
-                .collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "broker={" + "\n" + broker.stream().map(item -> tab + tab + item.info())
-                .collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "schemaRegistry={" + "\n" + schemaRegistry.stream()
-                .map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n"
-                + tab + "}" + "\n" +
+        return "Settings{" + "\n" +
+                tab + "released=" + released + "\n" +
+                tab + "version='" + version + '\'' + "\n" +
+                tab + "logPath='" + logPath + '\'' + "\n" +
+                tab + "mode='" + mode + '\'' + "\n" +
+                tab + "zookeeper={" + "\n" + zookeeper.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
+                tab + "broker={" + "\n" + broker.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
+                tab + "schemaRegistry={" + "\n" + schemaRegistry.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
                 tab + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
                 tab + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
-                tab + "streams_priority=" + infoThread() + "\n" +
+                tab + "streamPriority=" + infoThread() + "\n" +
                 '}';
     }
 }

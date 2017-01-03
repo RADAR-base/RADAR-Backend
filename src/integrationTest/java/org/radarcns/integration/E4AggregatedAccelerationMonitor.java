@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.process.KafkaMonitor;
+import org.radarcns.process.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +21,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Consumer for Aggregated Acceleration Stream
  */
-public class E4AggregatedAccelerationMonitor extends KafkaMonitor<GenericRecord, GenericRecord> {
+public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
     private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
-    private boolean isDone =false;
 
     public E4AggregatedAccelerationMonitor(String topic, String clientID) {
         super(Collections.singletonList(topic),clientID);
@@ -37,7 +36,7 @@ public class E4AggregatedAccelerationMonitor extends KafkaMonitor<GenericRecord,
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
         if(records.count()==0)
         {
-            isDone=true;
+            shutdown();
             return;
         }
         assertTrue(records.count()>0);
@@ -82,9 +81,4 @@ public class E4AggregatedAccelerationMonitor extends KafkaMonitor<GenericRecord,
             assertEquals((double)max.get(2), 64.0d, 0.0);
         }
     }
-
-    protected boolean isDone() {
-        return this.isDone;
-    }
-
 }

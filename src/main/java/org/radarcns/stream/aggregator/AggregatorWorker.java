@@ -5,7 +5,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.topic.AvroTopic;
-import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
     private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
     private final int numThreads;
     private final String clientID;
-    private KafkaStreams streams;
+    private final KafkaStreams streams;
     private final MasterAggregator master;
     private KafkaProperty kafkaProperty ;
 
