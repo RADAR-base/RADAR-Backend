@@ -1,4 +1,4 @@
-package org.radarcns.empaticaE4.topic;
+package org.radarcns.empatica.topic;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.aggregator.DoubleAggregator;

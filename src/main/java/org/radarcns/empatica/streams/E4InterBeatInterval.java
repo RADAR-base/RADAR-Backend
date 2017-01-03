@@ -1,11 +1,11 @@
-package org.radarcns.empaticaE4.streams;
+package org.radarcns.empatica.streams;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
-import org.radarcns.empaticaE4.topic.E4Topics;
+import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.empatica.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.stream.aggregator.SensorAggregator;
@@ -23,13 +23,13 @@ import java.io.IOException;
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
 
-    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
+    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4InterBeatInterval(String clientID, int numThread, MasterAggregator master
+    public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master
             , KafkaProperty kafkaProperties)
             throws IOException{
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
-                clientID, numThread,master, kafkaProperties);
+                clientId, numThread,master, kafkaProperties);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 }

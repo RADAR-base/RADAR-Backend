@@ -3,7 +3,7 @@ package org.radarcns;
 import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.SubCommand;
-import org.radarcns.empaticaE4.E4Worker;
+import org.radarcns.empatica.E4Worker;
 import org.radarcns.process.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

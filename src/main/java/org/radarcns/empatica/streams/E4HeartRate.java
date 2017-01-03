@@ -1,12 +1,12 @@
-package org.radarcns.empaticaE4.streams;
+package org.radarcns.empatica.streams;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
-import org.radarcns.empaticaE4.topic.E4Topics;
+import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.empatica.topic.E4Topics;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.stream.aggregator.InternalAggregator;
 import org.radarcns.stream.aggregator.MasterAggregator;
@@ -24,9 +24,9 @@ import java.io.IOException;
  */
 public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
 
-    private final RadarUtilities UTILITIES = RadarSingletonFactory.getRadarUtilities();
-    public E4HeartRate(String clientID, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException {
-        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientID, numThread,
+    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    public E4HeartRate(String clientId, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException {
+        super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientId, numThread,
                 master, kafkaProperties);
     }
 
@@ -37,12 +37,12 @@ public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval,
                 .aggregate(
                     DoubleValueCollector::new,
                     (k, v, valueCollector) -> valueCollector.add(
-                            UTILITIES.ibiToHR(v.getInterBeatInterval())),
+                            utilities.ibiToHR(v.getInterBeatInterval())),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(UTILITIES.getWindowed(k),v.convertInAvro()))
+                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
     }
 
