@@ -1,7 +1,7 @@
 package org.radarcns;
 
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.empaticaE4.E4Worker;
+import org.radarcns.empatica.E4Worker;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

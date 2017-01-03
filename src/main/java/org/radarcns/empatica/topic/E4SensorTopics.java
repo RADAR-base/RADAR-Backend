@@ -1,13 +1,13 @@
-package org.radarcns.empaticaE4.topic;
+package org.radarcns.empatica.topic;
 
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.empaticaE4.EmpaticaE4Acceleration;
-import org.radarcns.empaticaE4.EmpaticaE4BatteryLevel;
-import org.radarcns.empaticaE4.EmpaticaE4BloodVolumePulse;
-import org.radarcns.empaticaE4.EmpaticaE4ElectroDermalActivity;
-import org.radarcns.empaticaE4.EmpaticaE4InterBeatInterval;
-import org.radarcns.empaticaE4.EmpaticaE4SensorStatus;
-import org.radarcns.empaticaE4.EmpaticaE4Temperature;
+import org.radarcns.empatica.EmpaticaE4Acceleration;
+import org.radarcns.empatica.EmpaticaE4BatteryLevel;
+import org.radarcns.empatica.EmpaticaE4BloodVolumePulse;
+import org.radarcns.empatica.EmpaticaE4ElectroDermalActivity;
+import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.empatica.EmpaticaE4SensorStatus;
+import org.radarcns.empatica.EmpaticaE4Temperature;
 import org.radarcns.topic.SensorTopic;
 import org.radarcns.topic.SensorTopics;
 

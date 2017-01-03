@@ -1,14 +1,14 @@
-package org.radarcns.empaticaE4;
+package org.radarcns.empatica;
 
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empaticaE4.streams.E4Acceleration;
-import org.radarcns.empaticaE4.streams.E4BatteryLevel;
-import org.radarcns.empaticaE4.streams.E4BloodVolumePulse;
-import org.radarcns.empaticaE4.streams.E4ElectroDermalActivity;
-import org.radarcns.empaticaE4.streams.E4HeartRate;
-import org.radarcns.empaticaE4.streams.E4InterBeatInterval;
-import org.radarcns.empaticaE4.streams.E4Temperature;
-import org.radarcns.empaticaE4.topic.E4Topics;
+import org.radarcns.empatica.streams.E4Acceleration;
+import org.radarcns.empatica.streams.E4BatteryLevel;
+import org.radarcns.empatica.streams.E4BloodVolumePulse;
+import org.radarcns.empatica.streams.E4ElectroDermalActivity;
+import org.radarcns.empatica.streams.E4HeartRate;
+import org.radarcns.empatica.streams.E4InterBeatInterval;
+import org.radarcns.empatica.streams.E4Temperature;
+import org.radarcns.empatica.topic.E4Topics;
 import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.util.RadarSingletonFactory;

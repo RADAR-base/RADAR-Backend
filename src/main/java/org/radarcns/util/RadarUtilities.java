@@ -1,7 +1,7 @@
 package org.radarcns.util;
 
 import org.apache.kafka.streams.kstream.Windowed;
-import org.radarcns.empaticaE4.EmpaticaE4Acceleration;
+import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 

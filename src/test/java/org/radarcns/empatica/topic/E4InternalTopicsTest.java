@@ -1,4 +1,4 @@
-package org.radarcns.empaticaE4.topic;
+package org.radarcns.empatica.topic;
 
 import org.junit.Before;
 import org.junit.Rule;

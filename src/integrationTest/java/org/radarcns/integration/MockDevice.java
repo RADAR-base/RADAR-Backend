@@ -2,7 +2,7 @@ package org.radarcns.integration;
 
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
-import org.radarcns.empaticaE4.*;
+import org.radarcns.empatica.*;
 import org.radarcns.kafka.AvroTopic;
 import org.radarcns.kafka.KafkaSender;
 import org.radarcns.kafka.KafkaTopicSender;
