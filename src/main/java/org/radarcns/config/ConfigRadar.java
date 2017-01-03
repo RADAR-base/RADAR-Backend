@@ -105,7 +105,7 @@ public class ConfigRadar {
         this.streamPriority = streamPriority;
     }
 
-    public List<ServerConfig> getSchema_registry() {
+    public List<ServerConfig> getSchemaRegistry() {
         return schemaRegistry;
     }
 
@@ -131,7 +131,7 @@ public class ConfigRadar {
 
     public String infoThread(){
         String tab = "  ";
-        return "{" + "\n" + streamPriority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + stream_priority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
+        return "{" + "\n" + streamPriority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + streamPriority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
     }
 
     @Override
