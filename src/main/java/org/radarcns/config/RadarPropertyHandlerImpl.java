@@ -3,7 +3,7 @@ package org.radarcns.config;
 import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
-import org.radarcns.Main;
+import org.radarcns.RadarBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -47,7 +47,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
 
         //If pathFile is null
         if (Strings.isNullOrEmpty(pathFile)) {
-            URL pathUrl = Main.class.getProtectionDomain().getCodeSource().getLocation();
+            URL pathUrl = RadarBackend.class.getProtectionDomain().getCodeSource().getLocation();
             pathFile = pathUrl.toURI().getPath();
             pathFile = pathFile.substring(0, pathFile.lastIndexOf('/') + 1)+ nameConfigFile;
             message = "DEFAULT CONFIGURATION";

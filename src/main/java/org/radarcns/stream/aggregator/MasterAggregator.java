@@ -1,5 +1,6 @@
 package org.radarcns.stream.aggregator;
 
+import org.radarcns.config.SubCommand;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.util.RadarSingletonFactory;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @see org.radarcns.stream.aggregator.AggregatorWorker
  */
-public abstract class MasterAggregator {
+public abstract class MasterAggregator implements SubCommand {
     private static final Logger log = LoggerFactory.getLogger(MasterAggregator.class);
 
     private final List<AggregatorWorker> list;

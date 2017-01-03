@@ -12,7 +12,7 @@ plugins {
 
 version = '1.0'
 
-mainClassName = 'org.radarcns.Main'
+mainClassName = 'org.radarcns.RadarBackend'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -90,10 +90,10 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
     compile group: 'org.yaml', name: 'snakeyaml', version: snakeyamlVersion
 
-    codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
-
     testCompile 'junit:junit:4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+
+    codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
 }
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {

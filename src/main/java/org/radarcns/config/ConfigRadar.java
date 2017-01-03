@@ -1,8 +1,5 @@
 package org.radarcns.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +13,9 @@ public class ConfigRadar {
     private String version;
     private String log_path;
     private String mode;
-    private List<Server> zookeeper;
-    private List<Server> broker;
-    private List<Server> schema_registry;
+    private List<ServerConfig> zookeeper;
+    private List<ServerConfig> broker;
+    private List<ServerConfig> schema_registry;
     private Integer auto_commit_interval_ms;
     private Integer session_timeout_ms;
     private Map<String,Integer> stream_priority;
@@ -61,19 +58,19 @@ public class ConfigRadar {
         return mode;
     }
 
-    public List<Server> getZookeeper() {
+    public List<ServerConfig> getZookeeper() {
         return zookeeper;
     }
 
-    public void setZookeeper(List<Server> zookeeper) {
+    public void setZookeeper(List<ServerConfig> zookeeper) {
         this.zookeeper = zookeeper;
     }
 
-    public List<Server> getBroker() {
+    public List<ServerConfig> getBroker() {
         return broker;
     }
 
-    public void setBroker(List<Server> broker) {
+    public void setBroker(List<ServerConfig> broker) {
         this.broker = broker;
     }
 
@@ -101,11 +98,11 @@ public class ConfigRadar {
         this.stream_priority = stream_priority;
     }
 
-    public List<Server> getSchema_registry() {
+    public List<ServerConfig> getSchema_registry() {
         return schema_registry;
     }
 
-    public void setSchema_registry(List<Server> schema_registry) {
+    public void setSchema_registry(List<ServerConfig> schema_registry) {
         this.schema_registry = schema_registry;
     }
 

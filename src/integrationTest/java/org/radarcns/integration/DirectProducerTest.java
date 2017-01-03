@@ -4,6 +4,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.RadarBackend;
+import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.kafka.KafkaSender;
 import org.radarcns.key.MeasurementKey;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ public class DirectProducerTest {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducerTest.class);
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    private String clientID = "someclinet";
     protected static int numOfAggregatedRecords = 5;
 
     @Test
@@ -58,7 +58,7 @@ public class DirectProducerTest {
             try {
                 streamingTimeoutMs = Long.parseLong(props.getProperty("streaming.timeout.ms"));
             } catch (NumberFormatException ex) {
-
+                // do nothing
             }
         }
 
@@ -80,9 +80,10 @@ public class DirectProducerTest {
             assertNull("Device had IOException", device.getException());
         }
 
-        String[] args = {"src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
+        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
 
-        RadarBackend backend = new RadarBackend(args);
+        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+        new RadarBackend(opts);
 
         Thread.sleep(numOfAggregatedRecords*11_000L);
 
@@ -90,9 +91,10 @@ public class DirectProducerTest {
     }
 
     private void consumeAggregated() {
-        E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor("android_empatica_e4_acceleration_output", clientID);
-        monitor.monitor(100_000L);
+        String clientId = "someclinet";
+        E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
+                "android_empatica_e4_acceleration_output", clientId);
+        monitor.setPollTimeout(100_000L);
+        monitor.start();
     }
-
-
 }

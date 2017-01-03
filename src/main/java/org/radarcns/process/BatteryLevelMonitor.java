@@ -17,7 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /** Monitors the battery level for any devices running empty */
-public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericRecord> {
+public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
     private final Set<MeasurementKey> isLow;
     private final Set<MeasurementKey> isCritical;
     private final List<BatteryLevelListener> listeners;
@@ -94,6 +94,6 @@ public class BatteryLevelMonitor extends KafkaMonitor<GenericRecord, GenericReco
     public static void main(String[] args) {
         BatteryLevelMonitor monitor = new BatteryLevelMonitor("android_empatica_e4_battery_level");
         monitor.addBatteryLevelListener(new BatteryLevelLogger());
-        monitor.monitor(Long.MAX_VALUE);
+        monitor.start();
     }
 }
