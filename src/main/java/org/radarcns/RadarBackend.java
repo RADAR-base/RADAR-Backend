@@ -22,6 +22,7 @@ public final class RadarBackend {
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
     private final RadarBackendOptions options;
     private final RadarPropertyHandler radarPropertyHandler;
+    private SubCommand command;
 
     public RadarBackend(@Nonnull RadarBackendOptions options) throws IOException {
         this.options = options;
@@ -32,7 +33,7 @@ public final class RadarBackend {
         log.info(radarPropertyHandler.getRadarProperties().info());
     }
 
-    public SubCommand getCommand() throws IOException {
+    public SubCommand createCommand() throws IOException {
         String subCommand = options.getSubCommand();
         if (subCommand == null) {
             subCommand = "stream";
@@ -75,7 +76,8 @@ public final class RadarBackend {
     private void go() throws IOException{
         log.info("STARTING");
 
-        getCommand().start();
+        command = createCommand();
+        command.start();
 
         log.info("STARTED");
     }
@@ -87,7 +89,7 @@ public final class RadarBackend {
     private void finish() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");
 
-        getCommand().shutdown();
+        command.shutdown();
 
         log.info("FINISHED");
     }
