@@ -2,9 +2,11 @@ package org.radarcns;
 
 import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.empatica.E4Worker;
 import org.radarcns.process.AbstractKafkaMonitor;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,24 +17,31 @@ import java.util.Arrays;
 /**
  * Core class that initialises configurations and then start all needed Kafka streams
  */
-public class RadarBackend {
+public final class RadarBackend {
 
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
-    private final SubCommand command;
+    private final RadarBackendOptions options;
+    private final RadarPropertyHandler radarPropertyHandler;
 
     public RadarBackend(@Nonnull RadarBackendOptions options) throws IOException {
+        this.options = options;
+
+        radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        radarPropertyHandler.load(options.getPropertyPath());
+        log.info("Configuration successfully updated");
+        log.info(radarPropertyHandler.getRadarProperties().info());
+    }
+
+    public SubCommand getCommand() throws IOException {
         String subCommand = options.getSubCommand();
         if (subCommand == null) {
             subCommand = "stream";
         }
         switch (subCommand) {
             case "stream":
-                command = new E4Worker(options.getRadarPropertyHandler()
-                                .getRadarProperties().isStandalone());
-                break;
+                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
             case "monitor":
-                command = AbstractKafkaMonitor.create(options);
-                break;
+                return AbstractKafkaMonitor.create(options);
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());
@@ -42,19 +51,19 @@ public class RadarBackend {
     /**
      * It starts streams and sets a ShutdownHook to close streams while closing the application
      */
-    private void application() {
+    public void application() {
         try {
             go();
-        } catch (IOException e) {
-            log.error("FATAL ERROR! The current instance cannot start", e);
-            System.exit(0);
+        } catch (IOException ex) {
+            log.error("FATAL ERROR! The current instance cannot start", ex);
+            System.exit(1);
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             try {
                 finish();
-            } catch (Exception e) {
-                log.error("Impossible to finalise the shutdown hook",e);
+            } catch (Exception ex) {
+                log.error("Impossible to finalise the shutdown hook", ex);
             }
         }));
     }
@@ -66,7 +75,7 @@ public class RadarBackend {
     private void go() throws IOException{
         log.info("STARTING");
 
-        command.start();
+        getCommand().start();
 
         log.info("STARTED");
     }
@@ -78,7 +87,7 @@ public class RadarBackend {
     private void finish() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");
 
-        command.shutdown();
+        getCommand().shutdown();
 
         log.info("FINISHED");
     }

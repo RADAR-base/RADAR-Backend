@@ -40,7 +40,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
   }
 
   @Override
-  public void load(String pathFile) throws URISyntaxException, IOException {
+  public void load(String pathFile) throws IOException {
     String message = "USER CONFIGURATION";
 
     if (properties != null) {
@@ -49,10 +49,14 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
 
     //If pathFile is null
     if (Strings.isNullOrEmpty(pathFile)) {
-      URL pathUrl = RadarBackend.class.getProtectionDomain().getCodeSource().getLocation();
-      pathFile = pathUrl.toURI().getPath();
-      pathFile = pathFile.substring(0, pathFile.lastIndexOf('/') + 1) + nameConfigFile;
-      message = "DEFAULT CONFIGURATION";
+      try {
+        URL pathUrl = RadarBackend.class.getProtectionDomain().getCodeSource().getLocation();
+        pathFile = pathUrl.toURI().getPath();
+        pathFile = pathFile.substring(0, pathFile.lastIndexOf('/') + 1) + nameConfigFile;
+        message = "DEFAULT CONFIGURATION";
+      } catch (URISyntaxException ex) {
+        throw new IOException("Cannot get path of executable", ex);
+      }
     }
     log.info("{}: loading config file at {}", message, pathFile);
 
