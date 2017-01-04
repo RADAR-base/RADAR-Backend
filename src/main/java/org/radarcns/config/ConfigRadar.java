@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 public class ConfigRadar {
     private Date released;
     private String version;
-    private String log_path;
+    @JsonProperty("log_path")
+    private String logPath;
     private String mode;
     private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
@@ -20,10 +21,19 @@ public class ConfigRadar {
     private Integer auto_commit_interval_ms;
     private Integer session_timeout_ms;
     private Map<String,Integer> stream_priority;
+    @JsonProperty("schema_registry")
+    private List<ServerConfig> schemaRegistry;
+    @JsonProperty("auto_commit_interval_ms")
+    private Integer autoCommitIntervalMs;
+    @JsonProperty("session_timeout_ms")
+    private Integer sessionTimeoutMs;
+    @JsonProperty("stream_priority")
+    private Map<String,Integer> streamPriority;
     @JsonProperty("battery_status")
     private BatteryStatusConfig batteryStatus;
 
-    public ConfigRadar() {}
+    public ConfigRadar() {
+    }
 
     public Date getReleased() {
         return released;
@@ -41,12 +51,12 @@ public class ConfigRadar {
         this.version = version;
     }
 
-    public String getLog_path() {
-        return log_path;
+    public String getLogPath() {
+        return logPath;
     }
 
-    public void setLog_path(String log_path) {
-        this.log_path = log_path;
+    public void setLogPath(String logPath) {
+        this.logPath = logPath;
     }
 
     public boolean isStandalone() {
@@ -77,40 +87,40 @@ public class ConfigRadar {
         this.broker = broker;
     }
 
-    public Integer getAuto_commit_interval_ms() {
-        return auto_commit_interval_ms;
+    public Integer getAutoCommitIntervalMs() {
+        return autoCommitIntervalMs;
     }
 
-    public void setAuto_commit_interval_ms(Integer auto_commit_interval_ms) {
-        this.auto_commit_interval_ms = auto_commit_interval_ms;
+    public void setAutoCommitIntervalMs(Integer autoCommitIntervalMs) {
+        this.autoCommitIntervalMs = autoCommitIntervalMs;
     }
 
-    public Integer getSession_timeout_ms() {
-        return session_timeout_ms;
+    public Integer getSessionTimeoutMs() {
+        return sessionTimeoutMs;
     }
 
-    public void setSession_timeout_ms(Integer session_timeout_ms) {
-        this.session_timeout_ms = session_timeout_ms;
+    public void setSessionTimeoutMs(Integer sessionTimeoutMs) {
+        this.sessionTimeoutMs = sessionTimeoutMs;
     }
 
-    public Map<String, Integer> getStream_priority() {
-        return stream_priority;
+    public Map<String, Integer> getStreamPriority() {
+        return streamPriority;
     }
 
-    public void setStream_priority(Map<String, Integer> stream_priority) {
-        this.stream_priority = stream_priority;
+    public void setStreamPriority(Map<String, Integer> streamPriority) {
+        this.streamPriority = streamPriority;
     }
 
-    public List<ServerConfig> getSchema_registry() {
-        return schema_registry;
+    public List<ServerConfig> getSchemaRegistry() {
+        return schemaRegistry;
     }
 
-    public void setSchema_registry(List<ServerConfig> schema_registry) {
-        this.schema_registry = schema_registry;
+    public void setSchema_registry(List<ServerConfig> schemaRegistry) {
+        this.schemaRegistry = schemaRegistry;
     }
 
     public Integer threadsByPriority(RadarPropertyHandler.Priority level){
-        return stream_priority.get(level.getParam());
+        return streamPriority.get(level.getParam());
     }
 
     public String getZookeeperPath(){
@@ -122,12 +132,12 @@ public class ConfigRadar {
     }
 
     public String getSchemaRegistryPath(){
-        return schema_registry.get(0).getPath();
+        return schemaRegistry.get(0).getPath();
     }
 
     public String infoThread(){
         String tab = "  ";
-        return "{" + "\n" + stream_priority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + stream_priority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
+        return "{" + "\n" + streamPriority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + streamPriority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
     }
 
     @Override
@@ -135,14 +145,14 @@ public class ConfigRadar {
         return "Settings{" + "\n" +
                 "  " + "released=" + released + "\n" +
                 "  " + "version='" + version + '\'' + "\n" +
-                "  " + "log_path='" + log_path + '\'' + "\n" +
+                "  " + "logPath='" + logPath + '\'' + "\n" +
                 "  " + "mode='" + mode + '\'' + "\n" +
                 "  " + "zookeeper=" + zookeeper + "\n" +
                 "  " + "broker=" + broker + "\n" +
-                "  " + "schema_registry=" + schema_registry + "\n" +
-                "  " + "auto_commit_interval_ms=" + auto_commit_interval_ms + "\n" +
-                "  " + "session_timeout_ms=" + session_timeout_ms + "\n" +
-                "  " + "streams_priority=" + stream_priority + "\n" +
+                "  " + "schemaRegistry=" + schemaRegistry + "\n" +
+                "  " + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
+                "  " + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
+                "  " + "streamPriority=" + streamPriority + "\n" +
                 '}';
     }
 
@@ -153,14 +163,14 @@ public class ConfigRadar {
         return "Settings{" + "\n" +
                 tab + "released=" + released + "\n" +
                 tab + "version='" + version + '\'' + "\n" +
-                tab + "log_path='" + log_path + '\'' + "\n" +
+                tab + "logPath='" + logPath + '\'' + "\n" +
                 tab + "mode='" + mode + '\'' + "\n" +
                 tab + "zookeeper={" + "\n" + zookeeper.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
                 tab + "broker={" + "\n" + broker.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "schema_registry={" + "\n" + schema_registry.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "auto_commit_interval_ms=" + auto_commit_interval_ms + "\n" +
-                tab + "session_timeout_ms=" + session_timeout_ms + "\n" +
-                tab + "streams_priority=" + infoThread() + "\n" +
+                tab + "schemaRegistry={" + "\n" + schemaRegistry.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
+                tab + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
+                tab + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
+                tab + "streamPriority=" + infoThread() + "\n" +
                 '}';
     }
 

@@ -1,5 +1,7 @@
 package org.radarcns.config;
 
+import static com.fasterxml.jackson.databind.PropertyNamingStrategy.SNAKE_CASE;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -81,8 +83,8 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     //  - mode can be standalone or high_performance
     //  - all thread priority must be bigger than 1
 
-    if (!Strings.isNullOrEmpty(getRadarProperties().getLog_path())) {
-      updateLog4jConfiguration(getRadarProperties().getLog_path());
+    if (!Strings.isNullOrEmpty(getRadarProperties().getLogPath())) {
+      updateLog4jConfiguration(getRadarProperties().getLogPath());
     }
 
   }
@@ -100,7 +102,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     try {
       ObjectMapper yamlObjectMapper = new ObjectMapper(new YAMLFactory());
       yamlObjectMapper
-        .setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+        .setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
       InputStream in = Files.newInputStream(Paths.get(pathFile));
       return yamlObjectMapper.readValue(in, ConfigRadar.class);
     } catch (IOException ex) {
@@ -110,13 +112,13 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
   }
 
 
-  /**
-   * @param logPath: new log file defined by the user
-   * @throws IllegalArgumentException if logPath is null or is not a valid file
-   */
-  private void updateLog4jConfiguration(@Nonnull String logPath)
-      throws IllegalArgumentException, IOException {
-    String message = null;
+    /**
+     * @param logPath: new log file defined by the user
+     * @throws IllegalArgumentException if logPath is null or is not a valid file
+     */
+    private void updateLog4jConfiguration(@Nonnull String logPath)
+            throws IllegalArgumentException, IOException {
+        String message = null;
 
     if (Strings.isNullOrEmpty(logPath)) {
       message = "Invalid log_path - check your configuration file";

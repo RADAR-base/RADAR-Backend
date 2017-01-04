@@ -86,6 +86,7 @@ public final class RadarBackend {
 
     /**
      * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
+     *
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
     private void finish() throws InterruptedException, IOException {
