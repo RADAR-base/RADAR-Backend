@@ -1,5 +1,11 @@
 package org.radarcns.util;
 
+import java.util.List;
+import java.util.Map;
+import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.streams.kstream.Window;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.TimeWindow;
@@ -13,11 +19,11 @@ import static org.junit.Assert.assertEquals;
 
 public class RadarUtilsTest {
 
-    private RadarUtilities radarUtilities ;
+    private RadarUtilities radarUtilities;
 
     @Before
     public void setUp() {
-        this.radarUtilities = new RadarUtils();
+        this.radarUtilities = new RadarUtilitiesImpl();
     }
 
     @Test
@@ -35,13 +41,13 @@ public class RadarUtilsTest {
     @Test
     public void floatToDouble() {
         double value = radarUtilities.floatToDouble(1.0f);
-        assertEquals(value,1.0d,0.0d);
+        assertEquals(value, 1.0d, 0.0d);
     }
 
     @Test
     public void ibiToHR() {
         double hR = radarUtilities.ibiToHR(1.0f);
-        assertEquals( (60d/1.0d), hR, 0.0d);
+        assertEquals((60d / 1.0d), hR, 0.0d);
     }
 
     @Test
@@ -55,5 +61,16 @@ public class RadarUtilsTest {
         assertEquals(value[0], 1.0f, 0.0);
         assertEquals(value[1], 2.0f, 0.0);
         assertEquals(value[2], 3.0f, 0.0);
+    }
+
+    @Test
+    public void measurementKeyToMongoDbKey() {
+       Schema schema = SchemaBuilder.struct().field("userId", Schema.STRING_SCHEMA).field("sourceId", Schema.STRING_SCHEMA).build();
+        Struct struct = new Struct(schema);
+        struct.put("userId", "user1");
+        struct.put("sourceId", "source1");
+
+        String value = radarUtilities.measurementKeyToMongoDbKey(struct);
+        assertEquals("user1-source1", value);
     }
 }

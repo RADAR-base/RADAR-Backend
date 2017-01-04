@@ -64,6 +64,9 @@ repositories {
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+    flatDir {
+        dirs 'lib'
+    }
 }
 
 idea {
@@ -86,7 +89,6 @@ dependencies {
     compile (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion) {
         exclude group: 'org.apache.hive'
     }
-    compile group: 'org.mongodb', name: 'mongo-java-driver', version: mongodbVersion
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
@@ -95,6 +97,7 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
+    compile group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
