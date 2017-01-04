@@ -17,10 +17,6 @@ public class ConfigRadar {
     private String mode;
     private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
-    private List<ServerConfig> schema_registry;
-    private Integer auto_commit_interval_ms;
-    private Integer session_timeout_ms;
-    private Map<String,Integer> stream_priority;
     @JsonProperty("schema_registry")
     private List<ServerConfig> schemaRegistry;
     @JsonProperty("auto_commit_interval_ms")
