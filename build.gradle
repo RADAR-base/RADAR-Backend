@@ -161,5 +161,6 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
+    distributionUrl = distributionUrl.replace("bin", "all")
 }
 
