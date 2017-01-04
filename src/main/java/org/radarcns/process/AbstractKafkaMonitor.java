@@ -1,6 +1,8 @@
 package org.radarcns.process;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import java.util.Arrays;
+import java.util.Locale;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -8,7 +10,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
+import org.radarcns.config.BatteryStatusConfig;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.process.BatteryLevelListener.Status;
 import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -149,7 +155,8 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
         this.pollTimeout = pollTimeout;
     }
 
-    public static KafkaMonitor create(RadarBackendOptions options) {
+    public static KafkaMonitor create(RadarBackendOptions options,
+            ConfigRadar properties) {
         BatteryLevelMonitor monitor;
         String[] args = options.getSubCommandArgs();
         String commandType;
@@ -162,6 +169,24 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
             case "battery":
                 monitor = new BatteryLevelMonitor("android_empatica_e4_battery_level");
                 monitor.addBatteryLevelListener(new BatteryLevelLogger());
+                BatteryStatusConfig config = properties.getBatteryStatus();
+                if (config != null) {
+                    String email = config.getEmailAddress();
+                    if (email != null) {
+                        Status minStatus = Status.CRITICAL;
+                        String level = config.getLevel();
+                        if (level != null) {
+                            try {
+                                minStatus = Status.valueOf(config.getLevel().toUpperCase(Locale.US));
+                            } catch (IllegalArgumentException ex) {
+                                logger.warn("Do not recognize minimum battery level {}. "
+                                                + "Choose from {} instead. Using CRITICAL.",
+                                        config.getLevel(), Arrays.toString(Status.values()));
+                            }
+                        }
+                        monitor.addBatteryLevelListener(new BatteryLevelEmail(email, minStatus));
+                    }
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);

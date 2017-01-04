@@ -1,5 +1,6 @@
 package org.radarcns.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ public class ConfigRadar {
     private Integer auto_commit_interval_ms;
     private Integer session_timeout_ms;
     private Map<String,Integer> stream_priority;
+    @JsonProperty("battery_status")
+    private BatteryStatusConfig batteryStatus;
 
     public ConfigRadar() {}
 
@@ -159,5 +162,13 @@ public class ConfigRadar {
                 tab + "session_timeout_ms=" + session_timeout_ms + "\n" +
                 tab + "streams_priority=" + infoThread() + "\n" +
                 '}';
+    }
+
+    public BatteryStatusConfig getBatteryStatus() {
+        return batteryStatus;
+    }
+
+    public void setBatteryStatus(BatteryStatusConfig batteryStatus) {
+        this.batteryStatus = batteryStatus;
     }
 }

@@ -1,6 +1,7 @@
 package org.radarcns;
 
 import org.apache.commons.cli.ParseException;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
@@ -35,14 +36,15 @@ public final class RadarBackend {
 
     public SubCommand createCommand() throws IOException {
         String subCommand = options.getSubCommand();
+        ConfigRadar properties = radarPropertyHandler.getRadarProperties();
         if (subCommand == null) {
             subCommand = "stream";
         }
         switch (subCommand) {
             case "stream":
-                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
+                return new E4Worker(properties.isStandalone());
             case "monitor":
-                return AbstractKafkaMonitor.create(options);
+                return AbstractKafkaMonitor.create(options, properties);
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());

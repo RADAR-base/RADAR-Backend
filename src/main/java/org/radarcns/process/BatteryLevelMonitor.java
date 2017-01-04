@@ -1,6 +1,13 @@
 package org.radarcns.process;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,13 +15,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.key.MeasurementKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 /** Monitors the battery level for any devices running empty */
 public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
@@ -38,53 +38,70 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
 
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
-            GenericRecord key = record.key();
-            if (key == null) {
-                logger.error("Failed to process record {} without a key.", record);
-                return;
-            }
-            MeasurementKey measurementKey;
-            Schema keySchema = key.getSchema();
-            if (keySchema.getField("userId") != null
-                    && keySchema.getField("sourceId") != null) {
-                measurementKey = new MeasurementKey((String) key.get("userId"),
-                        (String) key.get("sourceId"));
-            } else {
-                logger.error("Failed to process record {} with wrong key type {}.",
-                        record, key.getSchema());
-                return;
-            }
-            GenericRecord value = record.value();
-            Schema recordSchema = value.getSchema();
-
-            int batteryLevelFieldId = recordSchema.getField("batteryLevel").pos();
-            Number batteryLevel = (Number) value.get(batteryLevelFieldId);
-            if (batteryLevel.floatValue() < 0.05) {
-                boolean newlyCritical = isCritical.add(measurementKey);
-                if (newlyCritical) {
-                    isLow.add(measurementKey);
-                    for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey,
-                                BatteryLevelListener.Status.CRITICAL);
+            try {
+                MeasurementKey key = extractKey(record);
+                float batteryLevel = extractBatteryLevel(record);
+                if (batteryLevel < 0.05) {
+                    boolean newlyCritical = isCritical.add(key);
+                    if (newlyCritical) {
+                        isLow.add(key);
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(key,
+                                    BatteryLevelListener.Status.CRITICAL);
+                        }
+                    }
+                } else if (batteryLevel < 0.2) {
+                    if (isLow.add(key)) {
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(key,
+                                    BatteryLevelListener.Status.LOW);
+                        }
+                    }
+                } else {
+                    if (isLow.remove(key)) {
+                        isCritical.remove(key);
+                        for (BatteryLevelListener listener : listeners) {
+                            listener.batteryLevelStatusUpdated(key,
+                                    BatteryLevelListener.Status.NORMAL);
+                        }
                     }
                 }
-            } else if (batteryLevel.floatValue() < 0.2) {
-                if (isLow.add(measurementKey)) {
-                    for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey,
-                                BatteryLevelListener.Status.LOW);
-                    }
-                }
-            } else {
-                if (isLow.remove(measurementKey)) {
-                    isCritical.remove(measurementKey);
-                    for (BatteryLevelListener listener : listeners) {
-                        listener.batteryLevelStatusUpdated(measurementKey,
-                                BatteryLevelListener.Status.NORMAL);
-                    }
-                }
+            } catch (IllegalArgumentException ex) {
+                logger.error("Failed to process record {}", record, ex);
             }
         }
+    }
+
+    private MeasurementKey extractKey(ConsumerRecord<GenericRecord, GenericRecord> record) {
+        GenericRecord key = record.key();
+        if (key == null) {
+            throw new IllegalArgumentException("Failed to process record without a key.");
+        }
+        Schema keySchema = key.getSchema();
+        Field userIdField = keySchema.getField("userId");
+        if (userIdField == null) {
+            throw new IllegalArgumentException("Failed to process record with key type "
+                    + key.getSchema() + " without user ID.");
+        }
+        Field sourceIdField = keySchema.getField("sourceId");
+        if (sourceIdField == null) {
+            throw new IllegalArgumentException("Failed to process record with key type "
+                    + key.getSchema() + " without source ID.");
+        }
+        return new MeasurementKey(
+                (String) key.get(userIdField.pos()),
+                (String) key.get(sourceIdField.pos()));
+    }
+
+    private float extractBatteryLevel(ConsumerRecord<GenericRecord, GenericRecord> record) {
+        GenericRecord value = record.value();
+        Field batteryField = value.getSchema().getField("batteryLevel");
+        if (batteryField == null) {
+            throw new IllegalArgumentException("Failed to process record with value type " +
+                    value.getSchema() + " without batteryLevel field.");
+        }
+        Number batteryLevel = (Number) record.value().get(batteryField.pos());
+        return batteryLevel.floatValue();
     }
 
     public void addBatteryLevelListener(BatteryLevelListener listener) {
