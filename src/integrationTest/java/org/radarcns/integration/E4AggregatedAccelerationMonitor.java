@@ -33,13 +33,18 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
         configure(props);
     }
 
+    @Override
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
+        // noop
+    }
+
+    @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        if(records.count()==0)
-        {
+        if (records.isEmpty()) {
             shutdown();
             return;
         }
-        assertTrue(records.count()>0);
+        assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
             GenericRecord key = record.key();
