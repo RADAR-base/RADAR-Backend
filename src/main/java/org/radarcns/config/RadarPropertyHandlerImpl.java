@@ -47,19 +47,17 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         //If pathFile is null
         if (Strings.isNullOrEmpty(pathFile)) {
             file = getDefaultFile();
-            log.info("DEFAULT CONFIGURATION: loading config file at {}", pathFile);
+            log.info("DEFAULT CONFIGURATION: loading config file at {}", file);
         } else {
             log.info("USER CONFIGURATION: loading config file at {}", pathFile);
             file = new File(pathFile);
         }
 
         if (!file.exists()) {
-            log.error("Config file {} does not exist", file);
-            return;
+            throw new IllegalArgumentException("Config file " + file + " does not exist");
         }
         if (!file.isFile()) {
-            log.error("Config file {} is invalid", file);
-            return;
+            throw new IllegalArgumentException("Config file " + file + " is invalid");
         }
 
         properties = loadConfigRadar(file);
@@ -100,7 +98,6 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     }
 
     private ConfigRadar loadConfigRadar(@Nonnull File pathFile) throws IOException {
-
         try {
             ObjectMapper yamlObjectMapper = new ObjectMapper(new YAMLFactory());
             yamlObjectMapper
@@ -111,7 +108,6 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             throw ex;
         }
     }
-
 
     /**
      * @param logPath: new log file defined by the user

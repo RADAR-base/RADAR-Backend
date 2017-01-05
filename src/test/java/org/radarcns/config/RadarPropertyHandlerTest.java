@@ -45,22 +45,12 @@ public class RadarPropertyHandlerTest {
     }
 
     @Test
-    public void loadWithEmptyPath() throws Exception {
-        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
-        properties.setAccessible(true);
-        properties.set(this.propertyHandler,null);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Config file does not exist");
-        propertyHandler.load(null);
-    }
-
-    @Test
     public void loadWithInvalidFilePath() throws Exception {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
-        properties.set(this.propertyHandler,null);
+        properties.set(this.propertyHandler, null);
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Config file is invalid");
+        exception.expectMessage("Config file /usr is invalid");
         String invalidPath = "/usr/";
         propertyHandler.load(invalidPath);
     }
