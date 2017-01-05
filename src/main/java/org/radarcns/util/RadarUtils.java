@@ -6,7 +6,10 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 
 public class RadarUtils implements RadarUtilities{
-    protected RadarUtils(){}
+    protected RadarUtils(){
+        // used for construction from RadarSingletonFactory
+    }
+
     public WindowedKey getWindowed(Windowed<MeasurementKey> window){
         return new WindowedKey(window.key().getUserId(), window.key().getSourceId(),
                 window.window().start(), window.window().end());

@@ -13,7 +13,6 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.radarcns.config.BatteryStatusConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
-import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.process.BatteryLevelListener.Status;
 import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;

@@ -1,26 +1,15 @@
 package org.radarcns.config;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * POJO representing a ServerConfig configuration
  */
 public class ServerConfig {
-
     private String host;
     private Integer port;
     private String protocol;
-
-    public ServerConfig() {}
-
-    public ServerConfig(String host, Integer port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    public ServerConfig(String host, Integer port, String protocol) {
-        this.host = host;
-        this.port = port;
-        this.protocol = protocol;
-    }
 
     public String getHost() {
         return host;
@@ -54,24 +43,12 @@ public class ServerConfig {
         }
     }
 
-    public String info(){
-        String result = host + ":" + port;
-        return (protocol == null || protocol.isEmpty()) ? result : protocol + "://" + result;
-    }
-
     @Override
     public String toString() {
-        if(protocol == null || protocol.isEmpty()){
-            return "ServerConfig{" +
-                    "host='" + host + '\'' +
-                    ", port=" + port +
-                    '}';
-        }
+        return getPath();
+    }
 
-        return "ServerConfig{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                ", protocol='" + protocol + '\'' +
-                '}';
+    public static String getPaths(List<ServerConfig> configList) {
+        return configList.stream().map(ServerConfig::getPath).collect(Collectors.joining(","));
     }
 }

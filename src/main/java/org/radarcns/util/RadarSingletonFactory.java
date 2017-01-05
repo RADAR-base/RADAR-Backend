@@ -3,19 +3,19 @@ package org.radarcns.util;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
 
-public class RadarSingletonFactory {
-
+public final class RadarSingletonFactory {
     private static RadarUtilities utilities;
 
     private static RadarPropertyHandler propertyHandler;
 
-    private static final Object syncObject = new Object();
+    private static final Object SYNC_OBJECT = new Object();
 
     private RadarSingletonFactory() {
+        // utility class
     }
 
     public static RadarUtilities getRadarUtilities() {
-        synchronized (syncObject) {
+        synchronized (SYNC_OBJECT) {
             if (utilities == null) {
                 utilities = new RadarUtils();
             }
@@ -24,7 +24,7 @@ public class RadarSingletonFactory {
     }
 
     public static RadarPropertyHandler getRadarPropertyHandler() {
-        synchronized (syncObject) {
+        synchronized (SYNC_OBJECT) {
             if (propertyHandler == null) {
                 propertyHandler = new RadarPropertyHandlerImpl();
             }

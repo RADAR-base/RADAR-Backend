@@ -1,10 +1,16 @@
 package org.radarcns.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * POJO representing the yml file
@@ -27,9 +33,6 @@ public class ConfigRadar {
     private Map<String,Integer> streamPriority;
     @JsonProperty("battery_status")
     private BatteryStatusConfig batteryStatus;
-
-    public ConfigRadar() {
-    }
 
     public Date getReleased() {
         return released;
@@ -104,14 +107,17 @@ public class ConfigRadar {
     }
 
     public void setStreamPriority(Map<String, Integer> streamPriority) {
-        this.streamPriority = streamPriority;
+        this.streamPriority = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : streamPriority.entrySet()) {
+            this.streamPriority.put(entry.getKey().toLowerCase(Locale.US), entry.getValue());
+        }
     }
 
     public List<ServerConfig> getSchemaRegistry() {
         return schemaRegistry;
     }
 
-    public void setSchema_registry(List<ServerConfig> schemaRegistry) {
+    public void setSchemaRegistry(List<ServerConfig> schemaRegistry) {
         this.schemaRegistry = schemaRegistry;
     }
 
@@ -119,55 +125,42 @@ public class ConfigRadar {
         return streamPriority.get(level.getParam());
     }
 
-    public String getZookeeperPath(){
-        return zookeeper.get(0).getPath();
+    public String getZookeeperPaths() {
+        return ServerConfig.getPaths(zookeeper);
     }
 
-    public String getBrokerPath(){
-        return broker.get(0).getPath();
+    public String getBrokerPaths() {
+        return ServerConfig.getPaths(broker);
     }
 
-    public String getSchemaRegistryPath(){
-        return schemaRegistry.get(0).getPath();
+    public String getSchemaRegistryPaths() {
+        return ServerConfig.getPaths(schemaRegistry);
     }
 
     public String infoThread(){
-        String tab = "  ";
-        return "{" + "\n" + streamPriority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + streamPriority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
+        return streamPriority.toString();
     }
 
     @Override
     public String toString() {
-        return "Settings{" + "\n" +
-                "  " + "released=" + released + "\n" +
-                "  " + "version='" + version + '\'' + "\n" +
-                "  " + "logPath='" + logPath + '\'' + "\n" +
-                "  " + "mode='" + mode + '\'' + "\n" +
-                "  " + "zookeeper=" + zookeeper + "\n" +
-                "  " + "broker=" + broker + "\n" +
-                "  " + "schemaRegistry=" + schemaRegistry + "\n" +
-                "  " + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
-                "  " + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
-                "  " + "streamPriority=" + streamPriority + "\n" +
-                '}';
-    }
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        // pretty print
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        // make ConfigRadar the root element
+        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+        // only serialize fields, not getters, etc.
+        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-    public String info() {
-
-        String tab = "  ";
-
-        return "Settings{" + "\n" +
-                tab + "released=" + released + "\n" +
-                tab + "version='" + version + '\'' + "\n" +
-                tab + "logPath='" + logPath + '\'' + "\n" +
-                tab + "mode='" + mode + '\'' + "\n" +
-                tab + "zookeeper={" + "\n" + zookeeper.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "broker={" + "\n" + broker.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "schemaRegistry={" + "\n" + schemaRegistry.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "autoCommitIntervalMs=" + autoCommitIntervalMs + "\n" +
-                tab + "sessionTimeoutMs=" + sessionTimeoutMs + "\n" +
-                tab + "streamPriority=" + infoThread() + "\n" +
-                '}';
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException ex) {
+            throw new UnsupportedOperationException("Cannot serialize config", ex);
+        }
     }
 
     public BatteryStatusConfig getBatteryStatus() {

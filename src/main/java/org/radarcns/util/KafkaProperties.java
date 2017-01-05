@@ -19,8 +19,12 @@ import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CL
 import static org.apache.kafka.clients.producer.ProducerConfig.RETRIES_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 
-public class KafkaProperties {
+public final class KafkaProperties {
     private static RadarConfig config = RadarConfig.load(KafkaProperties.class.getClassLoader());
+
+    private KafkaProperties() {
+        // utility class only
+    }
 
     /**
      * Generate Kafka Producer properties

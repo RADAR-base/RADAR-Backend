@@ -7,8 +7,7 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 /**
  * Set of Serde usefull for Kafka Streams
  */
-public class RadarSerdes{
-
+public final class RadarSerdes{
     private final Serde<DoubleValueCollector> doubelCollector;
     private final Serde<DoubleArrayCollector> doubelArrayCollector;
 

@@ -49,12 +49,12 @@ public class RollingTimeAverage {
      * @return average value per second
      */
     public double getAverage() {
-        long now = System.currentTimeMillis();
-        long currentWindowStart = now - window;
-
         if (!hasAverage()) {
             throw new IllegalStateException("Cannot get average without values");
         }
+
+        long now = System.currentTimeMillis();
+        long currentWindowStart = now - window;
 
         while (!deque.isEmpty() && deque.getFirst().time < currentWindowStart) {
             total -= firstTime.value;

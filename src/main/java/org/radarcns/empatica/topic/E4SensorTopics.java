@@ -18,7 +18,7 @@ import java.util.Set;
  * Entire set of Empatica E4 SensorTopic
  * @see SensorTopic
  */
-public class E4SensorTopics implements SensorTopics {
+public final class E4SensorTopics implements SensorTopics {
 
     //All sensor topics
     private final SensorTopic<EmpaticaE4Acceleration> accelerationTopic;
@@ -31,7 +31,7 @@ public class E4SensorTopics implements SensorTopics {
 
     private static E4SensorTopics instance = new E4SensorTopics();
 
-    protected static E4SensorTopics getInstance() {
+    static E4SensorTopics getInstance() {
         return instance;
     }
 

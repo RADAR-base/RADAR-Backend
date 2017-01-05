@@ -17,7 +17,7 @@ import java.util.Collection;
  * @param <K> topic key type
  * @param <V> topic record type
  */
-public abstract class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
+public class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     private final String name;
 
     //Enumerate all possible suffix
