@@ -134,11 +134,6 @@ pmd {
     ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
-
-pmdTest {
-    ruleSetFiles = files("config/pmd/test_ruleset.xml")
-}
-
 task integrationTest(type:Test){
     description = "Run integration tests (located in src/integrationTest/...)."
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
