@@ -1,12 +1,16 @@
 package org.radarcns.util;
 
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 
-public class RadarUtils implements RadarUtilities{
-    protected RadarUtils(){
+/**
+ * Implements {@link RadarUtilities}
+ */
+public class RadarUtilitiesImpl implements RadarUtilities{
+    protected RadarUtilitiesImpl() {
         // used for construction from RadarSingletonFactory
     }
 
@@ -28,5 +32,16 @@ public class RadarUtils implements RadarUtilities{
                 floatToDouble(value.getX()),
                 floatToDouble(value.getY()),
                 floatToDouble(value.getZ())};
+    }
+
+    /**
+     * Creates a key string using userId and sourceId
+     * @param key
+     * @return converted key string
+     */
+    @Override
+    public String measurementKeyToMongoDbKey(Struct key) {
+        return key.get("userId")
+                + "-" + key.get("sourceId");
     }
 }

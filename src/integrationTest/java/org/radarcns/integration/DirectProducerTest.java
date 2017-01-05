@@ -22,7 +22,6 @@ public class DirectProducerTest {
     private final static Logger logger = LoggerFactory.getLogger(DirectProducerTest.class);
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    protected static int numOfAggregatedRecords = 5;
 
     @Test
     public void testDirect() throws Exception {
@@ -85,7 +84,7 @@ public class DirectProducerTest {
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
         new RadarBackend(opts).application();
 
-        Thread.sleep(numOfAggregatedRecords*11_000L);
+        Thread.sleep(40_000L);
 
         consumeAggregated();
     }
