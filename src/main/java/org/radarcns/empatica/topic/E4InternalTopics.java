@@ -12,12 +12,12 @@ import java.util.Set;
  * Entire set of Empatica E4 InternalTopic
  * @see InternalTopic
  */
-public class E4InternalTopics implements InternalTopics {
+public final class E4InternalTopics implements InternalTopics {
     private final InternalTopic<DoubleAggregator> heartRateTopic;
 
     private static E4InternalTopics instance = new E4InternalTopics();
 
-    protected static E4InternalTopics getInstance() {
+    static E4InternalTopics getInstance() {
         return instance;
     }
 
@@ -49,5 +49,4 @@ public class E4InternalTopics implements InternalTopics {
     public InternalTopic<DoubleAggregator> getHeartRateTopic() {
         return heartRateTopic;
     }
-
 }

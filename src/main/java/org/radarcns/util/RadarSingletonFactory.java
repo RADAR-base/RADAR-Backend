@@ -7,15 +7,16 @@ import org.radarcns.config.RadarPropertyHandlerImpl;
  * SingletonFactory of RadarBackend project. This factory composites all singleton objects that need
  * to be maintained in this project and provides a gateway to get singleton objects
  */
-public class RadarSingletonFactory {
+public final class RadarSingletonFactory {
 
     private static RadarUtilities utilities;
 
     private static RadarPropertyHandler propertyHandler;
 
-    private static final Object syncObject = new Object();
+    private static final Object SYNC_OBJECT = new Object();
 
     private RadarSingletonFactory() {
+        // utility class
     }
 
     /**
@@ -24,7 +25,7 @@ public class RadarSingletonFactory {
      * @return a RadarUtilities object
      */
     public static RadarUtilities getRadarUtilities() {
-        synchronized (syncObject) {
+        synchronized (SYNC_OBJECT) {
             if (utilities == null) {
                 utilities = new RadarUtilitiesImpl();
             }
@@ -38,7 +39,7 @@ public class RadarSingletonFactory {
      * @return a RadarPropertyHandler object
      */
     public static RadarPropertyHandler getRadarPropertyHandler() {
-        synchronized (syncObject) {
+        synchronized (SYNC_OBJECT) {
             if (propertyHandler == null) {
                 propertyHandler = new RadarPropertyHandlerImpl();
             }

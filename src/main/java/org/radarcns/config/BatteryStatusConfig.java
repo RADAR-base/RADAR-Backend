@@ -2,6 +2,9 @@ package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * POJO representing a battery status monitor configuration
+ */
 public class BatteryStatusConfig {
     @JsonProperty("email_address")
     private String emailAddress;

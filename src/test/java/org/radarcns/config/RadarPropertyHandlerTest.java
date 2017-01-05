@@ -76,14 +76,14 @@ public class RadarPropertyHandlerTest {
         assertEquals("standalone", properties.getMode());
         assertNull(properties.getLogPath());
         assertNotNull(properties.getBroker());
-        assertNotNull(properties.getBrokerPath());
+        assertNotNull(properties.getBrokerPaths());
         assertNotNull(properties.getReleased());
         assertNotNull(properties.getSchemaRegistry());
-        assertNotNull(properties.getSchemaRegistryPath());
+        assertNotNull(properties.getSchemaRegistryPaths());
         assertNotNull(properties.getZookeeper());
         assertNotNull(properties.getAutoCommitIntervalMs());
         assertNotNull(properties.getSessionTimeoutMs());
-        assertNotNull(properties.getZookeeperPath());
+        assertNotNull(properties.getZookeeperPaths());
         assertNotNull(properties.getVersion());
 
     }

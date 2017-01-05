@@ -10,12 +10,11 @@ import java.util.Set;
 /**
  * Singleton class representing the list of Empatica E4 topics
  */
-public class E4Topics implements DeviceTopics {
-
+public final class E4Topics implements DeviceTopics {
     private static E4Topics instance = new E4Topics();
 
-    private static final E4SensorTopics sensorTopics = E4SensorTopics.getInstance();
-    private static final E4InternalTopics internalTopics = E4InternalTopics.getInstance();
+    private static final E4SensorTopics SENSOR_TOPICS = E4SensorTopics.getInstance();
+    private static final E4InternalTopics INTERNAL_TOPICS = E4InternalTopics.getInstance();
 
     public static E4Topics getInstance() {
         return instance;
@@ -40,13 +39,13 @@ public class E4Topics implements DeviceTopics {
      * @return an instance of E4SensorTopics
      */
     public E4SensorTopics getSensorTopics() {
-        return sensorTopics;
+        return SENSOR_TOPICS;
     }
 
     /**
      * @return an instance of E4InternalTopics
      */
     public E4InternalTopics getInternalTopics() {
-        return internalTopics;
+        return INTERNAL_TOPICS;
     }
 }

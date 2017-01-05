@@ -19,7 +19,6 @@ import java.util.Arrays;
  * Core class that initialises configurations and then start all needed Kafka streams
  */
 public final class RadarBackend {
-
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
     private final RadarBackendOptions options;
     private final RadarPropertyHandler radarPropertyHandler;
@@ -30,8 +29,9 @@ public final class RadarBackend {
 
         radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         radarPropertyHandler.load(options.getPropertyPath());
+
         log.info("Configuration successfully updated");
-        log.info(radarPropertyHandler.getRadarProperties().info());
+        log.info("radar.yml configuration: {}", radarPropertyHandler.getRadarProperties());
     }
 
     public SubCommand createCommand() throws IOException {

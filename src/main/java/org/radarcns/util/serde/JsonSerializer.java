@@ -16,7 +16,7 @@ public class JsonSerializer<T> implements Serializer<T> {
     
     private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
     
-    private static final ObjectWriter writer = getFieldMapper().writer();
+    private static final ObjectWriter WRITER = getFieldMapper().writer();
 
     private static ObjectMapper getFieldMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -29,13 +29,13 @@ public class JsonSerializer<T> implements Serializer<T> {
 
     @Override
     public void configure(Map<String, ?> map, boolean b) {
-
+        // no configuration needed
     }
 
     @Override
     public byte[] serialize(String topic, T t) {
         try {
-            return writer.writeValueAsBytes(t);
+            return WRITER.writeValueAsBytes(t);
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize value {} in topic {}", t, topic, e);
             return null;
@@ -44,6 +44,6 @@ public class JsonSerializer<T> implements Serializer<T> {
 
     @Override
     public void close() {
-
+        // noop
     }
 }

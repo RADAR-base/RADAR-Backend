@@ -11,8 +11,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.process.BatteryLevelListener.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,39 +36,31 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
         this.listeners = new ArrayList<>();
     }
 
-    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
-            try {
-                MeasurementKey key = extractKey(record);
-                float batteryLevel = extractBatteryLevel(record);
-                if (batteryLevel < 0.05) {
-                    boolean newlyCritical = isCritical.add(key);
-                    if (newlyCritical) {
-                        isLow.add(key);
-                        for (BatteryLevelListener listener : listeners) {
-                            listener.batteryLevelStatusUpdated(key,
-                                    BatteryLevelListener.Status.CRITICAL);
-                        }
-                    }
-                } else if (batteryLevel < 0.2) {
-                    if (isLow.add(key)) {
-                        for (BatteryLevelListener listener : listeners) {
-                            listener.batteryLevelStatusUpdated(key,
-                                    BatteryLevelListener.Status.LOW);
-                        }
-                    }
-                } else {
-                    if (isLow.remove(key)) {
-                        isCritical.remove(key);
-                        for (BatteryLevelListener listener : listeners) {
-                            listener.batteryLevelStatusUpdated(key,
-                                    BatteryLevelListener.Status.NORMAL);
-                        }
-                    }
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+        try {
+            MeasurementKey key = extractKey(record);
+            float batteryLevel = extractBatteryLevel(record);
+            if (batteryLevel <= Status.CRITICAL.getLevel()) {
+                if (isCritical.add(key)) {
+                    isLow.add(key);
+                    updateStatus(key, Status.CRITICAL);
                 }
-            } catch (IllegalArgumentException ex) {
-                logger.error("Failed to process record {}", record, ex);
+            } else if (batteryLevel < Status.LOW.getLevel()) {
+                if (isLow.add(key)) {
+                    updateStatus(key, Status.LOW);
+                }
+            } else if (isLow.remove(key)) {
+                isCritical.remove(key);
+                updateStatus(key, Status.NORMAL);
             }
+        } catch (IllegalArgumentException ex) {
+            logger.error("Failed to process record {}", record, ex);
+        }
+    }
+
+    private void updateStatus(MeasurementKey key, Status status) {
+        for (BatteryLevelListener listener : listeners) {
+            listener.batteryLevelStatusUpdated(key, status);
         }
     }
 

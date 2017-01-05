@@ -15,8 +15,8 @@ import java.util.Map;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
     private static final Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
-    private static final ObjectReader reader = getFieldMapper().reader();
-    private static final JsonFactory jsonFactory = new JsonFactory();
+    private static final ObjectReader READER = getFieldMapper().reader();
+    private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
     private Class<T> deserializedClass;
 
@@ -49,7 +49,7 @@ public class JsonDeserializer<T> implements Deserializer<T> {
         }
 
         try {
-            return reader.readValue(jsonFactory.createParser(bytes), deserializedClass);
+            return READER.readValue(JSON_FACTORY.createParser(bytes), deserializedClass);
         } catch (IOException e) {
             logger.error("Failed to deserialize value for topic {}", topic, e);
             return null;
@@ -58,6 +58,6 @@ public class JsonDeserializer<T> implements Deserializer<T> {
 
     @Override
     public void close() {
-
+        // noop
     }
 }
