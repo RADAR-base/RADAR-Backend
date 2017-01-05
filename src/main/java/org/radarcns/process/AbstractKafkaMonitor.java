@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
@@ -130,8 +131,15 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
         logger.error("Failed to find faulty message.");
     }
 
-    /** Evaluate the records that the monitor receives by overriding this function */
-    protected abstract void evaluateRecords(ConsumerRecords<K, V> records);
+    /** Evaluate a single record that the monitor receives by overriding this function */
+    protected abstract void evaluateRecord(ConsumerRecord<K, V> records);
+
+    /** Evaluates the records that the monitor receives */
+    protected void evaluateRecords(ConsumerRecords<K, V> records) {
+        for (ConsumerRecord<K, V> record : records) {
+            evaluateRecord(record);
+        }
+    }
 
     /**
      * Whether the monitoring is done.
