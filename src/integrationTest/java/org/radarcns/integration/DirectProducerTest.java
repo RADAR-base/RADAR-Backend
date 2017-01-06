@@ -7,6 +7,7 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.kafka.KafkaSender;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,7 @@ public class DirectProducerTest {
     private void consumeAggregated() throws IOException {
         String clientId = "someclinet";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(),
                 "android_empatica_e4_acceleration_output", clientId);
         monitor.setPollTimeout(100_000L);
         monitor.start();

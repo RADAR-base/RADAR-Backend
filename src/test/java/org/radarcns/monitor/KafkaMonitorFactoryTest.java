@@ -10,13 +10,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.junit.Test;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
 
 public class KafkaMonitorFactoryTest {
     @Test
-    public void createMonitor() throws Exception {
+    public void createBatteryMonitor() throws Exception {
         String[] args = {"monitor", "battery"};
         RadarBackendOptions options = RadarBackendOptions.parse(args);
         ConfigRadar config = new ConfigRadar();
@@ -40,5 +41,31 @@ public class KafkaMonitorFactoryTest {
         BatteryLevelMonitor batteryMonitor = (BatteryLevelMonitor) monitor;
         batteryMonitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         assertTrue(new File(tmpDir, "battery_monitors_1.yml").isFile());
+    }
+
+    @Test
+    public void createDisconnectMonitor() throws Exception {
+        String[] args = {"monitor", "disconnect"};
+        RadarBackendOptions options = RadarBackendOptions.parse(args);
+        ConfigRadar config = new ConfigRadar();
+        DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
+        disconnectConfig.setEmailAddress("test@localhost");
+        disconnectConfig.setTimeout(100L);
+        String tmpDir = Files.createTempDirectory(null).toAbsolutePath().toString();
+        config.setPersistencePath(tmpDir);
+        config.setSchemaRegistry(Collections.emptyList());
+        config.setBroker(Collections.emptyList());
+
+        File tmpConfig = File.createTempFile("radar", ".yml");
+        config.store(tmpConfig);
+
+        RadarPropertyHandler properties = new RadarPropertyHandlerImpl();
+        properties.load(tmpConfig.getAbsolutePath());
+
+        KafkaMonitor monitor = new KafkaMonitorFactory(options, properties).createMonitor();
+        assertEquals(DisconnectMonitor.class, monitor.getClass());
+        DisconnectMonitor disconnectMonitor = (DisconnectMonitor) monitor;
+        disconnectMonitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
+        assertTrue(new File(tmpDir, "temperature_disconnect_1.yml").isFile());
     }
 }

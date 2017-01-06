@@ -42,7 +42,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         configure(props);
 
         super.setPollTimeout(timeUntilReportedMissing);
-        dayFormat = new SimpleDateFormat("EEE, d MMM at HH:mm:ss z", Locale.US);
+        dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
     }
 
     @Override

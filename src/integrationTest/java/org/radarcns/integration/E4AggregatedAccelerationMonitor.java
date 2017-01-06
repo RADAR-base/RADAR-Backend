@@ -13,6 +13,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandlerImpl;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
@@ -24,8 +26,8 @@ import org.slf4j.LoggerFactory;
 public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
     private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
 
-    public E4AggregatedAccelerationMonitor(String topic, String clientID) throws IOException {
-        super(Collections.singletonList(topic), "new", clientID, null, null);
+    public E4AggregatedAccelerationMonitor(RadarPropertyHandler radar, String topic, String clientID) throws IOException {
+        super(radar, Collections.singletonList(topic), "new", clientID, null);
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
