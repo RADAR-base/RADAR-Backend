@@ -14,7 +14,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 // TODO this class should substitute org.radarcns.util.RadarConfig
 public class KafkaProperty {
 
-    private ConfigRadar configRadar;
+    private final ConfigRadar configRadar;
 
     protected KafkaProperty(ConfigRadar configRadar) {
         this.configRadar = configRadar;

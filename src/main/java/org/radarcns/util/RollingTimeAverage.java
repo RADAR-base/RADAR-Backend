@@ -33,9 +33,9 @@ public class RollingTimeAverage {
     /** Add a new value. */
     public void add(double x) {
         if (firstTime == null) {
-            firstTime = new TimeCount(x);
+            firstTime = TimeCount.create(x);
         } else {
-            deque.addLast(new TimeCount(x));
+            deque.addLast(TimeCount.create(x));
         }
         total += x;
     }
@@ -78,9 +78,13 @@ public class RollingTimeAverage {
         private final double value;
         private final long time;
 
-        private TimeCount(double value) {
+        private TimeCount(long time, double value) {
             this.value = value;
-            this.time = System.currentTimeMillis();
+            this.time = time;
+        }
+
+        private static TimeCount create(double value) {
+            return new TimeCount(System.currentTimeMillis(), value);
         }
     }
 }
