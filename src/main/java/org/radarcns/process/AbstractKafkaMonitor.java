@@ -3,6 +3,8 @@ package org.radarcns.process;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.util.Arrays;
 import java.util.Locale;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,7 +16,8 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.radarcns.config.BatteryStatusConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
-import org.radarcns.process.BatteryLevelListener.Status;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.util.EmailSender;
 import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -37,7 +40,7 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
     protected final List<String> topics;
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
 
-    protected KafkaConsumer consumer;
+    private KafkaConsumer consumer;
     private final Properties properties;
     private long pollTimeout;
     private boolean done;
@@ -50,12 +53,12 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
      *
      * @param topics topics to monitor
      */
-    public AbstractKafkaMonitor(List<String> topics, String clientID) {
+    public AbstractKafkaMonitor(List<String> topics, String clientId) {
         RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         properties = new Properties();
         properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        properties.setProperty(CLIENT_ID_CONFIG, clientID);
+        properties.setProperty(CLIENT_ID_CONFIG, clientId);
         config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
         this.consumer = null;
@@ -86,6 +89,7 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
         try {
             while (!isShutdown()) {
                 try {
+                    @SuppressWarnings("unchecked")
                     ConsumerRecords<K, V> records = consumer.poll(getPollTimeout());
                     ops.add(records.count());
                     logger.info("Received {} records", records.count());
@@ -164,7 +168,7 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
 
     public static KafkaMonitor create(RadarBackendOptions options,
             ConfigRadar properties) {
-        BatteryLevelMonitor monitor;
+        KafkaMonitor monitor;
         String[] args = options.getSubCommandArgs();
         String commandType;
         if (args == null || args.length == 0) {
@@ -174,30 +178,59 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
         }
         switch (commandType) {
             case "battery":
-                monitor = new BatteryLevelMonitor("android_empatica_e4_battery_level");
-                monitor.addBatteryLevelListener(new BatteryLevelLogger());
-                BatteryStatusConfig config = properties.getBatteryStatus();
-                if (config != null) {
-                    String email = config.getEmailAddress();
-                    if (email != null) {
-                        Status minStatus = Status.CRITICAL;
-                        String level = config.getLevel();
-                        if (level != null) {
-                            try {
-                                minStatus = Status.valueOf(config.getLevel().toUpperCase(Locale.US));
-                            } catch (IllegalArgumentException ex) {
-                                logger.warn("Do not recognize minimum battery level {}. "
-                                                + "Choose from {} instead. Using CRITICAL.",
-                                        config.getLevel(), Arrays.toString(Status.values()));
-                            }
-                        }
-                        monitor.addBatteryLevelListener(new BatteryLevelEmail(email, minStatus));
-                    }
-                }
+                monitor = batteryLevelMonitor(options, properties);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
         }
         return monitor;
+    }
+
+    private static KafkaMonitor batteryLevelMonitor(RadarBackendOptions options,
+            ConfigRadar properties) {
+        BatteryLevelMonitor.Status minLevel = null;
+        EmailSender sender = null;
+        BatteryStatusConfig config = properties.getBatteryStatus();
+
+        if (config != null) {
+            String email = config.getEmailAddress();
+            if (email != null) {
+                sender = new EmailSender("localhost", "no-reply@radar-cns.org",
+                        Collections.singletonList(email));
+            }
+            String level = config.getLevel();
+            if (level != null) {
+                try {
+                    minLevel = BatteryLevelMonitor.Status.valueOf(level.toUpperCase(Locale.US));
+                } catch (IllegalArgumentException ex) {
+                    logger.warn("Do not recognize minimum battery level {}. "
+                                    + "Choose from {} instead. Using CRITICAL.",
+                            level, Arrays.toString(BatteryLevelMonitor.Status.values()));
+                }
+            }
+        }
+
+        return new BatteryLevelMonitor("android_empatica_e4_battery_level", sender, minLevel);
+    }
+
+    protected MeasurementKey extractKey(ConsumerRecord<GenericRecord, ?> record) {
+        GenericRecord key = record.key();
+        if (key == null) {
+            throw new IllegalArgumentException("Failed to process record without a key.");
+        }
+        Schema keySchema = key.getSchema();
+        Field userIdField = keySchema.getField("userId");
+        if (userIdField == null) {
+            throw new IllegalArgumentException("Failed to process record with key type "
+                    + key.getSchema() + " without user ID.");
+        }
+        Field sourceIdField = keySchema.getField("sourceId");
+        if (sourceIdField == null) {
+            throw new IllegalArgumentException("Failed to process record with key type "
+                    + key.getSchema() + " without source ID.");
+        }
+        return new MeasurementKey(
+                (String) key.get(userIdField.pos()),
+                (String) key.get(sourceIdField.pos()));
     }
 }
