@@ -22,7 +22,7 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - sudo docker-compose up -d
-  - ./gradlew test integrationTest
+  - ./gradlew check integrationTest
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy
