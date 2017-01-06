@@ -127,18 +127,11 @@ jar {
 checkstyle {
     // codacy version
     toolVersion '6.16'
-    ignoreFailures = true
+    ignoreFailures false
 
     // ignore tests
     sourceSets = [sourceSets.main]
 }
-
-task checkstyleStrict(type: Checkstyle) {
-    ignoreFailures = false
-    configFile = file("config/checkstyle/checkstyle_strict.xml")
-}
-
-check.dependsOn checkstyleStrict
 
 pmd {
     // codacy version
