@@ -15,10 +15,9 @@ import javax.annotation.Nonnull;
  */
 public class SensorTopic<V extends SpecificRecord> extends AvroTopic<MeasurementKey, V> {
     /**
-     * @param name: name of the input topic
-     * @param valueClass: java class representing the record
+     * @param name name of the input topic
      */
-    public SensorTopic(@Nonnull String name, @Nonnull Class<V> valueClass) {
-        super(name, MeasurementKey.class, valueClass);
+    public SensorTopic(@Nonnull String name) {
+        super(name);
     }
 }

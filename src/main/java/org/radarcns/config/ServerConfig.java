@@ -37,7 +37,7 @@ public class ServerConfig {
 
     public String getPath() {
         if (protocol != null) {
-            return protocol +"://"+ host + ":" + port;
+            return protocol + "://" + host + ":" + port;
         } else {
             return host + ":" + port;
         }

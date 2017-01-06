@@ -110,7 +110,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     }
 
     /**
-     * @param logPath: new log file defined by the user
+     * @param logPath new log file defined by the user
      * @throws IllegalArgumentException if logPath is null or is not a valid file
      */
     private void updateLog4jConfiguration(@Nonnull String logPath)

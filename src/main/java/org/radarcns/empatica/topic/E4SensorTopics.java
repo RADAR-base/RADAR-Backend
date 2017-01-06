@@ -37,19 +37,19 @@ public final class E4SensorTopics implements SensorTopics {
 
     private E4SensorTopics() {
         accelerationTopic = new SensorTopic<>(
-                "android_empatica_e4_acceleration", EmpaticaE4Acceleration.class);
+                "android_empatica_e4_acceleration");
         batteryLevelTopic = new SensorTopic<>(
-                "android_empatica_e4_battery_level", EmpaticaE4BatteryLevel.class);
+                "android_empatica_e4_battery_level");
         bloodVolumePulseTopic = new SensorTopic<>(
-                "android_empatica_e4_blood_volume_pulse", EmpaticaE4BloodVolumePulse.class);
+                "android_empatica_e4_blood_volume_pulse");
         electroDermalActivityTopic = new SensorTopic<>(
-                "android_empatica_e4_electrodermal_activity", EmpaticaE4ElectroDermalActivity.class);
+                "android_empatica_e4_electrodermal_activity");
         interBeatIntervalTopic = new SensorTopic<>(
-                "android_empatica_e4_inter_beat_interval", EmpaticaE4InterBeatInterval.class);
+                "android_empatica_e4_inter_beat_interval");
         sensorStatusTopic = new SensorTopic<>(
-                "android_empatica_e4_sensor_status", EmpaticaE4SensorStatus.class);
+                "android_empatica_e4_sensor_status");
         temperatureTopic = new SensorTopic<>(
-                "android_empatica_e4_temperature", EmpaticaE4Temperature.class);
+                "android_empatica_e4_temperature");
     }
 
     @Override

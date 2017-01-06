@@ -22,23 +22,21 @@ public class InternalTopic<V extends SpecificRecord> extends AvroTopic<WindowedK
     private final String source;
 
     /**
-     * @param source: name of the inout topic
-     * @param name: name of the output topic
-     * @param valueClass: java class representing the record
+     * @param source name of the inout topic
+     * @param name name of the output topic
      */
-    public InternalTopic(@Nonnull String source, @Nonnull String name,
-                         @Nonnull Class<V> valueClass) {
-        super(name,WindowedKey.class,valueClass);
+    public InternalTopic(@Nonnull String source, @Nonnull String name) {
+        super(name);
 
         this.source = source;
     }
 
     /**
-     * @return the input topic. While org.radarcns.topic.SensorTopic uses the varibale name
-     * to generate the input topic, Internal topic uses the source variable.
+     * @return input topic. While {@link SensorTopic} uses the variable name to generate the input
+     *         topic, Internal topic uses the source variable.
      */
     @Override
-    public String getInputTopic(){
+    public String getInputTopic() {
         return this.source;
     }
 }

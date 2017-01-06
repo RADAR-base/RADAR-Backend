@@ -32,7 +32,8 @@ public final class KafkaProperties {
     public static Properties getSimpleProducer() {
         Properties props = new Properties();
 
-        config.updateProperties(props, CLIENT_ID_CONFIG, BOOTSTRAP_SERVERS_CONFIG, SCHEMA_REGISTRY_URL_CONFIG);
+        config.updateProperties(props, CLIENT_ID_CONFIG, BOOTSTRAP_SERVERS_CONFIG,
+                SCHEMA_REGISTRY_URL_CONFIG);
 
         props.put(ACKS_CONFIG, "all");
         props.put(RETRIES_CONFIG, 0);
@@ -45,14 +46,14 @@ public final class KafkaProperties {
     /**
      * Private method to generate properties for a common Kafka Consumer
      */
-    private static Properties getConsumer(String clientID) {
+    private static Properties getConsumer(String clientId) {
         Properties props = new Properties();
 
-        config.updateProperties(props, CLIENT_ID_CONFIG, BOOTSTRAP_SERVERS_CONFIG, SCHEMA_REGISTRY_URL_CONFIG,
-                GROUP_ID_CONFIG, SESSION_TIMEOUT_MS_CONFIG);
+        config.updateProperties(props, CLIENT_ID_CONFIG, BOOTSTRAP_SERVERS_CONFIG,
+                SCHEMA_REGISTRY_URL_CONFIG, GROUP_ID_CONFIG, SESSION_TIMEOUT_MS_CONFIG);
 
-        if (clientID != null && !clientID.isEmpty()) {
-            props.put(CLIENT_ID_CONFIG, clientID);
+        if (clientId != null && !clientId.isEmpty()) {
+            props.put(CLIENT_ID_CONFIG, clientId);
         }
         props.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
@@ -65,8 +66,8 @@ public final class KafkaProperties {
     /**
      * Return properties for a Kafka Consumer that manages commits by itself
      */
-    public static Properties getSelfCommitConsumer(String clientID){
-        Properties props = getConsumer(clientID);
+    public static Properties getSelfCommitConsumer(String clientId) {
+        Properties props = getConsumer(clientId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         return props;
     }

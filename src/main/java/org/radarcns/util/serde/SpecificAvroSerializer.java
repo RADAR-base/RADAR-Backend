@@ -1,9 +1,7 @@
 package org.radarcns.util.serde;
 
-/**
- * Created by Francesco Nobilia on 21/10/2016.
- */
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.HashMap;
@@ -11,7 +9,7 @@ import java.util.Map;
 
 import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 
-public class SpecificAvroSerializer<T extends  org.apache.avro.specific.SpecificRecord> implements Serializer<T> {
+public class SpecificAvroSerializer<T extends SpecificRecord> implements Serializer<T> {
 
     private final KafkaAvroSerializer inner;
 

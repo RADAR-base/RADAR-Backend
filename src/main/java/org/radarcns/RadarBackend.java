@@ -62,7 +62,7 @@ public final class RadarBackend {
             System.exit(1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 finish();
             } catch (Exception ex) {
@@ -75,7 +75,7 @@ public final class RadarBackend {
      * Start here all needed MasterAggregator
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
-    private void go() throws IOException{
+    private void go() throws IOException {
         log.info("STARTING");
 
         command = createCommand();
@@ -97,7 +97,7 @@ public final class RadarBackend {
         log.info("FINISHED");
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             RadarBackendOptions options = RadarBackendOptions.parse(args);
             RadarBackend backend = new RadarBackend(options);

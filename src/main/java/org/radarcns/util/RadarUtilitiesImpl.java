@@ -9,36 +9,31 @@ import org.radarcns.key.WindowedKey;
 /**
  * Implements {@link RadarUtilities}
  */
-public class RadarUtilitiesImpl implements RadarUtilities{
+public class RadarUtilitiesImpl implements RadarUtilities {
     protected RadarUtilitiesImpl() {
         // used for construction from RadarSingletonFactory
     }
 
-    public WindowedKey getWindowed(Windowed<MeasurementKey> window){
+    public WindowedKey getWindowed(Windowed<MeasurementKey> window) {
         return new WindowedKey(window.key().getUserId(), window.key().getSourceId(),
                 window.window().start(), window.window().end());
     }
 
-    public double floatToDouble(float input){
+    public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
     }
 
-    public double ibiToHR(float input){
+    public double ibiToHeartRate(float input) {
         return 60d / floatToDouble(input);
     }
 
-    public double[] accelerationToArray(EmpaticaE4Acceleration value){
+    public double[] accelerationToArray(EmpaticaE4Acceleration value) {
         return new double[] {
                 floatToDouble(value.getX()),
                 floatToDouble(value.getY()),
                 floatToDouble(value.getZ())};
     }
 
-    /**
-     * Creates a key string using userId and sourceId
-     * @param key
-     * @return converted key string
-     */
     @Override
     public String measurementKeyToMongoDbKey(Struct key) {
         return key.get("userId")

@@ -11,14 +11,14 @@ import java.util.List;
  */
 public class DoubleArrayCollector {
     private DoubleValueCollector[] collectors;
+
     /**
-     * @param value: new sample that has to be analysed
+     * @param value new sample that has to be analysed
      */
     public DoubleArrayCollector add(double[] value) {
-        if(collectors==null){
+        if (collectors == null) {
             collectors = new DoubleValueCollector[value.length];
-            for(int i=0; i< value.length; i++ )
-            {
+            for (int i = 0; i < value.length; i++) {
                 collectors[i] = new DoubleValueCollector();
             }
         }
@@ -40,7 +40,7 @@ public class DoubleArrayCollector {
     }
 
     /**
-     * @return the Avro equivalent class represented by org.radarcns.aggregator.DoubleArrayAggegator
+     * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleArrayAggregator
      */
     public DoubleArrayAggregator convertInAvro() {
         int len = collectors.length;

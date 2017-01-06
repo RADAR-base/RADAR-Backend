@@ -20,15 +20,17 @@ public class DoubleValueCollector {
     private final double[] quartile = new double[3];
     private double iqr = 0;
 
-    private transient final RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
+    private final transient RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
 
-    private final List<Double> list = new ArrayList<>();
+    private final List<Double> history = new ArrayList<>();
 
     public DoubleValueCollector add(float value) {
         return this.add(utils.floatToDouble(value));
     }
 
-    /** @param value: new sample that has to be analysed */
+    /**
+     * @param value new sample that has to be analysed
+     */
     public DoubleValueCollector add(double value) {
         updateMin(value);
         updateMax(value);
@@ -38,21 +40,27 @@ public class DoubleValueCollector {
         return this;
     }
 
-    /** @param value: new sample that update min value */
+    /**
+     * @param value new sample that update min value
+     */
     private void updateMin(double value) {
         if (min > value) {
             min = value;
         }
     }
 
-    /** @param value: new sample that update max value */
+    /**
+     * @param value new sample that update max value
+     */
     private void updateMax(double value) {
         if (max < value) {
             max = value;
         }
     }
 
-    /** @param value: new sample that update average value */
+    /**
+     * @param value new sample that update average value
+     */
     private void updateAvg(double value) {
         count++;
         sum += value;
@@ -60,13 +68,15 @@ public class DoubleValueCollector {
         avg = sum / count;
     }
 
-    /** @param value: new sample that update quartiles value */
+    /**
+     * @param value new sample that update quartiles value
+     */
     private void updateQuartile(double value) {
-        list.add(value);
+        history.add(value);
 
-        double[] data = new double[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            data[i] = list.get(i);
+        double[] data = new double[history.size()];
+        for (int i = 0; i < history.size(); i++) {
+            data[i] = history.get(i);
         }
 
         DescriptiveStatistics ds = new DescriptiveStatistics(data);
@@ -88,10 +98,12 @@ public class DoubleValueCollector {
                 + ", avg=" + avg
                 + ", quartile=" + Arrays.toString(quartile)
                 + ", iqr=" + iqr
-                + ", list=" + list + '}';
+                + ", history=" + history + '}';
     }
 
-    /** @return the Avro equivalent class represented by org.radarcns.aggregator.DoubleAggegator */
+    /**
+     * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleAggregator
+     */
     public DoubleAggregator convertInAvro() {
         return new DoubleAggregator(min, max, sum, count, avg, getQuartile(), iqr);
     }

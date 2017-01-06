@@ -22,25 +22,26 @@ import java.io.IOException;
 public abstract class InternalAggregator<I, O extends SpecificRecord>
         extends AggregatorWorker<WindowedKey, O, InternalTopic<O>> {
     /**
-     * @param topic:    kafka topic that will be consumed
-     * @param clientID: useful to debug usign the Kafka log
-     * @param master:   pointer to the MasterAggregator useful to call the notification functions
+     * @param topic     kafka topic that will be consumed
+     * @param clientId  useful to debug usign the Kafka log
+     * @param master    pointer to the MasterAggregator useful to call the notification functions
      */
-    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID,
-                              @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty) throws IOException {
-        this(topic, clientID, 1, master, kafkaProperty);
+    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientId,
+            @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty)
+            throws IOException {
+        this(topic, clientId, 1, master, kafkaProperty);
     }
 
     /**
-     * @param topic:     kafka topic that will be consumed
-     * @param clientID:  useful to debug usign the Kafka log
-     * @param numThread: number of threads to execute stream processing
-     * @param master:    pointer to the MasterAggregator useful to call the notification functions
+     * @param topic      kafka topic that will be consumed
+     * @param clientId   useful to debug usign the Kafka log
+     * @param numThread  number of threads to execute stream processing
+     * @param master     pointer to the MasterAggregator useful to call the notification functions
      */
-    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientID,
-                              int numThread, @Nonnull MasterAggregator master,@Nonnull KafkaProperty kafkaProperty )
+    public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientId,
+            int numThread, @Nonnull MasterAggregator master,@Nonnull KafkaProperty kafkaProperty)
             throws IOException {
-        super(topic, clientID, numThread, master, kafkaProperty);
+        super(topic, clientId, numThread, master, kafkaProperty);
     }
 
     @Override

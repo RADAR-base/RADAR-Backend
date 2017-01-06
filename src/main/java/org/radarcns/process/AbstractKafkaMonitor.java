@@ -48,9 +48,8 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     /**
      * Set some basic properties.
      *
-     * Update the properties field in the subclasses. During any overriding constructor, be sure
-     * to call {@see configure()}.
-     *
+     * <p>Update the properties field in the subclasses. During any overriding constructor, be sure
+     * to call {@link #configure(Properties)}.
      * @param topics topics to monitor
      * @param groupId Kafka group ID
      * @param clientId Kafka client ID
@@ -60,13 +59,14 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     public AbstractKafkaMonitor(Collection<String> topics, String groupId, String clientId,
             PersistentStateStore stateStore, S stateDefault) {
 
-        RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
         properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(GROUP_ID_CONFIG, groupId);
         properties.setProperty(CLIENT_ID_CONFIG, clientId);
+
+        RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
         this.consumer = null;
@@ -101,7 +101,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     /**
      * Monitor a given topic until the {@see isShutdown()} method returns true.
      *
-     * When a message is encountered that cannot be deserialized,
+     * <p>When a message is encountered that cannot be deserialized,
      * {@link #handleSerializationException()} is called.
      */
     public void start() {
@@ -130,11 +130,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     /**
      * Handles any deserialization message.
      *
-     * This implementation tries to find the partition that contains the faulty message and
+     * <p>This implementation tries to find the partition that contains the faulty message and
      * increases the consumer position to skip that message.
      *
-     * The new position is not committed, so on failure of the client, the message must be skipped
-     * again.
+     * <p>The new position is not committed, so on failure of the client, the message must be
+     * skipped again.
      */
     // TODO: submit the message to another topic to indicate that it could not be deserialized.
     protected void handleSerializationException() {
@@ -178,7 +178,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     /**
      * Whether the monitoring is done.
      *
-     * Override to have some stopping behaviour, this implementation always returns false.
+     * <p>Override to have some stopping behaviour, this implementation always returns false.
      */
     public synchronized boolean isShutdown() {
         return done;

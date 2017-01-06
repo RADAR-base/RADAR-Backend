@@ -125,14 +125,23 @@ jar {
 checkstyle {
     // codacy version
     toolVersion '6.16'
+    ignoreFailures = true
 
     // ignore tests
     sourceSets = [sourceSets.main]
 }
 
+task checkstyleStrict(type: Checkstyle) {
+    ignoreFailures = false
+    configFile = file("config/checkstyle/checkstyle_without_javadoc.xml")
+}
+
+check.dependsOn checkstyleStrict
+
 pmd {
     // codacy version
     toolVersion = '5.5.2'
+    ignoreFailures = false
 
     // ignore tests
     sourceSets = [sourceSets.main]

@@ -29,7 +29,7 @@ public class RadarThreadFactoryBuilder {
                     + " must be >= " + Thread.MIN_PRIORITY);
         }
 
-		if (priority > Thread.MAX_PRIORITY) {
+        if (priority > Thread.MAX_PRIORITY) {
             throw new IllegalArgumentException("Thread priority " + priority
                     + " must be <= " + Thread.MAX_PRIORITY);
         }

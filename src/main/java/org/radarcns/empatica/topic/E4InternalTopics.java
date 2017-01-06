@@ -24,7 +24,7 @@ public final class E4InternalTopics implements InternalTopics {
     private E4InternalTopics() {
         heartRateTopic = new InternalTopic<>(
                 "android_empatica_e4_inter_beat_interval",
-                "android_empatica_e4_heartrate", DoubleAggregator.class);
+                "android_empatica_e4_heartrate");
     }
 
     @Override

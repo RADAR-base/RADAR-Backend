@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /**
  * Get the average of a set of values collected in a sliding time window of fixed duration.
  *
- * At least one value is needed to get an average.
+ * <p>At least one value is needed to get an average.
  */
 public class RollingTimeAverage {
     private final long window;
@@ -43,7 +43,7 @@ public class RollingTimeAverage {
     /**
      * Get the average value per second over a sliding time window of fixed size.
      *
-     * It takes one value before the window started as a baseline, and adds all values in the
+     * <p>It takes one value before the window started as a baseline, and adds all values in the
      * window. It then divides by the total time window from the first value (outside/before the
      * window) to the last value (at the end of the window).
      * @return average value per second
@@ -74,11 +74,11 @@ public class RollingTimeAverage {
         return 1000d * (total - valueOutsideWindow) / timeWindow;
     }
 
-    static class TimeCount {
+    private static class TimeCount {
         private final double value;
         private final long time;
 
-        TimeCount(double value) {
+        private TimeCount(double value) {
             this.value = value;
             this.time = System.currentTimeMillis();
         }

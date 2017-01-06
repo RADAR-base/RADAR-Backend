@@ -123,7 +123,7 @@ public class ConfigRadar {
         this.schemaRegistry = schemaRegistry;
     }
 
-    public Integer threadsByPriority(RadarPropertyHandler.Priority level){
+    public Integer threadsByPriority(RadarPropertyHandler.Priority level) {
         return streamPriority.get(level.getParam());
     }
 
@@ -139,7 +139,7 @@ public class ConfigRadar {
         return ServerConfig.getPaths(schemaRegistry);
     }
 
-    public String infoThread(){
+    public String infoThread() {
         return streamPriority.toString();
     }
 

@@ -25,7 +25,8 @@ public class RadarConfig extends AbstractConfig {
                 ConfigDef.Importance.LOW, "List of topics to consume.");
         CONFIG_DEF.define(SESSION_TIME_WINDOW, ConfigDef.Type.LONG, SESSION_TIME_WINDOW_DEFAULT,
                 ConfigDef.Range.atLeast(0L), ConfigDef.Importance.LOW,
-                "the time-window length to consider two events in a stream as part of the same session.");
+                "the time-window length to consider two events in a stream as part of the same "
+                + "session.");
     }
 
     //Enumerate all possible topics

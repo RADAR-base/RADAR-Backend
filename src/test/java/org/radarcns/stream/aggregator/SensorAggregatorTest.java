@@ -27,7 +27,7 @@ public class SensorAggregatorTest {
     @Test
     public void getBuilder() throws IOException {
         String topicName = "TESTTopic";
-        SensorTopic sensorTopic = new SensorTopic(topicName, String.class);
+        SensorTopic sensorTopic = new SensorTopic(topicName);
         when(aggregator.getTopic()).thenReturn(sensorTopic);
         doCallRealMethod().when(aggregator).getBuilder();
         KStreamBuilder builder =aggregator.getBuilder();

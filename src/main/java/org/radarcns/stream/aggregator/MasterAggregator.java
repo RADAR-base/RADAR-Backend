@@ -28,9 +28,9 @@ public abstract class MasterAggregator implements SubCommand {
             RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
 
     /**
-     * @param standalone: true means that the aggregator will assign one thread per stream
-     * @param nameSensor: the name of the device that produced data that will be consumed. Only for
-     *     debug
+     * @param standalone true means that the aggregator will assign one thread per stream
+     * @param nameSensor the name of the device that produced data that will be consumed. Only for
+     *                   debug
      */
     protected MasterAggregator(boolean standalone, @Nonnull String nameSensor) throws IOException {
         if (!standalone) {
@@ -64,9 +64,9 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Function called by the constructor to populate the AggregatorWorker list
+     * Populates an AggregatorWorker list with workers
      *
-     * @param list:
+     * @param list list to add workers to
      * @param low,normal,high: are the three available priority levels that can be used to start
      *                       kafka streams
      */
@@ -76,7 +76,7 @@ public abstract class MasterAggregator implements SubCommand {
     /**
      * Informative function to log the topics list that the application is going to use
      *
-     * @param log: the logger instance that will be used to notify the user
+     * @param log the logger instance that will be used to notify the user
      */
     protected abstract void announceTopics(@Nonnull Logger log);
 
@@ -99,7 +99,7 @@ public abstract class MasterAggregator implements SubCommand {
     /**
      * Notification from AggregatorWorker that it has started its managed stream
      *
-     * @param stream: the name of the stream that has been started. Useful for debug purpose
+     * @param stream the name of the stream that has been started. Useful for debug purpose
      */
     public void notifyStartedStream(@Nonnull String stream) {
         int current = currentStream.incrementAndGet();
@@ -110,7 +110,7 @@ public abstract class MasterAggregator implements SubCommand {
     /**
      * Notification from AggregatorWorker that it has closed its managed stream
      *
-     * @param stream: the name of the stream that has been closed. Useful for debug purpose
+     * @param stream the name of the stream that has been closed. Useful for debug purpose
      */
     public void notifyClosedStream(@Nonnull String stream) {
         int current = currentStream.decrementAndGet();
@@ -126,7 +126,7 @@ public abstract class MasterAggregator implements SubCommand {
     /**
      * Function used by AggregatorWorker to notify a crash and trigger a forced shutdown.
      *
-     * @param stream: the name of the stream that is crashed. Useful for debug purpose
+     * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
     public void notifyCrashedStream(@Nonnull String stream) {
         log.warn("[{}] {} is crashed", nameSensor, stream);
@@ -143,8 +143,6 @@ public abstract class MasterAggregator implements SubCommand {
      *       as the number of starting threads
      */
     private void checkThreadParams() {
-//        ConfigRadar props = PropertiesRadar.getInstance();
-
         if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH) < 1) {
             log.error("Invalid parameter: {} priority threads are {}",
                     RadarPropertyHandler.Priority.HIGH,
@@ -168,5 +166,7 @@ public abstract class MasterAggregator implements SubCommand {
         }
     }
 
-    protected void setConfigRadar(ConfigRadar configRadar) {this.configRadar = configRadar;}
+    protected void setConfigRadar(ConfigRadar configRadar) {
+        this.configRadar = configRadar;
+    }
 }

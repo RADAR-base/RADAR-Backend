@@ -21,13 +21,13 @@ public interface RadarUtilities {
 
     double floatToDouble(float input);
 
-    double ibiToHR(float input);
+    double ibiToHeartRate(float input);
 
     double[] accelerationToArray(EmpaticaE4Acceleration value);
 
     /**
      * Converts a MesurementKey Struct into a String
-     * @param key
+     * @param key record key
      * @return converted key string
      */
     String measurementKeyToMongoDbKey(Struct key);

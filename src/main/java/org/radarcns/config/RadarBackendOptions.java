@@ -15,11 +15,11 @@ public class RadarBackendOptions {
     private final String subCommand;
     private final String[] subCommandArgs;
     public static final Options OPTIONS = new Options()
-        .addOption("c", "config", true, "Configuration YAML file");
+            .addOption("c", "config", true, "Configuration YAML file");
 
 
     /**
-     * @param cli: command line arguments given
+     * @param cli command line arguments given
      */
     public RadarBackendOptions(CommandLine cli) {
         log.info("Loading configuration");

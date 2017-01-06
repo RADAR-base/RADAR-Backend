@@ -22,10 +22,10 @@ import java.io.IOException;
  * Definition of Kafka Stream for aggregating data about Blood Volume Pulse collected by Empatica E4
  */
 public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroDermalActivity> {
-
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
-    public E4ElectroDermalActivity(String clientId, int numThread, MasterAggregator master, KafkaProperty kafkaProperties)
-            throws IOException{
+
+    public E4ElectroDermalActivity(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),
                 clientId, numThread, master, kafkaProperties);
     }

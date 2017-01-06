@@ -19,13 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Monitors the battery level for any devices running empty */
-public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, BatteryLevelState> {
+public class BatteryLevelMonitor extends
+        AbstractKafkaMonitor<GenericRecord, GenericRecord, BatteryLevelState> {
     private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
     private final EmailSender sender;
     private final Status minLevel;
 
-    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel, PersistentStateStore stateStore) {
+    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel,
+            PersistentStateStore stateStore) {
         super(topics, "battery_monitors", "1", stateStore, new BatteryLevelState());
 
         Properties props = new Properties();
@@ -81,8 +83,8 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
         GenericRecord value = record.value();
         Field batteryField = value.getSchema().getField("batteryLevel");
         if (batteryField == null) {
-            throw new IllegalArgumentException("Failed to process record with value type " +
-                    value.getSchema() + " without batteryLevel field.");
+            throw new IllegalArgumentException("Failed to process record with value type "
+                    + value.getSchema() + " without batteryLevel field.");
         }
         Number batteryLevel = (Number) record.value().get(batteryField.pos());
         return batteryLevel.floatValue();
