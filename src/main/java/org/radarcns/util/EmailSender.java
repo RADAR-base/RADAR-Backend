@@ -14,7 +14,7 @@ public class EmailSender {
     private final List<String> to;
     private final Properties properties;
 
-    public EmailSender(String host, String from, List<String> to) {
+    public EmailSender(String host, int port, String from, List<String> to) {
         this.from = from;
         this.to = to;
 
@@ -23,6 +23,7 @@ public class EmailSender {
 
         // Setup mail server
         properties.setProperty("mail.smtp.host", host);
+        properties.setProperty("mail.smtp.port", String.valueOf(port));
     }
 
     public void sendEmail(String subject, String text) throws MessagingException {
