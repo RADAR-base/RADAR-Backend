@@ -148,8 +148,8 @@ public class ConfigRadar {
 
     public String getSchemaRegistryPaths() {
         if (schemaRegistry == null) {
-        throw new IllegalStateException("'schema_registry' is not configured");
-    }
+            throw new IllegalStateException("'schema_registry' is not configured");
+        }
 
         return ServerConfig.getPaths(schemaRegistry);
     }

@@ -1,7 +1,9 @@
 package org.radarcns;
 
+import java.io.IOException;
+import java.util.Arrays;
+import javax.annotation.Nonnull;
 import org.apache.commons.cli.ParseException;
-import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
@@ -10,10 +12,6 @@ import org.radarcns.monitor.KafkaMonitorFactory;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Core class that initialises configurations and then start all needed Kafka streams

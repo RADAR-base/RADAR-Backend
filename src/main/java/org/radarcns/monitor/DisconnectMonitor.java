@@ -17,7 +17,6 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
-import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
