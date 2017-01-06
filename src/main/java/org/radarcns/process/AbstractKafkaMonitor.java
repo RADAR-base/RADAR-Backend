@@ -7,10 +7,8 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -22,13 +20,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
-import org.radarcns.config.BatteryMonitorConfig;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.MonitorConfig;
-import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.util.EmailSender;
 import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -38,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * Monitor a list of topics for anomalous behavior.
  */
 public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
-    protected final Collection<String> topics;
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
 
+    protected final Collection<String> topics;
     private KafkaConsumer consumer;
     private final Properties properties;
     private long pollTimeout;
@@ -166,78 +158,6 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
 
     public void setPollTimeout(long pollTimeout) {
         this.pollTimeout = pollTimeout;
-    }
-
-    public static KafkaMonitor create(RadarBackendOptions options,
-            ConfigRadar properties) {
-        KafkaMonitor monitor;
-        String[] args = options.getSubCommandArgs();
-        String commandType;
-        if (args == null || args.length == 0) {
-            commandType = "battery";
-        } else {
-            commandType = args[0];
-        }
-        switch (commandType) {
-            case "battery":
-                monitor = batteryLevelMonitor(options, properties);
-                break;
-            case "disconnect":
-                monitor = disconnectMonitor(options, properties);
-                break;
-            default:
-                throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
-        }
-        return monitor;
-    }
-
-    private static KafkaMonitor batteryLevelMonitor(RadarBackendOptions options,
-            ConfigRadar properties) {
-        BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
-        BatteryMonitorConfig config = properties.getBatteryMonitor();
-        EmailSender sender = getSender(config);
-        Collection<String> topics = getTopics(config, "android_empatica_e4_battery_level");
-
-        if (config != null && config.getLevel() != null) {
-            String level = config.getLevel().toUpperCase(Locale.US);
-            try {
-                minLevel = BatteryLevelMonitor.Status.valueOf(level);
-            } catch (IllegalArgumentException ex) {
-                logger.warn("Minimum battery level {} is not recognized. "
-                                + "Choose from {} instead. Using CRITICAL.",
-                        level, Arrays.toString(BatteryLevelMonitor.Status.values()));
-            }
-        }
-
-        return new BatteryLevelMonitor(topics, sender, minLevel);
-    }
-
-    private static KafkaMonitor disconnectMonitor(RadarBackendOptions options,
-            ConfigRadar properties) {
-        DisconnectMonitorConfig config = properties.getDisconnectMonitor();
-        EmailSender sender = getSender(config);
-        long timeout = 300_000L;  // 5 minutes
-        if (config != null && config.getTimeout() != null) {
-            timeout = config.getTimeout();
-        }
-        Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
-        return new DisconnectMonitor(topics, "temperature_disconnect", sender, timeout);
-    }
-
-    private static EmailSender getSender(MonitorConfig config) {
-        if (config != null && config.getEmailAddress() != null) {
-            return new EmailSender("localhost", "no-reply@radar-cns.org",
-                    Collections.singletonList(config.getEmailAddress()));
-        }
-        return null;
-    }
-
-    private static Collection<String> getTopics(MonitorConfig config, String defaultTopic) {
-        if (config != null && config.getTopics() != null) {
-            return config.getTopics();
-        } else {
-            return Collections.singleton(defaultTopic);
-        }
     }
 
     protected MeasurementKey extractKey(ConsumerRecord<GenericRecord, ?> record) {
