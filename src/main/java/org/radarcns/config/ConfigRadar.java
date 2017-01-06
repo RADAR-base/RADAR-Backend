@@ -31,8 +31,10 @@ public class ConfigRadar {
     private Integer sessionTimeoutMs;
     @JsonProperty("stream_priority")
     private Map<String,Integer> streamPriority;
-    @JsonProperty("battery_status")
-    private BatteryStatusConfig batteryStatus;
+    @JsonProperty("battery_monitor")
+    private BatteryMonitorConfig batteryMonitor;
+    @JsonProperty("disconnect_monitor")
+    private DisconnectMonitorConfig disconnectMonitor;
 
     public Date getReleased() {
         return released;
@@ -141,6 +143,22 @@ public class ConfigRadar {
         return streamPriority.toString();
     }
 
+    public BatteryMonitorConfig getBatteryMonitor() {
+        return batteryMonitor;
+    }
+
+    public void setBatteryMonitor(BatteryMonitorConfig batteryMonitor) {
+        this.batteryMonitor = batteryMonitor;
+    }
+
+    public DisconnectMonitorConfig getDisconnectMonitor() {
+        return disconnectMonitor;
+    }
+
+    public void setDisconnectMonitor(DisconnectMonitorConfig disconnectMonitor) {
+        this.disconnectMonitor = disconnectMonitor;
+    }
+
     @Override
     public String toString() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -161,13 +179,5 @@ public class ConfigRadar {
         } catch (JsonProcessingException ex) {
             throw new UnsupportedOperationException("Cannot serialize config", ex);
         }
-    }
-
-    public BatteryStatusConfig getBatteryStatus() {
-        return batteryStatus;
-    }
-
-    public void setBatteryStatus(BatteryStatusConfig batteryStatus) {
-        this.batteryStatus = batteryStatus;
     }
 }

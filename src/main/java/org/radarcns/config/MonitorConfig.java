@@ -1,14 +1,15 @@
 package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 /**
- * POJO representing a battery status monitor configuration
+ * POJO representing a monitor configuration
  */
-public class BatteryStatusConfig {
+public class MonitorConfig {
     @JsonProperty("email_address")
     private String emailAddress;
-    private String level;
+    private List<String> topics;
 
     public String getEmailAddress() {
         return emailAddress;
@@ -18,11 +19,11 @@ public class BatteryStatusConfig {
         this.emailAddress = emailAddress;
     }
 
-    public String getLevel() {
-        return level;
+    public List<String> getTopics() {
+        return topics;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setTopics(List<String> topics) {
+        this.topics = topics;
     }
 }

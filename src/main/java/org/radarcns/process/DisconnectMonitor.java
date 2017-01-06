@@ -2,14 +2,17 @@ package org.radarcns.process;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import javax.mail.MessagingException;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.util.EmailSender;
@@ -27,12 +30,17 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<GenericRecord, Gener
     private final EmailSender sender;
     private final Format dayFormat;
 
-    public DisconnectMonitor(List<String> topics, String clientID, long timeUntilReportedMissing,
-            EmailSender sender) {
-        super(topics, clientID);
+    public DisconnectMonitor(Collection<String> topics, String groupId,
+            EmailSender sender, long timeUntilReportedMissing) {
+        super(topics, "1");
         this.timeUntilReportedMissing = timeUntilReportedMissing;
         lastSeen = new HashMap<>();
         this.sender = sender;
+
+        Properties props = new Properties();
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        configure(props);
 
         super.setPollTimeout(timeUntilReportedMissing);
         reportedMissing = new HashMap<>();

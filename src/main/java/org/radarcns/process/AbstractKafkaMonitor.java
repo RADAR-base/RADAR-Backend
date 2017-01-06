@@ -1,8 +1,17 @@
 package org.radarcns.process;
 
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
+
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -13,8 +22,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
-import org.radarcns.config.BatteryStatusConfig;
+import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.util.EmailSender;
@@ -23,21 +34,11 @@ import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
-
 /**
  * Monitor a list of topics for anomalous behavior.
  */
 public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
-    protected final List<String> topics;
+    protected final Collection<String> topics;
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
 
     private KafkaConsumer consumer;
@@ -53,11 +54,12 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
      *
      * @param topics topics to monitor
      */
-    public AbstractKafkaMonitor(List<String> topics, String clientId) {
+    public AbstractKafkaMonitor(Collection<String> topics, String clientId) {
         RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         properties = new Properties();
-        properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
+        String deserializer = KafkaAvroDeserializer.class.getName();
+        properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, deserializer);
+        properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(CLIENT_ID_CONFIG, clientId);
         config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
@@ -70,7 +72,7 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
     /**
      * Call to actually create the consumer.
      */
-    protected void configure(Properties properties) {
+    protected final void configure(Properties properties) {
         this.properties.putAll(properties);
         consumer = new KafkaConsumer<>(this.properties);
         consumer.subscribe(topics);
@@ -180,6 +182,9 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
             case "battery":
                 monitor = batteryLevelMonitor(options, properties);
                 break;
+            case "disconnect":
+                monitor = disconnectMonitor(options, properties);
+                break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
         }
@@ -188,29 +193,51 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
 
     private static KafkaMonitor batteryLevelMonitor(RadarBackendOptions options,
             ConfigRadar properties) {
-        BatteryLevelMonitor.Status minLevel = null;
-        EmailSender sender = null;
-        BatteryStatusConfig config = properties.getBatteryStatus();
+        BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
+        BatteryMonitorConfig config = properties.getBatteryMonitor();
+        EmailSender sender = getSender(config);
+        Collection<String> topics = getTopics(config, "android_empatica_e4_battery_level");
 
-        if (config != null) {
-            String email = config.getEmailAddress();
-            if (email != null) {
-                sender = new EmailSender("localhost", "no-reply@radar-cns.org",
-                        Collections.singletonList(email));
-            }
-            String level = config.getLevel();
-            if (level != null) {
-                try {
-                    minLevel = BatteryLevelMonitor.Status.valueOf(level.toUpperCase(Locale.US));
-                } catch (IllegalArgumentException ex) {
-                    logger.warn("Do not recognize minimum battery level {}. "
-                                    + "Choose from {} instead. Using CRITICAL.",
-                            level, Arrays.toString(BatteryLevelMonitor.Status.values()));
-                }
+        if (config != null && config.getLevel() != null) {
+            String level = config.getLevel().toUpperCase(Locale.US);
+            try {
+                minLevel = BatteryLevelMonitor.Status.valueOf(level);
+            } catch (IllegalArgumentException ex) {
+                logger.warn("Minimum battery level {} is not recognized. "
+                                + "Choose from {} instead. Using CRITICAL.",
+                        level, Arrays.toString(BatteryLevelMonitor.Status.values()));
             }
         }
 
-        return new BatteryLevelMonitor("android_empatica_e4_battery_level", sender, minLevel);
+        return new BatteryLevelMonitor(topics, sender, minLevel);
+    }
+
+    private static KafkaMonitor disconnectMonitor(RadarBackendOptions options,
+            ConfigRadar properties) {
+        DisconnectMonitorConfig config = properties.getDisconnectMonitor();
+        EmailSender sender = getSender(config);
+        long timeout = 300_000L;  // 5 minutes
+        if (config != null && config.getTimeout() != null) {
+            timeout = config.getTimeout();
+        }
+        Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
+        return new DisconnectMonitor(topics, "temperature_disconnect", sender, timeout);
+    }
+
+    private static EmailSender getSender(MonitorConfig config) {
+        if (config != null && config.getEmailAddress() != null) {
+            return new EmailSender("localhost", "no-reply@radar-cns.org",
+                    Collections.singletonList(config.getEmailAddress()));
+        }
+        return null;
+    }
+
+    private static Collection<String> getTopics(MonitorConfig config, String defaultTopic) {
+        if (config != null && config.getTopics() != null) {
+            return config.getTopics();
+        } else {
+            return Collections.singleton(defaultTopic);
+        }
     }
 
     protected MeasurementKey extractKey(ConsumerRecord<GenericRecord, ?> record) {

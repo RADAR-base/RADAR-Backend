@@ -1,7 +1,9 @@
 package org.radarcns.process;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.mail.MessagingException;
@@ -22,8 +24,8 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
     private final EmailSender sender;
     private final Status minLevel;
 
-    public BatteryLevelMonitor(String topic, EmailSender sender, Status minLevel) {
-        super(Collections.singletonList(topic), "1");
+    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel) {
+        super(topics, "1");
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "battery_monitors");
@@ -90,7 +92,7 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
 
     public static void main(String[] args) {
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(
-                "android_empatica_e4_battery_level", null, null);
+                Collections.singletonList("android_empatica_e4_battery_level"), null, null);
         monitor.start();
     }
 
