@@ -1,5 +1,7 @@
 package org.radarcns.process;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +12,7 @@ import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +28,10 @@ public class KafkaMonitorFactory {
         this.properties = properties;
     }
 
-    public KafkaMonitor createMonitor() {
+    public KafkaMonitor createMonitor() throws IOException {
         KafkaMonitor monitor;
         String[] args = options.getSubCommandArgs();
+        PersistentStateStore stateStore = new PersistentStateStore(new File("state"));
         String commandType;
         if (args == null || args.length == 0) {
             commandType = "battery";
@@ -36,10 +40,10 @@ public class KafkaMonitorFactory {
         }
         switch (commandType) {
             case "battery":
-                monitor = createBatteryLevelMonitor();
+                monitor = createBatteryLevelMonitor(stateStore);
                 break;
             case "disconnect":
-                monitor = createDisconnectMonitor();
+                monitor = createDisconnectMonitor(stateStore);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -47,7 +51,7 @@ public class KafkaMonitorFactory {
         return monitor;
     }
 
-    private KafkaMonitor createBatteryLevelMonitor() {
+    private KafkaMonitor createBatteryLevelMonitor(PersistentStateStore stateStore) {
         BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
         BatteryMonitorConfig config = properties.getBatteryMonitor();
         EmailSender sender = getSender(config);
@@ -64,10 +68,10 @@ public class KafkaMonitorFactory {
             }
         }
 
-        return new BatteryLevelMonitor(topics, sender, minLevel);
+        return new BatteryLevelMonitor(topics, sender, minLevel, stateStore);
     }
 
-    private KafkaMonitor createDisconnectMonitor() {
+    private KafkaMonitor createDisconnectMonitor(PersistentStateStore stateStore) {
         DisconnectMonitorConfig config = properties.getDisconnectMonitor();
         EmailSender sender = getSender(config);
         long timeout = 300_000L;  // 5 minutes
@@ -75,7 +79,8 @@ public class KafkaMonitorFactory {
             timeout = config.getTimeout();
         }
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
-        return new DisconnectMonitor(topics, "temperature_disconnect", sender, timeout);
+        return new DisconnectMonitor(topics, "temperature_disconnect", sender, timeout,
+                stateStore);
     }
 
     private EmailSender getSender(MonitorConfig config) {

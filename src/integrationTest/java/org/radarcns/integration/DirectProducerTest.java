@@ -89,7 +89,7 @@ public class DirectProducerTest {
         consumeAggregated();
     }
 
-    private void consumeAggregated() {
+    private void consumeAggregated() throws IOException {
         String clientId = "someclinet";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 "android_empatica_e4_acceleration_output", clientId);

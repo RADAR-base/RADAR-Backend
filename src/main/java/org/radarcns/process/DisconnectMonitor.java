@@ -6,45 +6,43 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import javax.mail.MessagingException;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.process.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
  */
-public class DisconnectMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
-    private final long timeUntilReportedMissing;
-    private final Map<MeasurementKey, Long> lastSeen;
-    private final Map<MeasurementKey, Long> reportedMissing;
+public class DisconnectMonitor extends AbstractKafkaMonitor<
+        GenericRecord, GenericRecord, DisconnectMonitorState> {
     private static final Logger logger = LoggerFactory.getLogger(DisconnectMonitor.class);
+
+    private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
 
     public DisconnectMonitor(Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing) {
-        super(topics, "1");
+            EmailSender sender, long timeUntilReportedMissing, PersistentStateStore stateStore) {
+        super(topics, groupId, "1", stateStore, new DisconnectMonitorState());
         this.timeUntilReportedMissing = timeUntilReportedMissing;
-        lastSeen = new HashMap<>();
         this.sender = sender;
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configure(props);
 
         super.setPollTimeout(timeUntilReportedMissing);
-        reportedMissing = new HashMap<>();
-        dayFormat = new SimpleDateFormat("EEE, d MMM at HH:mm:ss z");
+        dayFormat = new SimpleDateFormat("EEE, d MMM at HH:mm:ss z", Locale.US);
     }
 
     @Override
@@ -52,14 +50,14 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<GenericRecord, Gener
         MeasurementKey key = extractKey(record);
 
         long now = System.currentTimeMillis();
-        lastSeen.put(key, now);
+        state.lastSeen.put(key, now);
 
-        Long reportedMissingTime = reportedMissing.remove(key);
+        Long reportedMissingTime = state.reportedMissing.remove(key);
         if (reportedMissingTime != null) {
             reportRecovered(key, reportedMissingTime);
         }
 
-        Iterator<Map.Entry<MeasurementKey, Long>> iterator = lastSeen.entrySet().iterator();
+        Iterator<Map.Entry<MeasurementKey, Long>> iterator = state.lastSeen.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<MeasurementKey, Long> entry = iterator.next();
             long timeout = entry.getValue() - now;
@@ -68,21 +66,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<GenericRecord, Gener
                 iterator.remove();
                 logger.info("Device {} timeout {}. Reporting it missing.", missingKey, timeout);
                 reportMissing(missingKey, timeout);
-                reportedMissing.put(missingKey, now);
+                state.reportedMissing.put(missingKey, now);
             }
         }
-    }
-
-    private long extractTimeReceived(GenericRecord value, long defaultValue) {
-        Field timeReceivedField = value.getSchema().getField("timeReceived");
-        long reportedTime;
-        if (timeReceivedField != null) {
-            double timeReceivedValue = ((Number) value.get(timeReceivedField.pos())).doubleValue();
-            reportedTime = Math.round(1000d * timeReceivedValue);
-        } else {
-            reportedTime = defaultValue;
-        }
-        return reportedTime;
     }
 
     private void reportMissing(MeasurementKey key, long timeout) {
@@ -111,6 +97,28 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<GenericRecord, Gener
             logger.info("Sent reconnected message successfully");
         } catch (MessagingException mex) {
             logger.error("Failed to send reconnected message.", mex);
+        }
+    }
+
+    public static class DisconnectMonitorState {
+        private final Map<MeasurementKey, Long> lastSeen = new HashMap<>();
+        private final Map<MeasurementKey, Long> reportedMissing = new HashMap<>();
+
+        public Map<MeasurementKey, Long> getLastSeen() {
+            return lastSeen;
+        }
+
+        public void setLastSeen(Map<MeasurementKey, Long> lastSeen) {
+            this.lastSeen.putAll(lastSeen);
+        }
+
+        public Map<MeasurementKey, Long> getReportedMissing() {
+            return reportedMissing;
+        }
+
+        public void setReportedMissing(
+                Map<MeasurementKey, Long> reportedMissing) {
+            this.reportedMissing.putAll(reportedMissing);
         }
     }
 }

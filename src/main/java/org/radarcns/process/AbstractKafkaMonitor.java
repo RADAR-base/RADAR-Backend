@@ -3,10 +3,12 @@ package org.radarcns.process;
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
@@ -21,6 +23,7 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.util.PersistentStateStore;
 import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -29,14 +32,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Monitor a list of topics for anomalous behavior.
  */
-public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
+public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
 
     protected final Collection<String> topics;
+    private final PersistentStateStore stateStore;
     private KafkaConsumer consumer;
     private final Properties properties;
     private long pollTimeout;
     private boolean done;
+    protected final S state;
+    private final String groupId;
+    private final String clientId;
 
     /**
      * Set some basic properties.
@@ -45,13 +52,20 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
      * to call {@see configure()}.
      *
      * @param topics topics to monitor
+     * @param groupId Kafka group ID
+     * @param clientId Kafka client ID
+     * @param stateStore state persistence store. If null, state will not be persisted
+     * @param stateDefault default state. If null, no state may be used.
      */
-    public AbstractKafkaMonitor(Collection<String> topics, String clientId) {
+    public AbstractKafkaMonitor(Collection<String> topics, String groupId, String clientId,
+            PersistentStateStore stateStore, S stateDefault) {
+
         RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
         properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+        properties.setProperty(GROUP_ID_CONFIG, groupId);
         properties.setProperty(CLIENT_ID_CONFIG, clientId);
         config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
 
@@ -59,6 +73,20 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
         this.topics = topics;
         this.pollTimeout = Long.MAX_VALUE;
         this.done = false;
+        this.clientId = clientId;
+        this.groupId = groupId;
+
+        this.stateStore = stateStore;
+        S localState = stateDefault;
+        if (stateStore != null && stateDefault != null) {
+            try {
+                localState = stateStore.retrieveState(groupId, clientId, stateDefault);
+            } catch (IOException ex) {
+                logger.error("Cannot retrieve persistent state {}. Restarting from empty state.",
+                        stateDefault.getClass().getName(), ex);
+            }
+        }
+        state = localState;
     }
 
     /**
@@ -136,6 +164,14 @@ public abstract class AbstractKafkaMonitor<K, V> implements KafkaMonitor {
     protected void evaluateRecords(ConsumerRecords<K, V> records) {
         for (ConsumerRecord<K, V> record : records) {
             evaluateRecord(record);
+        }
+        if (stateStore != null && state != null) {
+            try {
+                stateStore.storeState(groupId, clientId, state);
+            } catch (IOException e) {
+                logger.error("Failed to store monitor state. "
+                        + "When restarted, all current state will be lost.");
+            }
         }
     }
 

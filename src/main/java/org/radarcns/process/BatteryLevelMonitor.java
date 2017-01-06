@@ -1,9 +1,9 @@
 package org.radarcns.process;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.mail.MessagingException;
@@ -12,28 +12,26 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.process.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Monitors the battery level for any devices running empty */
-public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
-    private final Set<MeasurementKey> isLow;
-    private final Set<MeasurementKey> isCritical;
+public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, BatteryLevelState> {
     private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
+
     private final EmailSender sender;
     private final Status minLevel;
 
-    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel) {
-        super(topics, "1");
+    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel, PersistentStateStore stateStore) {
+        super(topics, "battery_monitors", "1", stateStore, new BatteryLevelState());
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "battery_monitors");
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configure(props);
 
-        this.isLow = new HashSet<>();
-        this.isCritical = new HashSet<>();
         this.sender = sender;
         this.minLevel = minLevel == null ? Status.CRITICAL : minLevel;
     }
@@ -43,20 +41,20 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
             MeasurementKey key = extractKey(record);
             float batteryLevel = extractBatteryLevel(record);
             if (batteryLevel <= Status.CRITICAL.getLevel()) {
-                if (isCritical.add(key)) {
-                    isLow.add(key);
+                if (state.isCritical.add(key)) {
+                    state.isLow.add(key);
                     updateStatus(key, Status.CRITICAL);
                     logger.warn("Battery level of sensor {} of user {} is critically low",
                             key.getSourceId(), key.getUserId());
                 }
             } else if (batteryLevel < Status.LOW.getLevel()) {
-                if (isLow.add(key)) {
+                if (state.isLow.add(key)) {
                     updateStatus(key, Status.LOW);
                     logger.warn("Battery level of sensor {} of user {} is low",
                             key.getSourceId(), key.getUserId());
                 }
-            } else if (isLow.remove(key)) {
-                isCritical.remove(key);
+            } else if (state.isLow.remove(key)) {
+                state.isCritical.remove(key);
                 updateStatus(key, Status.NORMAL);
                 logger.info("Battery of sensor {} of user {} is has returned to normal.",
                         key.getSourceId(), key.getUserId());
@@ -90,9 +88,9 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
         return batteryLevel.floatValue();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(
-                Collections.singletonList("android_empatica_e4_battery_level"), null, null);
+                Collections.singletonList("android_empatica_e4_battery_level"), null, null, null);
         monitor.start();
     }
 
@@ -107,6 +105,27 @@ public class BatteryLevelMonitor extends AbstractKafkaMonitor<GenericRecord, Gen
 
         public float getLevel() {
             return this.level;
+        }
+    }
+
+    public static class BatteryLevelState {
+        private final Set<MeasurementKey> isLow = new HashSet<>();
+        private final Set<MeasurementKey> isCritical = new HashSet<>();
+
+        public Set<MeasurementKey> getIsLow() {
+            return isLow;
+        }
+
+        public void setIsLow(Set<MeasurementKey> isLow) {
+            this.isLow.addAll(isLow);
+        }
+
+        public Set<MeasurementKey> getIsCritical() {
+            return isCritical;
+        }
+
+        public void setIsCritical(Set<MeasurementKey> isCritical) {
+            this.isCritical.addAll(isCritical);
         }
     }
 }
