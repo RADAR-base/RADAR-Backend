@@ -26,11 +26,12 @@ import static io.confluent.connect.avro.AvroData.ANYTHING_SCHEMA;
 /**
  * Writes data to HDFS using the Confluent Kafka HDFS connector.
  *
- * This will write both the keys and values of the data to file, in a new Avro format with as its two fields the "key"
- * and "value" fields, with the original Avro schema of the key and value as the type of those fields.
+ * <p>This will write both the keys and values of the data to file, in a new Avro format with as
+ * its two fields the "key" and "value" fields, with the original Avro schema of the key and value
+ * as the type of those fields.
  *
- * To use, implement a {@link Format#getRecordWriterProvider()} that returns this class (i.e., {@link AvroFormatRadar},
- * and provide that in the `format.class` property.
+ * <p>To use, implement a {@link Format#getRecordWriterProvider()} that returns this class (i.e.,
+ * {@link AvroFormatRadar}), and provide that in the `format.class` property.
  */
 public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
 
@@ -43,8 +44,8 @@ public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
     }
 
     /**
-     * The returned RecordWriter method assumes that all {@link SinkRecord} objects provided to it have the same schema
-     * and that the record indeed HAS both a key and value schema.
+     * Constructs a RecordWriter that assumes that all {@link SinkRecord} objects provided to it
+     * have the same schema and that the record indeed HAS both a key and value schema.
      */
     @Override
     public RecordWriter<SinkRecord> getRecordWriter(Configuration conf, final String fileName,
@@ -70,7 +71,7 @@ public class AvroRecordWriterProviderRadar  implements RecordWriterProvider {
         final DataFileWriter<Object> writer = new DataFileWriter<>(new GenericDatumWriter<>());
         writer.create(combinedSchema, out);
 
-        return new RecordWriter<SinkRecord>(){
+        return new RecordWriter<SinkRecord>() {
             @Override
             public void write(SinkRecord record) throws IOException {
                 log.trace("Sink record: {}", record.toString());

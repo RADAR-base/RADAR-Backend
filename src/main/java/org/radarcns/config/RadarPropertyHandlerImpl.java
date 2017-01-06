@@ -1,8 +1,5 @@
 package org.radarcns.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +10,7 @@ import javax.annotation.Nonnull;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.radarcns.RadarBackend;
+import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +58,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             throw new IllegalArgumentException("Config file " + file + " is invalid");
         }
 
-        properties = loadConfigRadar(file);
+        properties = ConfigRadar.load(file);
 
         //TODO: add check to validate configuration file. Remember
         //  - log path can be only null, all others have to be stated
@@ -97,20 +95,8 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         return this.kafkaProperty;
     }
 
-    private ConfigRadar loadConfigRadar(@Nonnull File pathFile) throws IOException {
-        try {
-            ObjectMapper yamlObjectMapper = new ObjectMapper(new YAMLFactory());
-            yamlObjectMapper
-                    .setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
-            return yamlObjectMapper.readValue(pathFile, ConfigRadar.class);
-        } catch (IOException ex) {
-            log.error("Impossible load properties", ex);
-            throw ex;
-        }
-    }
-
     /**
-     * @param logPath: new log file defined by the user
+     * @param logPath new log file defined by the user
      * @throws IllegalArgumentException if logPath is null or is not a valid file
      */
     private void updateLog4jConfiguration(@Nonnull String logPath)
@@ -142,5 +128,15 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
 
         log.info("Log path has been correctly configured to {}", logFile.getAbsolutePath());
         log.info("All future messages will be redirected to the log file");
+    }
+
+    @Override
+    public PersistentStateStore getPersistentStateStore() throws IOException {
+        if (getRadarProperties().getPersistencePath() != null) {
+            File persistenceDir = new File(getRadarProperties().getPersistencePath());
+            return new PersistentStateStore(persistenceDir);
+        } else {
+            return null;
+        }
     }
 }

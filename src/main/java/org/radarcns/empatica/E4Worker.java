@@ -1,6 +1,7 @@
 package org.radarcns.empatica;
 
 import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.empatica.streams.E4Acceleration;
 import org.radarcns.empatica.streams.E4BatteryLevel;
 import org.radarcns.empatica.streams.E4BloodVolumePulse;
@@ -24,20 +25,22 @@ import java.util.List;
  */
 public class E4Worker extends MasterAggregator {
 
-    public E4Worker(boolean standalone) throws IOException{
+    public E4Worker(boolean standalone) throws IOException {
         super(standalone,"Empatica E4");
     }
 
     @Override
-    protected void announceTopics(@Nonnull Logger log){
+    protected void announceTopics(@Nonnull Logger log) {
         log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
                 + "before starting: \n  - {}",
                 String.join("\n  - ", E4Topics.getInstance().getTopicNames()));
     }
 
     @Override
-    protected void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high) throws IOException {
-        KafkaProperty kafkaProperty = RadarSingletonFactory.getRadarPropertyHandler().getKafkaProperties();
+    protected void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high)
+            throws IOException {
+        RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         list.add(new E4Acceleration("E4Acceleration",high,this,kafkaProperty));
         list.add(new E4BatteryLevel("E4BatteryLevel",low,this,kafkaProperty));
         list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this,kafkaProperty));

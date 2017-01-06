@@ -20,24 +20,26 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
- * Definition of Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
+ * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
-public class E4HeartRate extends InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
-
+public class E4HeartRate extends
+        InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
-    public E4HeartRate(String clientId, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException {
+
+    public E4HeartRate(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientId, numThread,
                 master, kafkaProperties);
     }
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream,
-                             @Nonnull InternalTopic<DoubleAggregator> topic) throws IOException {
+            @Nonnull InternalTopic<DoubleAggregator> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
                     (k, v, valueCollector) -> valueCollector.add(
-                            utilities.ibiToHR(v.getInterBeatInterval())),
+                            utilities.ibiToHeartRate(v.getInterBeatInterval())),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())

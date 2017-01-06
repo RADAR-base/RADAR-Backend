@@ -18,11 +18,11 @@ public class RadarSerde<T> {
         this.jsonDeserializer = new JsonDeserializer<>(type);
     }
 
-    public Serde<T> getSerde(){
+    public Serde<T> getSerde() {
         return Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
     }
 
-    public Serde<Windowed<T>> getWindowed(){
+    public Serde<Windowed<T>> getWindowed() {
         WindowedSerializer<T> windowedSerializer = new WindowedSerializer<>(jsonSerializer);
         WindowedDeserializer<T> windowedDeserializer = new WindowedDeserializer<>(jsonDeserializer);
         return Serdes.serdeFrom(windowedSerializer,windowedDeserializer);

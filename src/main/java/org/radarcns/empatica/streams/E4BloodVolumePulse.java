@@ -20,16 +20,16 @@ import java.io.IOException;
 
 public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePulse> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
-    public E4BloodVolumePulse(String clientId, int numThread,
-                              MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
+
+    public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(),
                 clientId, numThread, master, kafkaProperties);
     }
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream,
-                             @Nonnull SensorTopic<EmpaticaE4BloodVolumePulse> topic)
-            throws IOException {
+            @Nonnull SensorTopic<EmpaticaE4BloodVolumePulse> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,

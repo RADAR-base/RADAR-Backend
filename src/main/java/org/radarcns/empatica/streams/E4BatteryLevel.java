@@ -22,17 +22,17 @@ import java.io.IOException;
  * Definition of Kafka Stream for aggregating data about Empatica E4 battery level
  */
 public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
-
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4BatteryLevel(String clientId, int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(),clientId,numThread,master, kafkaProperties);
+    public E4BatteryLevel(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
+        super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(), clientId, numThread,
+                master, kafkaProperties);
     }
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream,
-                             @Nonnull SensorTopic<EmpaticaE4BatteryLevel> topic)
-            throws IOException {
+            @Nonnull SensorTopic<EmpaticaE4BatteryLevel> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,

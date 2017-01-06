@@ -1,19 +1,17 @@
 package org.radarcns;
 
+import java.io.IOException;
+import java.util.Arrays;
+import javax.annotation.Nonnull;
 import org.apache.commons.cli.ParseException;
-import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.empatica.E4Worker;
-import org.radarcns.process.AbstractKafkaMonitor;
+import org.radarcns.monitor.KafkaMonitorFactory;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Core class that initialises configurations and then start all needed Kafka streams
@@ -36,15 +34,14 @@ public final class RadarBackend {
 
     public SubCommand createCommand() throws IOException {
         String subCommand = options.getSubCommand();
-        ConfigRadar properties = radarPropertyHandler.getRadarProperties();
         if (subCommand == null) {
             subCommand = "stream";
         }
         switch (subCommand) {
             case "stream":
-                return new E4Worker(properties.isStandalone());
+                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
             case "monitor":
-                return AbstractKafkaMonitor.create(options, properties);
+                return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());
@@ -62,7 +59,7 @@ public final class RadarBackend {
             System.exit(1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 finish();
             } catch (Exception ex) {
@@ -75,7 +72,7 @@ public final class RadarBackend {
      * Start here all needed MasterAggregator
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
-    private void go() throws IOException{
+    private void go() throws IOException {
         log.info("STARTING");
 
         command = createCommand();
@@ -97,7 +94,7 @@ public final class RadarBackend {
         log.info("FINISHED");
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             RadarBackendOptions options = RadarBackendOptions.parse(args);
             RadarBackend backend = new RadarBackend(options);

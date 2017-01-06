@@ -21,7 +21,7 @@ public interface RadarUtilities {
 
     double floatToDouble(float input);
 
-    double ibiToHR(float input);
+    double ibiToHeartRate(float input);
 
     double[] accelerationToArray(EmpaticaE4Acceleration value);
 }

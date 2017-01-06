@@ -21,11 +21,10 @@ import org.radarcns.util.serde.RadarSerdes;
  * Definition of Kafka Stream for aggregating data collected by Empatica E4 Acceleromete
  */
 public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
-
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4Acceleration(String clientId, int numThread, MasterAggregator master,
-        KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(), clientId, numThread,
             master, kafkaProperties);
     }
@@ -33,8 +32,7 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream,
-        @Nonnull SensorTopic<EmpaticaE4Acceleration> topic)
-        throws IOException {
+            @Nonnull SensorTopic<EmpaticaE4Acceleration> topic) throws IOException {
         kstream.groupByKey()
             .aggregate(
                 DoubleArrayCollector::new,

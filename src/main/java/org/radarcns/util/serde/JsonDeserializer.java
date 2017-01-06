@@ -37,14 +37,14 @@ public class JsonDeserializer<T> implements Deserializer<T> {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> map, boolean b) {
-        if(deserializedClass == null) {
+        if (deserializedClass == null) {
             deserializedClass = (Class<T>) map.get("serializedClass");
         }
     }
 
     @Override
     public T deserialize(String topic, byte[] bytes) {
-        if(bytes == null){
+        if (bytes == null) {
             return null;
         }
 

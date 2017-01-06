@@ -21,8 +21,9 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > "$HOME/bin/docker-compose";
   - chmod +x "$HOME/bin/docker-compose";
 script:
+  - ./gradlew check
   - sudo docker-compose up -d
-  - ./gradlew test integrationTest
+  - ./gradlew integrationTest
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy

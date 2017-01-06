@@ -18,21 +18,21 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         T extends AvroTopic<K, V>> implements Runnable, Thread.UncaughtExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
     private final int numThreads;
-    private final String clientID;
+    private final String clientId;
     private final KafkaStreams streams;
     private final MasterAggregator master;
     private KafkaProperty kafkaProperty ;
 
     private final T topic;
 
-    public AggregatorWorker(@Nonnull T topic, @Nonnull String clientID, int numThreads,
-                            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) throws IOException {
+    public AggregatorWorker(@Nonnull T topic, @Nonnull String clientId, int numThreads,
+            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) throws IOException {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
         }
 
-        this.clientID = clientID;
+        this.clientId = clientId;
         this.master = aggregator;
         this.topic = topic;
         this.numThreads = numThreads;
@@ -43,15 +43,15 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
 
     private KafkaStreams initiateKafkaStream() throws IOException {
         log.info("Creating the stream {} from topic {} to topic {}",
-                getClientID(), getTopic().getInputTopic(), getTopic().getOutputTopic());
+                getClientId(), getTopic().getInputTopic(), getTopic().getOutputTopic());
         KafkaStreams kafkaStreams = new KafkaStreams(getBuilder(),
-                kafkaProperty.getStream(getClientID(), numThreads, DeviceTimestampExtractor.class));
+                kafkaProperty.getStream(getClientId(), numThreads, DeviceTimestampExtractor.class));
         kafkaStreams.setUncaughtExceptionHandler(this);
         return kafkaStreams;
     }
 
     /** Create a Kafka Stream builder */
-    protected KStreamBuilder getBuilder() throws IOException{
+    protected KStreamBuilder getBuilder() throws IOException {
         return new KStreamBuilder();
     }
 
@@ -61,24 +61,24 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
      */
     @Override
     public void run() {
-        log.info("Starting {} stream", clientID);
+        log.info("Starting {} stream", clientId);
         streams.start();
 
-        master.notifyStartedStream(clientID);
+        master.notifyStartedStream(clientId);
     }
 
     /**
      * It closes the stream and notify the MasterAggregator
      */
     public void shutdown() {
-        log.info("Shutting down {} stream", getClientID());
+        log.info("Shutting down {} stream", getClientId());
         streams.close();
 
-        master.notifyClosedStream(clientID);
+        master.notifyClosedStream(clientId);
     }
 
-    public String getClientID() {
-        return clientID;
+    public String getClientId() {
+        return clientId;
     }
 
     /**
@@ -88,7 +88,7 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         Thread thread;
 
         thread = new Thread(this);
-        thread.setName(this.clientID);
+        thread.setName(this.clientId);
 
         return thread;
     }
@@ -101,7 +101,7 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
     public void uncaughtException(Thread t, Throwable e) {
         log.error("Thread {} has been terminated due to {}", t.getName(), e.getMessage(), e);
 
-        master.notifyCrashedStream(clientID);
+        master.notifyCrashedStream(clientId);
 
         //TODO find a better solution based on the exception
     }

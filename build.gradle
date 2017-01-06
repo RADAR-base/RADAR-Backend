@@ -103,6 +103,8 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
+    integrationTestCompile group: 'org.subethamail', name: 'subethasmtp', version: '3.1.7'
+
     codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
 }
 
@@ -138,13 +140,24 @@ jar {
 }
 
 checkstyle {
+    // codacy version
     toolVersion '6.16'
+    ignoreFailures false
+
+    // ignore tests
+    sourceSets = [sourceSets.main]
 }
 
 pmd {
-    ignoreFailures = true
-
+    // codacy version
     toolVersion = '5.5.2'
+    ignoreFailures = false
+
+    // ignore tests
+    sourceSets = [sourceSets.main]
+
+    consoleOutput = true
+
     ruleSets = []
     ruleSetFiles = files("config/pmd/ruleset.xml")
 }

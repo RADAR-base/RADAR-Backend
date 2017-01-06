@@ -22,20 +22,17 @@ import java.io.IOException;
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
-
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master
-            , KafkaProperty kafkaProperties)
-            throws IOException{
+    public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
                 clientId, numThread,master, kafkaProperties);
     }
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream,
-                             @Nonnull SensorTopic<EmpaticaE4InterBeatInterval> topic)
-            throws IOException {
+            @Nonnull SensorTopic<EmpaticaE4InterBeatInterval> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,

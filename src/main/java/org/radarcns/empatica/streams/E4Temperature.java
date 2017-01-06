@@ -24,14 +24,16 @@ import java.io.IOException;
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4Temperature(String clientId,int numThread, MasterAggregator master, KafkaProperty kafkaProperties) throws IOException{
-        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(),clientId,numThread,master, kafkaProperties);
+    public E4Temperature(String clientId,int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) throws IOException {
+        super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(), clientId, numThread,
+                master, kafkaProperties);
     }
 
 
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream,
-                             @Nonnull SensorTopic<EmpaticaE4Temperature> topic) throws IOException {
+            @Nonnull SensorTopic<EmpaticaE4Temperature> topic) throws IOException {
         kstream.groupByKey()
                 .aggregate(
                         DoubleValueCollector::new,

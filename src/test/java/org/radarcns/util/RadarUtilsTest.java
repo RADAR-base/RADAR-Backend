@@ -1,8 +1,5 @@
 package org.radarcns.util;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -46,7 +43,7 @@ public class RadarUtilsTest {
 
     @Test
     public void ibiToHR() {
-        double hR = radarUtilities.ibiToHR(1.0f);
+        double hR = radarUtilities.ibiToHeartRate(1.0f);
         assertEquals((60d / 1.0d), hR, 0.0d);
     }
 

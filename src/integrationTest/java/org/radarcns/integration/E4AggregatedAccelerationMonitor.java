@@ -1,34 +1,35 @@
 package org.radarcns.integration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandlerImpl;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.process.AbstractKafkaMonitor;
+import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Consumer for Aggregated Acceleration Stream
  */
-public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord> {
+public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
     private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
 
-    public E4AggregatedAccelerationMonitor(String topic, String clientID) {
-        super(Collections.singletonList(topic),clientID);
+    public E4AggregatedAccelerationMonitor(RadarPropertyHandler radar, String topic, String clientID) throws IOException {
+        super(radar, Collections.singletonList(topic), "new", clientID, null);
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "new");
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         configure(props);
     }

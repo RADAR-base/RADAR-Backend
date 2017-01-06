@@ -1,9 +1,6 @@
 package org.radarcns.util.serde;
 
-/**
- * Created by Francesco Nobilia on 21/10/2016.
- */
-
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -11,8 +8,7 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
-
-public class SpecificAvroSerde <T extends  org.apache.avro.specific.SpecificRecord> implements Serde<T> {
+public class SpecificAvroSerde<T extends SpecificRecord> implements Serde<T> {
     private final Serde<T> inner;
 
     /**
@@ -43,5 +39,4 @@ public class SpecificAvroSerde <T extends  org.apache.avro.specific.SpecificReco
         inner.serializer().close();
         inner.deserializer().close();
     }
-
 }

@@ -20,7 +20,7 @@ import java.util.Collection;
 public class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     private final String name;
 
-    //Enumerate all possible suffix
+    /** Topic suffixes for different use cases. */
     private enum Suffix {
         output("output"), store("store");
 
@@ -36,45 +36,42 @@ public class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     }
 
     /**
-     * @param name the topic name inside the Kafka cluster
-     * @param keyClass the java class representing the key
-     * @param valueClass the java class representing the record
+     * @param name topic name inside the Kafka cluster
      */
-    public AvroTopic(@Nonnull String name, @Nonnull Class<K> keyClass,
-                     @Nonnull Class<V> valueClass) {
+    public AvroTopic(@Nonnull String name) {
         this.name = name;
     }
 
     /**
-     * @return the topic name
+     * @return topic name
      */
-    protected String getName(){
+    protected String getName() {
         return this.name;
     }
 
     /**
-     * @return the name of the Input topic
+     * @return name of the Input topic
      */
     public String getInputTopic() {
         return this.name;
     }
 
     /**
-     * @return the name of the topic used to write results of data aggregation
+     * @return name of the topic used to write results of data aggregation
      */
-    public String getOutputTopic(){
+    public String getOutputTopic() {
         return name + "_" + Suffix.output;
     }
 
     /**
-     * @return the State Store name for the given topic
+     * @return State Store name for the given topic
      */
-    public String getStateStoreName(){
-        return name+"_"+ Suffix.store;
+    public String getStateStoreName() {
+        return name + "_" + Suffix.store;
     }
 
     /**
-     * @return the collection of all used topic
+     * @return collection of all used topic
      */
     public Collection<String> getAllTopicNames() {
         return Arrays.asList(getInputTopic(), getOutputTopic());
