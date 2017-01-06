@@ -123,13 +123,22 @@ jar {
 }
 
 checkstyle {
+    // codacy version
     toolVersion '6.16'
+
+    // ignore tests
+    sourceSets = [sourceSets.main]
 }
 
 pmd {
-    ignoreFailures = true
-
+    // codacy version
     toolVersion = '5.5.2'
+
+    // ignore tests
+    sourceSets = [sourceSets.main]
+
+    consoleOutput = true
+
     ruleSets = []
     ruleSetFiles = files("config/pmd/ruleset.xml")
 }
