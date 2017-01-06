@@ -1,4 +1,4 @@
-package org.radarcns.process;
+package org.radarcns.monitor;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -13,8 +13,9 @@ import javax.mail.MessagingException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.process.DisconnectMonitor.DisconnectMonitorState;
+import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.PersistentStateStore;
 import org.slf4j.Logger;
@@ -31,9 +32,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final EmailSender sender;
     private final Format dayFormat;
 
-    public DisconnectMonitor(Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing, PersistentStateStore stateStore) {
-        super(topics, groupId, "1", stateStore, new DisconnectMonitorState());
+    public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
+            EmailSender sender, long timeUntilReportedMissing) {
+        super(radar, topics, groupId, "1", new DisconnectMonitorState());
         this.timeUntilReportedMissing = timeUntilReportedMissing;
         this.sender = sender;
 

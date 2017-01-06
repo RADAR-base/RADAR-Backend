@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +38,8 @@ public class ConfigRadar {
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
+    @JsonProperty("persistence_path")
+    private String persistencePath;
 
     public Date getReleased() {
         return released;
@@ -128,14 +133,24 @@ public class ConfigRadar {
     }
 
     public String getZookeeperPaths() {
+        if (zookeeper == null) {
+            throw new IllegalStateException("'zookeeper' is not configured");
+        }
         return ServerConfig.getPaths(zookeeper);
     }
 
     public String getBrokerPaths() {
+        if (broker == null) {
+            throw new IllegalStateException("Kafka 'broker' is not configured");
+        }
         return ServerConfig.getPaths(broker);
     }
 
     public String getSchemaRegistryPaths() {
+        if (schemaRegistry == null) {
+        throw new IllegalStateException("'schema_registry' is not configured");
+    }
+
         return ServerConfig.getPaths(schemaRegistry);
     }
 
@@ -159,13 +174,27 @@ public class ConfigRadar {
         this.disconnectMonitor = disconnectMonitor;
     }
 
-    @Override
-    public String toString() {
+    public String getPersistencePath() {
+        return persistencePath;
+    }
+
+    public void setPersistencePath(String persistencePath) {
+        this.persistencePath = persistencePath;
+    }
+
+    public static ConfigRadar load(File file) throws IOException {
+        ObjectMapper mapper = createMapper();
+        return mapper.readValue(file, ConfigRadar.class);
+    }
+
+    public void store(File file) throws IOException {
+        ObjectMapper mapper = createMapper();
+        mapper.writeValue(file, this);
+    }
+
+    private static ObjectMapper createMapper() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        // pretty print
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        // make ConfigRadar the root element
-        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         // only serialize fields, not getters, etc.
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
@@ -173,6 +202,16 @@ public class ConfigRadar {
                 .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+        return mapper;
+    }
+
+    @Override
+    public String toString() {
+        ObjectMapper mapper = createMapper();
+        // pretty print
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        // make ConfigRadar the root element
+        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
 
         try {
             return mapper.writeValueAsString(this);

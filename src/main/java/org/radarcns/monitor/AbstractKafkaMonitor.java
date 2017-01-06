@@ -1,4 +1,4 @@
-package org.radarcns.process;
+package org.radarcns.monitor;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
@@ -22,9 +22,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.SerializationException;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.util.PersistentStateStore;
-import org.radarcns.util.RadarConfig;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +54,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      * @param topics topics to monitor
      * @param groupId Kafka group ID
      * @param clientId Kafka client ID
-     * @param stateStore state persistence store. If null, state will not be persisted
      * @param stateDefault default state. If null, no state may be used.
      */
-    public AbstractKafkaMonitor(Collection<String> topics, String groupId, String clientId,
-            PersistentStateStore stateStore, S stateDefault) {
+    public AbstractKafkaMonitor(RadarPropertyHandler radar, Collection<String> topics,
+            String groupId, String clientId, S stateDefault) {
 
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
@@ -66,8 +66,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         properties.setProperty(GROUP_ID_CONFIG, groupId);
         properties.setProperty(CLIENT_ID_CONFIG, clientId);
 
-        RadarConfig config = RadarConfig.load(RadarConfig.class.getClassLoader());
-        config.updateProperties(properties, SCHEMA_REGISTRY_URL_CONFIG, BOOTSTRAP_SERVERS_CONFIG);
+        ConfigRadar config = radar.getRadarProperties();
+        properties.setProperty(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
+        properties.setProperty(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
         this.consumer = null;
         this.topics = topics;
@@ -76,7 +77,16 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         this.clientId = clientId;
         this.groupId = groupId;
 
-        this.stateStore = stateStore;
+        PersistentStateStore localStateStore;
+        try {
+            localStateStore = radar.getPersistentStateStore();
+        } catch (IOException ex) {
+            logger.warn("Cannot get persistent state store {}. Not persisting state.",
+                    stateDefault.getClass().getName(), ex);
+            localStateStore = null;
+        }
+        this.stateStore = localStateStore;
+
         S localState = stateDefault;
         if (stateStore != null && stateDefault != null) {
             try {
@@ -90,12 +100,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
     /**
-     * Call to actually create the consumer.
+     * Additional configuration to pass to the consumer.
      */
     protected final void configure(Properties properties) {
         this.properties.putAll(properties);
-        consumer = new KafkaConsumer<>(this.properties);
-        consumer.subscribe(topics);
     }
 
     /**
@@ -105,6 +113,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      * {@link #handleSerializationException()} is called.
      */
     public void start() {
+        consumer = new KafkaConsumer<>(this.properties);
+        consumer.subscribe(topics);
+
         logger.info("Monitoring streams {}", topics);
         RollingTimeAverage ops = new RollingTimeAverage(20000);
 

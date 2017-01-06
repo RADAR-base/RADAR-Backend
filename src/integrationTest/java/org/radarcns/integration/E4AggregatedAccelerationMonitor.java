@@ -14,7 +14,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.process.AbstractKafkaMonitor;
+import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

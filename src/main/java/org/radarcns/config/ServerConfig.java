@@ -2,6 +2,7 @@ package org.radarcns.config;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /**
  * POJO representing a ServerConfig configuration
@@ -48,7 +49,7 @@ public class ServerConfig {
         return getPath();
     }
 
-    public static String getPaths(List<ServerConfig> configList) {
+    public static String getPaths(@Nonnull List<ServerConfig> configList) {
         return configList.stream().map(ServerConfig::getPath).collect(Collectors.joining(","));
     }
 }

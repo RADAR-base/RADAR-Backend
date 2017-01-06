@@ -1,4 +1,4 @@
-package org.radarcns.process;
+package org.radarcns.monitor;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -11,10 +11,11 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.process.BatteryLevelMonitor.BatteryLevelState;
+import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
-import org.radarcns.util.PersistentStateStore;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +27,9 @@ public class BatteryLevelMonitor extends
     private final EmailSender sender;
     private final Status minLevel;
 
-    public BatteryLevelMonitor(Collection<String> topics, EmailSender sender, Status minLevel,
-            PersistentStateStore stateStore) {
-        super(topics, "battery_monitors", "1", stateStore, new BatteryLevelState());
+    public BatteryLevelMonitor(RadarPropertyHandler radar, Collection<String> topics,
+            EmailSender sender, Status minLevel) {
+        super(radar, topics, "battery_monitors", "1", new BatteryLevelState());
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -91,8 +92,11 @@ public class BatteryLevelMonitor extends
     }
 
     public static void main(String[] args) throws IOException {
-        BatteryLevelMonitor monitor = new BatteryLevelMonitor(
-                Collections.singletonList("android_empatica_e4_battery_level"), null, null, null);
+        RadarPropertyHandler radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        radarPropertyHandler.load(null);
+
+        BatteryLevelMonitor monitor = new BatteryLevelMonitor(radarPropertyHandler,
+                Collections.singletonList("android_empatica_e4_battery_level"), null, null);
         monitor.start();
     }
 

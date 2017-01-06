@@ -1,4 +1,4 @@
-package org.radarcns.process;
+package org.radarcns.monitor;
 
 import org.radarcns.config.SubCommand;
 

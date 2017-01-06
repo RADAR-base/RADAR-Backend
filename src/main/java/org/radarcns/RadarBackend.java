@@ -6,7 +6,7 @@ import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.empatica.E4Worker;
-import org.radarcns.process.KafkaMonitorFactory;
+import org.radarcns.monitor.KafkaMonitorFactory;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +36,14 @@ public final class RadarBackend {
 
     public SubCommand createCommand() throws IOException {
         String subCommand = options.getSubCommand();
-        ConfigRadar properties = radarPropertyHandler.getRadarProperties();
         if (subCommand == null) {
             subCommand = "stream";
         }
         switch (subCommand) {
             case "stream":
-                return new E4Worker(properties.isStandalone());
+                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
             case "monitor":
-                return new KafkaMonitorFactory(options, properties).createMonitor();
+                return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());

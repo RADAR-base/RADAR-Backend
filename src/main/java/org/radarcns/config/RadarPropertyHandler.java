@@ -1,6 +1,7 @@
 package org.radarcns.config;
 
 import java.io.IOException;
+import org.radarcns.util.PersistentStateStore;
 
 /**
  * Interface that handles YAML configuration file loading
@@ -26,4 +27,12 @@ public interface RadarPropertyHandler {
     void load(String pathFile) throws IOException;
 
     KafkaProperty getKafkaProperties();
+
+    /**
+     * Create a {@link PersistentStateStore} if so configured in the radar properties. Notably, the
+     * {@code persistent_directory} must be set.
+     * @return PersistentStateStore or null if none is configured.
+     * @throws IOException if the persistence store cannot be reached.
+     */
+    PersistentStateStore getPersistentStateStore() throws IOException;
 }
