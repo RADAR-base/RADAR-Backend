@@ -133,7 +133,7 @@ checkstyle {
 
 task checkstyleStrict(type: Checkstyle) {
     ignoreFailures = false
-    configFile = file("config/checkstyle/checkstyle_without_javadoc.xml")
+    configFile = file("config/checkstyle/checkstyle_strict.xml")
 }
 
 check.dependsOn checkstyleStrict
