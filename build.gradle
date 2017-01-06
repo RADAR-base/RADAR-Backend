@@ -54,6 +54,8 @@ configurations {
     codacy
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
+    connector
+    compile.extendsFrom connector
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -65,7 +67,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
     flatDir {
-        dirs 'lib'
+        dirs 'libs'
     }
 }
 
@@ -97,7 +99,7 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-    compile group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
+    connector group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
@@ -110,6 +112,19 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 }
 
 compileJava.source(generateAvro.outputs)
+
+task connectorJar(type: Jar) {
+    from {
+        configurations.connector.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(sourceSets.main.output) {
+        include "org/radarcns/sink/mongodb/*"
+    }
+    from("${buildDir}/avro/") {
+        include "org/radarcns/**"
+    }
+    archiveName = "radar-mongodb-connector-${version}.jar"
+}
 
 jar {
     manifest {

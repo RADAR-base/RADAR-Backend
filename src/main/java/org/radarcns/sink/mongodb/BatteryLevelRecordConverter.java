@@ -7,15 +7,11 @@ import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.Document;
 import org.radarcns.serialization.RecordConverter;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
 
 /**
  * RecordConverter to convert a BatteryLevel record to a MongoDB Document
  */
 public class BatteryLevelRecordConverter implements RecordConverter {
-
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     /**
      * Returns the list of supported schemas, which behaves as the id to select suitable
@@ -41,10 +37,21 @@ public class BatteryLevelRecordConverter implements RecordConverter {
         Struct key = (Struct) sinkRecord.key();
         Struct value = (Struct) sinkRecord.value();
 
-        return new Document("_id", utilities.measurementKeyToMongoDbKey(key))
+        return new Document("_id", measurementKeyToMongoDbKey(key))
                 .append("user", key.getString("userId"))
                 .append("source", key.getString("sourceId"))
                 .append("batteryLevel", value.getFloat32("batteryLevel"))
                 .append("timeReceived", value.getFloat64("timeReceived"));
+    }
+
+
+    /**
+     * Creates a key string using userId and sourceId
+     * @param key
+     * @return converted key string
+     */
+    private static String measurementKeyToMongoDbKey(Struct key) {
+        return key.get("userId")
+                + "-" + key.get("sourceId");
     }
 }

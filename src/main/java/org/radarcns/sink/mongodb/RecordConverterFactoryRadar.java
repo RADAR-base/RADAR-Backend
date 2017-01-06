@@ -1,5 +1,6 @@
 package org.radarcns.sink.mongodb;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.radarcns.serialization.RecordConverter;
 import org.radarcns.serialization.RecordConverterFactory;
@@ -15,7 +16,8 @@ public class RecordConverterFactoryRadar extends RecordConverterFactory {
      * @return list of RecordConverters available
      */
     protected List<RecordConverter> genericConverters() {
-        List<RecordConverter> recordConverters = super.genericConverters();
+        List<RecordConverter> recordConverters = new ArrayList<RecordConverter>();
+        recordConverters.addAll(super.genericConverters());
         recordConverters.add(new BatteryLevelRecordConverter());
         return recordConverters;
     }

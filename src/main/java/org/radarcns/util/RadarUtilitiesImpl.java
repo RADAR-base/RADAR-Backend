@@ -34,14 +34,4 @@ public class RadarUtilitiesImpl implements RadarUtilities{
                 floatToDouble(value.getZ())};
     }
 
-    /**
-     * Creates a key string using userId and sourceId
-     * @param key
-     * @return converted key string
-     */
-    @Override
-    public String measurementKeyToMongoDbKey(Struct key) {
-        return key.get("userId")
-                + "-" + key.get("sourceId");
-    }
 }

@@ -63,14 +63,4 @@ public class RadarUtilsTest {
         assertEquals(value[2], 3.0f, 0.0);
     }
 
-    @Test
-    public void measurementKeyToMongoDbKey() {
-       Schema schema = SchemaBuilder.struct().field("userId", Schema.STRING_SCHEMA).field("sourceId", Schema.STRING_SCHEMA).build();
-        Struct struct = new Struct(schema);
-        struct.put("userId", "user1");
-        struct.put("sourceId", "source1");
-
-        String value = radarUtilities.measurementKeyToMongoDbKey(struct);
-        assertEquals("user1-source1", value);
-    }
 }

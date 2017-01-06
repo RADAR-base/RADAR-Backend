@@ -67,4 +67,13 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: "http://localhost:8081"
       KAFKA_REST_HOST_NAME: "localhost"
 
-
+  #---------------------------------------------------------------------------#
+  # Mongo DB                                                                  #
+  #---------------------------------------------------------------------------#
+  mongo:
+    image: mongo:3.3
+    volumes:
+      - /data/db
+    ports:
+      - "27017:27017"
+    command: --smallfiles --rest --noauth
