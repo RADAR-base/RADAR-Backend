@@ -282,6 +282,26 @@ services:
     volumes:
       - ./radar.yml:/usr/local/RADAR-Backend/radar.yml
 
+  #---------------------------------------------------------------------------#
+  # RADAR backend monitor                                                     #
+  #---------------------------------------------------------------------------#
+  radar-backend-monitor:
+    image: backend-monitor
+    networks:
+      - zookeeper
+      - kafka
+      - api
+    depends_on:
+      - zookeeper-1
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - schema-registry-1
+      - rest-proxy-1
+    volumes:
+      - ./radar.yml:/usr/local/RADAR-Backend/radar.yml
+
+
 
 
 
