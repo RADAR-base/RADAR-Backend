@@ -10,7 +10,7 @@ plugins {
     id "com.avast.gradle.docker-compose" version "0.3.16"
 }
 
-version = '1.0'
+version = '0.1'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
