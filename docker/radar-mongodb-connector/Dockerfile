@@ -11,7 +11,7 @@
 # limitations under the License.
 
 
-FROM confluentinc/cp-kafka-connect:latest
+FROM confluentinc/cp-kafka-connect:3.1.1
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl>
 
@@ -22,5 +22,3 @@ ADD  https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/rad
 
 # Load modified launcher
 COPY launch /etc/confluent/docker/launch
-
-
