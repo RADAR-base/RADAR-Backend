@@ -23,6 +23,8 @@ RUN echo && echo "==> Installing Components" \
     && echo "==> Downloading RADAR-CNS/RADAR-Backend v0.1-beta.1 release from GitHub" \
     && cd /usr/local && mkdir RADAR-Backend
 
-ADD https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radarbackend-0.1.jar /usr/local/RADAR-Backend/
+ADD https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radarbackend-0.1.jar /usr/share/java/
 
-CMD ["java", "-jar",  "/usr/local/RADAR-Backend/radarbackend-0.1.jar", "stream"]
+VOLUME /etc/radar.yml
+
+ENTRYPOINT ["/usr/bin/java", "-jar",  "/usr/share/java/radarbackend-0.1.jar", "-c", "/etc/radar.yml"]

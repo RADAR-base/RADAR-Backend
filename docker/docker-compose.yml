@@ -8,6 +8,8 @@ networks:
     driver: bridge
   api:
     driver: bridge
+  mongodb:
+    driver: bridge
   hadoop:
     external: true
 
@@ -119,9 +121,9 @@ services:
   mongo:
     image: mongo:3.2.10
     volumes:
-          - /data/db
+      - /data/db
     networks:
-      - api
+      - mongodb
     ports:
       - "27017:27017"
 
@@ -131,6 +133,7 @@ services:
   tomcat:
     image: tomcat:8.0.37
     networks:
+      - mongodb
       - api
     ports:
       - "8080:8080"
@@ -189,15 +192,15 @@ services:
   #---------------------------------------------------------------------------#
   # RADAR mongo connector                                                     #
   #---------------------------------------------------------------------------#
-  radar-mongodb-connect:
-    image: radar-mongodb-con
-#    restart: on-failure:3
+  radar-mongodb-connector:
+    build: radar-mongodb-connector
+    image: radarcns/radar-mongodb-connector:0.1
     volumes:
-      - ./sink-radar.properties:/etc/kafka-connect/sink.properties
+      - ./sink-mongodb.properties:/etc/kafka-connect/sink-mongodb.properties
     networks:
       - zookeeper
       - kafka
-      - api
+      - mongodb
     depends_on:
       - mongo
       - zookeeper-1
@@ -227,14 +230,14 @@ services:
   # RADAR HDFS connector                                                     #
   #---------------------------------------------------------------------------#
   radar-hdfs-connect:
-    image: radar-hdfs-con
+    build: radar-hdfs-connector
+    image: radarcns/radar-hdfs-connector:0.1
     restart: on-failure:3
     volumes:
       - ./sink-hdfs.properties:/etc/kafka-connect/sink.properties
     networks:
       - zookeeper
       - kafka
-      - api
       - hadoop
     depends_on:
       - zookeeper-1
@@ -267,41 +270,39 @@ services:
   # RADAR backend streams                                                     #
   #---------------------------------------------------------------------------#
   radar-backend-stream:
-    image: backend-stream
+    build: radar-backend-kafka
+    image: radarcns/radar-backend-kafka:0.1
+    command:
+      - stream
     networks:
       - zookeeper
       - kafka
-      - api
     depends_on:
       - zookeeper-1
       - kafka-1
       - kafka-2
       - kafka-3
       - schema-registry-1
-      - rest-proxy-1
     volumes:
-      - ./radar.yml:/usr/local/RADAR-Backend/radar.yml
+      - ./radar.yml:/etc/radar.yml
+
 
   #---------------------------------------------------------------------------#
   # RADAR backend monitor                                                     #
   #---------------------------------------------------------------------------#
   radar-backend-monitor:
-    image: backend-monitor
+    build: radar-backend-kafka
+    image: radarcns/radar-backend-kafka:0.1
+    command:
+      - monitor
     networks:
       - zookeeper
       - kafka
-      - api
     depends_on:
       - zookeeper-1
       - kafka-1
       - kafka-2
       - kafka-3
       - schema-registry-1
-      - rest-proxy-1
     volumes:
-      - ./radar.yml:/usr/local/RADAR-Backend/radar.yml
-
-
-
-
-
+      - ./radar.yml:/etc/radar.yml

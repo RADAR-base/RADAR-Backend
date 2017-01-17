@@ -11,18 +11,14 @@
 # limitations under the License.
 
 
-FROM confluentinc/cp-base:3.1.1
+FROM confluentinc/cp-kafka-connect:3.1.1
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl>
 
-LABEL description="RADAR-CNS Backend streams and monitor"
+LABEL description="RADAR-CNS Backend- HDFS Sink Connector"
 
-# Install RADAR-Backend
-RUN echo && echo "==> Installing Components" \
-    # Download Git RADAR-Backend release
-    && echo "==> Downloading RADAR-CNS/RADAR-Backend v0.1-beta.1 release from GitHub" \
-    && cd /usr/local && mkdir RADAR-Backend
+# Deploy RADAR-Backend - Mongodb Sink Connector
+ADD  https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radar-hdfs-connector-0.1.jar /etc/kafka-connect/jars/
 
-ADD https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radarbackend-0.1.jar /usr/local/RADAR-Backend/
-
-CMD ["java", "-jar",  "/usr/local/RADAR-Backend/radarbackend-0.1.jar", "monitor"]
+# Load modified launcher
+COPY launch /etc/confluent/docker/launch
