@@ -10,7 +10,7 @@ plugins {
     id "com.avast.gradle.docker-compose" version "0.3.16"
 }
 
-version = '1.0'
+version = '0.1'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
@@ -54,6 +54,10 @@ configurations {
     codacy
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
+    connectorMongo
+    connectorHDFS
+    compile.extendsFrom connectorMongo
+    compile.extendsFrom connectorHDFS
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -65,7 +69,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
     flatDir {
-        dirs 'lib'
+        dirs 'libs'
     }
 }
 
@@ -86,7 +90,7 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     compile group: 'org.apache.avro', name: 'avro', version: avroVersion
     compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
-    compile (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion) {
+    connectorHDFS (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion) {
         exclude group: 'org.apache.hive'
     }
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: findbugsVersion
@@ -97,7 +101,7 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-    compile group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
+    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
@@ -112,6 +116,26 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 }
 
 compileJava.source(generateAvro.outputs)
+
+task connectorMongoJar(type: Jar) {
+    from {
+        configurations.connectorMongo.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(sourceSets.main.output) {
+        include "org/radarcns/sink/mongodb/*"
+    }
+    from("${buildDir}/avro/") {
+        include "org/radarcns/**"
+    }
+    archiveName = "radar-mongodb-connector-${version}.jar"
+}
+
+task connectorHDFSJar(type: Jar) {
+    from(sourceSets.main.output) {
+        include "org/radarcns/sink/hdfs/*"
+    }
+    archiveName = "radar-hdfs-connector-${version}.jar"
+}
 
 jar {
     manifest {
@@ -153,6 +177,8 @@ task integrationTest(type:Test){
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 check.dependsOn integrationTestClasses
+jar.dependsOn connectorMongoJar
+jar.dependsOn connectorHDFSJar
 
 jacocoTestReport {
     executionData test, integrationTest

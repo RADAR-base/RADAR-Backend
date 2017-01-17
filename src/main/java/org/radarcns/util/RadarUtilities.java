@@ -16,7 +16,6 @@
 
 package org.radarcns.util;
 
-import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
@@ -40,11 +39,4 @@ public interface RadarUtilities {
     double ibiToHeartRate(float input);
 
     double[] accelerationToArray(EmpaticaE4Acceleration value);
-
-    /**
-     * Converts a MesurementKey Struct into a String
-     * @param key record key
-     * @return converted key string
-     */
-    String measurementKeyToMongoDbKey(Struct key);
 }

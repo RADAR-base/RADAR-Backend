@@ -1,0 +1,37 @@
+version: 1.0
+released: 2016-11-27
+
+#============================= Application =============================#
+log_path:
+#Possible value are standalone or high_performance
+mode: standalone
+
+#============================== Zookeeper ==============================#
+#List of Zookeeper instances
+zookeeper:
+    - host: zookeeper-1
+      port: 2181
+
+#================================ Kafka ================================#
+#List of Kafka brokers
+broker:
+    - host: kafka-1
+      port: 9092
+
+#Kafka internal parameters
+auto_commit_interval_ms: 1000
+session_timeout_ms: 10000
+
+#============================ Kafka Streams ============================#
+#The number of threads that a stream must be run according is priority
+stream_priority:
+  low: 1
+  normal: 2
+  high: 4
+
+#=========================== Schema Registry ===========================#
+#List of Schema Registry instances
+schema_registry:
+    - host: schema-registry-1
+      port: 8081
+      protocol: http

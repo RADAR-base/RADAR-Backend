@@ -16,7 +16,6 @@
 
 package org.radarcns.util;
 
-import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
@@ -50,9 +49,4 @@ public class RadarUtilitiesImpl implements RadarUtilities {
                 floatToDouble(value.getZ())};
     }
 
-    @Override
-    public String measurementKeyToMongoDbKey(Struct key) {
-        return key.get("userId")
-                + "-" + key.get("sourceId");
-    }
 }
