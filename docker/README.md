@@ -133,6 +133,6 @@ $ docker run -d \
 ```
 
 
-A `docker-compose` file that provides the whole dependent components is give here. 
+A `docker-compose` file that provides the whole dependent components is give [here][https://github.com/RADAR-CNS/RADAR-Backend/blob/dev/docker/docker-compose.yml]. 
 
 Use `sudo docker-compose up -d` to create to run the RADAR-Backend in one step. 
