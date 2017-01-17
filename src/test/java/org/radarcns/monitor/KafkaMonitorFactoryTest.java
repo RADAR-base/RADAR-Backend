@@ -40,6 +40,10 @@ public class KafkaMonitorFactoryTest {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
         batteryConfig.setEmailAddress("test@localhost");
         batteryConfig.setLevel("LOW");
+        batteryConfig.setEmailAddress("radarcns@hyve.net");
+        batteryConfig.setEmailHost("localhost");
+        batteryConfig.setEmailPort(25);
+        batteryConfig.setEmailUser("someuser");
         config.setBatteryMonitor(batteryConfig);
         String tmpDir = Files.createTempDirectory(null).toAbsolutePath().toString();
         config.setPersistencePath(tmpDir);

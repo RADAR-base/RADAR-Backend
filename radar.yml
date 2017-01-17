@@ -35,3 +35,12 @@ schema_registry:
     - host: radar-test.thehyve.net
       port: 8081
       protocol: http
+#======================== Battery level monitor ========================#
+battery_monitor:
+  level: LOW
+  email_address: nivethika@thehyve.nl
+  email_host: localhost
+  email_port: 25
+  email_user: no-reply@radarcns.org
+  topics:
+    - android_empatica_e4_battery_level
