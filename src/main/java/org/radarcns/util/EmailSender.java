@@ -16,10 +16,12 @@
 
 package org.radarcns.util;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -28,25 +30,37 @@ import javax.mail.internet.MimeMessage;
 public class EmailSender {
     private final String from;
     private final List<String> to;
-    private final Properties properties;
+    private final Session session;
 
-    public EmailSender(String host, int port, String from, List<String> to) {
+    public EmailSender(String host, int port, String from, List<String> to) throws IOException {
         this.from = from;
         this.to = to;
 
+        Properties properties = new Properties();
         // Get system properties
-        properties = System.getProperties();
+        properties.putAll(System.getProperties());
 
-        // Setup mail server
-        properties.setProperty("mail.smtp.host", host);
-        properties.setProperty("mail.smtp.port", String.valueOf(port));
+        if (host != null) {
+            // Setup mail server
+            properties.setProperty("mail.smtp.host", host);
+        }
+        if (port > 0) {
+            properties.setProperty("mail.smtp.port", String.valueOf(port));
+        }
+
+        session = Session.getInstance(properties);
+        try {
+            Transport transport = session.getTransport("smtp");
+            transport.connect();
+            if (!transport.isConnected()) {
+                throw new IOException("Cannot connect to SMTP server " + host + ":" + port);
+            }
+        } catch (MessagingException ex) {
+            throw new IOException("Cannot instantiate SMTP server", ex);
+        }
     }
 
     public void sendEmail(String subject, String text) throws MessagingException {
-
-        // Get the default Session object.
-        Session session = Session.getDefaultInstance(properties);
-
         // Create a default MimeMessage object.
         MimeMessage message = new MimeMessage(session);
 

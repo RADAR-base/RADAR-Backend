@@ -64,7 +64,7 @@ public class KafkaMonitorFactory {
         return monitor;
     }
 
-    private KafkaMonitor createBatteryLevelMonitor() {
+    private KafkaMonitor createBatteryLevelMonitor() throws IOException {
         BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
         BatteryMonitorConfig config = properties.getRadarProperties().getBatteryMonitor();
         EmailSender sender = getSender(config);
@@ -84,7 +84,7 @@ public class KafkaMonitorFactory {
         return new BatteryLevelMonitor(properties, topics, sender, minLevel);
     }
 
-    private KafkaMonitor createDisconnectMonitor() {
+    private KafkaMonitor createDisconnectMonitor() throws IOException {
         DisconnectMonitorConfig config = properties.getRadarProperties().getDisconnectMonitor();
         EmailSender sender = getSender(config);
         long timeout = 300_000L;  // 5 minutes
@@ -96,7 +96,7 @@ public class KafkaMonitorFactory {
                 timeout);
     }
 
-    private EmailSender getSender(MonitorConfig config) {
+    private EmailSender getSender(MonitorConfig config) throws IOException {
         if (config != null && config.getEmailAddress() != null) {
             return new EmailSender(config.getEmailHost(), config.getEmailPort(),
                     config.getEmailUser(),

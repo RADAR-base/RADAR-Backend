@@ -23,6 +23,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Collections;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
@@ -30,8 +32,23 @@ import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
+import org.subethamail.wiser.Wiser;
 
 public class KafkaMonitorFactoryTest {
+    private Wiser emailServer;
+
+    @Before
+    public void setUp() {
+        emailServer = new Wiser(2525);
+        emailServer.setHostname("localhost");
+        emailServer.start();
+    }
+
+    @After
+    public void tearDown() {
+        emailServer.stop();
+    }
+
     @Test
     public void createBatteryMonitor() throws Exception {
         String[] args = {"monitor", "battery"};
@@ -39,6 +56,8 @@ public class KafkaMonitorFactoryTest {
         ConfigRadar config = new ConfigRadar();
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
         batteryConfig.setEmailAddress("test@localhost");
+        batteryConfig.setEmailHost("localhost");
+        batteryConfig.setEmailPort(2525);
         batteryConfig.setLevel("LOW");
         config.setBatteryMonitor(batteryConfig);
         String tmpDir = Files.createTempDirectory(null).toAbsolutePath().toString();
@@ -66,6 +85,8 @@ public class KafkaMonitorFactoryTest {
         ConfigRadar config = new ConfigRadar();
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
         disconnectConfig.setEmailAddress("test@localhost");
+        disconnectConfig.setEmailHost("localhost");
+        disconnectConfig.setEmailPort(2525);
         disconnectConfig.setTimeout(100L);
         String tmpDir = Files.createTempDirectory(null).toAbsolutePath().toString();
         config.setPersistencePath(tmpDir);
