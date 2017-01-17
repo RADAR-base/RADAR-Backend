@@ -85,7 +85,7 @@ public class MockDevice<K> extends Thread {
             KafkaTopicSender<K, EmpaticaE4Temperature> temperatureSender = sender.sender(temperature);
 
             int accelerationFrequency = 32;
-            int batteryFrequency = 1;
+            int batteryFrequency = 32;
             int bvpFrequency = 64;
             int edaFrequency = 4;
             int ibiFrequency = 1;
@@ -97,7 +97,7 @@ public class MockDevice<K> extends Thread {
                     double tR = System.currentTimeMillis() / 1000d;
                     double tD = tR + t * timeDriftFactor;
                     sendIfNeeded(i, accelerationFrequency, accelerationSender, new EmpaticaE4Acceleration(tD, tR, 15f, -15f, 64f));
-                    sendIfNeeded(i, batteryFrequency, batterySender, new EmpaticaE4BatteryLevel(tD, tR, 1f - (batteryDecayFactor*t % 1)));
+                    sendIfNeeded(i, batteryFrequency, batterySender, new EmpaticaE4BatteryLevel(tD, tR, 0.05f));
                     sendIfNeeded(i, bvpFrequency, bvpSender, new EmpaticaE4BloodVolumePulse(tD, tR, 80.0f));
                     sendIfNeeded(i, edaFrequency, edaSender, new EmpaticaE4ElectroDermalActivity(tD, tR, 0.026897f));
                     sendIfNeeded(i, ibiFrequency, ibiSender, new EmpaticaE4InterBeatInterval(tD, tR, 0.921917f));

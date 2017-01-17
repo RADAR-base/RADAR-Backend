@@ -96,14 +96,14 @@ public class DirectProducerTest {
             assertNull("Device had IOException", device.getException());
         }
 
-        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
+//        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
 
-        RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts).application();
-
-        Thread.sleep(40_000L);
-
-        consumeAggregated();
+//        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+//        new RadarBackend(opts).application();
+//
+//        Thread.sleep(40_000L);
+//
+//        consumeAggregated();
     }
 
     private void consumeAggregated() throws IOException {
