@@ -35,3 +35,10 @@ schema_registry:
     - host: localhost
       port: 8081
       protocol: http
+
+
+battery_monitor:
+  level: LOW
+  email_address: nivethika@thehyve.nl
+  topics:
+    - android_empatica_e4_battery_level
