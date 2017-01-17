@@ -7,31 +7,18 @@ RADAR-Backend offers number of components such as
  4. A real-time status monitor
 
 All these images require Zookeeper, Kafka-broker, Schema registry and Rest proxy running 
+
 #### RADAR-HDFS Connector
 
 To build image locally:
 ```
-$ docker build -t "radar-hdfs-con" -f Dockerfile.hdfscon .
+docker-compose build radar-hdfs-connector
 ```
 To run the docker image locally: ( In addition to the aforementioned dependencies HDFS is required to be installed and running)
 
 This image has to be extended with a volume with appropriate sink.properties
 ```
-$ docker run -d \
-  --name radar-hdfs-connector  \
-  -v pathtoyoursinkproperties:/etc/kafka-connect/sink.properties \
-  -e CONNECT_BOOTSTRAP_SERVERS=localhost:39092 \
-  -e CONNECT_REST_PORT=28082 \
-  -e CONNECT_GROUP_ID="default" \
-  -e CONNECT_CONFIG_STORAGE_TOPIC="default.config" \
-  -e CONNECT_OFFSET_STORAGE_TOPIC="default.offsets" \
-  -e CONNECT_STATUS_STORAGE_TOPIC="default.status" \
-  -e CONNECT_KEY_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
-  -e CONNECT_VALUE_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
-  -e CONNECT_INTERNAL_KEY_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
-  -e CONNECT_INTERNAL_VALUE_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
-  -e CONNECT_REST_ADVERTISED_HOST_NAME="localhost" \
-    radar-hdfs-con:latest
+docker-compose up radar-hdfs-connector
 ```
 
 Sample HDFS sink.properties
@@ -44,34 +31,19 @@ flush.size=15000
 hdfs.url=hdfs://namenode:8020
 format.class=org.radarcns.sink.hdfs.AvroFormatRadar
 topics.dir=topicAndroidNew
-
 ```
 
 #### RADAR-MongoDB Connector
 
 To build image locally:
 ```
-$ docker build -t "radar-mongodb-con" -f Dockerfile.mongodbcon .
+docker-compose build radar-mongodb-connector
 ```
 To run the docker image locally: ( In addition to the aforementioned dependencies MongoDB is required to be installed and running)
 
-This image has to be extended with a volume with appropriate sink.properties
+This image has to be extended with a volume with appropriate sink.properties, see the `docker-compose.yml` for their details.
 ```
-$ docker run -d \
- --name radar-mongodb-connector \
- -v pathtoyoursinkproperties:/etc/kafka-connect/sink.properties \
- -e CONNECT_BOOTSTRAP_SERVERS=localhost:39092 \
- -e CONNECT_REST_PORT=28082 \
- -e CONNECT_GROUP_ID="default" \
- -e CONNECT_CONFIG_STORAGE_TOPIC="default.config" \
- -e CONNECT_OFFSET_STORAGE_TOPIC="default.offsets" \
- -e CONNECT_STATUS_STORAGE_TOPIC="default.status" \
- -e CONNECT_KEY_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
- -e CONNECT_VALUE_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
- -e CONNECT_INTERNAL_KEY_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
- -e CONNECT_INTERNAL_VALUE_CONVERTER="org.apache.kafka.connect.json.JsonConverter" \
- -e CONNECT_REST_ADVERTISED_HOST_NAME="localhost" \
-   radar-mongodb-con:latest
+docker-compose up radar-mongodb-connector
 ```
 
 Sample MongoDB sink.properties
@@ -108,29 +80,27 @@ record.converter.class=org.radarcns.sink.mongodb.RecordConverterFactoryRadar
 
 To build image locally:
 ```
-$ docker build -t "backend-stream" -f Dockerfile.streams .
+docker-compose build radar-backend-stream
 ```
 To run the docker image locally: 
 ```
-$ docker run -d \
- --name radar-backend-stream \
- -v ./radar.yml:/usr/local/RADAR-Backend/radar.yml \
-   backend-stream:latest
+docker-compose up radar-backend-stream
 ```
 
-#### RADAR-Aggregator Streams
+Edit the `radar.yml` file to configure the streams.
+
+#### RADAR topic monitor
 
 To build image locally:
 ```
-$ docker build -t "backend-monitor" -f Dockerfile.monitor .
+docker-compose build radar-backend-monitor
 ```
 To run the docker image locally: 
 ```
-$ docker run -d \
- --name radar-backend-monitor \
- -v ./radar.yml:/usr/local/RADAR-Backend/radar.yml \
-   backend-monitor:latest
+docker-compose run radar-backend-monitor
 ```
+
+Edit the `radar.yml` file to configure the monitors.
 
 
 A `docker-compose` file that provides the whole dependent components is give [here](https://github.com/RADAR-CNS/RADAR-Backend/blob/dev/docker/docker-compose.yml). 

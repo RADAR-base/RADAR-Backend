@@ -229,7 +229,7 @@ services:
   #---------------------------------------------------------------------------#
   # RADAR HDFS connector                                                     #
   #---------------------------------------------------------------------------#
-  radar-hdfs-connect:
+  radar-hdfs-connector:
     build: radar-hdfs-connector
     image: radarcns/radar-hdfs-connector:0.1
     restart: on-failure:3
