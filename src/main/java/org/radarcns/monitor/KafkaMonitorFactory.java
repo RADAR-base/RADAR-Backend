@@ -82,7 +82,8 @@ public class KafkaMonitorFactory {
 
     private EmailSender getSender(MonitorConfig config) {
         if (config != null && config.getEmailAddress() != null) {
-            return new EmailSender("localhost", 25, "no-reply@radar-cns.org",
+            return new EmailSender(config.getEmailHost(), config.getEmailPort(),
+                    config.getEmailUser(),
                     Collections.singletonList(config.getEmailAddress()));
         }
         return null;
