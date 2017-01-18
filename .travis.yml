@@ -22,8 +22,7 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - ./gradlew check
-  - sudo docker-compose up -d
-  - ./gradlew integrationTest
-  - sudo docker-compose down
+  - echo $"SMARTHOST_ADDRESS=$SMTP_HOST\nSMARTHOST_PORT=${SMTP_PORT:-25}\nSMARTHOST_USER=$SMTP_USER\nSMARTHOST_PASSWORD=$SMTP_PASSWORD" > smtp.env
+  - sudo docker-compose up -d && sleep 10 && ./gradlew integrationTest && sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy

@@ -10,6 +10,10 @@ plugins {
     id "com.avast.gradle.docker-compose" version "0.3.16"
 }
 
+//---------------------------------------------------------------------------//
+// Configuration                                                             //
+//---------------------------------------------------------------------------//
+
 version = '0.1'
 
 mainClassName = 'org.radarcns.RadarBackend'
@@ -30,12 +34,13 @@ ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
 ext.mockitoVersion = '2.2.29'
+ext.okhttpVersion = '3.4.1'
+ext.subethamailVersion = '3.1.7'
+ext.codacyVersion = '1.0.10'
 
-run {
-    if ( project.hasProperty("appArgs") ) {
-        args Eval.me(appArgs)
-    }
-}
+//---------------------------------------------------------------------------//
+// Sources and classpath configurations                                      //
+//---------------------------------------------------------------------------//
 
 sourceSets {
     // Note that just declaring this sourceset creates two configurations.
@@ -73,13 +78,6 @@ repositories {
     }
 }
 
-idea {
-    module {
-        downloadSources = true
-        sourceDirs += file("build/avro")
-    }
-}
-
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // The production code uses the SLF4J logging API at compile time
@@ -102,13 +100,18 @@ dependencies {
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
-    integrationTestCompile group: 'org.subethamail', name: 'subethasmtp', version: '3.1.7'
+    integrationTestCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
-    codacy 'com.github.codacy:codacy-coverage-reporter:1.0.10'
+    codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
+
+//---------------------------------------------------------------------------//
+// AVRO file manipulation                                                    //
+//---------------------------------------------------------------------------//
+
 
 task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
     source("src/main/resources/avro")
@@ -116,6 +119,11 @@ task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask)
 }
 
 compileJava.source(generateAvro.outputs)
+idea.module.sourceDirs += file("build/avro")
+
+//---------------------------------------------------------------------------//
+// Packaging                                                                 //
+//---------------------------------------------------------------------------//
 
 task connectorMongoJar(type: Jar) {
     from {
@@ -150,6 +158,10 @@ jar {
 jar.dependsOn connectorMongoJar
 jar.dependsOn connectorHDFSJar
 
+//---------------------------------------------------------------------------//
+// Style checking                                                            //
+//---------------------------------------------------------------------------//
+
 checkstyle {
     // codacy version
     toolVersion '6.16'
@@ -172,6 +184,10 @@ pmd {
     ruleSets = []
     ruleSetFiles = files("config/pmd/ruleset.xml")
 }
+
+//---------------------------------------------------------------------------//
+// Testing                                                                   //
+//---------------------------------------------------------------------------//
 
 tasks.matching {it instanceof Test}.all {
     def stdout = new LinkedList<String>()
@@ -217,6 +233,10 @@ task integrationTest(type: Test){
 
 check.dependsOn integrationTestClasses
 
+//---------------------------------------------------------------------------//
+// Code coverage and codacy                                                  //
+//---------------------------------------------------------------------------//
+
 jacocoTestReport {
     executionData test, integrationTest
     reports {
@@ -239,8 +259,22 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
     args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2.1'
-    distributionUrl = distributionUrl.replace("bin", "all")
+//---------------------------------------------------------------------------//
+// Build system metadata                                                     //
+//---------------------------------------------------------------------------//
+idea {
+    module {
+        downloadSources = true
+    }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2.1'
+    distributionUrl distributionUrl.replace("bin", "all")
+}
+
+run {
+    if ( project.hasProperty("appArgs") ) {
+        args Eval.me(appArgs)
+    }
+}
