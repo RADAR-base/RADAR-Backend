@@ -16,6 +16,12 @@
 
 package org.radarcns.integration;
 
+import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -26,13 +32,6 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 public class DirectProducerTest {
 
@@ -96,14 +95,14 @@ public class DirectProducerTest {
             assertNull("Device had IOException", device.getException());
         }
 
-//        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
+        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
 
-//        RadarBackendOptions opts = RadarBackendOptions.parse(args);
-//        new RadarBackend(opts).application();
-//
-//        Thread.sleep(40_000L);
-//
-//        consumeAggregated();
+        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+        new RadarBackend(opts).application();
+
+        Thread.sleep(40_000L);
+
+        consumeAggregated();
     }
 
     private void consumeAggregated() throws IOException {

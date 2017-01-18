@@ -77,13 +77,3 @@ services:
     ports:
       - "27017:27017"
     command: --smallfiles --rest --noauth
-
-  #---------------------------------------------------------------------------#
-  # Email server                                                              #
-  #---------------------------------------------------------------------------#
-  smtp:
-    image: namshi/smtp:latest
-    volumes:
-      - /var/spool/exim
-    env_file:
-      - smtp.env
