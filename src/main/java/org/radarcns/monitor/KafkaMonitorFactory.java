@@ -47,7 +47,7 @@ public class KafkaMonitorFactory {
         String[] args = options.getSubCommandArgs();
         String commandType;
         if (args == null || args.length == 0) {
-            commandType = "battery";
+            commandType = "all";
         } else {
             commandType = args[0];
         }
@@ -57,6 +57,10 @@ public class KafkaMonitorFactory {
                 break;
             case "disconnect":
                 monitor = createDisconnectMonitor();
+                break;
+            case "all":
+                monitor = new CombinedKafkaMonitor(Arrays.asList(
+                        createBatteryLevelMonitor(), createDisconnectMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
