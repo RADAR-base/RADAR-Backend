@@ -148,6 +148,8 @@ jar {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+jar.dependsOn connectorMongoJar
+jar.dependsOn connectorHDFSJar
 
 checkstyle {
     // codacy version
@@ -172,14 +174,49 @@ pmd {
     ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
-task integrationTest(type:Test){
+tasks.matching {it instanceof Test}.all {
+    def stdout = new LinkedList<String>()
+    beforeTest { TestDescriptor td ->
+        stdout.clear()
+    }
+
+    onOutput { TestDescriptor td, TestOutputEvent toe ->
+        stdout.addAll(toe.getMessage().split('(?m)$'))
+        while (stdout.size() > 100) {
+            stdout.remove()
+        }
+    }
+
+    afterTest { TestDescriptor td, TestResult tr ->
+        if (tr.resultType == TestResult.ResultType.FAILURE) {
+            println()
+            print("${td.className}.${td.name} FAILED")
+            if (stdout.empty) {
+                println(" without any output")
+            } else {
+                println(" with last 100 lines of output:")
+                println('=' * 100)
+                stdout.each { print(it) }
+                println('=' * 100)
+            }
+        }
+    }
+
+    testLogging {
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat "full"
+    }
+}
+
+task integrationTest(type: Test){
     description = "Run integration tests (located in src/integrationTest/...)."
-    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    testClassesDir project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
+
 check.dependsOn integrationTestClasses
-jar.dependsOn connectorMongoJar
-jar.dependsOn connectorHDFSJar
 
 jacocoTestReport {
     executionData test, integrationTest
