@@ -25,12 +25,16 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class CombinedKafkaMonitorTest {
 
     @Test(expected = IOException.class)
-    public void testFlow() throws Exception {
+    public void testExceptionFlow() throws Exception {
         KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
         KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
 
@@ -51,7 +55,7 @@ public class CombinedKafkaMonitorTest {
     }
 
     @Test(expected = IOException.class)
-    public void testFlow2() throws Exception {
+    public void testExceptionFlow2() throws Exception {
         KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
         KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
 
@@ -71,6 +75,37 @@ public class CombinedKafkaMonitorTest {
         }
     }
 
+
+    @Test
+    public void testFlow() throws Exception {
+        KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
+        KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
+
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                km.start();
+            } catch (IOException | InterruptedException e) {
+                fail(e.toString());
+            }
+        });
+
+        Thread.sleep(100L);
+
+        assertFalse(km.isShutdown());
+        verify(kafkaMonitor1, times(1)).start();
+        verify(kafkaMonitor2, times(1)).start();
+
+        km.shutdown();
+        verify(kafkaMonitor1, times(1)).shutdown();
+        verify(kafkaMonitor2, times(1)).shutdown();
+
+        assertTrue(km.isShutdown());
+        executor.shutdown();
+        assertTrue(executor.awaitTermination(100, TimeUnit.MILLISECONDS));
+    }
 
     @Test
     public void testPollTimeout() throws Exception {
