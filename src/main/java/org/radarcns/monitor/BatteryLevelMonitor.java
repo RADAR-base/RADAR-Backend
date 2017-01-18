@@ -19,9 +19,9 @@ package org.radarcns.monitor;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import javax.mail.MessagingException;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -59,21 +59,21 @@ public class BatteryLevelMonitor extends
         try {
             MeasurementKey key = extractKey(record);
             float batteryLevel = extractBatteryLevel(record);
+            float previousLevel = state.updateLevel(key, batteryLevel);
+
             if (batteryLevel <= Status.CRITICAL.getLevel()) {
-                if (state.isCritical.add(key)) {
-                    state.isLow.add(key);
+                if (previousLevel > Status.CRITICAL.getLevel()) {
                     updateStatus(key, Status.CRITICAL);
                     logger.warn("Battery level of sensor {} of user {} is critically low",
                             key.getSourceId(), key.getUserId());
                 }
-            } else if (batteryLevel < Status.LOW.getLevel()) {
-                if (state.isLow.add(key)) {
+            } else if (batteryLevel <= Status.LOW.getLevel()) {
+                if (previousLevel > Status.LOW.getLevel()) {
                     updateStatus(key, Status.LOW);
                     logger.warn("Battery level of sensor {} of user {} is low",
                             key.getSourceId(), key.getUserId());
                 }
-            } else if (state.isLow.remove(key)) {
-                state.isCritical.remove(key);
+            } else if (previousLevel <= Status.LOW.getLevel()) {
                 updateStatus(key, Status.NORMAL);
                 logger.info("Battery of sensor {} of user {} is has returned to normal.",
                         key.getSourceId(), key.getUserId());
@@ -84,11 +84,25 @@ public class BatteryLevelMonitor extends
     }
 
     private void updateStatus(MeasurementKey key, Status status) {
-        if (sender != null && status.getLevel() <= minLevel.getLevel()) {
+        if (sender == null) {
+            return;
+        }
+
+        if (status.getLevel() <= minLevel.getLevel()) {
             try {
                 sender.sendEmail("[RADAR-CNS] battery level low",
                         "The battery level of " + key + " is now " + status + ". "
                                 + "Please ensure that it gets recharged.");
+                logger.info("Sent battery level status message successfully");
+            } catch (MessagingException mex) {
+                logger.error("Failed to send battery level status message.", mex);
+            }
+        }
+        if (status == Status.NORMAL) {
+            try {
+                sender.sendEmail("[RADAR-CNS] battery level returned to normal",
+                        "The battery level of " + key + " has returned to normal. "
+                                + "No further action is needed.");
                 logger.info("Sent battery level status message successfully");
             } catch (MessagingException mex) {
                 logger.error("Failed to send battery level status message.", mex);
@@ -131,23 +145,19 @@ public class BatteryLevelMonitor extends
     }
 
     public static class BatteryLevelState {
-        private final Set<MeasurementKey> isLow = new HashSet<>();
-        private final Set<MeasurementKey> isCritical = new HashSet<>();
+        private final Map<MeasurementKey, Float> levels = new HashMap<>();
 
-        public Set<MeasurementKey> getIsLow() {
-            return isLow;
+        public Map<MeasurementKey, Float> getLevels() {
+            return levels;
         }
 
-        public void setIsLow(Set<MeasurementKey> isLow) {
-            this.isLow.addAll(isLow);
+        public void setLevels(Map<MeasurementKey, Float> levels) {
+            this.levels.putAll(levels);
         }
 
-        public Set<MeasurementKey> getIsCritical() {
-            return isCritical;
-        }
-
-        public void setIsCritical(Set<MeasurementKey> isCritical) {
-            this.isCritical.addAll(isCritical);
+        private float updateLevel(MeasurementKey key, float level) {
+            Float previousLevel = levels.put(key, level);
+            return previousLevel == null ? 1.0f : previousLevel;
         }
     }
 }

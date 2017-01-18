@@ -76,11 +76,9 @@ public class DeviceTimestampExtractorTest {
 
     }
 
-    private GenericRecord buildIndexedRecord(String userSchema) {
-
+    public static GenericRecord buildIndexedRecord(String userSchema) {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse(userSchema);
-
         return new GenericData.Record(schema);
     }
 }

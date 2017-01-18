@@ -16,9 +16,8 @@
 
 package org.radarcns.util;
 
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.kafka.streams.kstream.Window;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.TimeWindow;
@@ -27,8 +26,6 @@ import org.junit.Test;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-
-import static org.junit.Assert.assertEquals;
 
 public class RadarUtilsTest {
 

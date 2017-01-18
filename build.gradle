@@ -104,7 +104,7 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
 
-    integrationTestCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
+    testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }

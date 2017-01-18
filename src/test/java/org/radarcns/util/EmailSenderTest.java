@@ -27,24 +27,14 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
 public class EmailSenderTest {
-    private Wiser emailServer;
-
-    @Before
-    public void setUp() {
-        emailServer = new Wiser(2525);
-        emailServer.setHostname("localhost");
-        emailServer.start();
-    }
-
-    @After
-    public void tearDown() {
-        emailServer.stop();
-    }
+    @Rule
+    public EmailServerRule emailServer = new EmailServerRule(2525);
 
     @Test
     public void testEmail() throws MessagingException, IOException {
@@ -55,10 +45,9 @@ public class EmailSenderTest {
 
         sender.sendEmail("hi", "it's me");
 
-        List<WiserMessage> messages = emailServer.getMessages();
+        List<MimeMessage> messages = emailServer.getMessages();
         assertEquals(1, messages.size());
-        WiserMessage message = messages.get(0);
-        MimeMessage mime = message.getMimeMessage();
+        MimeMessage mime = messages.get(0);
 
         assertEquals(1, mime.getFrom().length);
         assertEquals("no-reply@radar-cns.org", mime.getFrom()[0].toString());

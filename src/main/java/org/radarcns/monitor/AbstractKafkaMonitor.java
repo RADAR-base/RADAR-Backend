@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -53,14 +54,16 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
 
     protected final Collection<String> topics;
-    private final PersistentStateStore stateStore;
-    private KafkaConsumer consumer;
-    private final Properties properties;
-    private long pollTimeout;
-    private boolean done;
     protected final S state;
+
+    private final PersistentStateStore stateStore;
+    private final Properties properties;
+    private final AtomicLong pollTimeout;
     private final String groupId;
     private final String clientId;
+
+    private KafkaConsumer consumer;
+    private boolean done;
 
     /**
      * Set some basic properties.
@@ -88,7 +91,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
         this.consumer = null;
         this.topics = topics;
-        this.pollTimeout = Long.MAX_VALUE;
+        this.pollTimeout = new AtomicLong(Long.MAX_VALUE);
         this.done = false;
         this.clientId = clientId;
         this.groupId = groupId;
@@ -216,11 +219,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
     public long getPollTimeout() {
-        return pollTimeout;
+        return pollTimeout.get();
     }
 
     public void setPollTimeout(long pollTimeout) {
-        this.pollTimeout = pollTimeout;
+        this.pollTimeout.set(pollTimeout);
     }
 
     protected MeasurementKey extractKey(ConsumerRecord<GenericRecord, ?> record) {

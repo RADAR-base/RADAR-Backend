@@ -73,6 +73,8 @@ public final class RadarBackend {
         } catch (IOException ex) {
             log.error("FATAL ERROR! The current instance cannot start", ex);
             System.exit(1);
+        } catch (InterruptedException ex) {
+            log.error("The current instance was interrupted", ex);
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -88,7 +90,7 @@ public final class RadarBackend {
      * Start here all needed MasterAggregator
      * @see org.radarcns.stream.aggregator.MasterAggregator
      */
-    private void go() throws IOException {
+    private void go() throws IOException, InterruptedException {
         log.info("STARTING");
 
         command = createCommand();

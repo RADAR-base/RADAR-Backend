@@ -23,7 +23,7 @@ import java.io.IOException;
  */
 public interface SubCommand {
     /** Start the subcommand */
-    void start() throws IOException;
+    void start() throws IOException, InterruptedException;
 
     /** Stop the subcommand, possibly waiting for it to complete. */
     void shutdown() throws IOException, InterruptedException;
