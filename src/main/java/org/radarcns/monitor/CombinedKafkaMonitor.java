@@ -147,4 +147,8 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     public boolean isShutdown() {
         return done.get();
     }
+
+    public List<KafkaMonitor> getMonitors() {
+        return new ArrayList<>(monitors);
+    }
 }
