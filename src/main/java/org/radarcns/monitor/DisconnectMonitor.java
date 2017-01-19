@@ -29,6 +29,7 @@ import javax.mail.MessagingException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
@@ -62,6 +63,25 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     @Override
+    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
+        super.evaluateRecords(records);
+
+        long now = System.currentTimeMillis();
+
+        Iterator<Map.Entry<MeasurementKey, Long>> iterator = state.lastSeen.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<MeasurementKey, Long> entry = iterator.next();
+            long timeout = now - entry.getValue();
+            if (timeout > timeUntilReportedMissing) {
+                MeasurementKey missingKey = entry.getKey();
+                iterator.remove();
+                reportMissing(missingKey, timeout);
+                state.reportedMissing.put(missingKey, now);
+            }
+        }
+    }
+
+    @Override
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         MeasurementKey key = extractKey(record);
 
@@ -72,22 +92,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         if (reportedMissingTime != null) {
             reportRecovered(key, reportedMissingTime);
         }
-
-        Iterator<Map.Entry<MeasurementKey, Long>> iterator = state.lastSeen.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<MeasurementKey, Long> entry = iterator.next();
-            long timeout = entry.getValue() - now;
-            if (timeout > timeUntilReportedMissing) {
-                MeasurementKey missingKey = entry.getKey();
-                iterator.remove();
-                logger.info("Device {} timeout {}. Reporting it missing.", missingKey, timeout);
-                reportMissing(missingKey, timeout);
-                state.reportedMissing.put(missingKey, now);
-            }
-        }
     }
 
     private void reportMissing(MeasurementKey key, long timeout) {
+        logger.info("Device {} timeout {}. Reporting it missing.", key, timeout);
         try {
             Date lastSeenDate = new Date(System.currentTimeMillis() - timeout);
             String lastSeen = dayFormat.format(lastSeenDate);
@@ -96,13 +104,14 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                             + "It was last seen on " + lastSeen + " (" + timeout / 1000L
                             + " seconds ago). If this is not intended, please ensure that it gets "
                             + "reconnected.");
-            logger.info("Sent disconnected message successfully");
+            logger.debug("Sent disconnected message successfully");
         } catch (MessagingException mex) {
             logger.error("Failed to send disconnected message.", mex);
         }
     }
 
     private void reportRecovered(MeasurementKey key, long reportedMissingTime) {
+        logger.info("Device {} seen again. Reporting it recovered.", key);
         try {
             Date reportedMissingDate = new Date(reportedMissingTime);
             String reportedMissing = dayFormat.format(reportedMissingDate);
@@ -110,7 +119,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             sender.sendEmail("[RADAR-CNS] device has reconnected",
                     "The device " + key + " that was reported disconnected on "
                             + reportedMissing + " has reconnected: it is sending new data.");
-            logger.info("Sent reconnected message successfully");
+            logger.debug("Sent reconnected message successfully");
         } catch (MessagingException mex) {
             logger.error("Failed to send reconnected message.", mex);
         }

@@ -16,18 +16,21 @@
 
 package org.radarcns.monitor;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
 
 import java.util.Collections;
 import javax.mail.MessagingException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +39,7 @@ import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.util.EmailSender;
 
-public class BatteryLevelMonitorTest {
+public class DisconnectMonitorTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -56,8 +59,7 @@ public class BatteryLevelMonitorTest {
                 + "]}");
 
         valueSchema = parser.parse("{\"name\": \"value\", \"type\": \"record\", \"fields\": ["
-                + "{\"name\": \"timeReceived\", \"type\": \"double\"},"
-                + "{\"name\": \"batteryLevel\", \"type\": \"float\"}"
+                + "{\"name\": \"timeReceived\", \"type\": \"double\"}"
                 + "]}");
 
         offset = 1000L;
@@ -67,43 +69,49 @@ public class BatteryLevelMonitorTest {
     }
 
     @Test
-    public void evaluateRecord() throws Exception {
+    public void evaluateRecords() throws Exception {
         ConfigRadar config = KafkaMonitorFactoryTest
                 .getBatteryMonitorConfig(25252, folder);
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
 
-        BatteryLevelMonitor monitor = new BatteryLevelMonitor(properties,
-                Collections.singletonList("mytopic"), sender, LOW);
+        long timeout = 50L;
 
-        sendMessage(monitor, 1.0f, false);
-        sendMessage(monitor, 1.0f, false);
-        sendMessage(monitor, 0.1f, true);
-        sendMessage(monitor, 0.1f, false);
-        sendMessage(monitor, 0.3f, true);
-        sendMessage(monitor, 0.4f, false);
-        sendMessage(monitor, 0.01f, true);
-        sendMessage(monitor, 0.01f, false);
-        sendMessage(monitor, 0.1f, false);
-        sendMessage(monitor, 0.1f, false);
-        sendMessage(monitor, 0.01f, true);
-        sendMessage(monitor, 1f, true);
+        DisconnectMonitor monitor = new DisconnectMonitor(properties,
+                Collections.singletonList("mytopic"), "mygroup", sender, timeout);
+
+        assertEquals(timeout, monitor.getPollTimeout());
+
+        sendMessage(monitor, "1", 0);
+        sendMessage(monitor, "2", 0);
+        Thread.sleep(timeout + 1);
+        monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
+        timesSent += 2;
+        verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
+        sendMessage(monitor, "1", 1);
+        sendMessage(monitor, "1", 0);
+        sendMessage(monitor, "2", 1);
+        sendMessage(monitor, "2", 0);
+        Thread.sleep(timeout + 1);
+        sendMessage(monitor, "0", 2);
     }
 
-    private void sendMessage(BatteryLevelMonitor monitor, float batteryLevel, boolean sentMessage)
+    private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages)
             throws MessagingException {
         Record key = new Record(keySchema);
-        key.put("sourceId", "1");
+        key.put("sourceId", source);
         key.put("userId", "me");
 
         Record value = new Record(valueSchema);
         value.put("timeReceived", timeReceived++);
-        value.put("batteryLevel", batteryLevel);
-        monitor.evaluateRecord(new ConsumerRecord<>("mytopic", 0, offset++, key, value));
+        ConsumerRecord<GenericRecord, GenericRecord> record = new ConsumerRecord<>(
+                "mytopic", 0, offset++, key, value);
+        TopicPartition partition = new TopicPartition(record.topic(), record.partition());
 
-        if (sentMessage) {
-            timesSent++;
-        }
+        monitor.evaluateRecords(new ConsumerRecords<>(
+                Collections.singletonMap(partition, Collections.singletonList(record))));
+
+        timesSent += sentMessages;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }
 }
