@@ -41,7 +41,7 @@ public class E4BatteryLevel extends SensorAggregator<EmpaticaE4BatteryLevel> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4BatteryLevel(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getBatteryLevelTopic(), clientId, numThread,
                 master, kafkaProperties);
     }

@@ -16,18 +16,22 @@
 
 package org.radarcns.stream.aggregator;
 
-import org.radarcns.config.SubCommand;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nonnull;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
+import org.radarcns.config.SubCommand;
+import org.radarcns.util.RadarSingletonFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstraction of a set of AggregatorWorker
@@ -37,11 +41,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class MasterAggregator implements SubCommand {
     private static final Logger log = LoggerFactory.getLogger(MasterAggregator.class);
 
-    private final List<AggregatorWorker> list;
+    public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
+
+    private final List<AggregatorWorker<?,?,?>> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
+    private int lowPriority;
+    private int normalPriority;
+    private int highPriority;
+
     private ConfigRadar configRadar =
             RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
+    private final ScheduledExecutorService executor;
 
     /**
      * @param standalone true means that the aggregator will assign one thread per stream
@@ -56,25 +67,24 @@ public abstract class MasterAggregator implements SubCommand {
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
-        int lowPriority = 1;
-        int normalPriority = 1;
-        int highPriority = 1;
+        lowPriority = 1;
+        normalPriority = 1;
+        highPriority = 1;
 
         if (standalone) {
             log.info("[{}] STANDALONE MODE", nameSensor);
         } else {
             log.info("[{}] GROUP MODE: {}", nameSensor, this.configRadar.infoThread());
-
-            lowPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW);
-            normalPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL);
-            highPriority = configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH);
+            lowPriority = configRadar.threadsByPriority(Priority.LOW);
+            normalPriority = configRadar.threadsByPriority(Priority.NORMAL);
+            highPriority = configRadar.threadsByPriority(Priority.HIGH);
         }
+
+        executor = Executors.newSingleThreadScheduledExecutor();
 
         announceTopics(log);
 
         list = new ArrayList<>();
-
-        createWorker(list, lowPriority, normalPriority, highPriority);
 
         log.info("Creating MasterAggregator instance for {}", nameSensor);
     }
@@ -82,12 +92,10 @@ public abstract class MasterAggregator implements SubCommand {
     /**
      * Populates an AggregatorWorker list with workers
      *
-     * @param list list to add workers to
      * @param low,normal,high: are the three available priority levels that can be used to start
      *                       kafka streams
      */
-    protected abstract void createWorker(
-            @Nonnull List<AggregatorWorker> list, int low, int normal, int high) throws IOException;
+    protected abstract List<AggregatorWorker<?,?,?>> createWorkers(int low, int normal, int high);
 
     /**
      * Informative function to log the topics list that the application is going to use
@@ -97,10 +105,11 @@ public abstract class MasterAggregator implements SubCommand {
     protected abstract void announceTopics(@Nonnull Logger log);
 
     /** It starts all AggregatorWorkers controlled by this MasterAggregator */
-    public void start() {
+    public void start() throws IOException {
         log.info("Starting all streams for {}", nameSensor);
 
-        list.forEach(v -> v.getThread().start());
+        list.addAll(createWorkers(lowPriority, normalPriority, highPriority));
+        list.forEach(v -> executor.submit(v::start));
     }
 
     /** It stops all AggregatorWorkers controlled by this MasterAggregator */
@@ -108,8 +117,11 @@ public abstract class MasterAggregator implements SubCommand {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!list.isEmpty()) {
-            list.remove(0).shutdown();
+            final AggregatorWorker<?, ?, ?> worker = list.remove(list.size() - 1);
+            executor.submit(worker::shutdown);
         }
+
+        executor.shutdown();
     }
 
     /**
@@ -150,6 +162,16 @@ public abstract class MasterAggregator implements SubCommand {
         log.info("Forcing shutdown of {}", nameSensor);
 
         //TODO implement forcing shutdown
+    }
+
+    public void restartStream(final AggregatorWorker<?, ?, ?> worker) {
+        log.info("Restarting stream {} for {}", worker.getClientId(), nameSensor);
+
+        try {
+            executor.schedule(worker::start, RETRY_TIMEOUT, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException ex) {
+            log.info("Failed to schedule");
+        }
     }
 
     /**

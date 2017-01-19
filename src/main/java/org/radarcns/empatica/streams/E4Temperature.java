@@ -40,8 +40,8 @@ import java.io.IOException;
 public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4Temperature(String clientId,int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+    public E4Temperature(String clientId, int numThread, MasterAggregator master,
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(), clientId, numThread,
                 master, kafkaProperties);
     }

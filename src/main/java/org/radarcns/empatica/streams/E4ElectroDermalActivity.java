@@ -41,7 +41,7 @@ public class E4ElectroDermalActivity extends SensorAggregator<EmpaticaE4ElectroD
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4ElectroDermalActivity(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getElectroDermalActivityTopic(),
                 clientId, numThread, master, kafkaProperties);
     }

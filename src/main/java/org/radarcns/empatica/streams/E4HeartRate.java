@@ -43,7 +43,7 @@ public class E4HeartRate extends
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4HeartRate(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientId, numThread,
                 master, kafkaProperties);
     }

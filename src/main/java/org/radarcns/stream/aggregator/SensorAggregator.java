@@ -41,8 +41,7 @@ public abstract class SensorAggregator<V extends SpecificRecord>
      * @param master pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientId,
-                            @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty)
-            throws IOException {
+            @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty) {
         this(topic, clientId, 1, master, kafkaProperty);
     }
 
@@ -53,9 +52,8 @@ public abstract class SensorAggregator<V extends SpecificRecord>
      * @param master pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientId,
-                            @Nonnull int numThread, @Nonnull MasterAggregator master,
-                            @Nonnull KafkaProperty kafkaProperty)
-            throws IOException {
+                            int numThread, @Nonnull MasterAggregator master,
+                            @Nonnull KafkaProperty kafkaProperty) {
         super(topic, clientId, numThread, master, kafkaProperty);
     }
 

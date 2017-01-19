@@ -16,6 +16,7 @@
 
 package org.radarcns.empatica;
 
+import java.util.Arrays;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.empatica.streams.E4Acceleration;
@@ -53,16 +54,23 @@ public class E4Worker extends MasterAggregator {
     }
 
     @Override
-    protected void createWorker(@Nonnull List<AggregatorWorker> list, int low, int normal, int high)
-            throws IOException {
+    protected List<AggregatorWorker<?,?,?>> createWorkers(int low, int normal, int high) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new E4Acceleration("E4Acceleration",high,this,kafkaProperty));
-        list.add(new E4BatteryLevel("E4BatteryLevel",low,this,kafkaProperty));
-        list.add(new E4BloodVolumePulse("E4BloodVolumePulse",high,this,kafkaProperty));
-        list.add(new E4ElectroDermalActivity("E4ElectroDermalActivity",normal,this,kafkaProperty));
-        list.add(new E4HeartRate("E4HeartRate",high,this,kafkaProperty));
-        list.add(new E4InterBeatInterval("E4InterBeatInterval",high,this,kafkaProperty));
-        list.add(new E4Temperature("E4Temperature",high,this,kafkaProperty));
+        return Arrays.asList(
+                new E4Acceleration(
+                        "E4Acceleration", high, this, kafkaProperty),
+                new E4BatteryLevel(
+                        "E4BatteryLevel", low, this, kafkaProperty),
+                new E4BloodVolumePulse(
+                        "E4BloodVolumePulse", high, this, kafkaProperty),
+                new E4ElectroDermalActivity(
+                        "E4ElectroDermalActivity", normal, this, kafkaProperty),
+                new E4HeartRate(
+                        "E4HeartRate", high,this, kafkaProperty),
+                new E4InterBeatInterval(
+                        "E4InterBeatInterval", high,this, kafkaProperty),
+                new E4Temperature(
+                        "E4Temperature", high, this, kafkaProperty));
     }
 }

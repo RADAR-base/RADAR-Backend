@@ -41,7 +41,7 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
                 clientId, numThread,master, kafkaProperties);
     }

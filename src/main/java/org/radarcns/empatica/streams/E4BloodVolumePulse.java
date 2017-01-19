@@ -38,7 +38,7 @@ public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePu
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(),
                 clientId, numThread, master, kafkaProperties);
     }

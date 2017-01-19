@@ -40,7 +40,7 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4Acceleration(String clientId, int numThread, MasterAggregator master,
-            KafkaProperty kafkaProperties) throws IOException {
+            KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(), clientId, numThread,
             master, kafkaProperties);
     }
