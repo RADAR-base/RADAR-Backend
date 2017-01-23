@@ -104,7 +104,7 @@ public class KafkaMonitorFactory {
         if (config != null && config.getEmailAddress() != null) {
             return new EmailSender(config.getEmailHost(), config.getEmailPort(),
                     config.getEmailUser(),
-                    Collections.singletonList(config.getEmailAddress()));
+                    config.getEmailAddress());
         }
         return null;
     }

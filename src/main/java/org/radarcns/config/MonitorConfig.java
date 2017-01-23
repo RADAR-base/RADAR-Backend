@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class MonitorConfig {
     @JsonProperty("email_address")
-    private String emailAddress;
+    private List<String> emailAddress;
 
     @JsonProperty("email_host")
     private String emailHost;
@@ -37,11 +37,11 @@ public class MonitorConfig {
 
     private List<String> topics;
 
-    public String getEmailAddress() {
+    public List<String> getEmailAddress() {
         return emailAddress;
     }
 
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(List<String> emailAddress) {
         this.emailAddress = emailAddress;
     }
 
