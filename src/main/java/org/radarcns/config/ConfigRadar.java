@@ -17,6 +17,7 @@
 package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,10 +27,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 
 /**
  * POJO representing the yml file
@@ -48,14 +51,15 @@ public class ConfigRadar {
     private Integer autoCommitIntervalMs;
     @JsonProperty("session_timeout_ms")
     private Integer sessionTimeoutMs;
-    @JsonProperty("stream_priority")
-    private Map<String,Integer> streamPriority;
+    @JsonIgnore
+    private Map<Priority, Integer> streamPriority;
     @JsonProperty("battery_monitor")
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("persistence_path")
     private String persistencePath;
+    private Map<String, Object> extras;
 
     public Date getReleased() {
         return released;
@@ -125,14 +129,33 @@ public class ConfigRadar {
         this.sessionTimeoutMs = sessionTimeoutMs;
     }
 
+    @JsonProperty("stream_priority")
     public Map<String, Integer> getStreamPriority() {
-        return streamPriority;
+        if (streamPriority == null) {
+            return null;
+        }
+        Map<String, Integer> stringStreamPriority = new HashMap<>();
+        for (Map.Entry<Priority, Integer> entry : streamPriority.entrySet()) {
+            stringStreamPriority.put(entry.getKey().getParam(), entry.getValue());
+        }
+        return stringStreamPriority;
     }
 
+    @JsonProperty("stream_priority")
     public void setStreamPriority(Map<String, Integer> streamPriority) {
-        this.streamPriority = new HashMap<>();
+        if (streamPriority == null) {
+            this.streamPriority = null;
+            return;
+        }
+
+        this.streamPriority = new EnumMap<>(Priority.class);
+
         for (Map.Entry<String, Integer> entry : streamPriority.entrySet()) {
-            this.streamPriority.put(entry.getKey().toLowerCase(Locale.US), entry.getValue());
+            if (entry.getValue() < 1) {
+                throw new IllegalArgumentException("Stream priorities cannot be smaller than 1");
+            }
+            Priority priority = Priority.valueOf(entry.getKey().toUpperCase(Locale.US));
+            this.streamPriority.put(priority, entry.getValue());
         }
     }
 
@@ -144,8 +167,18 @@ public class ConfigRadar {
         this.schemaRegistry = schemaRegistry;
     }
 
-    public Integer threadsByPriority(RadarPropertyHandler.Priority level) {
-        return streamPriority.get(level.getParam());
+    public int threadsByPriority(Priority level, int defaultValue) {
+        if (defaultValue <= 0) {
+            throw new IllegalArgumentException("Default number of threads must be larger than 0");
+        }
+        if (streamPriority == null) {
+            return defaultValue;
+        }
+        Integer mapValue = streamPriority.get(level);
+        if (mapValue == null) {
+            return defaultValue;
+        }
+        return mapValue;
     }
 
     public String getZookeeperPaths() {
@@ -196,6 +229,14 @@ public class ConfigRadar {
 
     public void setPersistencePath(String persistencePath) {
         this.persistencePath = persistencePath;
+    }
+
+    public Map<String, Object> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(Map<String, Object> extras) {
+        this.extras = extras;
     }
 
     public static ConfigRadar load(File file) throws IOException {

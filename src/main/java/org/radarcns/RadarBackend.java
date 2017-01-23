@@ -39,13 +39,23 @@ public final class RadarBackend {
     private SubCommand command;
 
     public RadarBackend(@Nonnull RadarBackendOptions options) throws IOException {
-        this.options = options;
+        this(options, createPropertyHandler(options));
+    }
 
-        radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        radarPropertyHandler.load(options.getPropertyPath());
+    public RadarBackend(@Nonnull RadarBackendOptions options,
+            @Nonnull RadarPropertyHandler properties) {
+        this.options = options;
+        this.radarPropertyHandler = properties;
 
         log.info("Configuration successfully updated");
         log.info("radar.yml configuration: {}", radarPropertyHandler.getRadarProperties());
+    }
+
+    private static RadarPropertyHandler createPropertyHandler(@Nonnull RadarBackendOptions options)
+            throws IOException {
+        RadarPropertyHandler properties = RadarSingletonFactory.getRadarPropertyHandler();
+        properties.load(options.getPropertyPath());
+        return properties;
     }
 
     public SubCommand createCommand() throws IOException {

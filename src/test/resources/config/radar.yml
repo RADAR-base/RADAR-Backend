@@ -2,7 +2,6 @@ version: 1.0
 released: 2016-11-27
 
 #============================= Application =============================#
-log_path: backend
 #Possible value are standalone or high_performance
 mode: standalone
 
@@ -35,3 +34,6 @@ schema_registry:
     - host: radar-test.thehyve.net
       port: 8081
       protocol: http
+
+extras:
+  somethingother: bla

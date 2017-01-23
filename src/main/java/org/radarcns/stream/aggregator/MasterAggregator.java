@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.config.SubCommand;
 import org.radarcns.util.RadarSingletonFactory;
@@ -60,10 +59,6 @@ public abstract class MasterAggregator implements SubCommand {
      *                   debug
      */
     protected MasterAggregator(boolean standalone, @Nonnull String nameSensor) throws IOException {
-        if (!standalone) {
-            checkThreadParams();
-        }
-
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
@@ -75,9 +70,9 @@ public abstract class MasterAggregator implements SubCommand {
             log.info("[{}] STANDALONE MODE", nameSensor);
         } else {
             log.info("[{}] GROUP MODE: {}", nameSensor, this.configRadar.infoThread());
-            lowPriority = configRadar.threadsByPriority(Priority.LOW);
-            normalPriority = configRadar.threadsByPriority(Priority.NORMAL);
-            highPriority = configRadar.threadsByPriority(Priority.HIGH);
+            lowPriority = configRadar.threadsByPriority(Priority.LOW, 1);
+            normalPriority = configRadar.threadsByPriority(Priority.NORMAL, 2);
+            highPriority = configRadar.threadsByPriority(Priority.HIGH, 4);
         }
 
         executor = Executors.newSingleThreadScheduledExecutor();
@@ -171,36 +166,6 @@ public abstract class MasterAggregator implements SubCommand {
             executor.schedule(worker::start, RETRY_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (RejectedExecutionException ex) {
             log.info("Failed to schedule");
-        }
-    }
-
-    /**
-     * It checks if the priority params specified by the user can be used or not.
-     * TODO: this check can be moved in the org.radarcns.config.PropertiesRadar class.
-     * TODO: A valuable enhancement is checking whether the involved topics have as many partitions
-     *       as the number of starting threads
-     */
-    private void checkThreadParams() {
-        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH) < 1) {
-            log.error("Invalid parameter: {} priority threads are {}",
-                    RadarPropertyHandler.Priority.HIGH,
-                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.HIGH));
-            throw new IllegalStateException(
-                    "The number of high priority threads must be an integer bigger than 0");
-        }
-        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL) < 1) {
-            log.error("Invalid parameter: {} priority threads are {}",
-                    RadarPropertyHandler.Priority.NORMAL,
-                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.NORMAL));
-            throw new IllegalStateException(
-                    "The number of normal priority threads must be an integer bigger than 0");
-        }
-        if (this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW) < 1) {
-            log.error("Invalid parameter: {} priority threads are {}",
-                    RadarPropertyHandler.Priority.LOW,
-                    this.configRadar.threadsByPriority(RadarPropertyHandler.Priority.LOW));
-            throw new IllegalStateException(
-                    "The number of low priority threads must be an integer bigger than 0");
         }
     }
 

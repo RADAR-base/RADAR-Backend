@@ -16,6 +16,8 @@
 
 package org.radarcns.config;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -24,8 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import java.lang.reflect.Field;
 import org.junit.Before;
@@ -76,7 +78,7 @@ public class RadarPropertyHandlerTest {
         Field propertiess = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         propertiess.setAccessible(true);
         propertiess.set(this.propertyHandler,null);
-        propertyHandler.load("radar.yml");
+        propertyHandler.load("src/test/resources/config/radar.yml");
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
         assertEquals("standalone", properties.getMode());
@@ -91,13 +93,19 @@ public class RadarPropertyHandlerTest {
         assertNotNull(properties.getSessionTimeoutMs());
         assertNotNull(properties.getZookeeperPaths());
         assertNotNull(properties.getVersion());
-
+        assertThat(properties.getExtras(), hasEntry("somethingother", "bla"));
     }
 
     @Test
     public void loadInvalidYaml() throws Exception {
         exception.expect(UnrecognizedPropertyException.class);
         propertyHandler.load("src/test/resources/config/invalidradar.yml");
+    }
+
+    @Test
+    public void loadInvalidStreamPriority() throws Exception {
+        exception.expect(JsonMappingException.class);
+        propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml");
     }
 
     @Test

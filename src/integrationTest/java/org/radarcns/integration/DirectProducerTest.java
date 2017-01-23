@@ -16,17 +16,20 @@
 
 package org.radarcns.integration;
 
-import static junit.framework.TestCase.assertNotNull;
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.RadarBackend;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.KafkaSender;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.util.RadarSingletonFactory;
@@ -41,18 +44,16 @@ public class DirectProducerTest {
 
     @Test
     public void testDirect() throws Exception {
+        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
+
+        RadarPropertyHandler properties = RadarSingletonFactory.getRadarPropertyHandler();
+        properties.load(propertiesPath);
+
+        ConfigRadar config = properties.getRadarProperties();
 
         Properties props = new Properties();
-        try (InputStream in = getClass().getResourceAsStream("/org/radarcns/kafka/kafka.properties")) {
-            assertNotNull(in);
-            props.load(in);
-            in.close();
-        }
-
-        if (!Boolean.parseBoolean(props.getProperty("servertest","false"))) {
-            logger.info("Serve test case has been disable.");
-            return;
-        }
+        props.put(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
+        props.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
         int numberOfDevices = 1;
         logger.info("Simulating the load of " + numberOfDevices);
@@ -68,13 +69,11 @@ public class DirectProducerTest {
             threads[i] = new MockDevice<>(senders[i], new MeasurementKey(userID+i, sourceID+i), MeasurementKey.getClassSchema(), MeasurementKey.class);
             threads[i].start();
         }
-        long streamingTimeoutMs = 5_000L;
-        if (props.containsKey("streaming.timeout.ms")) {
-            try {
-                streamingTimeoutMs = Long.parseLong(props.getProperty("streaming.timeout.ms"));
-            } catch (NumberFormatException ex) {
-                // do nothing
-            }
+        long streamingTimeoutMs = 1_000L;
+
+        Map<String, Object> extras = config.getExtras();
+        if (extras != null && extras.containsKey("streaming_timeout_ms")) {
+            streamingTimeoutMs = ((Number)extras.get("streaming_timeout_ms")).longValue();
         }
 
         threads[0].join(streamingTimeoutMs);
@@ -95,10 +94,10 @@ public class DirectProducerTest {
             assertNull("Device had IOException", device.getException());
         }
 
-        String[] args = {"-c", "src/integrationTest/resources/org/radarcns/kafka/radar.yml"};
+        String[] args = {"-c", propertiesPath};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts).application();
+        new RadarBackend(opts, properties).application();
 
         Thread.sleep(40_000L);
 
