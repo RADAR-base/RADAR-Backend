@@ -38,7 +38,8 @@ schema_registry:
 #======================== Battery level monitor ========================#
 battery_monitor:
   level: LOW
-  email_address: nivethika@thehyve.nl
+  email_address:
+    - test@thehyve.nl,radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org
