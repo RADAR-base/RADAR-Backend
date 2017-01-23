@@ -118,7 +118,7 @@ public class KafkaMonitorFactoryTest {
 
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
-        disconnectConfig.setEmailAddress("test@localhost");
+        disconnectConfig.setEmailAddress(Collections.singletonList("test@localhost"));
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
         disconnectConfig.setTimeout(100L);
@@ -133,7 +133,7 @@ public class KafkaMonitorFactoryTest {
 
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
-        batteryConfig.setEmailAddress("test@localhost");
+        batteryConfig.setEmailAddress(Collections.singletonList("test@localhost"));
         batteryConfig.setEmailHost("localhost");
         batteryConfig.setEmailPort(port);
         batteryConfig.setLevel("LOW");
