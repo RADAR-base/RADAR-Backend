@@ -3,18 +3,45 @@
 [![Build Status](https://travis-ci.org/RADAR-CNS/RADAR-Backend.svg?branch=master)](https://travis-ci.org/RADAR-CNS/RADAR-Backend)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e21c0c25f43e4676a3c69bae444101ca)](https://www.codacy.com/app/RADAR-CNS/RADAR-Backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-Backend&amp;utm_campaign=Badge_Grade)
 
-A Java application based on Confluent Platform to standardise, analyse and persistent data collected by RADAR-CNS data sources. Data is consumed and produced in Apache Avro format using the schemas stored inside the RADAR-CNS [schema repository](https://github.com/RADAR-CNS/RADAR-Schemas).
+RADAR-Backend is a Java application based on Confluent Platform to standardise, analyse and persist data collected by RADAR-CNS data sources. It supports the backend requirements of RADAR-CNS project. The data is produced and consumed in Apache Avro format using the schemas stored inside the RADAR-CNS [schema repository](https://github.com/RADAR-CNS/RADAR-Schemas).
 
-Currently only the Empatica E4 is supported.
+RADAR-Backend provides an abstract layer to monitor and analyse streams of wearable data and write data to Hot or Cold storage. The Application Programming Interfaces (APIs) of RADAR-Backend makes the process of to integrating additional topics, wearable devices easier. It currently provides MongoDB as the Hot-storage and HDFS data store as the Cold-storage. They can be easily tuned using property files. The stream-monitors monitor topics and notify users (e.g. via emails) under given circumstances. 
 
 ## Dependencies
 
-The code requires:
+The following are the prerequisites to run RADAR-Backend on your machine:
 
-- a Java 8 installation
-- a [Confluent Platform 3.1.0 installation](http://docs.confluent.io/3.1.0/installation.html) running the Zookeeper, Kafka, Schema Registry and Kafka REST Proxy services.
+   - Java 8 installed
+   - [Confluent Platform 3.1.0](http://docs.confluent.io/3.1.0/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
+   - MongoDB installed and running ( to use Hot-storage )
+   - Hadoop 2.7.3 and HDFS installed and configured ( to use Cold-storage )
+   - SMTP server
 
-To get email notifications for Empatica E4 battery status, an email server has to be setup on `localhost`. To [run the HDFS connector](https://github.com/RADAR-CNS/RADAR-Backend/wiki/Guide-to-RADAR-HDFS-Connector), Hadoop needs to be installed. 
+## Extending abstract APIs
+
+### Extending KafkaStreams 
+The implementation of KafkaStreams is generalised using abstract layers. 
+
+#####Topics
+The stream topics are categorized into two categories. These topics are a extensions of [AvroTopic<K,V>](https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/sensor/AvroTopic.java). 
+- [SensorTopic<V>][5]: Defines a topic that can be consumed and aggregated as it is.
+- [InternalTopic<O>][6]: Defines a topic used to consume,aggregate and transform.
+- [SensorTopics][7]: Contains the list of SensorTopic<V>s.
+- [InternalTopics][8]: Contains the list of InternalTopic<O>s.
+
+[SensorTopics][7] and [InternalTopics][8] allows the implementation for sets of spefic topic type. To improve the flexibility, these topic sets are then unified by [DeviceTopics][9].
+#####Streams
+KafkaStreams currently communicates using master-slave model. The [MasterAggregator][1] defines the stream-master, while [AggregatorWorker][2] represents the stream-slave. The master-stream creates, starts and stops a list of stream-slaves registered with the corresponding master. 
+There are two types of slave-streams ( i.e. AggregatorWorker ):
+- [SensorAggregator][3]: Consumes and aggregates topics without performing any transformations
+- [InternalAggregator][4] Modifies incoming streams and produces a new information
+The SensorAggregator consumes [SensorTopic<V>][5], while the InternalAggregator reads [InternalTopic<O>][6].
+While the classical Kafka Consumer requires two implementations to support standalone and group executions, the AggregatorWorker abstraction provides both behaviours with one implementation.
+
+To extend RADAR-Backend for additional devices, do the following steps (see the `org.radarcns.empatica` package as an example):
+- Create [SensorTopics][7] and if needed [InternalTopics][8] then unify them in [DeviceTopics][9]
+- For each topic, create either [SensorAggregator][3] or [InternalAggregator][4]
+- Define the [MasterAggregator][1]
 
 # Quickstart for Empatica
 
@@ -22,7 +49,7 @@ To get email notifications for Empatica E4 battery status, an email server has t
 
 To run the RADAR applications, run the following:
 
-1. open your shell inside the project folder and run
+1. open your shell inside the project folder and runSensorTopics][7]
 
     ```shell
     # Clean
@@ -90,31 +117,14 @@ To run the RADAR applications, run the following:
 
 ## Contributing
 
-To add additional devices, make the following steps (see the `org.radarcns.empatica` package as an example):
-- create [SensorTopics][7] and if needed [InternalTopics][8] then unify them in [DeviceTopics][9]
-- for each topic create either [SensorAggregator][3] or [InternalAggregator][4]
-- define your [MasterAggregator][1]
+
 
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html).
 
 If you want to contribute a feature or fix, please make a pull request
 
 
-## About the code
 
-### Generalisation
-
-The Kafka Streams concept has been generalised. [MasterAggregator][1] defines the stream master while [AggregatorWorker][2] represents the stream slave. The master stream creates, starts and stops a list of stream slave. Two types of slave stream have been defined:
-- [SensorAggregator][3] consumes and aggregates topics without performing any transformations
-- [InternalAggregator][4] modifies incoming data producing a new information
-While the classical Kafka Consumer requires two implementations to support standalone and group executions, the stream slave definition provides both behaviours with one implementation.
-
-While the former consumes [SensorTopic<V>][5], the latter reads [InternalTopic<O>][6]. These topics are a specialisation of [AvroTopic<K,V>]().
-- [SensorTopic<V>][5] defines a set of topic used to consume and aggregate data as is
-- [InternalTopic<O>][6] delineates a set of topic used to consume and aggregate transformed data
-[SensorTopics][7] and [InternalTopics][8] drive the developer to the implementation of sets of topics containing only one topic type. To improve the flexibility, these sets are then unified by [DeviceTopics][9]. All these set should be defined following the [Factory Method Pattern](https://en.wikipedia.org/wiki/Factory_method_pattern). It should be used for each element that has to be unique within the application (e.g. [MasterAggregator][1])
-
-[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic APACHE Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
 
 ### Empatica E4
 
@@ -127,6 +137,9 @@ While the former consumes [SensorTopic<V>][5], the latter reads [InternalTopic<O
 - [E4InterBeatInterval][20]: it aggregates inter beat interval data
 - [E4Temperature][21]: it aggregates data coming form temperature sensor
 
+[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic APACHE Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
+
+To get email notifications for Empatica E4 battery status, an email server has to be setup on `localhost`. To [run the HDFS connector](https://github.com/RADAR-CNS/RADAR-Backend/wiki/Guide-to-RADAR-HDFS-Connector), Hadoop needs to be installed. 
 
   [1]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/MasterAggregator.java
   [2]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/AggregatorWorker.java
