@@ -13,12 +13,15 @@
 
 FROM confluentinc/cp-kafka-connect:3.1.1
 
-MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl>
+MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl> , Francesco N <francesco.nobilia@kcl.ac.uk>
 
 LABEL description="RADAR-CNS Backend- HDFS Sink Connector"
 
 # Deploy RADAR-Backend - Mongodb Sink Connector
 ADD  https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radar-hdfs-connector-0.1.jar /etc/kafka-connect/jars/
+
+# Load topics validator
+COPY ./kafka_status.sh /home/kafka_status.sh
 
 # Load modified launcher
 COPY launch /etc/confluent/docker/launch

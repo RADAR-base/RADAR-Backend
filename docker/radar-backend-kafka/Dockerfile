@@ -13,7 +13,7 @@
 
 FROM confluentinc/cp-base:3.1.1
 
-MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl>
+MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris B <joris@thehyve.nl> , Francesco N <francesco.nobilia@kcl.ac.uk>
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 
@@ -25,6 +25,9 @@ RUN echo && echo "==> Installing Components" \
 
 ADD https://github.com/RADAR-CNS/RADAR-Backend/releases/download/0.1-beta.1/radarbackend-0.1.jar /usr/share/java/
 
+# Load topics validator
+COPY ["./init.sh", "./kafka_status.sh", "/home/"]
+
 VOLUME /etc/radar.yml
 
-ENTRYPOINT ["/usr/bin/java", "-jar",  "/usr/share/java/radarbackend-0.1.jar", "-c", "/etc/radar.yml"]
+ENTRYPOINT ["./home/init.sh"]
