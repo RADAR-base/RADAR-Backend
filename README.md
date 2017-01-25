@@ -60,7 +60,7 @@ Currently, RADAR-Backend provides implementation to stream, monitor, store Empat
 
 ## Installing and Running RADAR-Backend components
 
-To Build the RADAR-Backend from source, (Check the prerequisites mentioned above):
+### To Build the RADAR-Backend from source, (Check the prerequisites mentioned above):
 
    1. Clone RADAR-Backend repository.
     ```shell
@@ -109,7 +109,8 @@ To Run Radar-backend streams
        ```shell
        java -jar radarbackend-1.0.jar -c path/to/radar.yml stream
        ```
-To Run Radar-backend monitors
+       
+### To Run Radar-backend monitors
    1. Follow the first 6 steps mentioned above. 
    2. In addition to the changes mentioned above in `radar.yml`, configure required monitor settings. (To get email notifications for Empatica E4 battery status, an email server has to be setup on `localhost`.)
       1. For battery status monitor, configure the following
@@ -152,7 +153,7 @@ To Run Radar-backend monitors
          java -jar radarbackend-1.0.jar -c path/to/radar.yml monitor
          ```
          
-To Run Radar-HDFS-Connector
+### To Run Radar-HDFS-Connector
    1. In addition to Zookeeper, Kafka-broker(s), Schema-registry and Rest-proxy, HDFS should be running
    2. Load the `radar-hdfs-connector-0.1.jar` to CLASSPATH
    ```shell
@@ -176,7 +177,8 @@ To Run Radar-HDFS-Connector
    ```shell
    connect-standalone /etc/schema-registry/connect-avro-standalone.properties path-to-your-hdfs-connector.properties
    ```
-To Run Radar-MongoDB-Connector
+   
+### To Run Radar-MongoDB-Connector
    1. In addition to Zookeeper, Kafka-broker(s), Schema-registry and Rest-proxy, MongoDB should be running with required credentials
    2. Load the `radar-mongodb-connector-0.1.jar` to CLASSPATH
    ```ini
