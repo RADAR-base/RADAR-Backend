@@ -26,7 +26,7 @@ while [ "$count" != "${#needed[@]}" ] ; do
     fi
 
     count=0
-    TOPICS=$(curl -sX GET -H "Content-Type: application/json" "$KAFKA_REST_PROXY/topics")
+    TOPICS=$(curl -sSX GET -H "Content-Type: application/json" "$KAFKA_REST_PROXY/topics")
     TOPICS="$(echo -e "${TOPICS}" | tr -d '"'  | tr -d '['  | tr -d ']' | tr -d '[:space:]' )"
 
     IFS=',' read -r -a array <<< $TOPICS
