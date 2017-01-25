@@ -5,5 +5,5 @@ echo "===> Waiting RADAR-CNS topics ... "
 ./home/kafka_status.sh
 
 # Start streams
-echo "===> Starting streams ... "
-./usr/bin/java -jar /usr/share/java/radarbackend-0.1.jar -c /etc/radar.yml
+echo "===> Starting " $1 "...."
+./usr/bin/java -jar /usr/share/java/radarbackend-0.1.jar -c /etc/radar.yml $1
