@@ -42,7 +42,7 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
     public E4Acceleration(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getAccelerationTopic(), clientId, numThread,
-            master, kafkaProperties);
+            true, master, kafkaProperties);
     }
 
 
@@ -52,12 +52,17 @@ public class E4Acceleration extends SensorAggregator<EmpaticaE4Acceleration> {
         kstream.groupByKey()
             .aggregate(
                 DoubleArrayCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(utilities.accelerationToArray(v)),
+                (k, v, valueCollector) -> valueCollector.add(converter(v)),
                 TimeWindows.of(10 * 1000L),
                 RadarSerdes.getInstance().getDoubelArrayCollector(),
                 topic.getStateStoreName())
             .toStream()
             .map((k, v) -> new KeyValue<>(utilities.getWindowed(k), v.convertInAvro()))
             .to(topic.getOutputTopic());
+    }
+
+    private double[] converter(EmpaticaE4Acceleration record) {
+        incrementMonitor();
+        return utilities.accelerationToArray(record);
     }
 }

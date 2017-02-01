@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.streams;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -31,16 +33,13 @@ import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
 public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePulse> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(),
-                clientId, numThread, master, kafkaProperties);
+                clientId, numThread, true, master, kafkaProperties);
     }
 
     @Override
@@ -49,12 +48,17 @@ public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePu
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getBloodVolumePulse()),
+                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
                 .map((k, v) -> new KeyValue<>(utilities.getWindowed(k), v.convertInAvro()))
                 .to(topic.getOutputTopic());
+    }
+
+    private Float extractValue(EmpaticaE4BloodVolumePulse record) {
+        incrementMonitor();
+        return record.getBloodVolumePulse();
     }
 }

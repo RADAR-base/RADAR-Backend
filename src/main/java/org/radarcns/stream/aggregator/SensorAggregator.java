@@ -16,15 +16,14 @@
 
 package org.radarcns.stream.aggregator;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.topic.SensorTopic;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
 
 /**
  * Runnable abstraction of a Kafka stream that consumes Sensor Topic.
@@ -38,23 +37,26 @@ public abstract class SensorAggregator<V extends SpecificRecord>
     /**
      * @param topic kafka topic that will be consumed
      * @param clientId useful to debug usign the Kafka log
+     * @param monitor states whether it requires or not a Monitor to check the stream progress
      * @param master pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientId,
-            @Nonnull MasterAggregator master, @Nonnull KafkaProperty kafkaProperty) {
-        this(topic, clientId, 1, master, kafkaProperty);
+                            boolean monitor, @Nonnull MasterAggregator master,
+                            @Nonnull KafkaProperty kafkaProperty) {
+        this(topic, clientId, 1, monitor, master, kafkaProperty);
     }
 
     /**
      * @param topic kafka topic that will be consumed
      * @param clientId useful to debug usign the Kafka log
      * @param numThread number of threads to execute stream processing
+     * @param monitor states whether it requires or not a Monitor to check the stream progress
      * @param master pointer to the MasterAggregator useful to call the notification functions
      */
     public SensorAggregator(@Nonnull SensorTopic<V> topic, @Nonnull String clientId,
-                            int numThread, @Nonnull MasterAggregator master,
+                            int numThread, boolean monitor, @Nonnull MasterAggregator master,
                             @Nonnull KafkaProperty kafkaProperty) {
-        super(topic, clientId, numThread, master, kafkaProperty);
+        super(topic, clientId, numThread, monitor, master, kafkaProperty);
     }
 
     protected KStreamBuilder getBuilder() throws IOException {

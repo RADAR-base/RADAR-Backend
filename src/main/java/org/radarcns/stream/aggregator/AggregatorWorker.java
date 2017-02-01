@@ -17,6 +17,7 @@
 package org.radarcns.stream.aggregator;
 
 import java.io.IOException;
+import java.util.Timer;
 import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
@@ -24,6 +25,7 @@ import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.topic.AvroTopic;
+import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +45,11 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
     private KafkaStreams streams;
     private KafkaProperty kafkaProperty;
 
+    private Monitor monitor;
+    private Timer timer;
+
     public AggregatorWorker(@Nonnull T topic, @Nonnull String clientId, int numThreads,
-            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
+            boolean monitor, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
@@ -55,6 +60,11 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         this.numThreads = numThreads;
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
+
+        if (monitor) {
+            this.monitor = new Monitor(log, "have been read from " + topic.getInputTopic(), null);
+            this.timer = new Timer();
+        }
     }
 
     /** Create a Kafka Stream builder */
@@ -78,6 +88,10 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
                             .getStream(getClientId(), numThreads, DeviceTimestampExtractor.class));
             streams.setUncaughtExceptionHandler(this);
             streams.start();
+
+            if (timer != null) {
+                timer.schedule(monitor, 0, 30_000);
+            }
 
             master.notifyStartedStream(clientId);
         } catch (IOException ex) {
@@ -134,5 +148,9 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
 
     protected void setKafkaProperty(KafkaProperty kafkaProperty) {
         this.kafkaProperty = kafkaProperty;
+    }
+
+    protected void incrementMonitor(){
+        monitor.increment();
     }
 }

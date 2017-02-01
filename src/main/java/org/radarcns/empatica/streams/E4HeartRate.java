@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.streams;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -32,9 +34,6 @@ import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
@@ -45,7 +44,7 @@ public class E4HeartRate extends
     public E4HeartRate(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientId, numThread,
-                master, kafkaProperties);
+                true, master, kafkaProperties);
     }
 
     @Override
@@ -54,14 +53,18 @@ public class E4HeartRate extends
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(
-                            utilities.ibiToHeartRate(v.getInterBeatInterval())),
+                    (k, v, valueCollector) -> valueCollector.add(converter(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
+    }
+
+    private double converter(EmpaticaE4InterBeatInterval record) {
+        incrementMonitor();
+        return utilities.ibiToHeartRate(record.getInterBeatInterval());
     }
 
 }

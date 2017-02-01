@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.streams;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -31,9 +33,6 @@ import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
 /**
  * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4
  */
@@ -43,7 +42,7 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
     public E4Temperature(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getTemperatureTopic(), clientId, numThread,
-                master, kafkaProperties);
+                true, master, kafkaProperties);
     }
 
 
@@ -53,12 +52,17 @@ public class E4Temperature extends SensorAggregator<EmpaticaE4Temperature> {
         kstream.groupByKey()
                 .aggregate(
                         DoubleValueCollector::new,
-                        (k, v, valueCollector) -> valueCollector.add(v.getTemperature()),
+                        (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
                         TimeWindows.of(10 * 1000L),
                         RadarSerdes.getInstance().getDoubleCollector(),
                         topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
+    }
+
+    private Float extractValue(EmpaticaE4Temperature record) {
+        incrementMonitor();
+        return record.getTemperature();
     }
 }

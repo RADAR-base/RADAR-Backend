@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.streams;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -31,9 +33,6 @@ import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
 /**
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4
  */
@@ -43,7 +42,7 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
     public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
-                clientId, numThread,master, kafkaProperties);
+                clientId, numThread, true, master, kafkaProperties);
     }
 
     @Override
@@ -52,12 +51,17 @@ public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInt
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getInterBeatInterval()),
+                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     topic.getStateStoreName())
                 .toStream()
                 .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertInAvro()))
                 .to(topic.getOutputTopic());
+    }
+
+    private Float extractValue(EmpaticaE4InterBeatInterval record) {
+        incrementMonitor();
+        return record.getInterBeatInterval();
     }
 }
