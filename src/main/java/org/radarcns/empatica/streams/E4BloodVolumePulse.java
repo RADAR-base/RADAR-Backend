@@ -32,14 +32,19 @@ import org.radarcns.topic.SensorTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class E4BloodVolumePulse extends SensorAggregator<EmpaticaE4BloodVolumePulse> {
+
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final Logger log = LoggerFactory.getLogger(E4BloodVolumePulse.class);
 
     public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getBloodVolumePulseTopic(),
-                clientId, numThread, true, master, kafkaProperties);
+                clientId, numThread, master, kafkaProperties);
+        setMonitor(log);
     }
 
     @Override

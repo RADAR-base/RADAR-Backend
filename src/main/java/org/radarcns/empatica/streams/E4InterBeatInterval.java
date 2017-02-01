@@ -32,17 +32,22 @@ import org.radarcns.topic.SensorTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4
  */
 public class E4InterBeatInterval extends SensorAggregator<EmpaticaE4InterBeatInterval> {
+
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final Logger log = LoggerFactory.getLogger(E4InterBeatInterval.class);
 
     public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getSensorTopics().getInterBeatIntervalTopic(),
-                clientId, numThread, true, master, kafkaProperties);
+                clientId, numThread, master, kafkaProperties);
+        setMonitor(log);
     }
 
     @Override

@@ -39,26 +39,24 @@ public abstract class InternalAggregator<I, O extends SpecificRecord>
     /**
      * @param topic     kafka topic that will be consumed
      * @param clientId  useful to debug usign the Kafka log
-     * @param monitor states whether it requires or not a Monitor to check the stream progress
      * @param master    pointer to the MasterAggregator useful to call the notification functions
      */
     public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientId,
-                                boolean monitor, @Nonnull MasterAggregator master,
+                                @Nonnull MasterAggregator master,
                                 @Nonnull KafkaProperty kafkaProperty) {
-        this(topic, clientId, 1, monitor, master, kafkaProperty);
+        this(topic, clientId, 1, master, kafkaProperty);
     }
 
     /**
      * @param topic      kafka topic that will be consumed
      * @param clientId   useful to debug usign the Kafka log
      * @param numThread  number of threads to execute stream processing
-     * @param monitor states whether it requires or not a Monitor to check the stream progress
      * @param master     pointer to the MasterAggregator useful to call the notification functions
      */
     public InternalAggregator(@Nonnull InternalTopic<O> topic, @Nonnull String clientId,
-                                int numThread, boolean monitor, @Nonnull MasterAggregator master,
+                                int numThread, @Nonnull MasterAggregator master,
                                 @Nonnull KafkaProperty kafkaProperty) {
-        super(topic, clientId, numThread, monitor, master, kafkaProperty);
+        super(topic, clientId, numThread, master, kafkaProperty);
     }
 
     @Override

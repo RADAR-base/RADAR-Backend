@@ -49,7 +49,7 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
     private Timer timer;
 
     public AggregatorWorker(@Nonnull T topic, @Nonnull String clientId, int numThreads,
-            boolean monitor, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
+            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
@@ -60,16 +60,17 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         this.numThreads = numThreads;
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
-
-        if (monitor) {
-            this.monitor = new Monitor(log, "have been read from " + topic.getInputTopic(), null);
-            this.timer = new Timer();
-        }
     }
 
     /** Create a Kafka Stream builder */
     protected KStreamBuilder getBuilder() throws IOException {
         return new KStreamBuilder();
+    }
+
+    /** Create a Monitor to check the stream behaviour*/
+    protected void setMonitor(Logger log) {
+        this.monitor = new Monitor(log, "records have been read from " + topic.getInputTopic());
+        this.timer = new Timer();
     }
 
     /**
@@ -150,7 +151,7 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         this.kafkaProperty = kafkaProperty;
     }
 
-    protected void incrementMonitor(){
+    protected void incrementMonitor() {
         monitor.increment();
     }
 }

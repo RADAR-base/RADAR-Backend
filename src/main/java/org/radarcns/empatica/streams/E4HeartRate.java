@@ -33,18 +33,23 @@ import org.radarcns.topic.InternalTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
 public class E4HeartRate extends
         InternalAggregator<EmpaticaE4InterBeatInterval, DoubleAggregator> {
+
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private final Logger log = LoggerFactory.getLogger(E4HeartRate.class);
 
     public E4HeartRate(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Topics.getInstance().getInternalTopics().getHeartRateTopic(), clientId, numThread,
-                true, master, kafkaProperties);
+                master, kafkaProperties);
+        setMonitor(log);
     }
 
     @Override
