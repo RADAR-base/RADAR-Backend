@@ -35,6 +35,9 @@ public class RecordConverterFactoryRadar extends RecordConverterFactory {
         List<RecordConverter> recordConverters = new ArrayList<RecordConverter>();
         recordConverters.addAll(super.genericConverters());
         recordConverters.add(new BatteryLevelRecordConverter());
+        recordConverters.add(new CountsStatusRecordConverter());
+        recordConverters.add(new ServerStatusRecordConverter());
+        recordConverters.add(new UptimeStatusRecordConverter());
         return recordConverters;
     }
 
