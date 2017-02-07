@@ -17,6 +17,7 @@
 package org.radarcns.stream.aggregator;
 
 import java.io.IOException;
+import java.util.Timer;
 import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
@@ -25,6 +26,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.topic.StreamDefinition;
+import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +42,15 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     private final String clientId;
     private final MasterAggregator master;
     private final StreamDefinition streamDefinition;
+    private final Monitor monitor;
 
     private KafkaStreams streams;
     private KafkaProperty kafkaProperty;
+    private Timer timer;
 
     public AggregatorWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
-            int numThreads, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
+            int numThreads, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty,
+            Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
@@ -56,6 +61,13 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
         this.numThreads = numThreads;
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
+
+        if (log == null) {
+            this.monitor = null;
+        } else {
+            this.monitor = new Monitor(monitorLog, "records have been read from "
+                    + streamDefinition.getInputTopic());
+        }
     }
 
     /** Create a Kafka Stream builder */
@@ -85,6 +97,10 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
                 getStreamDefinition().getOutputTopic());
 
         try {
+            if (monitor != null) {
+                timer = new Timer();
+                timer.schedule(monitor, 0, 30_000);
+            }
             streams = new KafkaStreams(getBuilder(),
                     kafkaProperty
                             .getStream(getClientId(), numThreads, DeviceTimestampExtractor.class));
@@ -134,6 +150,10 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
             streams.close();
             streams = null;
         }
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 
     protected KafkaStreams getStreams() {
@@ -146,5 +166,9 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
 
     protected void setKafkaProperty(KafkaProperty kafkaProperty) {
         this.kafkaProperty = kafkaProperty;
+    }
+
+    protected void incrementMonitor() {
+        monitor.increment();
     }
 }

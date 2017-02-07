@@ -30,6 +30,9 @@ public class RadarThreadFactoryBuilder {
     private int priority = Thread.NORM_PRIORITY;
 
     public RadarThreadFactoryBuilder setNamePrefix(@Nonnull String namePrefix) {
+        if (namePrefix == null) {
+            throw new IllegalArgumentException("namePrefix cannot be null");
+        }
         this.namePrefix = namePrefix;
         return this;
     }

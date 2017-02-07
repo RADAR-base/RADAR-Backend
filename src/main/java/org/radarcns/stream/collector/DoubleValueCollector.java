@@ -17,14 +17,13 @@
 package org.radarcns.stream.collector;
 
 import com.google.common.primitives.Doubles;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /** Java class to aggregate data using Kafka Streams. Double is the base unit */
 public class DoubleValueCollector {

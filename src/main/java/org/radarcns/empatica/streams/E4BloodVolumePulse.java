@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.streams;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -29,18 +31,19 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class E4BloodVolumePulse extends
         AggregatorWorker<MeasurementKey, EmpaticaE4BloodVolumePulse> {
+    private static final Logger log = LoggerFactory.getLogger(E4BloodVolumePulse.class);
+
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Streams.getInstance().getSensorStreams().getBloodVolumePulseStream(),
-                clientId, numThread, master, kafkaProperties);
+                clientId, numThread, master, kafkaProperties, log);
     }
 
     @Override
@@ -49,12 +52,17 @@ public class E4BloodVolumePulse extends
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getBloodVolumePulse()),
+                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map((k, v) -> new KeyValue<>(utilities.getWindowed(k), v.convertToAvro()))
                 .to(getStreamDefinition().getOutputTopic().getName());
+    }
+
+    private Float extractValue(EmpaticaE4BloodVolumePulse record) {
+        incrementMonitor();
+        return record.getBloodVolumePulse();
     }
 }

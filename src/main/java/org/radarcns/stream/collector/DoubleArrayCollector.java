@@ -16,11 +16,10 @@
 
 package org.radarcns.stream.collector;
 
-import org.radarcns.aggregator.DoubleArrayAggregator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.radarcns.aggregator.DoubleArrayAggregator;
 
 /**
  * Java class to aggregate data using Kafka Streams. Double Array is the base unit

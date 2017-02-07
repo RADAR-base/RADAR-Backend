@@ -31,17 +31,20 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
  */
 public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4InterBeatInterval> {
+    private static final Logger log = LoggerFactory.getLogger(E4HeartRate.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public E4HeartRate(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
         super(E4Streams.getInstance().getInternalStreams().getHeartRateStream(), clientId,
-                numThread, master, kafkaProperties);
+                numThread, master, kafkaProperties, log);
     }
 
     @Override
@@ -50,8 +53,7 @@ public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4Inte
         kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(
-                            utilities.ibiToHeartRate(v.getInterBeatInterval())),
+                    (k, v, valueCollector) -> valueCollector.add(converter(v)),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
@@ -60,4 +62,8 @@ public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4Inte
                 .to(getStreamDefinition().getOutputTopic().getName());
     }
 
+    private double converter(EmpaticaE4InterBeatInterval record) {
+        incrementMonitor();
+        return utilities.ibiToHeartRate(record.getInterBeatInterval());
+    }
 }
