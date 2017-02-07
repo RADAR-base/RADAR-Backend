@@ -16,8 +16,6 @@
 
 package org.radarcns.empatica.topic;
 
-import org.radarcns.topic.DeviceTopics;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,24 +24,22 @@ import java.util.Set;
 /**
  * Singleton class representing the list of Empatica E4 topics
  */
-public final class E4Topics implements DeviceTopics {
-    private static E4Topics instance = new E4Topics();
+public final class E4Streams {
+    private static final E4Streams INSTANCE = new E4Streams();
+    private static final E4SensorStreams SENSOR_TOPICS = E4SensorStreams.getInstance();
+    private static final E4InternalStreams INTERNAL_TOPICS = E4InternalStreams.getInstance();
 
-    private static final E4SensorTopics SENSOR_TOPICS = E4SensorTopics.getInstance();
-    private static final E4InternalTopics INTERNAL_TOPICS = E4InternalTopics.getInstance();
-
-    public static E4Topics getInstance() {
-        return instance;
+    public static E4Streams getInstance() {
+        return INSTANCE;
     }
 
-    private E4Topics(){}
+    private E4Streams(){}
 
-    @Override
     public List<String> getTopicNames() {
         Set<String> set = new HashSet<>();
 
-        set.addAll(E4InternalTopics.getInstance().getTopicNames());
-        set.addAll(E4SensorTopics.getInstance().getTopicNames());
+        set.addAll(getSensorStreams().getTopicNames());
+        set.addAll(getInternalStreams().getTopicNames());
 
         ArrayList<String> list = new ArrayList<>(set);
         list.sort(String::compareTo);
@@ -52,16 +48,16 @@ public final class E4Topics implements DeviceTopics {
     }
 
     /**
-     * @return an instance of E4SensorTopics
+     * @return an INSTANCE of E4SensorStreams
      */
-    public E4SensorTopics getSensorTopics() {
+    public E4SensorStreams getSensorStreams() {
         return SENSOR_TOPICS;
     }
 
     /**
-     * @return an instance of E4InternalTopics
+     * @return an INSTANCE of E4InternalStreams
      */
-    public E4InternalTopics getInternalTopics() {
+    public E4InternalStreams getInternalStreams() {
         return INTERNAL_TOPICS;
     }
 }

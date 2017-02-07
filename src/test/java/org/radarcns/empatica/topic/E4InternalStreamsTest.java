@@ -16,52 +16,48 @@
 
 package org.radarcns.empatica.topic;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.radarcns.topic.InternalTopic;
-
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.radarcns.topic.StreamDefinition;
 
 /**
  * Created by nivethika on 21-12-16.
  */
-public class E4InternalTopicsTest {
-    private E4InternalTopics internalTopics;
+public class E4InternalStreamsTest {
+    private E4InternalStreams internalStreams;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() {
-        this.internalTopics = E4InternalTopics.getInstance();
+        this.internalStreams = E4InternalStreams.getInstance();
     }
     @Test
     public void getTopic() {
-        InternalTopic topic = this.internalTopics.getTopic("android_empatica_e4_heartrate");
-        assertEquals("android_empatica_e4_inter_beat_interval", topic.getInputTopic());
-        assertEquals("android_empatica_e4_heartrate_output", topic.getOutputTopic());
-        assertEquals("android_empatica_e4_heartrate_store", topic.getStateStoreName());
-        assertEquals(2, topic.getAllTopicNames().size());
+        StreamDefinition topic = this.internalStreams.getStreamDefinition("android_empatica_e4_inter_beat_interval");
+        assertEquals("android_empatica_e4_inter_beat_interval", topic.getInputTopic().getName());
+        assertEquals("android_empatica_e4_heartrate", topic.getOutputTopic().getName());
+        assertEquals("android_empatica_e4_inter_beat_interval->android_empatica_e4_heartrate", topic.getStateStoreName());
     }
 
-    @Test
     public void getInvalidTopic() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Topic something unknown");
-        InternalTopic topic = this.internalTopics.getTopic("something");
-        assertNull(topic);
+        StreamDefinition topic = this.internalStreams.getStreamDefinition("something");
     }
 
     @Test
     public void getTopicNames() {
-        Set<String> topics = this.internalTopics.getTopicNames();
-        assertEquals(2, topics.size());
-        assertEquals(this.internalTopics.getHeartRateTopic().getAllTopicNames().toArray()[1],topics.toArray()[0]);
-        assertEquals(this.internalTopics.getHeartRateTopic().getAllTopicNames().toArray()[0],topics.toArray()[1]);
+        List<String> topics = this.internalStreams.getTopicNames();
+        assertEquals(Arrays.asList(
+                "android_empatica_e4_heartrate",
+                "android_empatica_e4_inter_beat_interval"), topics);
     }
 }

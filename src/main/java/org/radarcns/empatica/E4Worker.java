@@ -26,7 +26,7 @@ import org.radarcns.empatica.streams.E4ElectroDermalActivity;
 import org.radarcns.empatica.streams.E4HeartRate;
 import org.radarcns.empatica.streams.E4InterBeatInterval;
 import org.radarcns.empatica.streams.E4Temperature;
-import org.radarcns.empatica.topic.E4Topics;
+import org.radarcns.empatica.topic.E4Streams;
 import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.util.RadarSingletonFactory;
@@ -50,11 +50,11 @@ public class E4Worker extends MasterAggregator {
     protected void announceTopics(@Nonnull Logger log) {
         log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
                 + "before starting: \n  - {}",
-                String.join("\n  - ", E4Topics.getInstance().getTopicNames()));
+                String.join("\n  - ", E4Streams.getInstance().getTopicNames()));
     }
 
     @Override
-    protected List<AggregatorWorker<?,?,?>> createWorkers(int low, int normal, int high) {
+    protected List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         return Arrays.asList(

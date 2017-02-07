@@ -11,8 +11,8 @@
 //import org.radarcns.config.ConfigRadar;
 //import org.radarcns.config.PropertiesRadar;
 //import org.radarcns.empatica.EmpaticaE4Acceleration;
-//import org.radarcns.empatica.topic.E4SensorTopics;
-//import org.radarcns.empatica.topic.E4Topics;
+//import org.radarcns.empatica.topic.E4SensorStreams;
+//import org.radarcns.empatica.topic.E4Streams;
 //import org.radarcns.key.MeasurementKey;
 //import org.radarcns.stream.aggregator.AggregatorWorker;
 //import org.radarcns.stream.aggregator.MasterAggregator;
@@ -50,7 +50,7 @@
 //
 ////        KStreamBuilder streamBuilder = new KStreamBuilder();
 ////        KStream<MeasurementKey, EmpaticaE4Acceleration> stream = streamBuilder.stream("E4Acceleration");
-////        SensorTopic sensorTopic = E4Topics.getInstance().getSensorTopics().getAccelerationTopic();
+////        SensorTopic sensorTopic = E4Streams.getInstance().getSensorTopics().getAccelerationStream();
 ////        e4Acceleration.setStream(stream, sensorTopic);
 //
 //    }

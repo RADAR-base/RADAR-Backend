@@ -21,37 +21,38 @@ import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.errors.StreamsException;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.topic.AvroTopic;
+import org.radarcns.topic.StreamDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Runnable abstraction of Kafka Stream Handler
  */
-public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord,
-        T extends AvroTopic<K, V>> implements Thread.UncaughtExceptionHandler {
+public abstract class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord>
+        implements Thread.UncaughtExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
 
     private final int numThreads;
     private final String clientId;
     private final MasterAggregator master;
-    private final T topic;
+    private final StreamDefinition streamDefinition;
 
     private KafkaStreams streams;
     private KafkaProperty kafkaProperty;
 
-    public AggregatorWorker(@Nonnull T topic, @Nonnull String clientId, int numThreads,
-            @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
+    public AggregatorWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
+            int numThreads, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
         }
         this.clientId = clientId;
         this.master = aggregator;
-        this.topic = topic;
+        this.streamDefinition = streamDefinition;
         this.numThreads = numThreads;
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
@@ -59,8 +60,18 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
 
     /** Create a Kafka Stream builder */
     protected KStreamBuilder getBuilder() throws IOException {
-        return new KStreamBuilder();
+        KStreamBuilder builder = new KStreamBuilder();
+
+        String inputTopic = getStreamDefinition().getInputTopic().getName();
+        setStream(builder.stream(inputTopic));
+
+        return builder;
     }
+
+    /**
+     * @implSpec it defines the stream computation
+     */
+    protected abstract void setStream(@Nonnull KStream<K, V> kstream) throws IOException;
 
     /**
      * It starts the stream and notify the MasterAggregator
@@ -70,7 +81,8 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
             throw new IllegalStateException("Cannot start already started stream again");
         }
         log.info("Creating the stream {} from topic {} to topic {}",
-                getClientId(), getTopic().getInputTopic(), getTopic().getOutputTopic());
+                getClientId(), getStreamDefinition().getInputTopic(),
+                getStreamDefinition().getOutputTopic());
 
         try {
             streams = new KafkaStreams(getBuilder(),
@@ -128,8 +140,8 @@ public class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord
         return streams;
     }
 
-    protected T getTopic() {
-        return topic;
+    protected StreamDefinition getStreamDefinition() {
+        return streamDefinition;
     }
 
     protected void setKafkaProperty(KafkaProperty kafkaProperty) {

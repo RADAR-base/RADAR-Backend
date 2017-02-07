@@ -24,26 +24,26 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by nivethika on 21-12-16.
  */
-public class E4TopicsTest {
-    private E4Topics e4Topics ;
+public class E4StreamsTest {
+    private E4Streams e4Streams;
 
     @Before
     public void setUp() {
-        this.e4Topics = E4Topics.getInstance();
+        this.e4Streams = E4Streams.getInstance();
     }
 
     @Test
     public void getSensorTopics() {
-        assertEquals(this.e4Topics.getSensorTopics(), E4SensorTopics.getInstance());
+        assertEquals(this.e4Streams.getSensorStreams(), E4SensorStreams.getInstance());
     }
 
     @Test
     public void getInternalTopics() {
-        assertEquals(this.e4Topics.getInternalTopics(), E4InternalTopics.getInstance());
+        assertEquals(this.e4Streams.getInternalStreams(), E4InternalStreams.getInstance());
     }
 
     @Test
     public void getTopicNames() {
-        assertEquals(15, this.e4Topics.getTopicNames().size()); // sort removes the redundant
+        assertEquals(15, this.e4Streams.getTopicNames().size()); // sort removes the redundant
     }
 }

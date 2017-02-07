@@ -42,7 +42,7 @@ public abstract class MasterAggregator implements SubCommand {
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<AggregatorWorker<?,?,?>> list;
+    private final List<AggregatorWorker<?,?>> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
     private int lowPriority;
@@ -90,7 +90,7 @@ public abstract class MasterAggregator implements SubCommand {
      * @param low,normal,high: are the three available priority levels that can be used to start
      *                       kafka streams
      */
-    protected abstract List<AggregatorWorker<?,?,?>> createWorkers(int low, int normal, int high);
+    protected abstract List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high);
 
     /**
      * Informative function to log the topics list that the application is going to use
@@ -112,7 +112,7 @@ public abstract class MasterAggregator implements SubCommand {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!list.isEmpty()) {
-            final AggregatorWorker<?, ?, ?> worker = list.remove(list.size() - 1);
+            final AggregatorWorker<?, ?> worker = list.remove(list.size() - 1);
             executor.submit(worker::shutdown);
         }
 
@@ -159,7 +159,7 @@ public abstract class MasterAggregator implements SubCommand {
         //TODO implement forcing shutdown
     }
 
-    public void restartStream(final AggregatorWorker<?, ?, ?> worker) {
+    public void restartStream(final AggregatorWorker<?, ?> worker) {
         log.info("Restarting stream {} for {}", worker.getClientId(), nameSensor);
 
         try {

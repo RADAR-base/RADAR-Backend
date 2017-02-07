@@ -16,11 +16,7 @@
 
 package org.radarcns.topic;
 
-import org.apache.avro.specific.SpecificRecord;
-
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * Set of Avro Topics
@@ -30,10 +26,8 @@ import java.util.Collection;
  *     (e.g. in_progress)</li>
  * <li>an output topic that persists the aggregated results (e.g. input topic)</li>
  * </ul>
- * @param <K> topic key type
- * @param <V> topic record type
  */
-public class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
+public class KafkaTopic {
     private final String name;
 
     /** Topic suffixes for different use cases. */
@@ -54,42 +48,38 @@ public class AvroTopic<K extends SpecificRecord, V extends SpecificRecord> {
     /**
      * @param name topic name inside the Kafka cluster
      */
-    public AvroTopic(@Nonnull String name) {
+    public KafkaTopic(@Nonnull String name) {
         this.name = name;
     }
 
     /**
      * @return topic name
      */
-    protected String getName() {
+    public String getName() {
         return this.name;
     }
 
-    /**
-     * @return name of the Input topic
-     */
-    public String getInputTopic() {
-        return this.name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        KafkaTopic topic = (KafkaTopic) o;
+
+        return name.equals(topic.name);
     }
 
-    /**
-     * @return name of the topic used to write results of data aggregation
-     */
-    public String getOutputTopic() {
-        return name + "_" + Suffix.output;
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 
-    /**
-     * @return State Store name for the given topic
-     */
-    public String getStateStoreName() {
-        return name + "_" + Suffix.store;
-    }
-
-    /**
-     * @return collection of all used topic
-     */
-    public Collection<String> getAllTopicNames() {
-        return Arrays.asList(getInputTopic(), getOutputTopic());
+    public String toString() {
+        return getName();
     }
 }

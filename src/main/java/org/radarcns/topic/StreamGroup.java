@@ -18,9 +18,8 @@ package org.radarcns.topic;
 
 import java.util.List;
 
-/**
- * Abstraction of topics list
- */
-public interface DeviceTopics {
+public interface StreamGroup {
+    StreamDefinition getStreamDefinition(String inputName);
+
     List<String> getTopicNames();
 }

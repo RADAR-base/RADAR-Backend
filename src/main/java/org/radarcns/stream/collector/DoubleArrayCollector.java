@@ -58,7 +58,7 @@ public class DoubleArrayCollector {
     /**
      * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleArrayAggregator
      */
-    public DoubleArrayAggregator convertInAvro() {
+    public DoubleArrayAggregator convertToAvro() {
         int len = collectors.length;
         List<Double> min = new ArrayList<>(len);
         List<Double> max = new ArrayList<>(len);
