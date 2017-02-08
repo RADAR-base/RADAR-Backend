@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package org.radarcns.kafka;
+package org.radarcns.topic;
 
-
+import javax.annotation.Nonnull;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificData;
 
 import java.util.List;
 
 /** KafkaTopic with schema */
-public class AvroTopic<K, V> {
-    private final String name;
+public class AvroTopic<K, V> extends KafkaTopic {
     private final Schema valueSchema;
     private final Schema keySchema;
     private final Schema.Type[] valueFieldTypes;
     private final Class<V> valueClass;
     private final Class<K> keyClass;
 
-    public AvroTopic( String name,   Schema keySchema,   Schema valueSchema,   Class<K> keyClass,   Class<V> valueClass) {
-        this.name = name;
+    public AvroTopic(@Nonnull String name, @Nonnull Schema keySchema, @Nonnull Schema valueSchema,
+            @Nonnull Class<K> keyClass, @Nonnull Class<V> valueClass) {
+        super(name);
         this.keySchema = keySchema;
         this.valueSchema = valueSchema;
         if (this.valueSchema.getField("time") == null) {
@@ -80,22 +80,23 @@ public class AvroTopic<K, V> {
         return valueFieldTypes;
     }
 
-    public String getName() {
-        return name;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass() || !super.equals(o)) {
+            return false;
+        }
 
         AvroTopic topic = (AvroTopic) o;
 
-        return name.equals(topic.name) && keyClass == topic.getKeyClass() && valueClass == topic.getValueClass();
+        return keyClass == topic.getKeyClass()
+                && valueClass == topic.getValueClass();
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return keyClass.hashCode() + 31 * valueClass.hashCode();
     }
 }

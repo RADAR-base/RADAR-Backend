@@ -31,8 +31,8 @@ public class RadarBackendOptions {
     private final String subCommand;
     private final String[] subCommandArgs;
     public static final Options OPTIONS = new Options()
-            .addOption("c", "config", true, "Configuration YAML file");
-
+            .addOption("c", "config", true, "Configuration YAML file")
+            .addOption("d", "devices", true, "Number of devices to use with the mock command.");
 
     /**
      * @param cli command line arguments given
@@ -60,6 +60,10 @@ public class RadarBackendOptions {
 
     public String getPropertyPath() {
         return this.cli.getOptionValue("config", null);
+    }
+
+    public int getNumMockDevices() {
+        return Integer.parseInt(this.cli.getOptionValue("devices", "1"));
     }
 
     public String getSubCommand() {

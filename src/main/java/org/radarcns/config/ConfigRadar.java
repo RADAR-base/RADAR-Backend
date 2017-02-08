@@ -47,6 +47,8 @@ public class ConfigRadar {
     private List<ServerConfig> broker;
     @JsonProperty("schema_registry")
     private List<ServerConfig> schemaRegistry;
+    @JsonProperty("rest_proxy")
+    private ServerConfig restProxy;
     @JsonProperty("auto_commit_interval_ms")
     private Integer autoCommitIntervalMs;
     @JsonProperty("session_timeout_ms")
@@ -167,6 +169,14 @@ public class ConfigRadar {
         this.schemaRegistry = schemaRegistry;
     }
 
+    public ServerConfig getRestProxy() {
+        return restProxy;
+    }
+
+    public void setRestProxy(ServerConfig restProxy) {
+        this.restProxy = restProxy;
+    }
+
     public int threadsByPriority(Priority level, int defaultValue) {
         if (defaultValue <= 0) {
             throw new IllegalArgumentException("Default number of threads must be larger than 0");
@@ -201,6 +211,14 @@ public class ConfigRadar {
         }
 
         return ServerConfig.getPaths(schemaRegistry);
+    }
+
+    public String getRestProxyPath() {
+        if (restProxy == null) {
+            throw new IllegalStateException("'rest_proxy' is not configured");
+        }
+
+        return restProxy.getPath();
     }
 
     public String infoThread() {

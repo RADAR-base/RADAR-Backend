@@ -25,6 +25,7 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.empatica.E4Worker;
 import org.radarcns.monitor.KafkaMonitorFactory;
+import org.radarcns.producer.MockProducerCommand;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,8 @@ public final class RadarBackend {
                 return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
+            case "mock":
+                return new MockProducerCommand(options, radarPropertyHandler);
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());
