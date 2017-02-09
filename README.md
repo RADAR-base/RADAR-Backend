@@ -12,7 +12,7 @@ RADAR-Backend provides an abstract layer to monitor and analyze streams of weara
 The following are the prerequisites to run RADAR-Backend on your machine:
 
 - Java 8
-   - [Confluent Platform 3.1.0](http://docs.confluent.io/3.1.0/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
+- [Confluent Platform 3.1.0](http://docs.confluent.io/3.1.0/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
 - MongoDB installed and running ( to use Hot-storage )
 - Hadoop 2.7.3 and HDFS installed and configured ( to use Cold-storage )
 - SMTP server to send notifications from the monitors.
@@ -37,7 +37,7 @@ The following are the prerequisites to run RADAR-Backend on your machine:
     # Build
     ./gradlew build
     ```
-   The build process creates separate jar files for each component. Built jars are located under `/build/libs` folder.
+   The build process creates separate jar files for each component. Built jars are located under `build/libs` folder.
 
 
 ## Usage
