@@ -39,7 +39,6 @@ public class GeneralStreamGroup implements StreamGroup {
         return ret;
     }
 
-    @Override
     public StreamDefinition getStreamDefinition(String name) {
         StreamDefinition topic = topicMap.get(name);
         if (topic == null) {

@@ -16,15 +16,12 @@
 
 package org.radarcns.empatica.topic;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.radarcns.topic.CombinedStreamGroup;
 
 /**
  * Singleton class representing the list of Empatica E4 topics
  */
-public final class E4Streams {
+public final class E4Streams extends CombinedStreamGroup {
     private static final E4Streams INSTANCE = new E4Streams();
     private static final E4SensorStreams SENSOR_TOPICS = E4SensorStreams.getInstance();
     private static final E4InternalStreams INTERNAL_TOPICS = E4InternalStreams.getInstance();
@@ -33,19 +30,7 @@ public final class E4Streams {
         return INSTANCE;
     }
 
-    private E4Streams(){}
-
-    public List<String> getTopicNames() {
-        Set<String> set = new HashSet<>();
-
-        set.addAll(getSensorStreams().getTopicNames());
-        set.addAll(getInternalStreams().getTopicNames());
-
-        ArrayList<String> list = new ArrayList<>(set);
-        list.sort(String::compareTo);
-
-        return list;
-    }
+    private E4Streams() {}
 
     /**
      * @return an INSTANCE of E4SensorStreams

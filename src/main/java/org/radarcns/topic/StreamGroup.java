@@ -19,7 +19,5 @@ package org.radarcns.topic;
 import java.util.List;
 
 public interface StreamGroup {
-    StreamDefinition getStreamDefinition(String inputName);
-
     List<String> getTopicNames();
 }
