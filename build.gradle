@@ -34,6 +34,7 @@ ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.okhttpVersion = '3.5.0'
 ext.okioVersion = '1.11.0'
+ext.openCsvVersion = '3.9'
 ext.junitVersion = '4.12'
 ext.mockitoVersion = '2.2.29'
 ext.hamcrestVersion = '1.3'
@@ -102,6 +103,7 @@ dependencies {
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.squareup.okio', name: 'okio', version: okioVersion
+    compile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
 
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: junitVersion
