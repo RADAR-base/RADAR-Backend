@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.BatteryMonitorConfig;
+import org.radarcns.config.ConfigLoader;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
@@ -101,7 +102,7 @@ public class KafkaMonitorFactoryTest {
 
     public static RadarPropertyHandler getRadarPropertyHandler(ConfigRadar config, TemporaryFolder folder) throws IOException {
         File tmpConfig = folder.newFile("radar.yml");
-        config.store(tmpConfig);
+        new ConfigLoader().store(tmpConfig, config);
 
         RadarPropertyHandler properties = new RadarPropertyHandlerImpl();
         properties.load(tmpConfig.getAbsolutePath());

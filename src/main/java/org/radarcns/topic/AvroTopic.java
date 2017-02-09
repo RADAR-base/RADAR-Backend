@@ -35,14 +35,9 @@ public class AvroTopic<K, V> extends KafkaTopic {
         super(name);
         this.keySchema = keySchema;
         this.valueSchema = valueSchema;
-        if (this.valueSchema.getField("time") == null) {
-            throw new IllegalArgumentException("Schema must have time as its first field");
-        }
-        if (this.valueSchema.getField("timeReceived") == null) {
-            throw new IllegalArgumentException("Schema must have timeReceived as a field");
-        }
         this.valueClass = valueClass;
         this.keyClass = keyClass;
+
         List<Schema.Field> fields = valueSchema.getFields();
         this.valueFieldTypes = new Schema.Type[fields.size()];
         for (int i = 0; i < fields.size(); i++) {
@@ -64,16 +59,6 @@ public class AvroTopic<K, V> extends KafkaTopic {
 
     public Class<K> getKeyClass() {
         return keyClass;
-    }
-
-    /**
-     * Tries to construct a new SpecificData instance of the value.
-     * @return new empty SpecificData class
-     * @throws ClassCastException Value class is not a SpecificData class
-     */
-    @SuppressWarnings("unchecked")
-    public V newValueInstance() throws ClassCastException {
-        return (V)SpecificData.newInstance(valueClass, valueSchema);
     }
 
     public Schema.Type[] getValueFieldTypes() {

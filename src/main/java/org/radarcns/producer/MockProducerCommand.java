@@ -1,10 +1,14 @@
 package org.radarcns.producer;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.avro.specific.SpecificRecord;
+import org.radarcns.config.ConfigLoader;
 import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
@@ -15,13 +19,24 @@ import org.slf4j.LoggerFactory;
 public class MockProducerCommand implements SubCommand {
     private static final Logger logger = LoggerFactory.getLogger(MockProducerCommand.class);
 
-    private final List<MockDevice> devices;
+    private final List<MockDevice<MeasurementKey>> devices;
+    private final List<MockFile> files;
     private final List<KafkaSender<MeasurementKey, SpecificRecord>> senders;
 
-
     public MockProducerCommand(RadarBackendOptions options,
-            RadarPropertyHandler radarPropertyHandler) {
-        int numDevices = options.getNumMockDevices();
+            RadarPropertyHandler radarPropertyHandler) throws IOException {
+        ConfigRadar radar = radarPropertyHandler.getRadarProperties();
+
+        File mockFile = options.getMockFile();
+        MockConfig mockConfig = null;
+
+        int numDevices;
+        if (mockFile != null) {
+            mockConfig = new ConfigLoader().load(mockFile, MockConfig.class);
+            numDevices = mockConfig.getData().size();
+        } else {
+            numDevices = options.getNumMockDevices();
+        }
 
         logger.info("Simulating the load of " + numDevices);
 
@@ -30,15 +45,15 @@ public class MockProducerCommand implements SubCommand {
 
         devices = new ArrayList<>(numDevices);
         senders = new ArrayList<>(numDevices);
-
-        ConfigRadar radar = radarPropertyHandler.getRadarProperties();
-        SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
+        files = new ArrayList<>(numDevices);
 
         if (options.isMockDirect()) {
             for (int i = 0; i < numDevices; i++) {
                 senders.add(new DirectSender<>(radarPropertyHandler));
             }
         } else {
+            SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
+
             RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender<>(
                     radar.getRestProxyPath(), retriever,
                     new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
@@ -48,9 +63,20 @@ public class MockProducerCommand implements SubCommand {
             }
         }
 
-        for (int i = 0; i < numDevices; i++) {
-            devices.add(new MockDevice<>(senders.get(i), new MeasurementKey(userId + i,
-                    sourceId + i), MeasurementKey.getClassSchema(), MeasurementKey.class));
+        if (mockConfig == null) {
+            for (int i = 0; i < numDevices; i++) {
+                devices.add(new MockDevice<>(senders.get(i), new MeasurementKey(userId + i,
+                        sourceId + i), MeasurementKey.getClassSchema(), MeasurementKey.class));
+            }
+        } else {
+            try {
+                for (int i = 0; i < numDevices; i++) {
+                    files.add(new MockFile(senders.get(i), mockFile, mockConfig.getData().get(i)));
+                }
+            } catch (NoSuchMethodException | IllegalAccessException
+                    | InvocationTargetException | ClassNotFoundException ex) {
+                throw new IOException("Cannot instantiate mock file", ex);
+            }
         }
     }
 
@@ -59,10 +85,16 @@ public class MockProducerCommand implements SubCommand {
         for (MockDevice device : devices) {
             device.start();
         }
+        for (MockFile file : files) {
+            file.send();
+        }
     }
 
     @Override
     public void shutdown() throws IOException, InterruptedException {
+        if (devices.isEmpty()) {
+            return;
+        }
         logger.info("Shutting down mock devices");
         for (MockDevice device : devices) {
             device.shutdown();

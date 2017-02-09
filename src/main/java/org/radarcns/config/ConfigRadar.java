@@ -16,16 +16,8 @@
 
 package org.radarcns.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -257,41 +249,8 @@ public class ConfigRadar {
         this.extras = extras;
     }
 
-    public static ConfigRadar load(File file) throws IOException {
-        ObjectMapper mapper = createMapper();
-        return mapper.readValue(file, ConfigRadar.class);
-    }
-
-    public void store(File file) throws IOException {
-        ObjectMapper mapper = createMapper();
-        mapper.writeValue(file, this);
-    }
-
-    private static ObjectMapper createMapper() {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-        // only serialize fields, not getters, etc.
-        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-        return mapper;
-    }
-
     @Override
     public String toString() {
-        ObjectMapper mapper = createMapper();
-        // pretty print
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        // make ConfigRadar the root element
-        mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
-
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException ex) {
-            throw new UnsupportedOperationException("Cannot serialize config", ex);
-        }
+        return new ConfigLoader().prettyString(this);
     }
 }

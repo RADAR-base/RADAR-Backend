@@ -129,13 +129,40 @@ To get email notifications for Empatica E4 battery status, an email server witho
       port: 8082
       protocol: http
     ```
-2. To generate data on some `backend_mock_empatica_e4_<>` topic with a number of devices, run (substitute `<num-devices>` with the needed number of devices):
+
+2. To send pre-made data, create a `mock_data.yml` YAML file with the following contents:
+
+    ```yaml
+    data:
+      - topic: topic1
+        file: topic1.csv
+        key_schema: org.radarcns.key.MeasurementKey
+        value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+    ```
+
+    Each value has a topic to send the data to, a file containing the data, a schema class for the key and a schema class for the value. Also create a CSV file for each of these entries:
+    ```csv
+    userId,sourceId,time,timeReceived,acceleration
+    a,b,14191933191.223,14191933193.223,[0.001;0.3222;0.6342]
+    a,c,14191933194.223,14191933195.223,[0.13131;0.6241;0.2423]
+    ```
+    Note that for array entries, use brackets (`[` and `]`) to enclose the values and use `;` as a delimiter.
+
+3. To generate data on some `backend_mock_empatica_e4_<>` topic with a number of devices, run (substitute `<num-devices>` with the needed number of devices):
 
     ```shell
     java -jar radarbackend-1.0.jar -c path/to/radar.yml mock --devices <num-devices>
     ```
-        
+
     Press `Ctrl-C` to stop.
+
+4. To generate the file data configured in point 2, run
+
+    ```shell
+    java -jar radarbackend-1.0.jar -c path/to/radar.yml mock --file mock_data.yml
+    ```
+
+    The data sending will automatically be stopped.
 
 ### To Run Radar-HDFS-Connector
 
