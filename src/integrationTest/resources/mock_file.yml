@@ -1,0 +1,5 @@
+data:
+  - file: integration_test.csv
+    topic: integration_test
+    key_schema: org.radarcns.key.MeasurementKey
+    value_schema: org.radarcns.aggregator.DoubleArrayAggregator
