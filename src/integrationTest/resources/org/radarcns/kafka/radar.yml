@@ -39,7 +39,8 @@ schema_registry:
 
 battery_monitor:
   level: LOW
-  email_address: nivethika@thehyve.nl
+  email_address:
+    - nivethika@thehyve.nl
   topics:
     - android_empatica_e4_battery_level
 

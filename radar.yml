@@ -44,7 +44,8 @@ rest_proxy:
 battery_monitor:
   level: LOW
   email_address:
-    - test@thehyve.nl,radar@thehyve.nl
+    - test@thehyve.nl
+    - radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org
