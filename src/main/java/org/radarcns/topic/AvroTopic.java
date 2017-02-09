@@ -16,11 +16,9 @@
 
 package org.radarcns.topic;
 
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificData;
-
-import java.util.List;
 
 /** KafkaTopic with schema */
 public class AvroTopic<K, V> extends KafkaTopic {
