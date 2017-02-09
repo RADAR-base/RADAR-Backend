@@ -32,7 +32,10 @@ public class RadarBackendOptions {
     private final String[] subCommandArgs;
     public static final Options OPTIONS = new Options()
             .addOption("c", "config", true, "Configuration YAML file")
-            .addOption("d", "devices", true, "Number of devices to use with the mock command.");
+            .addOption("d", "devices", true, "Number of devices to use with the mock command.")
+            .addOption("D", "direct", false, "The mock device will bypass the rest-proxy and use "
+                    + "the Kafka Producer API instead.");
+
 
     /**
      * @param cli command line arguments given
@@ -64,6 +67,10 @@ public class RadarBackendOptions {
 
     public int getNumMockDevices() {
         return Integer.parseInt(this.cli.getOptionValue("devices", "1"));
+    }
+
+    public boolean isMockDirect() {
+        return this.cli.hasOption("direct");
     }
 
     public String getSubCommand() {

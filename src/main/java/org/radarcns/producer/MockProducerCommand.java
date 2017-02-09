@@ -33,14 +33,22 @@ public class MockProducerCommand implements SubCommand {
 
         ConfigRadar radar = radarPropertyHandler.getRadarProperties();
         SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
-        RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender<>(
-                radar.getRestProxyPath(), retriever,
-                new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
-                10_000);
+
+        if (options.isMockDirect()) {
+            for (int i = 0; i < numDevices; i++) {
+                senders.add(new DirectSender<>(radarPropertyHandler));
+            }
+        } else {
+            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender<>(
+                    radar.getRestProxyPath(), retriever,
+                    new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
+                    10_000);
+            for (int i = 0; i < numDevices; i++) {
+                senders.add(new BatchedKafkaSender<>(firstSender, 10_000, 1000));
+            }
+        }
 
         for (int i = 0; i < numDevices; i++) {
-            senders.add(new BatchedKafkaSender<>(firstSender, 10_000, 1000));
-            //noinspection unchecked
             devices.add(new MockDevice<>(senders.get(i), new MeasurementKey(userId + i,
                     sourceId + i), MeasurementKey.getClassSchema(), MeasurementKey.class));
         }
