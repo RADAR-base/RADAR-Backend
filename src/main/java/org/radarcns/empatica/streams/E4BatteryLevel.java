@@ -43,7 +43,7 @@ public class E4BatteryLevel extends AggregatorWorker<MeasurementKey, EmpaticaE4B
 
     public E4BatteryLevel(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getBatteryLevelStream(), clientId,
+        super(E4Streams.getInstance().getBatteryLevelStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 

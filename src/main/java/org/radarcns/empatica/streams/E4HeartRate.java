@@ -43,7 +43,7 @@ public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4Inte
 
     public E4HeartRate(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getInternalStreams().getHeartRateStream(), clientId,
+        super(E4Streams.getInstance().getHeartRateStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 

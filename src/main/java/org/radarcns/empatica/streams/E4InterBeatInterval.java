@@ -44,7 +44,7 @@ public class E4InterBeatInterval extends
 
     public E4InterBeatInterval(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getInterBeatIntervalStream(),
+        super(E4Streams.getInstance().getInterBeatIntervalStream(),
                 clientId, numThread, master, kafkaProperties, log);
     }
 

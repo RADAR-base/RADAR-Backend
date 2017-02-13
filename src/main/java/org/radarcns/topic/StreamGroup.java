@@ -18,6 +18,21 @@ package org.radarcns.topic;
 
 import java.util.List;
 
+/**
+ * A group of Kafka stream definitions. For example, a stream group can be created for a type of
+ * device or a business case.
+ */
 public interface StreamGroup {
+    /**
+     * Get all topic names, input and output, that are defined in this stream group.
+     * @return alphabetically ordered list of topic names
+     */
     List<String> getTopicNames();
+
+    /**
+     * Get the stream definition for a given input topic.
+     * @param inputTopic input topic name
+     * @return stream definition of given input topic
+     */
+    StreamDefinition getStreamDefinition(String inputTopic);
 }

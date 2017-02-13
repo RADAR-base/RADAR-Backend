@@ -246,31 +246,32 @@ There are currently two APIs in RADAR-Backend: one for streaming data (RADAR-Str
 
 ### Extending RADAR-Stream
 
-RADAR-Stream is a layer on top of Kafka streams. Topics are processed by streams in two phases. First, an [OutputStreamGroup][7] aggregates data of sensors into predefined time windows (e.g., 10 seconds). Next, a [GeneralStreamGroup][8] aggregates and transforms data that has already been processed by an earlier stream.
+RADAR-Stream is a layer on top of Kafka streams. Topics are processed by streams in two phases. First, a group of sensor streams aggregates data of sensors into predefined time windows (e.g., 10 seconds). Next, internal topics aggregate and transforms data that has already been processed by an earlier stream.
 
 KafkaStreams currently communicates using master-slave model. The [MasterAggregator][1] defines the stream-master, while [AggregatorWorker][2] represents the stream-slave. The master-stream creates, starts and stops a list of stream-slaves registered with the corresponding master. 
 While the classical Kafka Consumer requires two implementations to support standalone and group executions, the AggregatorWorker provides both behaviors with one implementation.
 
 To extend the RADAR-Stream API, follow these steps (see the `org.radarcns.empatica` package as an example):
-- Create sensor streams with an [OutputStreamGroup][7] and if needed internal streams with a [GeneralStreamGroup][8]. Then unify them in a [CombinedStreamGroup][9].
+
+- Create a stream group by overriding [GeneralStreamGroup][8]. Use its `createSensorStream` and `createStream` methods to create the stream definitions.
 - For each topic, create a [AggregatorWorker][2].
 - Define the [MasterAggregator][1]
 
 #### Empatica E4
 
 Currently, RADAR-Backend provides implementation to stream, monitor, store Empatica E4 topics data produced by RADAR-AndroidApplication. 
-[E4Worker][11] is the [MasterAggregator][1]. [E4SensorTopics][12] and [E4InternalTopics][13] are respectively [OutputStreamGroup][7] and [GeneralStreamGroup][8]. [E4Topics][14] (i.e. [CombinedStreamGroup][9]) are consumed by sensor topics:
+[E4Worker][11] is the [MasterAggregator][1]. The stream group [E4Streams][14] defines the following sensor topics:
 
 - [E4Acceleration][15]: it aggregates data coming from accelerometer
 - [E4BatteryLevel][16]: it aggregates battery level information
 - [E4BloodVolumePulse][17]: it aggregates blood volume pulse data
 - [E4ElectroDermalActivity][18]: it aggregates electrodermal activity informations
-- [E4InterBeatInterval][20]: it aggregates inter beat interval data
+- [E4InterBeatInterval][20]: it aggregates inter-beat-interval data
 - [E4Temperature][21]: it aggregates data coming form temperature sensor
 
-And internal topic:
+And one internal topic:
 
-- [E4HeartRate][19]: starting from the inter beat interval, this aggregator computes the heart rate value
+- [E4HeartRate][19]: starting from the inter-beat-interval, this aggregator computes the heart rate
 
 [DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
 
@@ -293,14 +294,10 @@ Monitors can be used to evaluate the status of a single stream, for example whet
 [3]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/AbstractKafkaMonitor.java
 [4]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/KafkaMonitorFactory.java
 [5]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/DisconnectMonitor.java
-[7]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/OutputStreamGroup.java
 [8]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/GeneralStreamGroup.java
-[9]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/CombinedStreamGroup.java
 [10]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/DeviceTimestampExtractor.java
 [11]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/E4Worker.java
-[12]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4SensorTopics.java
-[13]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4InternalTopics.java
-[14]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4Topics.java
+[14]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4Streams.java
 [15]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Acceleration.java
 [16]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BatteryLevel.java
 [17]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BloodVolumePulse.java
