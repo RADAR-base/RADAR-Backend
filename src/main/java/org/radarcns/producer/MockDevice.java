@@ -11,6 +11,7 @@ import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.empatica.EmpaticaE4Tag;
 import org.radarcns.empatica.EmpaticaE4Temperature;
 import org.radarcns.topic.AvroTopic;
+import org.radarcns.util.Oscilloscope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,9 @@ public class MockDevice<K> extends Thread {
     private final AvroTopic<K, EmpaticaE4InterBeatInterval> ibi;
     private final AvroTopic<K, EmpaticaE4Tag> tags;
     private final AvroTopic<K, EmpaticaE4Temperature> temperature;
-    private final int hertzModulus;
+    private final int baseFrequency;
     private final KafkaSender<K, SpecificRecord> sender;
     private final K key;
-    private final long nanoTimeStep;
     private final float batteryDecayFactor;
     private final float timeDriftFactor;
     private final AtomicBoolean stopping;
@@ -64,10 +64,7 @@ public class MockDevice<K> extends Thread {
         temperature = new AvroTopic<>("backend_mock_empatica_e4_temperature",
                 keySchema, EmpaticaE4Temperature.getClassSchema(),
                 keyClass, EmpaticaE4Temperature.class);
-        hertzModulus = 64;
-        nanoTimeStep = 1000000000L / hertzModulus;
-        lastSleep = 0;
-
+        baseFrequency = 64;
 
         // decay
         Random random = new Random();
@@ -80,8 +77,6 @@ public class MockDevice<K> extends Thread {
     }
 
     public void run() {
-        lastSleep = System.nanoTime();
-
         try (
                 KafkaTopicSender<K, EmpaticaE4Acceleration> accelerationSender
                         = sender.sender(acceleration);
@@ -104,29 +99,36 @@ public class MockDevice<K> extends Thread {
             int ibiFrequency = 1;
             int tagsFrequency = 1;
             int temperatureFrequency = 4;
+            int timeStep = 0;
 
-            for (int t = 0; t < Integer.MAX_VALUE && !stopping.get(); t++) {
-                for (int i = 1; i <= hertzModulus; i++) {
-                    double timeReceived = System.currentTimeMillis() / 1000d;
-                    double time = timeReceived + t * timeDriftFactor;
-                    sendIfNeeded(i, accelerationFrequency, accelerationSender,
-                            new EmpaticaE4Acceleration(time, timeReceived, 15f, -15f, 64f));
-                    sendIfNeeded(i, batteryFrequency, batterySender,
-                            new EmpaticaE4BatteryLevel(time, timeReceived,
-                                    1f - (batteryDecayFactor * t % 1)));
-                    sendIfNeeded(i, bvpFrequency, bvpSender,
-                            new EmpaticaE4BloodVolumePulse(time, timeReceived, 80.0f));
-                    sendIfNeeded(i, edaFrequency, edaSender,
-                            new EmpaticaE4ElectroDermalActivity(time, timeReceived, 0.026897f));
-                    sendIfNeeded(i, ibiFrequency, ibiSender,
-                            new EmpaticaE4InterBeatInterval(time, timeReceived, 0.921917f));
-                    sendIfNeeded(i, tagsFrequency, tagSender,
-                            new EmpaticaE4Tag(time, timeReceived));
-                    sendIfNeeded(i, temperatureFrequency, temperatureSender,
-                            new EmpaticaE4Temperature(time, timeReceived, 37.0f));
-                    sleep();
+            Oscilloscope oscilloscope = new Oscilloscope(baseFrequency);
+
+            while (!stopping.get()) {
+                // The time keeping is regulated with beats, with baseFrequency beats per second.
+                int beat = oscilloscope.beat();
+
+                double timeReceived = System.currentTimeMillis() / 1000d;
+                double time = timeReceived + timeStep * timeDriftFactor;
+                sendIfNeeded(beat, accelerationFrequency, accelerationSender,
+                        new EmpaticaE4Acceleration(time, timeReceived, 15f, -15f, 64f));
+                sendIfNeeded(beat, batteryFrequency, batterySender,
+                        new EmpaticaE4BatteryLevel(time, timeReceived,
+                                1f - (batteryDecayFactor * timeStep % 1)));
+                sendIfNeeded(beat, bvpFrequency, bvpSender,
+                        new EmpaticaE4BloodVolumePulse(time, timeReceived, 80.0f));
+                sendIfNeeded(beat, edaFrequency, edaSender,
+                        new EmpaticaE4ElectroDermalActivity(time, timeReceived, 0.026897f));
+                sendIfNeeded(beat, ibiFrequency, ibiSender,
+                        new EmpaticaE4InterBeatInterval(time, timeReceived, 0.921917f));
+                sendIfNeeded(beat, tagsFrequency, tagSender,
+                        new EmpaticaE4Tag(time, timeReceived));
+                sendIfNeeded(beat, temperatureFrequency, temperatureSender,
+                        new EmpaticaE4Temperature(time, timeReceived, 37.0f));
+
+                if (oscilloscope.willRestart()) {
+                    timeStep++;
+                    logger.debug("Single time step {}", key);
                 }
-                logger.debug("Single time step {}", key);
             }
         } catch (InterruptedException ex) {
             // do nothing, just exit the loop
@@ -138,22 +140,13 @@ public class MockDevice<K> extends Thread {
         }
     }
 
-    private <V extends SpecificRecord> void sendIfNeeded(int timeStep, int frequency,
+    private <V extends SpecificRecord> void sendIfNeeded(int beat, int frequency,
             KafkaTopicSender<K, V> topicSender, V avroRecord) throws IOException {
-        if (frequency > 0 && timeStep % (hertzModulus / frequency) == 0) {
+        if (frequency > 0 && beat % (baseFrequency / frequency) == 0) {
             synchronized (OFFSET) {
                 topicSender.send(OFFSET.incrementAndGet(), key, avroRecord);
             }
         }
-    }
-
-    private void sleep() throws InterruptedException {
-        long currentTime = System.nanoTime();
-        long nanoToSleep = nanoTimeStep - currentTime + lastSleep;
-        if (nanoToSleep > 0) {
-            Thread.sleep(nanoToSleep / 1000000L, ((int) nanoToSleep) % 1000000);
-        }
-        lastSleep = currentTime;
     }
 
     public void shutdown() {
