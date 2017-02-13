@@ -43,7 +43,7 @@ public class Oscilloscope {
             long timeToSleep = nextSend - currentTime;
             Thread.sleep(timeToSleep / 1_000_000L, ((int) timeToSleep) % 1_000_000);
         }
-        int beatNumber = (iteration % frequency) + 1;
+        int beatNumber = iteration % frequency + 1;
         iteration++;
         return beatNumber;
     }

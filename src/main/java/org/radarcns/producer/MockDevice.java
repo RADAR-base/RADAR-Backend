@@ -37,7 +37,6 @@ public class MockDevice<K> extends Thread {
     private final float timeDriftFactor;
     private final AtomicBoolean stopping;
 
-    private long lastSleep;
     private IOException exception;
 
     public MockDevice(KafkaSender<K, SpecificRecord> sender, K key,
