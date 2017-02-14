@@ -43,7 +43,7 @@ public class E4Acceleration extends AggregatorWorker<MeasurementKey, EmpaticaE4A
 
     public E4Acceleration(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getAccelerationStream(), clientId,
+        super(E4Streams.getInstance().getAccelerationStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 

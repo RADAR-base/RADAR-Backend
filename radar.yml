@@ -35,11 +35,17 @@ schema_registry:
     - host: localhost
       port: 8081
       protocol: http
+rest_proxy:
+    host: radar-test.thehyve.net
+    port: 8082
+    protocol: http
+
 #======================== Battery level monitor ========================#
 battery_monitor:
   level: LOW
   email_address:
-    - test@thehyve.nl,radar@thehyve.nl
+    - test@thehyve.nl
+    - radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org

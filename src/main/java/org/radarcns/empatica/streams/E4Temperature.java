@@ -43,7 +43,7 @@ public class E4Temperature extends AggregatorWorker<MeasurementKey, EmpaticaE4Te
 
     public E4Temperature(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getTemperatureStream(), clientId,
+        super(E4Streams.getInstance().getTemperatureStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 

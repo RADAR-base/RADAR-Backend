@@ -18,38 +18,66 @@ package org.radarcns.topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+/**
+ * Implementation of a {@link StreamGroup}. Override to create specific streams for a given
+ * device: use the {@link #createStream(String, String)} to create an internal stream and
+ * {@link #createSensorStream(String)} to create a sensor stream.
+ *
+ * <p>To access the streams, create getter functions or use the {@link #getStreamDefinition(String)}
+ * method.
+ */
 public class GeneralStreamGroup implements StreamGroup {
     private final Map<String, StreamDefinition> topicMap;
-    private final List<String> topicNames;
+    private final Set<String> topicNames;
 
     public GeneralStreamGroup() {
         topicMap = new HashMap<>();
-        topicNames = new ArrayList<>();
+        topicNames = new HashSet<>();
     }
 
+    /**
+     * Create a stream from input to output topic. By using this method, {@link #getTopicNames()}
+     * and {@link #getStreamDefinition(String)} automatically get updated.
+     * @param input input topic name
+     * @param output output topic name
+     * @return stream definition.
+     */
     protected StreamDefinition createStream(String input, String output) {
         StreamDefinition ret = new StreamDefinition(new KafkaTopic(input), new KafkaTopic(output));
         topicMap.put(input, ret);
         topicNames.add(input);
         topicNames.add(output);
-        topicNames.sort(String::compareTo);
         return ret;
     }
 
+    /**
+     * Create a sensor stream from input topic to a "[input]_output" topic. By using this method,
+     * {@link #getTopicNames()} and {@link #getStreamDefinition(String)} automatically get updated.
+     * @param input input topic name
+     * @return sensor stream definition
+     */
+    protected StreamDefinition createSensorStream(String input) {
+        return createStream(input, input + "_output");
+    }
+
     @Override
-    public StreamDefinition getStreamDefinition(String name) {
-        StreamDefinition topic = topicMap.get(name);
+    public StreamDefinition getStreamDefinition(String inputTopic) {
+        StreamDefinition topic = topicMap.get(inputTopic);
         if (topic == null) {
-            throw new IllegalArgumentException("Topic " + name + " unknown");
+            throw new IllegalArgumentException("Topic " + inputTopic + " unknown");
         }
         return topic;
     }
 
     @Override
     public List<String> getTopicNames() {
-        return topicNames;
+        List<String> topicList = new ArrayList<>(topicNames);
+        topicList.sort(String::compareToIgnoreCase);
+        return topicList;
     }
 }

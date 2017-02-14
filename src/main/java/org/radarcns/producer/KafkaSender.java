@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package org.radarcns.topic;
+package org.radarcns.producer;
 
-import java.util.List;
+import java.io.Closeable;
+import java.io.IOException;
+import org.radarcns.topic.AvroTopic;
 
-/**
- * A group of Kafka stream definitions. For example, a stream group can be created for a type of
- * device or a business case.
- */
-public interface StreamGroup {
-    /**
-     * Get all topic names, input and output, that are defined in this stream group.
-     * @return alphabetically ordered list of topic names
-     */
-    List<String> getTopicNames();
+/** Thread-safe sender */
+public interface KafkaSender<K, V> extends Closeable {
+    /** Get a non thread-safe sender instance. */
+    <L extends K, W extends V> KafkaTopicSender<L, W> sender(AvroTopic<L, W> topic)
+            throws IOException;
 
     /**
-     * Get the stream definition for a given input topic.
-     * @param inputTopic input topic name
-     * @return stream definition of given input topic
+     * If the sender is no longer connected, try to reconnect.
+     * @return whether the connection has been restored.
      */
-    StreamDefinition getStreamDefinition(String inputTopic);
+    boolean resetConnection();
+
+    /**
+     * Whether the sender is connected to the Kafka system.
+     */
+    boolean isConnected();
 }

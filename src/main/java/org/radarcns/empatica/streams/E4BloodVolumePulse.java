@@ -42,7 +42,7 @@ public class E4BloodVolumePulse extends
 
     public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getBloodVolumePulseStream(),
+        super(E4Streams.getInstance().getBloodVolumePulseStream(),
                 clientId, numThread, master, kafkaProperties, log);
     }
 

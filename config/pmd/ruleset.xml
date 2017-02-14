@@ -50,6 +50,7 @@
   <rule ref="rulesets/java/design.xml">
     <exclude name="AvoidDeeplyNestedIfStmts"/>
     <exclude name="SwitchDensity"/>
+    <exclude name="AccessorClassGeneration"/>
     <exclude name="ConstructorCallsOverridableMethod"/>
     <exclude name="AvoidSynchronizedAtMethodLevel"/>
     <exclude name="TooFewBranchesForASwitchStatement"/>

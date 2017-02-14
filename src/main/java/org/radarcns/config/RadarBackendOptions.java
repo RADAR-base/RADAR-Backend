@@ -16,6 +16,7 @@
 
 package org.radarcns.config;
 
+import java.io.File;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -31,7 +32,11 @@ public class RadarBackendOptions {
     private final String subCommand;
     private final String[] subCommandArgs;
     public static final Options OPTIONS = new Options()
-            .addOption("c", "config", true, "Configuration YAML file");
+            .addOption("c", "config", true, "Configuration YAML file")
+            .addOption("d", "devices", true, "Number of devices to use with the mock command.")
+            .addOption("D", "direct", false, "The mock device will bypass the rest-proxy and use "
+                    + "the Kafka Producer API instead.")
+            .addOption("f", "file", true, "Read mock data from given configuration file.");
 
 
     /**
@@ -60,6 +65,23 @@ public class RadarBackendOptions {
 
     public String getPropertyPath() {
         return this.cli.getOptionValue("config", null);
+    }
+
+    public int getNumMockDevices() {
+        return Integer.parseInt(this.cli.getOptionValue("devices", "1"));
+    }
+
+    public boolean isMockDirect() {
+        return this.cli.hasOption("direct");
+    }
+
+    public File getMockFile() {
+        String file = this.cli.getOptionValue("file", null);
+        if (file == null) {
+            return null;
+        } else {
+            return new File(file);
+        }
     }
 
     public String getSubCommand() {

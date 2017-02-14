@@ -45,7 +45,7 @@ public class E4ElectroDermalActivity extends
 
     public E4ElectroDermalActivity(String clientId, int numThread, MasterAggregator master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getSensorStreams().getElectroDermalActivityStream(),
+        super(E4Streams.getInstance().getElectroDermalActivityStream(),
                 clientId, numThread, master, kafkaProperties, log);
     }
 

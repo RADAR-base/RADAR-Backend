@@ -74,7 +74,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             throw new IllegalArgumentException("Config file " + file + " is invalid");
         }
 
-        properties = ConfigRadar.load(file);
+        properties = new ConfigLoader().load(file, ConfigRadar.class);
 
         //TODO: add check to validate configuration file. Remember
         //  - log path can be only null, all others have to be stated
