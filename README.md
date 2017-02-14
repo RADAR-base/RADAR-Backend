@@ -12,7 +12,7 @@ RADAR-Backend provides an abstract layer to monitor and analyze streams of weara
 The following are the prerequisites to run RADAR-Backend on your machine:
 
 - Java 8
-- [Confluent Platform 3.1.0](http://docs.confluent.io/3.1.0/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
+- [Confluent Platform 3.1.2](http://docs.confluent.io/3.1.2/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
 - MongoDB installed and running ( to use Hot-storage )
 - Hadoop 2.7.3 and HDFS installed and configured ( to use Cold-storage )
 - SMTP server to send notifications from the monitors.
@@ -184,7 +184,7 @@ To get email notifications for Empatica E4 battery status, an email server witho
     hdfs.url=hdfs://localhost:9000
     format.class=org.radarcns.sink.HDFS.AvroFormatRadar
     ```
-    For more details visit our [wiki](https://github.com/RADAR-CNS/RADAR-Backend/wiki/Guide-to-RADAR-HDFS-Connector) and [Kafka-HDFS-Connector](http://docs.confluent.io/3.1.0/connect/connect-hdfs/docs/hdfs_connector.html)
+    For more details visit our [wiki](https://github.com/RADAR-CNS/RADAR-Backend/wiki/Guide-to-RADAR-HDFS-Connector) and [Kafka-HDFS-Connector](http://docs.confluent.io/3.1.2/connect/connect-hdfs/docs/hdfs_connector.html)
    
 4. Run the connector. To run the connector in `standalone mode` (on an enviornment confluent platform is installed)
    
@@ -230,7 +230,7 @@ To get email notifications for Empatica E4 battery status, an email server witho
     # Factory class to do the actual record conversion
     record.converter.class=org.radarcns.sink.mongodb.RecordConverterFactoryRadar
     ```
-    For more details visit our [MongoDBConnector](https://github.com/RADAR-CNS/RADAR-MongoDbConnector) and [Kafka-Connect](http://docs.confluent.io/3.1.0/connect/quickstart.html)
+    For more details visit our [MongoDBConnector](https://github.com/RADAR-CNS/RADAR-MongoDbConnector) and [Kafka-Connect](http://docs.confluent.io/3.1.2/connect/quickstart.html)
    
 4. Run the connector. To run the connector in `standalone mode` (on an enviornment where the Confluent platform is installed):
    
@@ -273,7 +273,7 @@ And one internal topic:
 
 - [E4HeartRate][19]: starting from the inter-beat-interval, this aggregator computes the heart rate
 
-[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.0/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
+[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.2/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
 
 ### Extending RADAR-Monitor
 
