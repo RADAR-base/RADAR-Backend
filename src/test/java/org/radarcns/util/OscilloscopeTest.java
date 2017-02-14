@@ -6,7 +6,6 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 
 public class OscilloscopeTest {
-
     @Test
     public void beat() throws Exception {
         Oscilloscope oscilloscope = new Oscilloscope(128);
@@ -32,7 +31,7 @@ public class OscilloscopeTest {
         assertEquals(1, oscilloscope.beat());
         // total time, from one cycle to the next, is about 1 second
         long cycleDiff = System.currentTimeMillis() - time;
-        assertThat(cycleDiff, Matchers.greaterThanOrEqualTo(1000L));
+        assertThat(cycleDiff, Matchers.greaterThanOrEqualTo(998L));
         assertThat(cycleDiff, Matchers.lessThan(1004L));
     }
 }
