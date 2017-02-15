@@ -3,6 +3,7 @@ package org.radarcns.producer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.avro.specific.SpecificRecord;
@@ -12,7 +13,13 @@ import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
+import org.radarcns.data.SpecificRecordEncoder;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.mock.MockDevice;
+import org.radarcns.mock.MockFile;
+import org.radarcns.producer.rest.BatchedKafkaSender;
+import org.radarcns.producer.rest.RestSender;
+import org.radarcns.producer.rest.SchemaRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +61,8 @@ public class MockProducerCommand implements SubCommand {
         } else {
             SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
 
-            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender<>(
-                    radar.getRestProxyPath(), retriever,
+            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender(new URL(
+                    radar.getRestProxyPath()), retriever,
                     new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
                     10_000);
             for (int i = 0; i < numDevices; i++) {

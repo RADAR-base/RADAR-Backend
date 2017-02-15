@@ -77,7 +77,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
     flatDir {
-        dirs 'libs'
+        dirs 'libs', 'commons/build/libs'
     }
 }
 
@@ -104,6 +104,7 @@ dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.squareup.okio', name: 'okio', version: okioVersion
     compile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
+    compile group: 'org.radarcns', name: 'radar-commons', version: '0.1-SNAPSHOT'
 
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: junitVersion

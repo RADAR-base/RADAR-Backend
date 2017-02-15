@@ -30,8 +30,10 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.kafka.KafkaSender;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.mock.MockDevice;
+import org.radarcns.producer.KafkaSender;
+import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class DirectProducerTest {
         MockDevice[] threads = new MockDevice[numberOfDevices];
         KafkaSender[] senders = new KafkaSender[numberOfDevices];
         for (int i = 0; i < numberOfDevices; i++) {
-            senders[i] = new DirectProducer<>(props);
+            senders[i] = new DirectSender(props);
             //noinspection unchecked
             threads[i] = new MockDevice<>(senders[i], new MeasurementKey(userID+i, sourceID+i), MeasurementKey.getClassSchema(), MeasurementKey.class);
             threads[i].start();

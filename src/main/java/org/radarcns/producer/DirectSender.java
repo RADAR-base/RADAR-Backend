@@ -13,6 +13,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.data.Record;
 import org.radarcns.topic.AvroTopic;
 
 /**
