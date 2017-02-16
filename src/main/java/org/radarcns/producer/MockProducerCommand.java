@@ -61,7 +61,7 @@ public class MockProducerCommand implements SubCommand {
         } else {
             SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
 
-            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender(new URL(
+            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender<>(new URL(
                     radar.getRestProxyPath()), retriever,
                     new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
                     10_000);
