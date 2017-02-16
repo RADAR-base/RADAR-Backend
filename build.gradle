@@ -3,7 +3,6 @@ plugins {
     id 'java'
     id 'idea'
     id 'application'
-    id 'com.commercehub.gradle.plugin.avro-base' version '0.9.0'
     id 'jacoco'
     id 'pmd'
     id 'checkstyle'
@@ -104,7 +103,7 @@ dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
     compile group: 'com.squareup.okio', name: 'okio', version: okioVersion
     compile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
-    compile group: 'org.radarcns', name: 'radar-commons', version: '0.1-SNAPSHOT'
+    compile project(':commons')
 
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: junitVersion
@@ -115,19 +114,6 @@ dependencies {
 
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
-
-//---------------------------------------------------------------------------//
-// AVRO file manipulation                                                    //
-//---------------------------------------------------------------------------//
-
-
-task generateAvro(type: com.commercehub.gradle.plugin.avro.GenerateAvroJavaTask) {
-    source("src/main/resources/avro")
-    outputDir = file("build/avro")
-}
-
-compileJava.source(generateAvro.outputs)
-idea.module.sourceDirs += file("build/avro")
 
 //---------------------------------------------------------------------------//
 // Packaging                                                                 //

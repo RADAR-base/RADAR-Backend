@@ -18,11 +18,14 @@ package org.radarcns.integration;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -56,6 +59,8 @@ public class DirectProducerTest {
         Properties props = new Properties();
         props.put(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
         props.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
+        props.put(KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+        props.put(VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 
         int numberOfDevices = 1;
         logger.info("Simulating the load of " + numberOfDevices);
