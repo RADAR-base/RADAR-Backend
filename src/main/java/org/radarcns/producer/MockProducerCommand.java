@@ -1,11 +1,17 @@
 package org.radarcns.producer;
 
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
+
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import org.apache.avro.specific.SpecificRecord;
 import org.radarcns.config.ConfigLoader;
 import org.radarcns.config.ConfigRadar;
@@ -17,6 +23,7 @@ import org.radarcns.data.SpecificRecordEncoder;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.mock.MockDevice;
 import org.radarcns.mock.MockFile;
+import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.producer.rest.BatchedKafkaSender;
 import org.radarcns.producer.rest.RestSender;
 import org.radarcns.producer.rest.SchemaRetriever;
@@ -56,13 +63,20 @@ public class MockProducerCommand implements SubCommand {
 
         if (options.isMockDirect()) {
             for (int i = 0; i < numDevices; i++) {
-                senders.add(new DirectSender<>(radarPropertyHandler));
+                Properties properties = new Properties();
+                properties.put(KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+                properties.put(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+                ConfigRadar radarProperties = radarPropertyHandler.getRadarProperties();
+                properties.put(SCHEMA_REGISTRY_URL_CONFIG, radarProperties.getSchemaRegistryPaths());
+                properties.put(BOOTSTRAP_SERVERS_CONFIG, radarProperties.getBrokerPaths());
+
+                senders.add(new DirectSender(properties));
             }
         } else {
             SchemaRetriever retriever = new SchemaRetriever(radar.getSchemaRegistryPaths());
 
-            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender(new URL(
-                    radar.getRestProxyPath()), retriever,
+            RestSender<MeasurementKey, SpecificRecord> firstSender = new RestSender(
+                    radar.getRestProxyPath(), retriever,
                     new SpecificRecordEncoder(false), new SpecificRecordEncoder(false),
                     10_000);
             for (int i = 0; i < numDevices; i++) {
