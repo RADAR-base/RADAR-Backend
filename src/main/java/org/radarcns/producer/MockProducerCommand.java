@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MockProducerCommand implements SubCommand {
+
     private static final Logger logger = LoggerFactory.getLogger(MockProducerCommand.class);
 
     private final List<MockDevice<MeasurementKey>> devices;
@@ -67,7 +68,8 @@ public class MockProducerCommand implements SubCommand {
                 properties.put(KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
                 properties.put(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
                 ConfigRadar radarProperties = radarPropertyHandler.getRadarProperties();
-                properties.put(SCHEMA_REGISTRY_URL_CONFIG, radarProperties.getSchemaRegistryPaths());
+                properties
+                        .put(SCHEMA_REGISTRY_URL_CONFIG, radarProperties.getSchemaRegistryPaths());
                 properties.put(BOOTSTRAP_SERVERS_CONFIG, radarProperties.getBrokerPaths());
 
                 senders.add(new DirectSender(properties));
