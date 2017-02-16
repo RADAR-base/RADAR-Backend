@@ -100,9 +100,6 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core' , name: 'jackson-databind' , version: jacksonVersion
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: okhttpVersion
-    compile group: 'com.squareup.okio', name: 'okio', version: okioVersion
-    compile group: 'com.opencsv', name: 'opencsv', version: openCsvVersion
     compile project(':commons')
 
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
