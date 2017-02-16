@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
