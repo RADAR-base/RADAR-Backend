@@ -16,8 +16,9 @@
 
 package org.radarcns.empatica.topic;
 
-import org.radarcns.topic.GeneralStreamGroup;
-import org.radarcns.topic.StreamDefinition;
+
+import org.radarcns.stream.GeneralStreamGroup;
+import org.radarcns.stream.StreamDefinition;
 
 /**
  * Singleton class representing the list of Empatica E4 topics
