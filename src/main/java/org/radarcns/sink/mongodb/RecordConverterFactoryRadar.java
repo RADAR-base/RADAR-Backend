@@ -34,6 +34,8 @@ public class RecordConverterFactoryRadar extends RecordConverterFactory {
     protected List<RecordConverter> genericConverters() {
         List<RecordConverter> recordConverters = new ArrayList<RecordConverter>();
         recordConverters.addAll(super.genericConverters());
+        recordConverters.add(new AggregatedAccelerationRecordConverter());
+        recordConverters.add(new DoubleAggregatedRecordConverter());
         recordConverters.add(new BatteryLevelRecordConverter());
         recordConverters.add(new CountsStatusRecordConverter());
         recordConverters.add(new ServerStatusRecordConverter());
