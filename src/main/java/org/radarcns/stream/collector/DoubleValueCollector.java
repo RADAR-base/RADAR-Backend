@@ -122,7 +122,8 @@ public class DoubleValueCollector {
      * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleAggregator
      */
     public DoubleAggregator convertToAvro() {
-        return new DoubleAggregator(min, max, sum.doubleValue(), (double)count, avg, getQuartile(), iqr);
+        return new DoubleAggregator(getMin(), getMax(), getSum(), getCount(), getAvg(),
+                getQuartile(), getIqr());
     }
 
     public double getMin() {
