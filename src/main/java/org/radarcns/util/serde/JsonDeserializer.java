@@ -21,13 +21,11 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-
+import java.io.IOException;
+import java.util.Map;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Map;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
     private static final Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);

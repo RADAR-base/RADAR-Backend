@@ -1,6 +1,7 @@
 package org.radarcns.config;
 
 import java.util.List;
+import org.radarcns.mock.MockDataConfig;
 
 public class MockConfig {
     private List<MockDataConfig> data;

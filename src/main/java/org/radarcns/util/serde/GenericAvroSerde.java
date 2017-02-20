@@ -16,13 +16,12 @@
 
 package org.radarcns.util.serde;
 
+import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
-
-import java.util.Map;
 
 /**
  * Created by Francesco Nobilia on 12/10/2016.
