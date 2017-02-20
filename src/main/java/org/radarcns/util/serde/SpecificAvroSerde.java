@@ -16,13 +16,12 @@
 
 package org.radarcns.util.serde;
 
+import java.util.Map;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
-
-import java.util.Map;
 
 public class SpecificAvroSerde<T extends SpecificRecord> implements Serde<T> {
     private final Serde<T> inner;

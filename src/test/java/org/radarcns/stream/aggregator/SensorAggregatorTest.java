@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.radarcns.topic.KafkaTopic;
 
 import java.io.IOException;
-import org.radarcns.topic.StreamDefinition;
+import org.radarcns.stream.StreamDefinition;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

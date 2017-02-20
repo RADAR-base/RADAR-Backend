@@ -25,7 +25,7 @@ import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.topic.StreamDefinition;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

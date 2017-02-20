@@ -18,6 +18,8 @@ package org.radarcns.integration;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -30,8 +32,10 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.kafka.KafkaSender;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.mock.MockDevice;
+import org.radarcns.producer.KafkaSender;
+import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +58,8 @@ public class DirectProducerTest {
         Properties props = new Properties();
         props.put(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
         props.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
+        props.put(KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+        props.put(VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 
         int numberOfDevices = 1;
         logger.info("Simulating the load of " + numberOfDevices);
@@ -64,7 +70,7 @@ public class DirectProducerTest {
         MockDevice[] threads = new MockDevice[numberOfDevices];
         KafkaSender[] senders = new KafkaSender[numberOfDevices];
         for (int i = 0; i < numberOfDevices; i++) {
-            senders[i] = new DirectProducer<>(props);
+            senders[i] = new DirectSender(props);
             //noinspection unchecked
             threads[i] = new MockDevice<>(senders[i], new MeasurementKey(userID+i, sourceID+i), MeasurementKey.getClassSchema(), MeasurementKey.class);
             threads[i].start();
