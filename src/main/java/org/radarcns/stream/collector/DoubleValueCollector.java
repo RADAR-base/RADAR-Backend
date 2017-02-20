@@ -30,7 +30,7 @@ import org.radarcns.util.RadarUtilities;
 public class DoubleValueCollector {
     private double min = Double.MAX_VALUE;
     private double max = Double.MIN_VALUE;
-    private BigDecimal sum = new BigDecimal(0.0);
+    private BigDecimal sum = BigDecimal.ZERO;
     private int count = 0;
     private double avg = 0;
     private final double[] quartile = new double[3];
@@ -79,9 +79,9 @@ public class DoubleValueCollector {
      */
     private void updateAvg(double value) {
         count++;
-        sum = sum.add(new BigDecimal(value));
+        sum = sum.add(BigDecimal.valueOf(value));
 
-        avg = sum.divide(new BigDecimal(count), BigDecimal.ROUND_HALF_EVEN).doubleValue();
+        avg = sum.divide(BigDecimal.valueOf(count), BigDecimal.ROUND_HALF_EVEN).doubleValue();
     }
 
     /**
@@ -101,8 +101,8 @@ public class DoubleValueCollector {
         quartile[1] = ds.getPercentile(50);
         quartile[2] = ds.getPercentile(75);
 
-        iqr = new BigDecimal(quartile[2]).subtract(
-                new BigDecimal(quartile[0])).doubleValue();
+        iqr = BigDecimal.valueOf(quartile[2]).subtract(
+                BigDecimal.valueOf(quartile[0])).doubleValue();
     }
 
     @Override
