@@ -19,7 +19,6 @@ package org.radarcns.stream.collector;
 import com.google.common.primitives.Doubles;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.radarcns.aggregator.DoubleAggregator;
@@ -81,7 +80,7 @@ public class DoubleValueCollector {
         count++;
         sum = sum.add(BigDecimal.valueOf(value));
 
-        avg = sum.divide(BigDecimal.valueOf(count), BigDecimal.ROUND_HALF_EVEN).doubleValue();
+        avg = sum.doubleValue() / count;
     }
 
     /**
@@ -108,13 +107,13 @@ public class DoubleValueCollector {
     @Override
     public String toString() {
         return "DoubleValueCollector{"
-                + "min=" + min
-                + ", max=" + max
-                + ", sum=" + sum
-                + ", count=" + count
-                + ", avg=" + avg
-                + ", quartile=" + Arrays.toString(quartile)
-                + ", iqr=" + iqr
+                + "min=" + getMin()
+                + ", max=" + getMax()
+                + ", sum=" + getSum()
+                + ", count=" + getCount()
+                + ", avg=" + getAvg()
+                + ", quartile=" + getQuartile()
+                + ", iqr=" + getIqr()
                 + ", history=" + history + '}';
     }
 

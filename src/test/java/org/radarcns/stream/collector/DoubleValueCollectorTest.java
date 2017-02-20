@@ -69,9 +69,9 @@ public class DoubleValueCollectorTest {
         valueCollector.add(15.0d);
         assertEquals(10.0234d, valueCollector.getMin(), 0.0d);
         assertEquals(15.0d, valueCollector.getMax(), 0.0d);
-        assertEquals(25.023400000000002d, valueCollector.getSum(), 0.0d);
-        assertEquals(12.511700000000001d, valueCollector.getAvg(), 0.0d);
-        assertEquals(15.0d-10.0234d, valueCollector.getIqr(), 0.0d);
+        assertEquals(25.0234d, valueCollector.getSum(), 0.0d);
+        assertEquals(12.5117d, valueCollector.getAvg(), 0.0d);
+        assertEquals(4.9766d, valueCollector.getIqr(), 0.0d);
         assertEquals(2, valueCollector.getCount(),0);
 
         valueCollector.add(28.100d);
