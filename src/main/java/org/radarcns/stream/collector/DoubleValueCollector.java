@@ -17,6 +17,7 @@
 package org.radarcns.stream.collector;
 
 import com.google.common.primitives.Doubles;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,8 +30,8 @@ import org.radarcns.util.RadarUtilities;
 public class DoubleValueCollector {
     private double min = Double.MAX_VALUE;
     private double max = Double.MIN_VALUE;
-    private double sum = 0;
-    private double count = 0;
+    private BigDecimal sum = new BigDecimal(0.0);
+    private int count = 0;
     private double avg = 0;
     private final double[] quartile = new double[3];
     private double iqr = 0;
@@ -78,9 +79,9 @@ public class DoubleValueCollector {
      */
     private void updateAvg(double value) {
         count++;
-        sum += value;
+        sum = sum.add(new BigDecimal(value));
 
-        avg = sum / count;
+        avg = sum.divide(new BigDecimal(count), BigDecimal.ROUND_HALF_EVEN).doubleValue();
     }
 
     /**
@@ -100,7 +101,8 @@ public class DoubleValueCollector {
         quartile[1] = ds.getPercentile(50);
         quartile[2] = ds.getPercentile(75);
 
-        iqr = quartile[2] - quartile[0];
+        iqr = new BigDecimal(quartile[2]).subtract(
+                new BigDecimal(quartile[0])).doubleValue();
     }
 
     @Override
@@ -120,7 +122,7 @@ public class DoubleValueCollector {
      * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleAggregator
      */
     public DoubleAggregator convertToAvro() {
-        return new DoubleAggregator(min, max, sum, count, avg, getQuartile(), iqr);
+        return new DoubleAggregator(min, max, sum.doubleValue(), (double)count, avg, getQuartile(), iqr);
     }
 
     public double getMin() {
@@ -132,7 +134,7 @@ public class DoubleValueCollector {
     }
 
     public double getSum() {
-        return sum;
+        return sum.doubleValue();
     }
 
     public double getCount() {
