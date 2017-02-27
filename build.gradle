@@ -20,17 +20,19 @@ mainClassName = 'org.radarcns.RadarBackend'
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.kafkaVersion = '0.10.1.1'
-ext.confluentVersion = '3.1.2'
 ext.boundaryVersion = '1.0.6'
-ext.mathVersion = '3.0'
+ext.codacyVersion = '1.0.10'
+ext.confluentVersion = '3.1.2'
+ext.hamcrestVersion = '1.3'
+ext.kafkaVersion = '0.10.1.1'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
+ext.mathVersion = '3.0'
+ext.mongoDbSinkVersion = '0.1-SNAPSHOT'
 ext.mockitoVersion = '2.2.29'
-ext.hamcrestVersion = '1.3'
+ext.radarCommonsVersion = 'v0.1-alpha.2'
 ext.subethamailVersion = '3.1.7'
-ext.codacyVersion = '1.0.10'
 
 //---------------------------------------------------------------------------//
 // Sources and classpath configurations                                      //
@@ -67,6 +69,7 @@ repositories {
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+    maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
     flatDir {
         dirs 'libs'
     }
@@ -85,8 +88,8 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-    connectorMongo group: 'org.radarcns', name: 'RADAR-Commons', version: 'v0.1-alpha.2'
-    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
+    connectorMongo group: 'org.radarcns', name: 'RADAR-Commons', version: radarCommonsVersion
+    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: mongoDbSinkVersion
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
