@@ -25,15 +25,16 @@ import org.bson.Document;
 import org.radarcns.application.ApplicationRecordCounts;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.serialization.RecordConverter;
+import org.radarcns.sink.mongodb.util.Converter;
 
 /**
- * RecordConverter to convert a StatusRecordCounts record to a MongoDB Document
+ * RecordConverter to convert a StatusRecordCounts record to a MongoDB Document.
  */
 public class CountsStatusRecordConverter implements RecordConverter {
 
     /**
      * Returns the list of supported schemas, which behaves as the id to select suitable
-     * RecordConverter for a SinkRecord
+     * RecordConverter for a SinkRecord.
      *
      * @return a list of supported Schemas
      */
@@ -44,7 +45,7 @@ public class CountsStatusRecordConverter implements RecordConverter {
     }
 
     /**
-     * Converts a ServerStatus SinkRecord into a MongoDB Document
+     * Converts a ServerStatus SinkRecord into a MongoDB Document.
      *
      * @param sinkRecord record to be converted
      * @return converted MongoDB Document to write
@@ -55,22 +56,14 @@ public class CountsStatusRecordConverter implements RecordConverter {
         Struct key = (Struct) sinkRecord.key();
         Struct value = (Struct) sinkRecord.value();
 
-        return new Document("_id", measurementKeyToMongoDbKey(key))
+        return new Document("_id", Converter.measurementKeyToMongoDbKey(key))
                 .append("user", key.getString("userId"))
                 .append("source", key.getString("sourceId"))
                 .append("recordsCached", value.getInt32("recordsCached"))
                 .append("recordsSent", value.getInt32("recordsSent"))
-                .append("recordsUnsent", value.getInt32("recordsUnsent"));
+                .append("recordsUnsent", value.getInt32("recordsUnsent"))
+                .append("timestamp", Converter.toDateTime(value.get("timeReceived")));
     }
 
 
-    /**
-     * Creates a key string using userId and sourceId
-     * @param key
-     * @return converted key string
-     */
-    private static String measurementKeyToMongoDbKey(Struct key) {
-        return key.get("userId")
-                + "-" + key.get("sourceId");
-    }
 }

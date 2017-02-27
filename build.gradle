@@ -110,6 +110,7 @@ task connectorMongoJar(type: Jar) {
     }
     from(sourceSets.main.output) {
         include "org/radarcns/sink/mongodb/*"
+        include "org/radarcns/sink/mongodb/util/*"
     }
     archiveName = "radar-mongodb-connector-${version}.jar"
 }
