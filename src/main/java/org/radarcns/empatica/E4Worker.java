@@ -16,7 +16,10 @@
 
 package org.radarcns.empatica;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.empatica.streams.E4Acceleration;
@@ -31,10 +34,6 @@ import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Singleton MasterAggregator for Empatica E4

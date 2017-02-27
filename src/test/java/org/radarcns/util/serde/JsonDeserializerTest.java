@@ -16,11 +16,9 @@
 
 package org.radarcns.util.serde;
 
-import junit.framework.TestCase;
-
-import org.radarcns.key.MeasurementKey;
-
 import java.nio.charset.Charset;
+import junit.framework.TestCase;
+import org.radarcns.key.MeasurementKey;
 
 public class JsonDeserializerTest extends TestCase {
     public void testSerialize() throws Exception {

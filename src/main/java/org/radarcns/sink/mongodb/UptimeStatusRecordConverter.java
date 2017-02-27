@@ -22,6 +22,8 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.Document;
+import org.radarcns.application.ApplicationUptime;
+import org.radarcns.key.MeasurementKey;
 import org.radarcns.serialization.RecordConverter;
 
 /**
@@ -37,8 +39,8 @@ public class UptimeStatusRecordConverter implements RecordConverter {
      */
     @Override
     public Collection<String> supportedSchemaNames() {
-        return Collections.singleton("org.radarcns.key.MeasurementKey-"
-                + "org.radarcns.applicationstatus.ApplicationStatusUptime");
+        return Collections.singleton(MeasurementKey.class.getCanonicalName() + "-"
+                + ApplicationUptime.class.getCanonicalName());
     }
 
     /**
@@ -56,7 +58,7 @@ public class UptimeStatusRecordConverter implements RecordConverter {
         return new Document("_id", measurementKeyToMongoDbKey(key))
                 .append("user", key.getString("userId"))
                 .append("source", key.getString("sourceId"))
-                .append("applicationUptime", value.getFloat64("applicationUptime"));
+                .append("applicationUptime", value.getFloat64("uptime"));
     }
 
 

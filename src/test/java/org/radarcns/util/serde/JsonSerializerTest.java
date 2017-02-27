@@ -17,7 +17,6 @@
 package org.radarcns.util.serde;
 
 import junit.framework.TestCase;
-
 import org.radarcns.key.MeasurementKey;
 
 public class JsonSerializerTest extends TestCase {

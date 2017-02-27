@@ -16,12 +16,12 @@
 
 package org.radarcns.config;
 
-import org.apache.commons.cli.ParseException;
-import org.junit.Test;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import org.apache.commons.cli.ParseException;
+import org.junit.Test;
 
 public class RadarBackendOptionsTest {
     @Test

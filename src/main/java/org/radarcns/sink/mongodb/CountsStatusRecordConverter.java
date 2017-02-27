@@ -22,6 +22,8 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.Document;
+import org.radarcns.application.ApplicationRecordCounts;
+import org.radarcns.key.MeasurementKey;
 import org.radarcns.serialization.RecordConverter;
 
 /**
@@ -37,8 +39,8 @@ public class CountsStatusRecordConverter implements RecordConverter {
      */
     @Override
     public Collection<String> supportedSchemaNames() {
-        return Collections.singleton("org.radarcns.key.MeasurementKey-"
-                + "org.radarcns.applicationstatus.ApplicationStatusRecordCounts");
+        return Collections.singleton(MeasurementKey.class.getCanonicalName() + "-"
+                + ApplicationRecordCounts.class.getCanonicalName());
     }
 
     /**
@@ -56,8 +58,9 @@ public class CountsStatusRecordConverter implements RecordConverter {
         return new Document("_id", measurementKeyToMongoDbKey(key))
                 .append("user", key.getString("userId"))
                 .append("source", key.getString("sourceId"))
-                .append("numberOfCachedRecords", value.getInt32("numberOfCachedRecords"))
-                .append("numberOfRecordsSent", value.getInt32("numberOfRecordsSent"));
+                .append("recordsCached", value.getInt32("recordsCached"))
+                .append("recordsSent", value.getInt32("recordsSent"))
+                .append("recordsUnsent", value.getInt32("recordsUnsent"));
     }
 
 

@@ -22,6 +22,8 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.Document;
+import org.radarcns.empatica.EmpaticaE4BatteryLevel;
+import org.radarcns.key.MeasurementKey;
 import org.radarcns.serialization.RecordConverter;
 
 /**
@@ -37,8 +39,8 @@ public class BatteryLevelRecordConverter implements RecordConverter {
      */
     @Override
     public Collection<String> supportedSchemaNames() {
-        return Collections.singleton("org.radarcns.key.MeasurementKey-"
-                + "org.radarcns.empatica.EmpaticaE4BatteryLevel");
+        return Collections.singleton(MeasurementKey.class.getCanonicalName() + "-"
+                + EmpaticaE4BatteryLevel.class.getCanonicalName());
     }
 
     /**

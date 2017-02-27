@@ -22,6 +22,8 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.Document;
+import org.radarcns.application.ApplicationServerStatus;
+import org.radarcns.key.MeasurementKey;
 import org.radarcns.serialization.RecordConverter;
 
 /**
@@ -37,8 +39,8 @@ public class ServerStatusRecordConverter implements RecordConverter {
      */
     @Override
     public Collection<String> supportedSchemaNames() {
-        return Collections.singleton("org.radarcns.key.MeasurementKey-"
-                + "org.radarcns.applicationstatus.ApplicationStatusServer");
+        return Collections.singleton(MeasurementKey.class.getCanonicalName() + "-"
+                + ApplicationServerStatus.class.getCanonicalName());
     }
 
     /**
@@ -57,7 +59,7 @@ public class ServerStatusRecordConverter implements RecordConverter {
                 .append("user", key.getString("userId"))
                 .append("source", key.getString("sourceId"))
                 .append("serverStatus", value.getString("serverStatus"))
-                .append("clientIP", value.getString("clientIP"));
+                .append("clientIP", value.getString("ipAddress"));
     }
 
 

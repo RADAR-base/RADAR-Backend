@@ -1,10 +1,9 @@
 package org.radarcns.util;
 
-import org.slf4j.Logger;
-
 import java.util.Collection;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
 
 /**
  * Monitors a count and buffer variable by printing out their values and resetting them.

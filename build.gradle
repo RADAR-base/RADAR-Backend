@@ -68,7 +68,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
     flatDir {
-        dirs 'libs', 'commons/build/libs'
+        dirs 'libs'
     }
 }
 
@@ -84,9 +84,10 @@ dependencies {
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
-    compile project(':commons')
 
+    connectorMongo group: 'org.radarcns', name: 'RADAR-Commons', version: 'v0.1-alpha.2'
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
+
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
@@ -106,9 +107,6 @@ task connectorMongoJar(type: Jar) {
     }
     from(sourceSets.main.output) {
         include "org/radarcns/sink/mongodb/*"
-    }
-    from("${buildDir}/avro/") {
-        include "org/radarcns/**"
     }
     archiveName = "radar-mongodb-connector-${version}.jar"
 }
