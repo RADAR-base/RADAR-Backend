@@ -25,3 +25,18 @@ script:
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ${GH_TOKEN}
+  file:
+    - build/libs/RADAR-Backend-${TRAVIS_TAG}.jar
+    - build/libs/RADAR-Backend-${TRAVIS_TAG}-javadoc.jar
+    - build/libs/RADAR-Backend-${TRAVIS_TAG}-sources.jar
+  skip_cleanup: true
+  on:
+    tags: true
+
+after_deploy:
+  - ./gradlew bintrayUpload
