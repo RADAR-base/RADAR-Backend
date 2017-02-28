@@ -13,7 +13,7 @@ plugins {
 // Configuration                                                             //
 //---------------------------------------------------------------------------//
 
-version = '0.1'
+version = 'v0.1-alpha.1'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
@@ -29,7 +29,7 @@ ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
 ext.mathVersion = '3.0'
-ext.mongoDbSinkVersion = '0.1-SNAPSHOT'
+ext.mongoDbSinkVersion = 'v0.1-alpha.1'
 ext.mockitoVersion = '2.2.29'
 ext.radarCommonsVersion = 'v0.1-alpha.2'
 ext.subethamailVersion = '3.1.7'
@@ -69,10 +69,7 @@ repositories {
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
-    maven { url 'https://dl.bintray.com/radar-cns/org.radarcns' }
-    flatDir {
-        dirs 'libs'
-    }
+
 }
 
 // In this section you declare the dependencies for your production and test code
