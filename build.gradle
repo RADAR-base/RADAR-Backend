@@ -289,7 +289,7 @@ publishing {
             artifact javadocJar
             groupId 'org.radarcns'
             artifactId 'RADAR-Backend'
-            version System.getenv('TRAVIS_TAG')
+            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Kafka backend for processing device data.')
