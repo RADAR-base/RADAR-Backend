@@ -111,20 +111,21 @@ task connectorMongoJar(type: Jar) {
         include "org/radarcns/sink/mongodb/*"
         include "org/radarcns/sink/mongodb/util/*"
     }
-    archiveName = "radar-mongodb-connector-${version}.jar"
+
+    archiveName = "radar-mongodb-connector-${System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version}.jar"
 }
 
 task connectorHDFSJar(type: Jar) {
     from(sourceSets.main.output) {
         include "org/radarcns/sink/hdfs/*"
     }
-    archiveName = "radar-hdfs-connector-${version}.jar"
+    archiveName = "radar-hdfs-connector-${System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version}.jar"
 }
 
 jar {
     manifest {
         attributes 'Implementation-Title': 'RADAR-CNS Back-End',
-                    'Implementation-Version': version,
+                    'Implementation-Version': System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : versions,
                     'Main-Class': mainClassName
     }
     from {
