@@ -288,6 +288,8 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
+            artifact connectorMongoJar
+            artifact connectorHDFSJar
             groupId 'org.radarcns'
             artifactId 'RADAR-Backend'
             version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
