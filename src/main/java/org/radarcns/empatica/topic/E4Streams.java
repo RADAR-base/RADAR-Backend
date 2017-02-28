@@ -60,7 +60,7 @@ public final class E4Streams extends GeneralStreamGroup {
 
         heartRateStream = createStream(
                 "android_empatica_e4_inter_beat_interval",
-                "android_empatica_e4_heartrate_output");
+                "android_empatica_e4_heartrate");
     }
 
     public StreamDefinition getAccelerationStream() {
