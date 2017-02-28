@@ -125,7 +125,7 @@ task connectorHDFSJar(type: Jar) {
 jar {
     manifest {
         attributes 'Implementation-Title': 'RADAR-CNS Back-End',
-                    'Implementation-Version': ${System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version} ,
+                    'Implementation-Version': version,
                     'Main-Class': mainClassName
     }
     from {
