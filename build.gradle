@@ -7,6 +7,8 @@ plugins {
     id 'pmd'
     id 'checkstyle'
     id "com.avast.gradle.docker-compose" version "0.3.16"
+    id "com.jfrog.bintray" version "1.7.3"
+    id 'maven-publish'
 }
 
 //---------------------------------------------------------------------------//

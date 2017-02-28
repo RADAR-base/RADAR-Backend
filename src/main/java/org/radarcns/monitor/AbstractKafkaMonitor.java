@@ -126,7 +126,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
     /**
-     * Monitor a given topic until the {@see isShutdown()} method returns true.
+     * Monitor a given topic until the {@link #isShutdown()} method returns true.
      *
      * <p>When a message is encountered that cannot be deserialized,
      * {@link #handleSerializationException()} is called.
