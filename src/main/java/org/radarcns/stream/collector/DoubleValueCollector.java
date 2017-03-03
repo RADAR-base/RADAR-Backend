@@ -16,9 +16,9 @@
 
 package org.radarcns.stream.collector;
 
-import com.google.common.primitives.Doubles;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.radarcns.aggregator.DoubleAggregator;
@@ -32,7 +32,7 @@ public class DoubleValueCollector {
     private BigDecimal sum = BigDecimal.ZERO;
     private int count = 0;
     private double avg = 0;
-    private final double[] quartile = new double[3];
+    private final Double[] quartile = new Double[3];
     private double iqr = 0;
 
     private final transient RadarUtilities utils = RadarSingletonFactory.getRadarUtilities();
@@ -146,7 +146,7 @@ public class DoubleValueCollector {
     }
 
     public List<Double> getQuartile() {
-        return Doubles.asList(quartile);
+        return  Arrays.asList(quartile);
     }
 
     public double getIqr() {

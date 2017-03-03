@@ -31,9 +31,10 @@ ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
 ext.mathVersion = '3.0'
-ext.mongoDbSinkVersion = 'v0.1-alpha.1'
+ext.findbugVersion = '3.0.1'
+ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = 'v0.1-alpha.3'
+ext.radarCommonsVersion = '0.1-alpha.4'
 ext.subethamailVersion = '3.1.7'
 
 //---------------------------------------------------------------------------//
@@ -57,10 +58,6 @@ configurations {
     codacy
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
-    connectorMongo
-    connectorHDFS
-    compile.extendsFrom connectorMongo
-    compile.extendsFrom connectorHDFS
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -77,23 +74,21 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 
+    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    connectorHDFS (group: 'io.confluent', name: 'kafka-connect-hdfs', version: confluentVersion) {
-        exclude group: 'org.apache.hive'
-    }
+    compile group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
+    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
     compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-    connectorMongo group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
-    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: mongoDbSinkVersion
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
@@ -102,26 +97,6 @@ dependencies {
 //---------------------------------------------------------------------------//
 // Packaging                                                                 //
 //---------------------------------------------------------------------------//
-
-task connectorMongoJar(type: Jar) {
-    from {
-        configurations.connectorMongo.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    from(sourceSets.main.output) {
-        include "org/radarcns/sink/mongodb/*"
-        include "org/radarcns/sink/mongodb/util/*"
-    }
-
-    archiveName = "radar-mongodb-connector-${version}.jar"
-}
-
-task connectorHDFSJar(type: Jar) {
-    from(sourceSets.main.output) {
-        include "org/radarcns/sink/hdfs/*"
-    }
-    archiveName = "radar-hdfs-connector-${ version}.jar"
-}
-
 jar {
     manifest {
         attributes 'Implementation-Title': 'RADAR-CNS Back-End',
@@ -132,8 +107,6 @@ jar {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
-jar.dependsOn connectorMongoJar
-jar.dependsOn connectorHDFSJar
 
 //---------------------------------------------------------------------------//
 // Style checking                                                            //
@@ -278,7 +251,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 // add javadoc/source jar tasks as artifacts
 artifacts {
-    archives sourcesJar, javadocJar, connectorMongoJar, connectorHDFSJar
+    archives sourcesJar, javadocJar
 }
 
 
@@ -299,34 +272,6 @@ publishing {
                 root.children().last() + pomConfig
             }
         }
-        RadarMongoDBConPublication(MavenPublication) {
-            from components.java
-            artifact connectorMongoJar
-            groupId 'org.radarcns'
-            artifactId 'RADAR-MongoDB-Connector'
-            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Kafka backend for processing device data.')
-                root.appendNode('name', 'RADAR-MongoDB-Connector')
-                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
-                root.children().last() + pomConfig
-            }
-        }
-        RadarHDFSConPublication(MavenPublication) {
-            from components.java
-            artifact connectorHDFSJar
-            groupId 'org.radarcns'
-            artifactId 'RADAR-HDFS-Connector'
-            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Kafka backend for processing device data.')
-                root.appendNode('name', 'RADAR-HDFS-Connector')
-                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
-                root.children().last() + pomConfig
-            }
-        }
     }
 }
 
@@ -336,7 +281,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')? System.getenv('BINTRAY_USER') : project.property('bintrayUser')
     key = System.getenv('BINTRAY_API_KEY') ? System.getenv('BINTRAY_API_KEY') : project.property('bintrayApiKey')
     override = false
-    publications = ['RadarBackendPublication' , 'RadarHDFSConPublication']
+    publications = ['RadarBackendPublication']
     pkg {
         repo = 'org.radarcns'
         name = 'RADAR-Backend'

@@ -16,7 +16,8 @@
 
 package org.radarcns.config;
 
-import com.google.common.base.Strings;
+import static org.radarcns.util.Strings.isNullOrEmpty;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         File file;
 
         //If pathFile is null
-        if (Strings.isNullOrEmpty(pathFile)) {
+        if (isNullOrEmpty(pathFile)) {
             file = getDefaultFile();
             log.info("DEFAULT CONFIGURATION: loading config file at {}", file);
         } else {
@@ -81,7 +82,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         //  - mode can be standalone or high_performance
         //  - all thread priority must be bigger than 1
 
-        if (!Strings.isNullOrEmpty(getRadarProperties().getLogPath())) {
+        if (!isNullOrEmpty(getRadarProperties().getLogPath())) {
             updateLog4jConfiguration(getRadarProperties().getLogPath());
         }
     }
@@ -117,7 +118,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
      */
     private void updateLog4jConfiguration(@Nonnull String logPath)
             throws IllegalArgumentException, IOException {
-        if (Strings.isNullOrEmpty(logPath)) {
+        if (isNullOrEmpty(logPath)) {
             throw new IllegalArgumentException("Invalid log_path - check your configuration file");
         }
 
