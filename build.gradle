@@ -15,7 +15,7 @@ plugins {
 // Configuration                                                             //
 //---------------------------------------------------------------------------//
 
-version = 'v0.1-alpha.1'
+version = '0.1-alpha.2'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
@@ -33,7 +33,7 @@ ext.junitVersion = '4.12'
 ext.mathVersion = '3.0'
 ext.mongoDbSinkVersion = 'v0.1-alpha.1'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = 'v0.1-alpha.2'
+ext.radarCommonsVersion = 'v0.1-alpha.3'
 ext.subethamailVersion = '3.1.7'
 
 //---------------------------------------------------------------------------//
@@ -87,7 +87,7 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-    connectorMongo group: 'org.radarcns', name: 'RADAR-Commons', version: radarCommonsVersion
+    connectorMongo group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
     connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: mongoDbSinkVersion
 
     testCompile group: 'junit', name: 'junit', version: junitVersion
@@ -112,14 +112,14 @@ task connectorMongoJar(type: Jar) {
         include "org/radarcns/sink/mongodb/util/*"
     }
 
-    archiveName = "radar-mongodb-connector-${System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version}.jar"
+    archiveName = "radar-mongodb-connector-${version}.jar"
 }
 
 task connectorHDFSJar(type: Jar) {
     from(sourceSets.main.output) {
         include "org/radarcns/sink/hdfs/*"
     }
-    archiveName = "radar-hdfs-connector-${System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version}.jar"
+    archiveName = "radar-hdfs-connector-${ version}.jar"
 }
 
 jar {
@@ -288,8 +288,6 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            artifact connectorMongoJar
-            artifact connectorHDFSJar
             groupId 'org.radarcns'
             artifactId 'RADAR-Backend'
             version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
@@ -297,6 +295,34 @@ publishing {
                 def root = asNode()
                 root.appendNode('description', 'Kafka backend for processing device data.')
                 root.appendNode('name', 'RADAR-Backend')
+                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
+                root.children().last() + pomConfig
+            }
+        }
+        RadarMongoDBConPublication(MavenPublication) {
+            from components.java
+            artifact connectorMongoJar
+            groupId 'org.radarcns'
+            artifactId 'RADAR-MongoDB-Connector'
+            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Kafka backend for processing device data.')
+                root.appendNode('name', 'RADAR-MongoDB-Connector')
+                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
+                root.children().last() + pomConfig
+            }
+        }
+        RadarHDFSConPublication(MavenPublication) {
+            from components.java
+            artifact connectorHDFSJar
+            groupId 'org.radarcns'
+            artifactId 'RADAR-HDFS-Connector'
+            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Kafka backend for processing device data.')
+                root.appendNode('name', 'RADAR-HDFS-Connector')
                 root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
                 root.children().last() + pomConfig
             }
@@ -310,7 +336,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')? System.getenv('BINTRAY_USER') : project.property('bintrayUser')
     key = System.getenv('BINTRAY_API_KEY') ? System.getenv('BINTRAY_API_KEY') : project.property('bintrayApiKey')
     override = false
-    publications = ['RadarBackendPublication']
+    publications = ['RadarBackendPublication' , 'RadarHDFSConPublication']
     pkg {
         repo = 'org.radarcns'
         name = 'RADAR-Backend'
