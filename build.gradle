@@ -262,12 +262,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             groupId 'org.radarcns'
-            artifactId 'RADAR-Backend'
-            version System.getenv('TRAVIS_TAG')? System.getenv('TRAVIS_TAG') : version
+            artifactId 'radar-backend'
+            version project.version
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'Kafka backend for processing device data.')
-                root.appendNode('name', 'RADAR-Backend')
+                root.appendNode('name', 'radar-backend')
                 root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
                 root.children().last() + pomConfig
             }
@@ -284,13 +284,13 @@ bintray {
     publications = ['RadarBackendPublication']
     pkg {
         repo = 'org.radarcns'
-        name = 'RADAR-Backend'
+        name = 'radar-backend'
         userOrg = 'radar-cns'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/RADAR-CNS/RADAR-Backend.git'
         version {
-            name = System.getenv('TRAVIS_TAG')
-            desc = 'Kafka backend for processing device data : Initial release'
+            name = project.version
+            desc = 'Kafka backend for processing device data : Alpha release'
             vcsTag = System.getenv('TRAVIS_TAG')
         }
     }
