@@ -292,6 +292,7 @@ bintray {
             name = project.version
             desc = 'Kafka backend for processing device data : Alpha release'
             vcsTag = System.getenv('TRAVIS_TAG')
+            released  = new Date()
         }
     }
 }
