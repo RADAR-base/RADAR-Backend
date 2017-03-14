@@ -16,16 +16,13 @@
 
 package org.radarcns.config;
 
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import java.util.Properties;
+import javax.annotation.Nonnull;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.processor.TimestampExtractor;
 import org.radarcns.util.serde.SpecificAvroSerde;
-
-import java.util.Properties;
-
-import javax.annotation.Nonnull;
-
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 
 // TODO this class should substitute org.radarcns.util.RadarConfig
 public class KafkaProperty {

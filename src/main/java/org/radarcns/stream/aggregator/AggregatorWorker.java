@@ -81,7 +81,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     }
 
     /**
-     * @implSpec it defines the stream computation
+     *   it defines the stream computation
      */
     protected abstract void setStream(@Nonnull KStream<K, V> kstream) throws IOException;
 

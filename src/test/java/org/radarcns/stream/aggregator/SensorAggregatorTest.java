@@ -16,20 +16,19 @@
 
 package org.radarcns.stream.aggregator;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.topic.KafkaTopic;
-
-import java.io.IOException;
 import org.radarcns.stream.StreamDefinition;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.any;
+import org.radarcns.topic.KafkaTopic;
 /**
  * Created by nivethika on 20-12-16.
  */

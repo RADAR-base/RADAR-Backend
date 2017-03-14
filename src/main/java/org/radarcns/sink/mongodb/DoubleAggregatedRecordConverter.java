@@ -23,14 +23,16 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.bson.BsonDateTime;
 import org.bson.BsonDouble;
 import org.bson.Document;
+import org.radarcns.aggregator.DoubleAggregator;
+import org.radarcns.key.WindowedKey;
 import org.radarcns.serialization.RecordConverter;
 import org.radarcns.util.Utility;
 
 public class DoubleAggregatedRecordConverter implements RecordConverter {
     @Override
     public Collection<String> supportedSchemaNames() {
-        return Collections.singleton("org.radarcns.key.WindowedKey-"
-                + "org.radarcns.aggregator.DoubleAggregator");
+        return Collections.singleton(WindowedKey.class.getCanonicalName() + "-"
+                + DoubleAggregator.class.getCanonicalName());
     }
 
     @Override

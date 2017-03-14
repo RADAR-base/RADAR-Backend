@@ -7,30 +7,34 @@ plugins {
     id 'pmd'
     id 'checkstyle'
     id "com.avast.gradle.docker-compose" version "0.3.16"
+    id "com.jfrog.bintray" version "1.7.3"
+    id 'maven-publish'
 }
 
 //---------------------------------------------------------------------------//
 // Configuration                                                             //
 //---------------------------------------------------------------------------//
 
-version = '0.1'
+version = '0.1-alpha.2'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.kafkaVersion = '0.10.1.1'
-ext.confluentVersion = '3.1.2'
 ext.boundaryVersion = '1.0.6'
-ext.mathVersion = '3.0'
+ext.codacyVersion = '1.0.10'
+ext.confluentVersion = '3.1.2'
+ext.hamcrestVersion = '1.3'
+ext.kafkaVersion = '0.10.1.1'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
+ext.mathVersion = '3.0'
+ext.mongoDbSinkVersion = '0.1-alpha.1'
 ext.mockitoVersion = '2.2.29'
-ext.hamcrestVersion = '1.3'
+ext.radarCommonsVersion = '0.1-alpha.4'
 ext.subethamailVersion = '3.1.7'
-ext.codacyVersion = '1.0.10'
 
 //---------------------------------------------------------------------------//
 // Sources and classpath configurations                                      //
@@ -61,15 +65,17 @@ configurations {
 
 // In this section you declare where to find the dependencies of your project
 repositories {
+    // For working with dev-branch commons
+    flatDir {
+        dirs 'libs'
+    }
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
-    flatDir {
-        dirs 'libs', 'commons/build/libs'
-    }
+
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -84,9 +90,10 @@ dependencies {
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
-    compile project(':commons')
 
-    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: '0.1-SNAPSHOT'
+    connectorMongo group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    connectorMongo group: "org.radarcns", name: 'kafka-connect-mongodb-sink', version: mongoDbSinkVersion
+
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
@@ -106,18 +113,17 @@ task connectorMongoJar(type: Jar) {
     }
     from(sourceSets.main.output) {
         include "org/radarcns/sink/mongodb/*"
+        include "org/radarcns/sink/mongodb/util/*"
     }
-    from("${buildDir}/avro/") {
-        include "org/radarcns/**"
-    }
-    archiveName = "radar-mongodb-connector-${version}.jar"
+
+    archiveName = "radar-mongodb-connector-${project.version}.jar"
 }
 
 task connectorHDFSJar(type: Jar) {
     from(sourceSets.main.output) {
         include "org/radarcns/sink/hdfs/*"
     }
-    archiveName = "radar-hdfs-connector-${version}.jar"
+    archiveName = "radar-hdfs-connector-${project.version}.jar"
 }
 
 jar {
@@ -244,6 +250,82 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 idea {
     module {
         downloadSources = true
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "RADAR-CNS - Distributions"
+        }
+    }
+    developers {
+        developer {
+            id "radar-cns"
+            name "Nivethika"
+            email "nivethika@thehyve.nl"
+        }
+    }
+}
+// custom tasks for creating source/javadoc jars
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.output
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+    archives sourcesJar, javadocJar, connectorMongoJar, connectorHDFSJar
+}
+
+
+publishing {
+    publications {
+        RadarBackendPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            artifact connectorMongoJar
+            artifact connectorHDFSJar
+            groupId 'org.radarcns'
+            artifactId 'RADAR-Backend'
+            version project.version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Kafka backend for processing device data.')
+                root.appendNode('name', 'RADAR-Backend')
+                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+
+
+bintray {
+    user = System.getenv('BINTRAY_USER')? System.getenv('BINTRAY_USER') : project.property('bintrayUser')
+    key = System.getenv('BINTRAY_API_KEY') ? System.getenv('BINTRAY_API_KEY') : project.property('bintrayApiKey')
+    override = false
+    publications = ['RadarBackendPublication']
+    pkg {
+        repo = 'org.radarcns'
+        name = 'RADAR-Backend'
+        userOrg = 'radar-cns'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/RADAR-CNS/RADAR-Backend.git'
+        version {
+            name = project.version
+            desc = 'Kafka backend for processing device data : Initial release'
+            vcsTag = System.getenv('TRAVIS_TAG')
+        }
     }
 }
 

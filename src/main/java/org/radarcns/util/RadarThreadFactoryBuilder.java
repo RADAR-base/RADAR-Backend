@@ -16,9 +16,9 @@
 
 package org.radarcns.util;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 /**
  * Created by Francesco Nobilia on 07/10/2016.

@@ -16,20 +16,19 @@
 
 package org.radarcns.sink.hdfs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.RecordWriter;
+import java.io.File;
+import java.io.IOException;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class AvroRecordWriterProviderRadarTest {
     private AvroData avroData;

@@ -16,6 +16,8 @@
 
 package org.radarcns.empatica.topic;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -23,8 +25,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.stream.StreamDefinition;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by nivethika on 21-12-16.

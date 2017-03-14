@@ -1,2 +1,1 @@
-rootProject.name = 'radarbackend'
-include 'commons'
+rootProject.name = 'RADAR-Backend'

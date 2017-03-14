@@ -16,12 +16,15 @@
 
 package org.radarcns.sink.hdfs;
 
+import static io.confluent.connect.avro.AvroData.ANYTHING_SCHEMA;
+
 import io.confluent.connect.avro.AvroData;
 import io.confluent.connect.hdfs.Format;
 import io.confluent.connect.hdfs.RecordWriter;
 import io.confluent.connect.hdfs.RecordWriterProvider;
 import io.confluent.connect.hdfs.avro.AvroRecordWriterProvider;
 import io.confluent.kafka.serializers.NonRecordContainer;
+import java.io.IOException;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
@@ -34,10 +37,6 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-
-import static io.confluent.connect.avro.AvroData.ANYTHING_SCHEMA;
 
 /**
  * Writes data to HDFS using the Confluent Kafka HDFS connector.

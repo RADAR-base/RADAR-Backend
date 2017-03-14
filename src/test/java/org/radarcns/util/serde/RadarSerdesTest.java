@@ -16,14 +16,14 @@
 
 package org.radarcns.util.serde;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.kafka.common.serialization.Serde;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 /**
  * Created by nivethika on 21-12-16.
  */
