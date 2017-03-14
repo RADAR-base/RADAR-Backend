@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons.iml" group="commons" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_avroSources.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_avroSources.iml" group="commons" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_integrationTest.iml" group="commons" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_main.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_main.iml" group="commons" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_test.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_test.iml" group="commons" />
