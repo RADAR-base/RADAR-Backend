@@ -15,7 +15,7 @@ plugins {
 // Configuration                                                             //
 //---------------------------------------------------------------------------//
 
-version = '0.1-alpha.2'
+version = '0.1-alpha.3-SNAPSHOT'
 
 mainClassName = 'org.radarcns.RadarBackend'
 
