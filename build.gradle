@@ -33,7 +33,7 @@ ext.junitVersion = '4.12'
 ext.mathVersion = '3.0'
 ext.mongoDbSinkVersion = '0.1-alpha.1'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.1-alpha.4'
+ext.radarCommonsVersion = '0.1-alpha.5-SNAPSHOT'
 ext.subethamailVersion = '3.1.7'
 
 //---------------------------------------------------------------------------//
@@ -66,16 +66,14 @@ configurations {
 // In this section you declare where to find the dependencies of your project
 repositories {
     // For working with dev-branch commons
-    flatDir {
-        dirs 'libs'
-    }
+    maven { url "${rootProject.projectDir}/libs" }
+
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
-
 }
 
 // In this section you declare the dependencies for your production and test code

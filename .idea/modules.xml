@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons.iml" group="commons" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_avroSources.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_avroSources.iml" group="commons" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_integrationTest.iml" group="commons" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_main.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_main.iml" group="commons" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commons/commons_test.iml" filepath="$PROJECT_DIR$/.idea/modules/commons/commons_test.iml" group="commons" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_integrationTest.iml" group="radarbackend" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_main.iml" group="radarbackend" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/radarbackend_test.iml" group="radarbackend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radar-backend.iml" filepath="$PROJECT_DIR$/.idea/modules/radar-backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radar-backend_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/radar-backend_integrationTest.iml" group="radar-backend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radar-backend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/radar-backend_main.iml" group="radar-backend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/radar-backend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/radar-backend_test.iml" group="radar-backend" />
     </modules>
   </component>
 </project>
