@@ -31,11 +31,9 @@ deploy:
   api_key:
     secure: ${GH_TOKEN}
   file:
-    - build/libs/RADAR-Backend-${TRAVIS_TAG}.jar
-    - build/libs/RADAR-Backend-${TRAVIS_TAG}-javadoc.jar
-    - build/libs/RADAR-Backend-${TRAVIS_TAG}-sources.jar
-    - build/libs/radar-mongodb-connector-${TRAVIS_TAG}.jar
-    - build/libs/radar-hdfs-connector-${TRAVIS_TAG}.jar
+    - build/libs/radar-backend-${TRAVIS_TAG}.jar
+    - build/libs/radar-backend-${TRAVIS_TAG}-javadoc.jar
+    - build/libs/radar-backend-${TRAVIS_TAG}-sources.jar
   skip_cleanup: true
   on:
     tags: true
