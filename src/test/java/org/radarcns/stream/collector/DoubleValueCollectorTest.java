@@ -78,4 +78,13 @@ public class DoubleValueCollectorTest {
         assertEquals(18.0766d, valueCollector.getIqr(), 0.0d);
 
     }
+
+    @Test
+    public void testAverage() {
+        double[] input = {36.793899922141186, 36.878288191353626, 36.965575690177715, 36.988087035729855, 36.628622572158214};
+        for (double d : input) {
+            valueCollector.add(d);
+        }
+        assertEquals(36.850894682312116, valueCollector.getAvg(), Math.pow(10, -10.0));
+    }
 }
