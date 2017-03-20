@@ -75,25 +75,37 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
 
+    // Kafka streaming API
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
+    compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
+
+    // Nonnull annotation
     compile group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
+
+    // Command-line interface
     compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
-    compile group: 'com.boundary', name: 'high-scale-lib', version: boundaryVersion
+
+    // Quartile in DoubleArrayCollector
     compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
+
+    // Configuration @JsonProperty
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+
+    // Monitor mail sending
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
-
+    // Testing
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
 
+    // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    // Send data to codacy
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }
 

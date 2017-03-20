@@ -251,6 +251,6 @@ public class ConfigRadar {
 
     @Override
     public String toString() {
-        return new ConfigLoader().prettyString(this);
+        return new YamlConfigLoader().prettyString(this);
     }
 }

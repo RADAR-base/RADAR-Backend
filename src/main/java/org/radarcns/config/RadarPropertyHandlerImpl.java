@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
  * Java Singleton class for handling the yml config file. Implements @link{ RadarPropertyHandler}
  */
 public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
-    private ConfigRadar properties;
-    private KafkaProperty kafkaProperty;
     private static final String CONFIG_FILE_NAME = "radar.yml";
     private static final String LOG_FILE_NAME = "backend.log";
-
     private static final Logger log = LoggerFactory.getLogger(RadarPropertyHandlerImpl.class);
+
+    private ConfigRadar properties;
+    private KafkaProperty kafkaProperty;
 
     @Override
     public ConfigRadar getRadarProperties() {
@@ -75,7 +75,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             throw new IllegalArgumentException("Config file " + file + " is invalid");
         }
 
-        properties = new ConfigLoader().load(file, ConfigRadar.class);
+        properties = new YamlConfigLoader().load(file, ConfigRadar.class);
 
         //TODO: add check to validate configuration file. Remember
         //  - log path can be only null, all others have to be stated

@@ -16,14 +16,13 @@
 
 package org.radarcns.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
+import org.radarcns.config.YamlConfigLoader;
 
 public class PersistentStateStore {
     private final File basePath;
-    private final ObjectMapper mapper;
+    private final YamlConfigLoader loader;
 
     public PersistentStateStore(File basePath) throws IOException {
         if (basePath.exists()) {
@@ -36,7 +35,7 @@ public class PersistentStateStore {
         }
 
         this.basePath = basePath;
-        this.mapper = new ObjectMapper(new YAMLFactory());
+        this.loader = new YamlConfigLoader();
     }
 
     public <T> T retrieveState(String groupId, String clientId, T stateDefault)
@@ -47,12 +46,11 @@ public class PersistentStateStore {
         }
         @SuppressWarnings("unchecked")
         Class<? extends T> stateClass = (Class<? extends T>) stateDefault.getClass();
-        return mapper.readValue(consumerFile, stateClass);
+        return loader.load(consumerFile, stateClass);
     }
 
     public void storeState(String groupId, String clientId, Object value) throws IOException {
-        File consumerFile = getFile(groupId, clientId);
-        mapper.writeValue(consumerFile, value);
+        loader.store(getFile(groupId, clientId), value);
     }
 
     private File getFile(String groupId, String clientId) {
