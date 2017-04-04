@@ -64,19 +64,19 @@ public class BatteryLevelMonitor extends
             if (batteryLevel <= Status.CRITICAL.getLevel()) {
                 if (previousLevel > Status.CRITICAL.getLevel()) {
                     updateStatus(key, Status.CRITICAL);
-                    logger.warn("Battery level of sensor {} of user {} is critically low",
-                            key.getSourceId(), key.getUserId());
+                    logger.warn("Battery level of sensor {} of user {} is critically low: {}",
+                            key.getSourceId(), key.getUserId(), record.value());
                 }
             } else if (batteryLevel <= Status.LOW.getLevel()) {
                 if (previousLevel > Status.LOW.getLevel()) {
                     updateStatus(key, Status.LOW);
-                    logger.warn("Battery level of sensor {} of user {} is low",
-                            key.getSourceId(), key.getUserId());
+                    logger.warn("Battery level of sensor {} of user {} is low: {}",
+                            key.getSourceId(), key.getUserId(), record.value());
                 }
             } else if (previousLevel <= Status.LOW.getLevel()) {
                 updateStatus(key, Status.NORMAL);
-                logger.info("Battery of sensor {} of user {} is has returned to normal.",
-                        key.getSourceId(), key.getUserId());
+                logger.info("Battery of sensor {} of user {} is has returned to normal: {}",
+                        key.getSourceId(), key.getUserId(), record.value());
             }
         } catch (IllegalArgumentException ex) {
             logger.error("Failed to process record {}", record, ex);
@@ -117,7 +117,7 @@ public class BatteryLevelMonitor extends
             throw new IllegalArgumentException("Failed to process record with value type "
                     + value.getSchema() + " without batteryLevel field.");
         }
-        Number batteryLevel = (Number) record.value().get(batteryField.pos());
+        Number batteryLevel = (Number) value.get(batteryField.pos());
         return batteryLevel.floatValue();
     }
 
@@ -145,18 +145,18 @@ public class BatteryLevelMonitor extends
     }
 
     public static class BatteryLevelState {
-        private final Map<MeasurementKey, Float> levels = new HashMap<>();
+        private Map<String, Float> levels = new HashMap<>();
 
-        public Map<MeasurementKey, Float> getLevels() {
+        public Map<String, Float> getLevels() {
             return levels;
         }
 
-        public void setLevels(Map<MeasurementKey, Float> levels) {
-            this.levels.putAll(levels);
+        public void setLevels(Map<String, Float> levels) {
+            this.levels = levels;
         }
 
-        private float updateLevel(MeasurementKey key, float level) {
-            Float previousLevel = levels.put(key, level);
+        public float updateLevel(MeasurementKey key, float level) {
+            Float previousLevel = levels.put(key.getUserId() + "#" + key.getSourceId(), level);
             return previousLevel == null ? 1.0f : previousLevel;
         }
     }
