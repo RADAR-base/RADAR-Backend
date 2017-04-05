@@ -44,9 +44,11 @@ public class BatteryLevelMonitor extends
 
     private final EmailSender sender;
     private final Status minLevel;
+    private final long logInterval;
+    private long messageNumber;
 
     public BatteryLevelMonitor(RadarPropertyHandler radar, Collection<String> topics,
-            EmailSender sender, Status minLevel) {
+            EmailSender sender, Status minLevel, long logInterval) {
         super(radar, topics, "battery_monitors", "1", new BatteryLevelState());
 
         Properties props = new Properties();
@@ -55,6 +57,7 @@ public class BatteryLevelMonitor extends
 
         this.sender = sender;
         this.minLevel = minLevel == null ? Status.CRITICAL : minLevel;
+        this.logInterval = logInterval;
     }
 
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
@@ -62,6 +65,12 @@ public class BatteryLevelMonitor extends
             MeasurementKey key = extractKey(record);
             float batteryLevel = extractBatteryLevel(record);
             float previousLevel = state.updateLevel(key, batteryLevel);
+
+            if (logInterval > 0 && ((int) (messageNumber % logInterval)) == 0) {
+                logger.info("Measuring battery level of record offset {} of {} with value {}",
+                        record.offset(), key, record.value());
+            }
+            messageNumber++;
 
             if (batteryLevel <= Status.CRITICAL.getLevel()) {
                 if (previousLevel > Status.CRITICAL.getLevel()) {
@@ -128,7 +137,7 @@ public class BatteryLevelMonitor extends
         radarPropertyHandler.load(null);
 
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(radarPropertyHandler,
-                Collections.singletonList("android_empatica_e4_battery_level"), null, null);
+                Collections.singletonList("android_empatica_e4_battery_level"), null, null, -1);
         monitor.start();
     }
 

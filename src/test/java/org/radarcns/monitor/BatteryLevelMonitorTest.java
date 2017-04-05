@@ -17,9 +17,7 @@
 package org.radarcns.monitor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -28,7 +26,6 @@ import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
 import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 import javax.mail.MessagingException;
@@ -86,7 +83,7 @@ public class BatteryLevelMonitorTest {
                 .getRadarPropertyHandler(config, folder);
 
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(properties,
-                Collections.singletonList("mytopic"), sender, LOW);
+                Collections.singletonList("mytopic"), sender, LOW, 10L);
 
         sendMessage(monitor, 1.0f, false);
         sendMessage(monitor, 1.0f, false);

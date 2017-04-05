@@ -50,19 +50,22 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
+    private final long logInterval;
+    private long messageNumber;
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing) {
+            EmailSender sender, long timeUntilReportedMissing, long logInterval) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
         this.timeUntilReportedMissing = timeUntilReportedMissing;
         this.sender = sender;
+        this.logInterval = logInterval;
+        this.dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configure(props);
 
         super.setPollTimeout(timeUntilReportedMissing);
-        dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
     }
 
     @Override
@@ -87,6 +90,12 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     @Override
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         MeasurementKey key = extractKey(record);
+
+        if (logInterval > 0 && ((int) (messageNumber % logInterval)) == 0) {
+            logger.info("Evaluating connection status of record offset {} of {} with value {}",
+                    record.offset(), key, record.value());
+        }
+        messageNumber++;
 
         long now = System.currentTimeMillis();
         String keyString = measurementKeyToString(key);

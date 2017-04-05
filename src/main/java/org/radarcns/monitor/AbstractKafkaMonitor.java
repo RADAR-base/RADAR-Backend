@@ -198,9 +198,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         if (stateStore != null && state != null) {
             try {
                 stateStore.storeState(groupId, clientId, state);
-            } catch (IOException e) {
-                logger.error("Failed to store monitor state. "
-                        + "When restarted, all current state will be lost.");
+            } catch (IOException ex) {
+                logger.error("Failed to store monitor state: {}. "
+                        + "When restarted, all current state will be lost.", ex.getMessage());
             }
         }
     }

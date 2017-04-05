@@ -87,7 +87,7 @@ public class DisconnectMonitorTest {
         long timeout = 50L;
 
         DisconnectMonitor monitor = new DisconnectMonitor(properties,
-                Collections.singletonList("mytopic"), "mygroup", sender, timeout);
+                Collections.singletonList("mytopic"), "mygroup", sender, timeout, 10L);
 
         assertEquals(timeout, monitor.getPollTimeout());
 

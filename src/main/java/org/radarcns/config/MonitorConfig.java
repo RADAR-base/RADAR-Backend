@@ -35,6 +35,9 @@ public class MonitorConfig {
     @JsonProperty("email_user")
     private String emailUser;
 
+    @JsonProperty("log_interval")
+    private Long logInterval;
+
     private List<String> topics;
 
     public List<String> getEmailAddress() {
@@ -75,5 +78,13 @@ public class MonitorConfig {
 
     public void setEmailUser(String emailUser) {
         this.emailUser = emailUser;
+    }
+
+    public Long getLogInterval() {
+        return logInterval;
+    }
+
+    public void setLogInterval(Long logInterval) {
+        this.logInterval = logInterval;
     }
 }

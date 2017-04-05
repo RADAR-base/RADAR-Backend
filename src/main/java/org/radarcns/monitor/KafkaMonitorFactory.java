@@ -84,8 +84,12 @@ public class KafkaMonitorFactory {
                         level, Arrays.toString(BatteryLevelMonitor.Status.values()));
             }
         }
+        long logInterval = -1L;
+        if (config != null && config.getLogInterval() != null) {
+            logInterval = config.getLogInterval();
+        }
 
-        return new BatteryLevelMonitor(properties, topics, sender, minLevel);
+        return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
     }
 
     private KafkaMonitor createDisconnectMonitor() throws IOException {
@@ -96,8 +100,12 @@ public class KafkaMonitorFactory {
             timeout = config.getTimeout();
         }
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
+        long logInterval = -1L;
+        if (config != null && config.getLogInterval() != null) {
+            logInterval = config.getLogInterval();
+        }
         return new DisconnectMonitor(properties, topics, "temperature_disconnect", sender,
-                timeout);
+                timeout, logInterval);
     }
 
     private EmailSender getSender(MonitorConfig config) throws IOException {
