@@ -16,13 +16,21 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
+import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Collections;
+import java.util.Map;
 import javax.mail.MessagingException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
@@ -34,9 +42,13 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.PersistentStateStore;
 
 public class BatteryLevelMonitorTest {
+
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -105,5 +117,20 @@ public class BatteryLevelMonitorTest {
             timesSent++;
         }
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
+    }
+
+    @Test
+    public void retrieveState() throws Exception {
+        File base = folder.newFolder();
+        PersistentStateStore stateStore = new PersistentStateStore(base);
+        BatteryLevelState state = new BatteryLevelState();
+        MeasurementKey key1 = new MeasurementKey("a", "b");
+        state.updateLevel(key1, 0.1f);
+        stateStore.storeState("one", "two", state);
+
+        PersistentStateStore stateStore2 = new PersistentStateStore(base);
+        BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());
+        Map<String, Float> values = state2.getLevels();
+        assertThat(values, hasEntry(measurementKeyToString(key1), 0.1f));
     }
 }

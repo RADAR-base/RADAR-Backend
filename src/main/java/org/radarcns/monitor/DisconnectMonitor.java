@@ -16,6 +16,9 @@
 
 package org.radarcns.monitor;
 
+import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+import static org.radarcns.util.PersistentStateStore.stringToKey;
+
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -68,14 +71,14 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
         long now = System.currentTimeMillis();
 
-        Iterator<Map.Entry<MeasurementKey, Long>> iterator = state.lastSeen.entrySet().iterator();
+        Iterator<Map.Entry<String, Long>> iterator = state.lastSeen.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<MeasurementKey, Long> entry = iterator.next();
+            Map.Entry<String, Long> entry = iterator.next();
             long timeout = now - entry.getValue();
             if (timeout > timeUntilReportedMissing) {
-                MeasurementKey missingKey = entry.getKey();
+                String missingKey = entry.getKey();
                 iterator.remove();
-                reportMissing(missingKey, timeout);
+                reportMissing(stringToKey(missingKey), timeout);
                 state.reportedMissing.put(missingKey, now);
             }
         }
@@ -86,9 +89,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         MeasurementKey key = extractKey(record);
 
         long now = System.currentTimeMillis();
-        state.lastSeen.put(key, now);
+        String keyString = measurementKeyToString(key);
+        state.lastSeen.put(keyString, now);
 
-        Long reportedMissingTime = state.reportedMissing.remove(key);
+        Long reportedMissingTime = state.reportedMissing.remove(keyString);
         if (reportedMissingTime != null) {
             reportRecovered(key, reportedMissingTime);
         }
@@ -126,23 +130,22 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     public static class DisconnectMonitorState {
-        private final Map<MeasurementKey, Long> lastSeen = new HashMap<>();
-        private final Map<MeasurementKey, Long> reportedMissing = new HashMap<>();
+        private final Map<String, Long> lastSeen = new HashMap<>();
+        private final Map<String, Long> reportedMissing = new HashMap<>();
 
-        public Map<MeasurementKey, Long> getLastSeen() {
+        public Map<String, Long> getLastSeen() {
             return lastSeen;
         }
 
-        public void setLastSeen(Map<MeasurementKey, Long> lastSeen) {
+        public void setLastSeen(Map<String, Long> lastSeen) {
             this.lastSeen.putAll(lastSeen);
         }
 
-        public Map<MeasurementKey, Long> getReportedMissing() {
+        public Map<String, Long> getReportedMissing() {
             return reportedMissing;
         }
 
-        public void setReportedMissing(
-                Map<MeasurementKey, Long> reportedMissing) {
+        public void setReportedMissing(Map<String, Long> reportedMissing) {
             this.reportedMissing.putAll(reportedMissing);
         }
     }

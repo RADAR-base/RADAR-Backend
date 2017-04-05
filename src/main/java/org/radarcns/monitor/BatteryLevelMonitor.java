@@ -16,6 +16,8 @@
 
 package org.radarcns.monitor;
 
+import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -156,7 +158,7 @@ public class BatteryLevelMonitor extends
         }
 
         public float updateLevel(MeasurementKey key, float level) {
-            Float previousLevel = levels.put(key.getUserId() + "#" + key.getSourceId(), level);
+            Float previousLevel = levels.put(measurementKeyToString(key), level);
             return previousLevel == null ? 1.0f : previousLevel;
         }
     }

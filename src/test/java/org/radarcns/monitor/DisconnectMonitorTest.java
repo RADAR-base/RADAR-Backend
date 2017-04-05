@@ -16,13 +16,19 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
 
+import java.io.File;
 import java.util.Collections;
+import java.util.Map;
 import javax.mail.MessagingException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
@@ -37,7 +43,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
+import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.PersistentStateStore;
 
 public class DisconnectMonitorTest {
     @Rule
@@ -113,5 +123,31 @@ public class DisconnectMonitorTest {
 
         timesSent += sentMessages;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
+    }
+
+    @Test
+    public void retrieveState() throws Exception {
+        File base = folder.newFolder();
+        PersistentStateStore stateStore = new PersistentStateStore(base);
+        DisconnectMonitorState state = new DisconnectMonitorState();
+        MeasurementKey key1 = new MeasurementKey("a", "b");
+        MeasurementKey key2 = new MeasurementKey("b", "c");
+        MeasurementKey key3 = new MeasurementKey("c", "d");
+        long now = System.currentTimeMillis();
+        state.getLastSeen().put(measurementKeyToString(key1), now);
+        state.getLastSeen().put(measurementKeyToString(key2), now + 1L);
+        state.getReportedMissing().put(measurementKeyToString(key3), now + 2L);
+        stateStore.storeState("one", "two", state);
+
+        PersistentStateStore stateStore2 = new PersistentStateStore(base);
+        DisconnectMonitorState state2 = stateStore2.retrieveState("one", "two", new DisconnectMonitorState());
+        Map<String, Long> lastSeen = state2.getLastSeen();
+        assertThat(lastSeen.size(), is(2));
+        assertThat(lastSeen, hasEntry(measurementKeyToString(key1), now));
+        assertThat(lastSeen, hasEntry(measurementKeyToString(key2), now + 1L));
+        Map<String, Long> reported = state2.getReportedMissing();
+        assertThat(reported.size(), is(1));
+        assertThat(reported, hasEntry(measurementKeyToString(key3), now + 2L));
+
     }
 }
