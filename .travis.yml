@@ -22,7 +22,7 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - ./gradlew check
-  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registdockerry-1 && sleep 10 && sudo docker-compose run --rm -v `PWD`/build:/code/build integration-test
+  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 10 && sudo docker-compose run --rm integration-test
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy
@@ -31,10 +31,8 @@ deploy:
   provider: releases
   api_key:
     secure: ${GH_TOKEN}
-  file:
-    - build/libs/radar-backend-${TRAVIS_TAG}.jar
-    - build/libs/radar-backend-${TRAVIS_TAG}-javadoc.jar
-    - build/libs/radar-backend-${TRAVIS_TAG}-sources.jar
+  file_glob: true
+  file: build/libs/*.jar
   skip_cleanup: true
   on:
     tags: true
