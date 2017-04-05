@@ -6,6 +6,7 @@ services:
   - docker
 env:
   DOCKER_COMPOSE_VERSION: 1.9.0
+  TERM: dumb
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -21,7 +22,7 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - ./gradlew check
-  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 10 && sudo docker-compose run --rm integration-test
+  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registdockerry-1 && sleep 10 && sudo docker-compose run --rm -v `PWD`/build:/code/build integration-test
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy

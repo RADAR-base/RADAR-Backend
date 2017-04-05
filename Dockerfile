@@ -1,5 +1,6 @@
-FROM java:8
+FROM openjdk:8-alpine
 
+ENV TERM=dumb
 COPY . /code
 WORKDIR /code
 
