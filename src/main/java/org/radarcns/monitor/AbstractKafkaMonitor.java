@@ -17,10 +17,14 @@
 package org.radarcns.monitor;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
@@ -84,6 +88,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(GROUP_ID_CONFIG, groupId);
         properties.setProperty(CLIENT_ID_CONFIG, clientId);
+        properties.setProperty(ENABLE_AUTO_COMMIT_CONFIG, "true");
+        properties.setProperty(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1001");
+        properties.setProperty(SESSION_TIMEOUT_MS_CONFIG, "15101");
+        properties.setProperty(HEARTBEAT_INTERVAL_MS_CONFIG, "7500");
 
         ConfigRadar config = radar.getRadarProperties();
         properties.setProperty(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
@@ -146,7 +154,6 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     ops.add(records.count());
                     logger.info("Received {} records", records.count());
                     evaluateRecords(records);
-                    consumer.commitSync();
                     logger.debug("Operations per second {}", (int) Math.round(ops.getAverage()));
                 } catch (SerializationException ex) {
                     handleSerializationException();
