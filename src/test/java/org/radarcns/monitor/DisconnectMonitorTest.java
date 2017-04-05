@@ -44,7 +44,6 @@ import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.PersistentStateStore;
