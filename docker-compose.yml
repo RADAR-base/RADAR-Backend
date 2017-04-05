@@ -98,4 +98,3 @@ services:
       - integrationTest
     volumes:
       - ./build:/code/build:rw
-      - ~/.gradle:/root/.gradle:rw
