@@ -15,9 +15,13 @@ plugins {
 // Configuration                                                             //
 //---------------------------------------------------------------------------//
 
+group = 'org.radarcns'
 version = '0.1-alpha.3-SNAPSHOT'
+ext.description = 'Kafka backend for processing device data.'
 
 mainClassName = 'org.radarcns.RadarBackend'
+
+ext.githubRepoName = 'RADAR-CNS/RADAR-Backend'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -36,6 +40,10 @@ ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
 ext.radarCommonsVersion = '0.1-alpha.5-SNAPSHOT'
 ext.subethamailVersion = '3.1.7'
+
+ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
+ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
+ext.website = 'http://radar-cns.org'
 
 //---------------------------------------------------------------------------//
 // Sources and classpath configurations                                      //
@@ -242,26 +250,63 @@ def pomConfig = {
         license {
             name "The Apache Software License, Version 2.0"
             url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "RADAR-CNS - Distributions"
+            distribution 'repo'
         }
     }
     developers {
         developer {
-            id "radar-cns"
-            name "Nivethika"
-            email "nivethika@thehyve.nl"
+            id 'nivemaham'
+            name 'Nivethika Mahasivam'
+            email 'nivethika@thehyve.nl'
+            organization 'The Hyve'
+        }
+        developer {
+            id 'fnobilia'
+            name 'Francesco Nobilia'
+            email 'francesco.nobilia@kcl.ac.uk'
+            organization 'King\'s College London'
+        }
+        developer {
+            id 'blootsvoets'
+            name 'Joris Borgdorff'
+            email 'joris@thehyve.nl'
+            organization 'The Hyve'
         }
     }
+    issueManagement {
+        system 'GitHub'
+        url issueUrl
+    }
+    organization {
+        name 'RADAR-CNS'
+        url website
+    }
+    scm {
+        connection 'scm:git:' + githubUrl
+        url githubUrl
+    }
 }
+
+ext.sharedManifest = manifest {
+    attributes("Implementation-Title": rootProject.name,
+            "Implementation-Version": version)
+}
+
+jar {
+    manifest.from sharedManifest
+}
+
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
-    from sourceSets.main.output
+    from sourceSets.main.allSource
+    manifest.from sharedManifest
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+    manifest.from sharedManifest
 }
 
 // add javadoc/source jar tasks as artifacts
@@ -275,14 +320,14 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            groupId 'org.radarcns'
-            artifactId 'radar-backend'
+            groupId project.group
+            artifactId rootProject.name
             version project.version
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'Kafka backend for processing device data.')
-                root.appendNode('name', 'radar-backend')
-                root.appendNode('url', 'https://github.com/RADAR-CNS/RADAR-Backend.git')
+                root.appendNode('description', description)
+                root.appendNode('name', rootProject.name)
+                root.appendNode('url', githubUrl)
                 root.children().last() + pomConfig
             }
         }
@@ -297,14 +342,19 @@ bintray {
     override = false
     publications = ['RadarBackendPublication']
     pkg {
-        repo = 'org.radarcns'
-        name = 'radar-backend'
+        repo = project.group
+        name = artifactName
         userOrg = 'radar-cns'
+        desc = description
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/RADAR-CNS/RADAR-Backend.git'
+        websiteUrl = website
+        issueTrackerUrl = issueUrl
+        vcsUrl = githubUrl
+        githubRepo = githubRepoName
+        githubReleaseNotesFile = 'README.md'
         version {
             name = project.version
-            desc = 'Kafka backend for processing device data : Alpha release'
+            desc = description
             vcsTag = System.getenv('TRAVIS_TAG')
             released = new Date()
         }
