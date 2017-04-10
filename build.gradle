@@ -38,7 +38,8 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.1-alpha.5-SNAPSHOT'
+ext.radarCommonsVersion = '0.2'
+ext.radarSchemasVersion = '0.1'
 ext.subethamailVersion = '3.1.7'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
@@ -79,11 +80,14 @@ repositories {
     maven { url 'http://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
+    maven { url  'http://dl.bintray.com/radar-cns/org.radarcns' }
 }
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
+    compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
@@ -343,7 +347,7 @@ bintray {
     publications = ['RadarBackendPublication']
     pkg {
         repo = project.group
-        name = artifactName
+        name = rootProject.name
         userOrg = 'radar-cns'
         desc = description
         licenses = ['Apache-2.0']
