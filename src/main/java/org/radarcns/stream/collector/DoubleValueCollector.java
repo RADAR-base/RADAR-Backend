@@ -19,8 +19,8 @@ package org.radarcns.stream.collector;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -88,20 +88,23 @@ public class DoubleValueCollector {
      */
     private void updateQuartile(double value) {
         history.add(value);
+        Collections.sort(history);
 
-        double[] data = new double[history.size()];
-        for (int i = 0; i < history.size(); i++) {
-            data[i] = history.get(i);
+        int length = history.size();
+
+        if (length == 1) {
+            quartile[0] = quartile[1] = quartile[2] = history.get(0);
+        } else {
+            for (int i = 0; i < 3; i++) {
+                double pos = i * (length + 1) / 4.0d;  // == i * 25 * (length + 1) / 100
+                int intPos = (int) pos;
+                double diff = pos - intPos;
+                double base = history.get(intPos - 1);
+                quartile[i] = base + diff * (history.get(intPos) - base);
+            }
         }
 
-        DescriptiveStatistics ds = new DescriptiveStatistics(data);
-
-        quartile[0] = ds.getPercentile(25);
-        quartile[1] = ds.getPercentile(50);
-        quartile[2] = ds.getPercentile(75);
-
-        iqr = BigDecimal.valueOf(quartile[2]).subtract(
-                BigDecimal.valueOf(quartile[0])).doubleValue();
+        iqr = quartile[2] - quartile[0];
     }
 
     @Override

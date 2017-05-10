@@ -99,9 +99,6 @@ dependencies {
     // Command-line interface
     compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
 
-    // Quartile in DoubleArrayCollector
-    compile group: 'org.apache.commons', name: 'commons-math3', version: mathVersion
-
     // Configuration @JsonProperty
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
 
