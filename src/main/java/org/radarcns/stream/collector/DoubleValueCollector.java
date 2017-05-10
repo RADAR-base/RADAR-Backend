@@ -96,15 +96,22 @@ public class DoubleValueCollector {
             quartile[0] = quartile[1] = quartile[2] = history.get(0);
         } else {
             for (int i = 0; i < 3; i++) {
-                double pos = i * (length + 1) / 4.0d;  // == i * 25 * (length + 1) / 100
+                double pos = (i + 1) * (length + 1) / 4.0d;  // == (i + 1) * 25 * (length + 1) / 100
                 int intPos = (int) pos;
-                double diff = pos - intPos;
-                double base = history.get(intPos - 1);
-                quartile[i] = base + diff * (history.get(intPos) - base);
+                if (intPos == 0) {
+                    quartile[i] = history.get(0);
+                } else if (intPos == length) {
+                    quartile[i] = history.get(length - 1);
+                } else {
+                    double diff = pos - intPos;
+                    double base = history.get(intPos - 1);
+                    quartile[i] = base + diff * (history.get(intPos) - base);
+                }
             }
         }
 
-        iqr = quartile[2] - quartile[0];
+        iqr = BigDecimal.valueOf(quartile[2]).subtract(
+                BigDecimal.valueOf(quartile[0])).doubleValue();
     }
 
     @Override
