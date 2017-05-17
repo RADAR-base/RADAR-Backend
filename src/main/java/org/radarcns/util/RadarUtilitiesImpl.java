@@ -16,10 +16,17 @@
 
 package org.radarcns.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.radarcns.aggregator.DoubleAggregator;
+import org.radarcns.aggregator.DoubleArrayAggregator;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
+import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
  * Implements {@link RadarUtilities}
@@ -36,6 +43,40 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
+    }
+
+    @Override
+    public KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleArrayCollector collector) {
+        List<DoubleValueCollector> subcollectors = collector.getCollectors();
+        int len = subcollectors.size();
+        List<Double> min = new ArrayList<>(len);
+        List<Double> max = new ArrayList<>(len);
+        List<Double> sum = new ArrayList<>(len);
+        List<Double> count = new ArrayList<>(len);
+        List<Double> avg = new ArrayList<>(len);
+        List<Double> iqr = new ArrayList<>(len);
+        List<List<Double>> quartile = new ArrayList<>(len);
+
+        for (DoubleValueCollector subcollector : subcollectors) {
+            min.add(subcollector.getMin());
+            max.add(subcollector.getMax());
+            sum.add(subcollector.getSum());
+            count.add(subcollector.getCount());
+            avg.add(subcollector.getAvg());
+            iqr.add(subcollector.getIqr());
+            quartile.add(subcollector.getQuartile());
+        }
+
+        return new KeyValue<>(getWindowed(window),
+                new DoubleArrayAggregator(min, max, sum, count, avg, quartile, iqr));
+    }
+
+    @Override
+    public KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleValueCollector collector) {
+        return new KeyValue<>(getWindowed(window),
+                new DoubleAggregator(collector.getMin(), collector.getMax(), collector.getSum(),
+                        collector.getCount(), collector.getAvg(), collector.getQuartile(),
+                        collector.getIqr()));
     }
 
     public double ibiToHeartRate(float input) {

@@ -57,7 +57,7 @@ public class E4BloodVolumePulse extends
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
-                .map((k, v) -> new KeyValue<>(utilities.getWindowed(k), v.convertToAvro()))
+                .map(utilities::collectorToAvro)
                 .to(getStreamDefinition().getOutputTopic().getName());
     }
 

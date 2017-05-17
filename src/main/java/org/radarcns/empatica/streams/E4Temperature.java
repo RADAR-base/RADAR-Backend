@@ -59,7 +59,7 @@ public class E4Temperature extends AggregatorWorker<MeasurementKey, EmpaticaE4Te
                         RadarSerdes.getInstance().getDoubleCollector(),
                         getStreamDefinition().getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertToAvro()))
+                .map(utilities::collectorToAvro)
                 .to(getStreamDefinition().getOutputTopic().getName());
     }
 

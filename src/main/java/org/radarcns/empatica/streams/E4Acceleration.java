@@ -18,7 +18,6 @@ package org.radarcns.empatica.streams;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
@@ -59,7 +58,7 @@ public class E4Acceleration extends AggregatorWorker<MeasurementKey, EmpaticaE4A
                 RadarSerdes.getInstance().getDoubelArrayCollector(),
                 getStreamDefinition().getStateStoreName())
             .toStream()
-            .map((k, v) -> new KeyValue<>(utilities.getWindowed(k), v.convertToAvro()))
+            .map(utilities::collectorToAvro)
             .to(getStreamDefinition().getOutputTopic().getName());
     }
 

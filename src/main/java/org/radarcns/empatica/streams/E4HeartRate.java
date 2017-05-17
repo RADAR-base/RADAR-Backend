@@ -58,7 +58,7 @@ public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4Inte
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
-                .map((k,v) -> new KeyValue<>(utilities.getWindowed(k),v.convertToAvro()))
+                .map(utilities::collectorToAvro)
                 .to(getStreamDefinition().getOutputTopic().getName());
     }
 

@@ -54,6 +54,10 @@ public class DoubleArrayCollector {
         return Arrays.toString(collectors);
     }
 
+    public List<DoubleValueCollector> getCollectors() {
+        return Arrays.asList(collectors);
+    }
+
     /**
      * @return Avro equivalent class represented by org.radarcns.aggregator.DoubleArrayAggregator
      */
