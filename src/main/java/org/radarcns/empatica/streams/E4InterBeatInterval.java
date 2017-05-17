@@ -18,7 +18,6 @@ package org.radarcns.empatica.streams;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;

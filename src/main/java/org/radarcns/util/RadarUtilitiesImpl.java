@@ -46,7 +46,8 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
-    public KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleArrayCollector collector) {
+    public KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, DoubleArrayCollector collector) {
         List<DoubleValueCollector> subcollectors = collector.getCollectors();
         int len = subcollectors.size();
         List<Double> min = new ArrayList<>(len);
@@ -72,7 +73,8 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
-    public KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleValueCollector collector) {
+    public KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, DoubleValueCollector collector) {
         return new KeyValue<>(getWindowed(window),
                 new DoubleAggregator(collector.getMin(), collector.getMax(), collector.getSum(),
                         collector.getCount(), collector.getAvg(), collector.getQuartile(),

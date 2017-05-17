@@ -27,19 +27,22 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
- * Interface that facades all utility functions that are required to support RadarBackend features
+ * Interface that facades all utility functions that are required to support RadarBackend features.
  */
 public interface RadarUtilities {
 
     /**
-     * Creates a WindowedKey for a window of MeasurementKey
+     * Creates a WindowedKey for a window of MeasurementKey.
      * @param window Windowed measurement keys
      * @return relevant WindowedKey
      */
     WindowedKey getWindowed(Windowed<MeasurementKey> window);
 
-    KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleArrayCollector collector);
-    KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(Windowed<MeasurementKey> window, DoubleValueCollector collector);
+    KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, DoubleArrayCollector collector);
+
+    KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, DoubleValueCollector collector);
 
     double floatToDouble(float input);
 
