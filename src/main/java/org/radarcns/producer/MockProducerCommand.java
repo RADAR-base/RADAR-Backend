@@ -24,8 +24,8 @@ import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
-import org.radarcns.mock.BasicMockConfig;
 import org.radarcns.mock.MockProducer;
+import org.radarcns.mock.config.BasicMockConfig;
 
 public class MockProducerCommand implements SubCommand {
     private final MockProducer producer;

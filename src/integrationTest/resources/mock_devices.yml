@@ -1,0 +1,18 @@
+#=========================== Schema Registry ============================#
+#List of Schema Registry instances
+schema_registry:
+  protocol: https
+  host: schema-registry-1
+  port: 8081
+
+#============================ Kafka broker ==============================#
+broker:
+  - host: kafka-1
+    port: 9092
+
+#=============================== Test ===================================#
+# time duration that mock data has to cover expressed in milliseconds.
+duration_millis: 15000
+
+#Possible value are direct, rest
+producer_mode: direct

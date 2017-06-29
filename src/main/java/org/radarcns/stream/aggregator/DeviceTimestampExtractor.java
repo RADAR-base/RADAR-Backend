@@ -36,7 +36,7 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
      * @throws RuntimeException if timeReceived is not present inside the analysed record
      */
     @Override
-    public long extract(ConsumerRecord<Object, Object> record) {
+    public long extract(ConsumerRecord<Object, Object> record, long previousTimestamp) {
         IndexedRecord value = (IndexedRecord) record.value();
         Schema recordSchema = value.getSchema();
 

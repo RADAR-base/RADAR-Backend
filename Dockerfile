@@ -4,4 +4,6 @@ ENV TERM=dumb
 COPY . /code
 WORKDIR /code
 
+RUN ./gradlew downloadDependencies
+
 ENTRYPOINT ["./gradlew"]

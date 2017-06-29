@@ -39,15 +39,15 @@ public class SensorAggregatorTest {
         aggregator = mock(AggregatorWorker.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void getBuilder() throws IOException {
         String topicName = "TESTTopic";
         StreamDefinition sensorTopic = new StreamDefinition(new KafkaTopic(topicName), new KafkaTopic(topicName + "_output"));
         when(aggregator.getStreamDefinition()).thenReturn(sensorTopic);
         doCallRealMethod().when(aggregator).getBuilder();
-        KStreamBuilder builder = aggregator.getBuilder();
+        aggregator.getBuilder();
 
         verify(aggregator, times(1)).setStream(any());
     }
-
 }

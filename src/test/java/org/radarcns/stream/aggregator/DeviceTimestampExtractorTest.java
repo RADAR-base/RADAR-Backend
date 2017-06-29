@@ -54,9 +54,9 @@ public class DeviceTimestampExtractorTest {
         GenericRecord record = buildIndexedRecord(userSchema);
         double timeValue = 40880.051388;
         record.put("timeReceived", timeValue);
-        ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord(topic, 3, 30, null, (IndexedRecord)record);
-        long extracted = this.timestampExtractor.extract(consumerRecord);
-        assertEquals((long) (1000d * (Double)timeValue ), extracted, 0.0000000);
+        ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord<>(topic, 3, 30, null, record);
+        long extracted = this.timestampExtractor.extract(consumerRecord, -1L);
+        assertEquals((long) (1000d * timeValue), extracted);
     }
 
     @Test
@@ -65,18 +65,17 @@ public class DeviceTimestampExtractorTest {
                 +"\"name\": \"TestTimeExtract\","
                 +"\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}";
         GenericRecord record = buildIndexedRecord(userSchema);
-        double timeValue = 40880.051388;
         record.put("timeReceived", "timeValue");
-        ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord(topic, 3, 30, null, (IndexedRecord)record);
+        ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord<>(topic, 3, 30, null, record);
 
         exception.expect(RuntimeException.class);
         exception.expectMessage("Impossible to extract timeReceived from");
-        long extracted = this.timestampExtractor.extract(consumerRecord);
+        long extracted = this.timestampExtractor.extract(consumerRecord, -1L);
         assertNull(extracted);
 
     }
 
-    public static GenericRecord buildIndexedRecord(String userSchema) {
+    private static GenericRecord buildIndexedRecord(String userSchema) {
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse(userSchema);
         return new GenericData.Record(schema);
