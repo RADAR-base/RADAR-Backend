@@ -16,18 +16,20 @@
 
 package org.radarcns.phone.streams;
 
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
+//import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.topic.E4Streams;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.phone.PhoneUsageEvent;
+import org.radarcns.phone.PlayStoreLookup;
 import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
+//import org.radarcns.util.RadarSingletonFactory;
+//import org.radarcns.util.RadarUtilities;
+//import org.radarcns.stream.collector.DoubleValueCollector;
+//import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ import java.io.IOException;
 
 public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent> {
     private static final Logger log = LoggerFactory.getLogger(PhoneUsage.class);
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    //    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public PhoneUsage(String clientId, int numThread, MasterAggregator master,
                        KafkaProperty kafkaProperties) {
@@ -47,7 +49,13 @@ public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent
     @Override
     protected void setStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream)
             throws IOException {
-        // TODO
+        kstream
+            .map((key, value) -> {
+                String category = PlayStoreLookup.fetchCategory(value.getPackageName().toString());
+                value.setCategoryName(category);
+                return new KeyValue<>(key,value);
+            })
+            .to(getStreamDefinition().getOutputTopic().getName());
     }
 
 }

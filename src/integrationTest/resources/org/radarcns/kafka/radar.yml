@@ -1,6 +1,7 @@
 version: 1.0
 released: 2016-11-27
 
+
 #============================= Application =============================#
 log_path: ./
 #Possible value are standalone or high_performance
