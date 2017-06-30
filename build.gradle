@@ -145,6 +145,11 @@ checkstyle {
     sourceSets = [sourceSets.main]
 }
 
+tasks.withType(Checkstyle) {
+    exclude '**/org/radarcns/phone/PhoneUsageEvent.java'
+    exclude '**/org/radarcns/phone/UsageEventType.java'
+}
+
 pmd {
     // codacy version
     toolVersion = '5.5.2'
