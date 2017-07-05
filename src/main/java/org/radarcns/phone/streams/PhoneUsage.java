@@ -18,18 +18,13 @@ package org.radarcns.phone.streams;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
-//import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.topic.E4Streams;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.phone.PlayStoreLookup;
+import org.radarcns.phone.topic.PhoneStreams;
 import org.radarcns.stream.aggregator.AggregatorWorker;
 import org.radarcns.stream.aggregator.MasterAggregator;
-//import org.radarcns.util.RadarSingletonFactory;
-//import org.radarcns.util.RadarUtilities;
-//import org.radarcns.stream.collector.DoubleValueCollector;
-//import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +37,7 @@ public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent
 
     public PhoneUsage(String clientId, int numThread, MasterAggregator master,
                        KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getHeartRateStream(), clientId,
+        super(PhoneStreams.getInstance().getUsageStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 

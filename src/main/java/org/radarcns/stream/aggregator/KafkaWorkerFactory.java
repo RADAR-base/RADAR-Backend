@@ -35,14 +35,18 @@ public class KafkaWorkerFactory {
     }
 
     public MasterAggregator createStreamWorker() throws IOException {
-        String[] args = options.getSubCommandArgs();
-        String commandType;
-        if (args == null || args.length == 0) {
-            commandType = "all";
-        } else {
-            commandType = args[0];
+        String streamType = properties.getRadarProperties().getStreamWorker();
+        if (streamType == null) {
+            // Try to get the stream type from the commandline arguments
+            String[] args = options.getSubCommandArgs();
+            if (args == null || args.length == 0) {
+                streamType = "all";
+            } else {
+                streamType = args[0];
+            }
         }
-        switch (commandType) {
+
+        switch (streamType) {
             case "e4":
                 return new E4Worker(properties.getRadarProperties().isStandalone());
             case "phone":
@@ -53,7 +57,7 @@ public class KafkaWorkerFactory {
                         new PhoneWorker(properties.getRadarProperties().isStandalone())
                         ));
             default:
-                throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
+                throw new IllegalArgumentException("Cannot create unknown stream " + streamType);
         }
     }
 }
