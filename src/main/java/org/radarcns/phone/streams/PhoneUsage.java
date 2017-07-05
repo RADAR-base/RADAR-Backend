@@ -35,6 +35,8 @@ public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent
     private static final Logger log = LoggerFactory.getLogger(PhoneUsage.class);
     //    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
+    private final PlayStoreLookup playStoreLookup = new PlayStoreLookup();
+
     public PhoneUsage(String clientId, int numThread, MasterAggregator master,
                        KafkaProperty kafkaProperties) {
         super(PhoneStreams.getInstance().getUsageStream(), clientId,
@@ -46,8 +48,10 @@ public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent
             throws IOException {
         kstream
             .map((key, value) -> {
-                String category = PlayStoreLookup.fetchCategory(value.getPackageName().toString());
-                value.setCategoryName(category);
+                String packageName = value.getPackageName().toString();
+                PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
+                value.setCategoryName(category.getCategoryName());
+                value.setCategoryNameFetchTime(category.getFetchTimeStamp());
                 return new KeyValue<>(key,value);
             })
             .to(getStreamDefinition().getOutputTopic().getName());

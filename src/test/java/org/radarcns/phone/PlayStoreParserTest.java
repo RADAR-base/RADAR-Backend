@@ -28,6 +28,8 @@ public class PlayStoreParserTest {
                 ,{ "com.android.chrome", "COMMUNICATION" }
                 ,{ "com.google.android.youtube", "VIDEO_PLAYERS" }
                 ,{ "com.withings.wiscale2", "HEALTH_AND_FITNESS" }
+                ,{ "com.android.systemui", "" }
+                ,{ "abc.abc", "" }
         });
     }
 
@@ -41,7 +43,7 @@ public class PlayStoreParserTest {
     }
 
     @Test
-    public void test() {
+    public void fetchCategoryTest() {
         String result = PlayStoreLookup.fetchCategory(fInputPackageName);
         assertEquals(fExpectedCategory, result);
     }

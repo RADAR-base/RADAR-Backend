@@ -11,8 +11,8 @@ import org.apache.avro.specific.SpecificData;
 /** Event for closing or opening an app */
 @org.apache.avro.specific.AvroGenerated
 public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 7932990075262993937L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhoneUsageEvent\",\"namespace\":\"org.radarcns.phone\",\"doc\":\"Event for closing or opening an app\",\"fields\":[{\"name\":\"time\",\"type\":\"double\",\"doc\":\"device timestamp in UTC (s)\"},{\"name\":\"timeReceived\",\"type\":\"double\",\"doc\":\"device receiver timestamp in UTC (s)\"},{\"name\":\"packageName\",\"type\":\"string\",\"doc\":\"package name of the launched app\"},{\"name\":\"categoryName\",\"type\":\"string\",\"doc\":\"app category as given by the play store\"},{\"name\":\"eventType\",\"type\":{\"type\":\"enum\",\"name\":\"UsageEventType\",\"symbols\":[\"FOREGROUND\",\"BACKGROUND\",\"CONFIG\",\"SHORTCUT\",\"INTERACTION\",\"NONE\"]},\"doc\":\"whether the event brought app to foreground or background or neither\"}]}");
+  private static final long serialVersionUID = -1373381171064471488L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhoneUsageEvent\",\"namespace\":\"org.radarcns.phone\",\"doc\":\"Event for closing or opening an app\",\"fields\":[{\"name\":\"time\",\"type\":\"double\",\"doc\":\"device timestamp in UTC (s)\"},{\"name\":\"timeReceived\",\"type\":\"double\",\"doc\":\"device receiver timestamp in UTC (s)\"},{\"name\":\"packageName\",\"type\":\"string\",\"doc\":\"package name of the launched app\"},{\"name\":\"categoryName\",\"type\":[\"null\",\"string\"],\"doc\":\"app category as given by the play store\"},{\"name\":\"categoryNameFetchTime\",\"type\":[\"null\",\"double\"],\"doc\":\"timestamp in UTC when the category was fetched from the play store (s)\"},{\"name\":\"eventType\",\"type\":{\"type\":\"enum\",\"name\":\"UsageEventType\",\"symbols\":[\"FOREGROUND\",\"BACKGROUND\",\"CONFIG\",\"SHORTCUT\",\"INTERACTION\",\"NONE\"]},\"doc\":\"whether the event brought app to foreground or background or neither\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   /** device timestamp in UTC (s) */
   @Deprecated public double time;
@@ -22,6 +22,8 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
   @Deprecated public java.lang.CharSequence packageName;
   /** app category as given by the play store */
   @Deprecated public java.lang.CharSequence categoryName;
+  /** timestamp in UTC when the category was fetched from the play store (s) */
+  @Deprecated public java.lang.Double categoryNameFetchTime;
   /** whether the event brought app to foreground or background or neither */
   @Deprecated public org.radarcns.phone.UsageEventType eventType;
 
@@ -38,13 +40,15 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
    * @param timeReceived device receiver timestamp in UTC (s)
    * @param packageName package name of the launched app
    * @param categoryName app category as given by the play store
+   * @param categoryNameFetchTime timestamp in UTC when the category was fetched from the play store (s)
    * @param eventType whether the event brought app to foreground or background or neither
    */
-  public PhoneUsageEvent(java.lang.Double time, java.lang.Double timeReceived, java.lang.CharSequence packageName, java.lang.CharSequence categoryName, org.radarcns.phone.UsageEventType eventType) {
+  public PhoneUsageEvent(java.lang.Double time, java.lang.Double timeReceived, java.lang.CharSequence packageName, java.lang.CharSequence categoryName, java.lang.Double categoryNameFetchTime, org.radarcns.phone.UsageEventType eventType) {
     this.time = time;
     this.timeReceived = timeReceived;
     this.packageName = packageName;
     this.categoryName = categoryName;
+    this.categoryNameFetchTime = categoryNameFetchTime;
     this.eventType = eventType;
   }
 
@@ -56,7 +60,8 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
     case 1: return timeReceived;
     case 2: return packageName;
     case 3: return categoryName;
-    case 4: return eventType;
+    case 4: return categoryNameFetchTime;
+    case 5: return eventType;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -69,7 +74,8 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
     case 1: timeReceived = (java.lang.Double)value$; break;
     case 2: packageName = (java.lang.CharSequence)value$; break;
     case 3: categoryName = (java.lang.CharSequence)value$; break;
-    case 4: eventType = (org.radarcns.phone.UsageEventType)value$; break;
+    case 4: categoryNameFetchTime = (java.lang.Double)value$; break;
+    case 5: eventType = (org.radarcns.phone.UsageEventType)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -143,6 +149,23 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
   }
 
   /**
+   * Gets the value of the 'categoryNameFetchTime' field.
+   * @return timestamp in UTC when the category was fetched from the play store (s)
+   */
+  public java.lang.Double getCategoryNameFetchTime() {
+    return categoryNameFetchTime;
+  }
+
+  /**
+   * Sets the value of the 'categoryNameFetchTime' field.
+   * timestamp in UTC when the category was fetched from the play store (s)
+   * @param value the value to set.
+   */
+  public void setCategoryNameFetchTime(java.lang.Double value) {
+    this.categoryNameFetchTime = value;
+  }
+
+  /**
    * Gets the value of the 'eventType' field.
    * @return whether the event brought app to foreground or background or neither
    */
@@ -199,6 +222,8 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
     private java.lang.CharSequence packageName;
     /** app category as given by the play store */
     private java.lang.CharSequence categoryName;
+    /** timestamp in UTC when the category was fetched from the play store (s) */
+    private java.lang.Double categoryNameFetchTime;
     /** whether the event brought app to foreground or background or neither */
     private org.radarcns.phone.UsageEventType eventType;
 
@@ -229,9 +254,13 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
         this.categoryName = data().deepCopy(fields()[3].schema(), other.categoryName);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.eventType)) {
-        this.eventType = data().deepCopy(fields()[4].schema(), other.eventType);
+      if (isValidValue(fields()[4], other.categoryNameFetchTime)) {
+        this.categoryNameFetchTime = data().deepCopy(fields()[4].schema(), other.categoryNameFetchTime);
         fieldSetFlags()[4] = true;
+      }
+      if (isValidValue(fields()[5], other.eventType)) {
+        this.eventType = data().deepCopy(fields()[5].schema(), other.eventType);
+        fieldSetFlags()[5] = true;
       }
     }
 
@@ -257,9 +286,13 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
         this.categoryName = data().deepCopy(fields()[3].schema(), other.categoryName);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.eventType)) {
-        this.eventType = data().deepCopy(fields()[4].schema(), other.eventType);
+      if (isValidValue(fields()[4], other.categoryNameFetchTime)) {
+        this.categoryNameFetchTime = data().deepCopy(fields()[4].schema(), other.categoryNameFetchTime);
         fieldSetFlags()[4] = true;
+      }
+      if (isValidValue(fields()[5], other.eventType)) {
+        this.eventType = data().deepCopy(fields()[5].schema(), other.eventType);
+        fieldSetFlags()[5] = true;
       }
     }
 
@@ -434,6 +467,49 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
     }
 
     /**
+      * Gets the value of the 'categoryNameFetchTime' field.
+      * timestamp in UTC when the category was fetched from the play store (s)
+      * @return The value.
+      */
+    public java.lang.Double getCategoryNameFetchTime() {
+      return categoryNameFetchTime;
+    }
+
+    /**
+      * Sets the value of the 'categoryNameFetchTime' field.
+      * timestamp in UTC when the category was fetched from the play store (s)
+      * @param value The value of 'categoryNameFetchTime'.
+      * @return This builder.
+      */
+    public org.radarcns.phone.PhoneUsageEvent.Builder setCategoryNameFetchTime(java.lang.Double value) {
+      validate(fields()[4], value);
+      this.categoryNameFetchTime = value;
+      fieldSetFlags()[4] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'categoryNameFetchTime' field has been set.
+      * timestamp in UTC when the category was fetched from the play store (s)
+      * @return True if the 'categoryNameFetchTime' field has been set, false otherwise.
+      */
+    public boolean hasCategoryNameFetchTime() {
+      return fieldSetFlags()[4];
+    }
+
+
+    /**
+      * Clears the value of the 'categoryNameFetchTime' field.
+      * timestamp in UTC when the category was fetched from the play store (s)
+      * @return This builder.
+      */
+    public org.radarcns.phone.PhoneUsageEvent.Builder clearCategoryNameFetchTime() {
+      categoryNameFetchTime = null;
+      fieldSetFlags()[4] = false;
+      return this;
+    }
+
+    /**
       * Gets the value of the 'eventType' field.
       * whether the event brought app to foreground or background or neither
       * @return The value.
@@ -449,9 +525,9 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
       * @return This builder.
       */
     public org.radarcns.phone.PhoneUsageEvent.Builder setEventType(org.radarcns.phone.UsageEventType value) {
-      validate(fields()[4], value);
+      validate(fields()[5], value);
       this.eventType = value;
-      fieldSetFlags()[4] = true;
+      fieldSetFlags()[5] = true;
       return this;
     }
 
@@ -461,7 +537,7 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
       * @return True if the 'eventType' field has been set, false otherwise.
       */
     public boolean hasEventType() {
-      return fieldSetFlags()[4];
+      return fieldSetFlags()[5];
     }
 
 
@@ -472,7 +548,7 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
       */
     public org.radarcns.phone.PhoneUsageEvent.Builder clearEventType() {
       eventType = null;
-      fieldSetFlags()[4] = false;
+      fieldSetFlags()[5] = false;
       return this;
     }
 
@@ -484,7 +560,8 @@ public class PhoneUsageEvent extends org.apache.avro.specific.SpecificRecordBase
         record.timeReceived = fieldSetFlags()[1] ? this.timeReceived : (java.lang.Double) defaultValue(fields()[1]);
         record.packageName = fieldSetFlags()[2] ? this.packageName : (java.lang.CharSequence) defaultValue(fields()[2]);
         record.categoryName = fieldSetFlags()[3] ? this.categoryName : (java.lang.CharSequence) defaultValue(fields()[3]);
-        record.eventType = fieldSetFlags()[4] ? this.eventType : (org.radarcns.phone.UsageEventType) defaultValue(fields()[4]);
+        record.categoryNameFetchTime = fieldSetFlags()[4] ? this.categoryNameFetchTime : (java.lang.Double) defaultValue(fields()[4]);
+        record.eventType = fieldSetFlags()[5] ? this.eventType : (org.radarcns.phone.UsageEventType) defaultValue(fields()[5]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

@@ -17,22 +17,56 @@ package org.radarcns.phone;
  */
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.radarcns.phone.streams.PhoneUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class PlayStoreLookup {
-    private static final Logger log = LoggerFactory.getLogger(PhoneUsage.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
 
     private static final String URL_PLAY_STORE_APP_DETAILS = "https://play.google.com/store/apps/details?id=";
     private static final String CATEGORY_ANCHOR_SELECTOR = "a.document-subtitle.category";
 
-    private PlayStoreLookup() {}
+    private final Map<String,AppCategory> categoryCache = new HashMap<>();
+
+    public AppCategory lookupCategory(String packageName) {
+        // If not yet in cache, fetch category for this package
+        if (!categoryCache.containsKey(packageName)) {
+            String categoryName = fetchCategory(packageName);
+            addCategoryToCache(packageName, categoryName);
+        }
+
+        return categoryCache.get(packageName);
+    }
+
+    private void addCategoryToCache(String packageName, String categoryName) {
+        AppCategory appCategory = new AppCategory(categoryName, System.currentTimeMillis() / 1000d);
+        categoryCache.put(packageName, appCategory);
+    }
+
+    public class AppCategory {
+        private final String categoryName;
+        private final double fetchTimeStamp;
+
+        private AppCategory(String categoryName, double fetchTimeStamp) {
+            this.categoryName = categoryName;
+            this.fetchTimeStamp = fetchTimeStamp;
+        }
+
+        public String getCategoryName() {
+            return categoryName;
+        }
+
+        public double getFetchTimeStamp() {
+            return fetchTimeStamp;
+        }
+    }
 
     /**
      * Fetches the app category by parsing the Play Store
