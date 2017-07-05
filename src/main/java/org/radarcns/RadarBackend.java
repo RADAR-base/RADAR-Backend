@@ -23,8 +23,8 @@ import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
-import org.radarcns.empatica.E4Worker;
 import org.radarcns.monitor.KafkaMonitorFactory;
+import org.radarcns.stream.aggregator.KafkaWorkerFactory;
 import org.radarcns.producer.MockProducerCommand;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public final class RadarBackend {
         }
         switch (subCommand) {
             case "stream":
-                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
+                return new KafkaWorkerFactory(options, radarPropertyHandler).createStreamWorker();
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":
