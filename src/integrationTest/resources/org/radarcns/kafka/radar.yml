@@ -3,7 +3,7 @@ released: 2016-11-27
 
 
 #============================= Application =============================#
-log_path: ./
+log_path: src/integrationTest
 #Possible value are standalone or high_performance
 mode: standalone
 
@@ -36,8 +36,6 @@ schema_registry:
     - host: schema-registry-1
       port: 8081
       protocol: http
-
-
 
 
 battery_monitor:
