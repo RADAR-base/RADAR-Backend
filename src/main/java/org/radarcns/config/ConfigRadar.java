@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.radarcns.config.RadarPropertyHandler.Priority;
-import org.radarcns.stream.aggregator.MasterAggregator;
 
 /**
  * POJO representing the yml file

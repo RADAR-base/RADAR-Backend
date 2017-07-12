@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -24,19 +24,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.stream.StreamDefinition;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.topic.KafkaTopic;
 /**
  * Created by nivethika on 20-12-16.
  */
 public class SensorAggregatorTest {
-    private AggregatorWorker aggregator;
+    private StreamWorker aggregator;
     @Before
     public void setUp() {
-        aggregator = mock(AggregatorWorker.class);
+        aggregator = mock(StreamWorker.class);
     }
 
     @SuppressWarnings("unchecked")

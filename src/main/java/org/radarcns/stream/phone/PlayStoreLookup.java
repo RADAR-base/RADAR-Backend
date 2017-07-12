@@ -1,7 +1,5 @@
-package org.radarcns.phone;
-
 /*
- * Copyright 2017 The Hyve
+ * Copyright 2017 King's College London and The Hyve
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,8 @@ package org.radarcns.phone;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.radarcns.stream.phone;
 
 import java.io.IOException;
 import java.util.HashMap;

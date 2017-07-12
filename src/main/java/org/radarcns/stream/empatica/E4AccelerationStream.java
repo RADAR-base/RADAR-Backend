@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.empatica.streams;
+package org.radarcns.stream.empatica;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
@@ -22,10 +22,9 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
-import org.radarcns.empatica.topic.E4Streams;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -36,11 +35,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Definition of Kafka Stream for aggregating data collected by Empatica E4 Acceleromete
  */
-public class E4Acceleration extends AggregatorWorker<MeasurementKey, EmpaticaE4Acceleration> {
-    private static final Logger log = LoggerFactory.getLogger(E4Acceleration.class);
+public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE4Acceleration> {
+    private static final Logger log = LoggerFactory.getLogger(E4AccelerationStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4Acceleration(String clientId, int numThread, MasterAggregator master,
+    public E4AccelerationStream(String clientId, int numThread, StreamMaster master,
             KafkaProperty kafkaProperties) {
         super(E4Streams.getInstance().getAccelerationStream(), clientId,
                 numThread, master, kafkaProperties, log);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -22,12 +22,13 @@ import static org.junit.Assert.assertNull;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.IndexedRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.radarcns.stream.DeviceTimestampExtractor;
+
 /**
  * Created by nivethika on 20-12-16.
  */

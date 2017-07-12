@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package org.radarcns.phone.streams;
+package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.phone.PhoneUsageEvent;
-import org.radarcns.phone.PlayStoreLookup;
-import org.radarcns.phone.topic.PhoneStreams;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.StreamMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-public class PhoneUsage extends AggregatorWorker<MeasurementKey, PhoneUsageEvent> {
-    private static final Logger log = LoggerFactory.getLogger(PhoneUsage.class);
+public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
+    private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
     //    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     private final PlayStoreLookup playStoreLookup = new PlayStoreLookup();
 
-    public PhoneUsage(String clientId, int numThread, MasterAggregator master,
+    public PhoneUsageStream(String clientId, int numThread, StreamMaster master,
                        KafkaProperty kafkaProperties) {
         super(PhoneStreams.getInstance().getUsageStream(), clientId,
                 numThread, master, kafkaProperties, log);

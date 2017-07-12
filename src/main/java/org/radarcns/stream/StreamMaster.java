@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,16 +33,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstraction of a set of AggregatorWorker
+ * Abstraction of a set of StreamWorker
  *
- * @see org.radarcns.stream.aggregator.AggregatorWorker
+ * @see StreamWorker
  */
-public abstract class MasterAggregator implements SubCommand {
-    private static final Logger log = LoggerFactory.getLogger(MasterAggregator.class);
+public abstract class StreamMaster implements SubCommand {
+    private static final Logger log = LoggerFactory.getLogger(StreamMaster.class);
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<AggregatorWorker<?,?>> list;
+    private final List<StreamWorker<?,?>> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
     private int lowPriority;
@@ -58,7 +58,7 @@ public abstract class MasterAggregator implements SubCommand {
      * @param nameSensor the name of the device that produced data that will be consumed. Only for
      *                   debug
      */
-    protected MasterAggregator(boolean standalone, @Nonnull String nameSensor) throws IOException {
+    protected StreamMaster(boolean standalone, @Nonnull String nameSensor) throws IOException {
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
@@ -81,16 +81,16 @@ public abstract class MasterAggregator implements SubCommand {
 
         list = new ArrayList<>();
 
-        log.info("Creating MasterAggregator instance for {}", nameSensor);
+        log.info("Creating StreamMaster instance for {}", nameSensor);
     }
 
     /**
-     * Populates an AggregatorWorker list with workers
+     * Populates an StreamWorker list with workers
      *
      * @param low,normal,high: are the three available priority levels that can be used to start
      *                       kafka streams
      */
-    protected abstract List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high);
+    protected abstract List<StreamWorker<?,?>> createWorkers(int low, int normal, int high);
 
     /**
      * Informative function to log the topics list that the application is going to use
@@ -99,7 +99,7 @@ public abstract class MasterAggregator implements SubCommand {
      */
     protected abstract void announceTopics(@Nonnull Logger log);
 
-    /** It starts all AggregatorWorkers controlled by this MasterAggregator */
+    /** It starts all AggregatorWorkers controlled by this StreamMaster */
     public void start() throws IOException {
         log.info("Starting all streams for {}", nameSensor);
 
@@ -107,12 +107,12 @@ public abstract class MasterAggregator implements SubCommand {
         list.forEach(v -> executor.submit(v::start));
     }
 
-    /** It stops all AggregatorWorkers controlled by this MasterAggregator */
+    /** It stops all AggregatorWorkers controlled by this StreamMaster */
     public void shutdown() throws InterruptedException {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!list.isEmpty()) {
-            final AggregatorWorker<?, ?> worker = list.remove(list.size() - 1);
+            final StreamWorker<?, ?> worker = list.remove(list.size() - 1);
             executor.submit(worker::shutdown);
         }
 
@@ -120,7 +120,7 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Notification from AggregatorWorker that it has started its managed stream
+     * Notification from StreamWorker that it has started its managed stream
      *
      * @param stream the name of the stream that has been started. Useful for debug purpose
      */
@@ -131,7 +131,7 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Notification from AggregatorWorker that it has closed its managed stream
+     * Notification from StreamWorker that it has closed its managed stream
      *
      * @param stream the name of the stream that has been closed. Useful for debug purpose
      */
@@ -147,7 +147,7 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Function used by AggregatorWorker to notify a crash and trigger a forced shutdown.
+     * Function used by StreamWorker to notify a crash and trigger a forced shutdown.
      *
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
@@ -159,7 +159,7 @@ public abstract class MasterAggregator implements SubCommand {
         //TODO implement forcing shutdown
     }
 
-    public void restartStream(final AggregatorWorker<?, ?> worker) {
+    public void restartStream(final StreamWorker<?, ?> worker) {
         log.info("Restarting stream {} for {}", worker.getClientId(), nameSensor);
 
         try {

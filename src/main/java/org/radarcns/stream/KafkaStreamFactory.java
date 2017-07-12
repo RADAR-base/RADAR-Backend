@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.empatica.E4Worker;
-import org.radarcns.phone.PhoneWorker;
+import org.radarcns.stream.empatica.E4StreamMaster;
+import org.radarcns.stream.phone.PhoneStreamMaster;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-public class KafkaWorkerFactory {
+public class KafkaStreamFactory {
     private final RadarPropertyHandler properties;
     private final RadarBackendOptions options;
 
-    public KafkaWorkerFactory(RadarBackendOptions options,
+    public KafkaStreamFactory(RadarBackendOptions options,
                               RadarPropertyHandler properties) {
         this.options = options;
         this.properties = properties;
     }
 
-    public MasterAggregator createStreamWorker() throws IOException {
+    public StreamMaster createStreamWorker() throws IOException {
         String streamType = properties.getRadarProperties().getStreamWorker();
         if (streamType == null) {
             // Try to get the stream type from the commandline arguments
@@ -46,15 +46,16 @@ public class KafkaWorkerFactory {
             }
         }
 
+        boolean isStandalone = properties.getRadarProperties().isStandalone();
         switch (streamType) {
             case "e4":
-                return new E4Worker(properties.getRadarProperties().isStandalone());
+                return new E4StreamMaster(isStandalone);
             case "phone":
-                return new PhoneWorker(properties.getRadarProperties().isStandalone());
+                return new PhoneStreamMaster(isStandalone);
             case "all":
                 return new CombinedKafkaWorker(Arrays.asList(
-                        new E4Worker(properties.getRadarProperties().isStandalone()),
-                        new PhoneWorker(properties.getRadarProperties().isStandalone())
+                        new E4StreamMaster(isStandalone),
+                        new PhoneStreamMaster(isStandalone)
                         ));
             default:
                 throw new IllegalArgumentException("Cannot create unknown stream " + streamType);

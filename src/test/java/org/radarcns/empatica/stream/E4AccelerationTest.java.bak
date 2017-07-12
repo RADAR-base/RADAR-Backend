@@ -12,10 +12,10 @@ import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.PropertiesRadar;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.empatica.topic.E4SensorStreams;
-import org.radarcns.empatica.topic.E4Streams;
+import E4Streams;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.topic.SensorTopic;
 
 import java.io.IOException;

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.radarcns.phone;
+package org.radarcns.stream.phone;
 
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.phone.streams.PhoneUsage;
-import org.radarcns.phone.topic.PhoneStreams;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 
@@ -31,12 +29,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Singleton MasterAggregator for Phone
- * @see org.radarcns.stream.aggregator.MasterAggregator
+ * Singleton StreamMaster for Phone
+ * @see StreamMaster
  */
-public class PhoneWorker extends MasterAggregator {
+public class PhoneStreamMaster extends StreamMaster {
 
-    public PhoneWorker(boolean standalone) throws IOException {
+    public PhoneStreamMaster(boolean standalone) throws IOException {
         super(standalone,"Phone");
     }
 
@@ -48,12 +46,12 @@ public class PhoneWorker extends MasterAggregator {
     }
 
     @Override
-    protected List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high) {
+    protected List<StreamWorker<?,?>> createWorkers(int low, int normal, int high) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         return Arrays.asList(
-                new PhoneUsage(
-                        "PhoneUsage", low, this, kafkaProperty)
+                new PhoneUsageStream(
+                        "PhoneUsageStream", low, this, kafkaProperty)
         );
     }
 }

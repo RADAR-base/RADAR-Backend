@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.phone.topic;
+package org.radarcns.stream.phone;
 
 import org.radarcns.stream.GeneralStreamGroup;
 import org.radarcns.stream.StreamDefinition;

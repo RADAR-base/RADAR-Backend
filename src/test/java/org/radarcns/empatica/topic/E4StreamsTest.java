@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.stream.StreamDefinition;
+import org.radarcns.stream.empatica.E4Streams;
 
 /**
  * Created by nivethika on 21-12-16.

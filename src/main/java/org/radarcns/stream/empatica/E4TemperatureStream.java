@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.radarcns.empatica.streams;
+package org.radarcns.stream.empatica;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
-import org.radarcns.empatica.topic.E4Streams;
+import org.radarcns.empatica.EmpaticaE4Temperature;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -34,35 +33,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4
+ * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4
  */
-public class E4HeartRate extends AggregatorWorker<MeasurementKey, EmpaticaE4InterBeatInterval> {
-    private static final Logger log = LoggerFactory.getLogger(E4HeartRate.class);
+public class E4TemperatureStream extends StreamWorker<MeasurementKey, EmpaticaE4Temperature> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private static final Logger log = LoggerFactory.getLogger(E4TemperatureStream.class);
 
-    public E4HeartRate(String clientId, int numThread, MasterAggregator master,
+    public E4TemperatureStream(String clientId, int numThread, StreamMaster master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getHeartRateStream(), clientId,
+        super(E4Streams.getInstance().getTemperatureStream(), clientId,
                 numThread, master, kafkaProperties, log);
     }
 
+
     @Override
-    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream)
+    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream)
             throws IOException {
         kstream.groupByKey()
                 .aggregate(
-                    DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(converter(v)),
-                    TimeWindows.of(10 * 1000L),
-                    RadarSerdes.getInstance().getDoubleCollector(),
-                    getStreamDefinition().getStateStoreName())
+                        DoubleValueCollector::new,
+                        (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                        TimeWindows.of(10 * 1000L),
+                        RadarSerdes.getInstance().getDoubleCollector(),
+                        getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro)
                 .to(getStreamDefinition().getOutputTopic().getName());
     }
 
-    private double converter(EmpaticaE4InterBeatInterval record) {
+    private Float extractValue(EmpaticaE4Temperature record) {
         incrementMonitor();
-        return utilities.ibiToHeartRate(record.getInterBeatInterval());
+        return record.getTemperature();
     }
 }

@@ -24,8 +24,9 @@ import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.monitor.KafkaMonitorFactory;
-import org.radarcns.stream.aggregator.KafkaWorkerFactory;
+import org.radarcns.stream.KafkaStreamFactory;
 import org.radarcns.producer.MockProducerCommand;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public final class RadarBackend {
         }
         switch (subCommand) {
             case "stream":
-                return new KafkaWorkerFactory(options, radarPropertyHandler).createStreamWorker();
+                return new KafkaStreamFactory(options, radarPropertyHandler).createStreamWorker();
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":
@@ -100,8 +101,8 @@ public final class RadarBackend {
     }
 
     /**
-     * Start here all needed MasterAggregator
-     * @see org.radarcns.stream.aggregator.MasterAggregator
+     * Start here all needed StreamMaster
+     * @see StreamMaster
      */
     private void go() throws IOException, InterruptedException {
         log.info("STARTING");
@@ -115,7 +116,7 @@ public final class RadarBackend {
     /**
      * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
      *
-     * @see org.radarcns.stream.aggregator.MasterAggregator
+     * @see StreamMaster
      */
     private void finish() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");

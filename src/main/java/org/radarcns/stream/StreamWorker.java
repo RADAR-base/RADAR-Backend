@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -25,7 +25,6 @@ import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.stream.StreamDefinition;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +32,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Runnable abstraction of Kafka Stream Handler
  */
-public abstract class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord>
+public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         implements Thread.UncaughtExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
+    private static final Logger log = LoggerFactory.getLogger(StreamWorker.class);
 
     private final int numThreads;
     private final String clientId;
-    private final MasterAggregator master;
+    private final StreamMaster master;
     private final StreamDefinition streamDefinition;
     private final Monitor monitor;
 
@@ -48,8 +47,8 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     private KafkaProperty kafkaProperty;
     private Timer timer;
 
-    public AggregatorWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
-            int numThreads, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty,
+    public StreamWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
+            int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
             Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
@@ -86,7 +85,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     protected abstract void setStream(@Nonnull KStream<K, V> kstream) throws IOException;
 
     /**
-     * It starts the stream and notify the MasterAggregator
+     * It starts the stream and notify the StreamMaster
      */
     public void start() {
         if (streams != null) {
@@ -114,7 +113,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
     }
 
     /**
-     * It closes the stream and notify the MasterAggregator
+     * It closes the stream and notify the StreamMaster
      */
     public void shutdown() {
         log.info("Shutting down {} stream", getClientId());

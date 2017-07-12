@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import org.slf4j.Logger;
 
@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CombinedKafkaWorker extends MasterAggregator {
+public class CombinedKafkaWorker extends StreamMaster {
 
-    private final List<MasterAggregator> streamWorkers;
+    private final List<StreamMaster> streamWorkers;
 
-    public CombinedKafkaWorker(Collection<MasterAggregator> streamWorkers) throws IOException {
+    public CombinedKafkaWorker(Collection<StreamMaster> streamWorkers) throws IOException {
         super(true, "Combined");
         if (streamWorkers == null || streamWorkers.isEmpty()) {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
@@ -37,9 +37,9 @@ public class CombinedKafkaWorker extends MasterAggregator {
     }
 
     @Override
-    public List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high) {
+    public List<StreamWorker<?,?>> createWorkers(int low, int normal, int high) {
         // Create AggregatorWorkers from all streamWorkers added
-        List<AggregatorWorker<?,?>> workers = new ArrayList<>();
+        List<StreamWorker<?,?>> workers = new ArrayList<>();
         this.streamWorkers.forEach(w -> workers.addAll(w.createWorkers(low, normal, high)));
         return workers;
     }
