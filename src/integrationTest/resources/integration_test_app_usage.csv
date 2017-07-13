@@ -1,9 +1,0 @@
-userId,sourceId,time,timeReceived,packageName,categoryName,eventType
-a,b,14191933191.223,14191933193.223,com.whatsapp,,FOREGROUND
-a,b,14191934191.223,14191934193.223,com.whatsapp,,BACKGROUND
-a,c,14191944194.223,14191944195.223,nl.thehyve.transmartclient,,FOREGROUND
-a,c,14191955194.223,14191955195.223,nl.thehyve.transmartclient,,BACKGROUND
-a,c,14191955194.223,14191955195.223,com.withings.wiscale2,,FOREGROUND
-a,c,14191956194.223,14191956195.223,com.withings.wiscale2,,BACKGROUND
-a,c,14191955194.223,14191955195.223,com.android.systemui,,FOREGROUND
-a,c,14191956194.223,14191956195.223,com.android.systemui,,BACKGROUND

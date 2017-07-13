@@ -37,7 +37,7 @@ public class DirectProducerTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    @Test
+    @Test(timeout = 150_000L)
     public void testDirect() throws Exception {
         File file = new File(getClass().getResource("/mock_devices.yml").getFile());
         BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
@@ -56,8 +56,6 @@ public class DirectProducerTest {
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
         new RadarBackend(opts, properties).application();
 
-        Thread.sleep(40_000L);
-
         consumeAggregated();
     }
 
@@ -66,7 +64,7 @@ public class DirectProducerTest {
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(),
                 "android_empatica_e4_acceleration_output", clientId);
-        monitor.setPollTimeout(100_000L);
+        monitor.setPollTimeout(140_000L);
         monitor.start();
     }
 }

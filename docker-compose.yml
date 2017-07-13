@@ -23,7 +23,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper-1:22888:23888
+      ZOOKEEPER_SERVERS: zookeeper-1:2888:3888
 
   #---------------------------------------------------------------------------#
   # Kafka Cluster                                                             #
@@ -48,15 +48,15 @@ services:
     networks:
       - confluent
     depends_on:
-      - "zookeeper-1"
+      - zookeeper-1
+      - kafka-1
     restart: always
     ports:
       - "8081:8081"
     environment:
-      #SR_KAFKASTORE_CONNECTION_URL: "zookeeper-sasl-1:2181"
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper-1:2181"
-      SCHEMA_REGISTRY_HOST_NAME: "schema-registry-1"
-      SCHEMA_REGISTRY_LISTENERS: "http://schema-registry-1:8081"
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper-1:2181
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   #---------------------------------------------------------------------------#
   # REST proxy                                                                #
