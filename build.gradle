@@ -118,6 +118,17 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    // For Topic name validation based on Kafka classes
+    testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
+        exclude group: 'org.apache.kafka', module: 'kafka-clients'
+        exclude group: 'net.sf.jopt-simple'
+        exclude group: 'com.yammer.metrics'
+        exclude group: 'org.scala-lang.modules'
+        exclude group: 'org.slf4j'
+        exclude group: 'com.101tec'
+        exclude group: 'org.apache.zookeeper'
+    }
+
     // Send data to codacy
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
 }

@@ -63,7 +63,7 @@ public class E4StreamsTest {
         StreamDefinition topic = this.e4Streams.getStreamDefinition("android_empatica_e4_inter_beat_interval");
         assertEquals("android_empatica_e4_inter_beat_interval", topic.getInputTopic().getName());
         assertEquals("android_empatica_e4_heartrate", topic.getOutputTopic().getName());
-        assertEquals("android_empatica_e4_inter_beat_interval->android_empatica_e4_heartrate", topic.getStateStoreName());
+        assertEquals("From-android_empatica_e4_inter_beat_interval-To-android_empatica_e4_heartrate", topic.getStateStoreName());
     }
 
     @Test
