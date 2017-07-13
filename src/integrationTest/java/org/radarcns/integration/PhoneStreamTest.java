@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,24 +32,23 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.RadarBackend;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.mock.MockProducer;
-import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
 import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
-import org.radarcns.producer.SchemaRetriever;
 import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
@@ -59,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PhoneStreamTest {
+    private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
     private static final Map<String, String> CATEGORIES = new HashMap<>();
     static {
         CATEGORIES.put("nl.nos.app", "NEWS_AND_MAGAZINES");
@@ -79,18 +78,39 @@ public class PhoneStreamTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RadarPropertyHandler propHandler;
+    private RadarBackend backend;
+
+    @Before
+    public void setUp() throws IOException, ParseException, InterruptedException {
+        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
+        propHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        if (!propHandler.isLoaded()) {
+            propHandler.load(propertiesPath);
+        }
+
+        String[] args = {"-c", propertiesPath, "stream"};
+
+        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+        propHandler.getRadarProperties().setStreamWorker("phone");
+        backend = new RadarBackend(opts, propHandler);
+        backend.start();
+    }
+
+    @After
+    public void tearDown() throws IOException, InterruptedException {
+        backend.shutdown();
+    }
 
     @Test(timeout = 300_000L)
     public void testDirect() throws Exception {
-        File file = new File(getClass().getResource("/mock_app_usage.yml").getFile());
-        BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
-        SchemaRetriever retriever = new SchemaRetriever(mockConfig.getSchemaRegistry(), 10);
+        ConfigRadar config = propHandler.getRadarProperties();
 
         Properties properties = new Properties();
         properties.put(KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         properties.put(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        properties.put(SCHEMA_REGISTRY_CONFIG, retriever);
-        properties.put(BOOTSTRAP_SERVERS_CONFIG, mockConfig.getBrokerPaths());
+        properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
+        properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
         DirectSender<MeasurementKey, SpecificRecord> sender = new DirectSender<>(properties);
         AvroTopic<MeasurementKey, PhoneUsageEvent> topic = new AvroTopic<>(
@@ -112,26 +132,17 @@ public class PhoneStreamTest {
             topicSender.send(offset++, key, new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
         }
         sender.close();
-
-        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
-        RadarPropertyHandler propHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        propHandler.load(propertiesPath);
-
-        String[] args = {"-c", propertiesPath, "stream"};
-
-        RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts, propHandler).application();
-
-        consumeAggregated(offset);
+        consumePhone(offset);
     }
 
-    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+    private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
         String clientId = "someclinet";
         KafkaMonitor monitor = new AbstractKafkaMonitor<GenericRecord, GenericRecord, Object>(RadarSingletonFactory.getRadarPropertyHandler(),
                 Collections.singletonList("android_phone_usage_event_output"), "new", clientId, null) {
             int numRecordsRead = 0;
             @Override
             protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
+                logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
                 GenericRecord value = records.value();
                 Double fetchTime = (Double)value.get("categoryNameFetchTime");
                 assertNotNull(fetchTime);

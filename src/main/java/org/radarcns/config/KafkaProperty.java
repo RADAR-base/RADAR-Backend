@@ -43,7 +43,6 @@ public class KafkaProperty {
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, configRadar.getBrokerPaths());
-        props.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, configRadar.getZookeeperPaths());
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
                 configRadar.getSchemaRegistryPaths());
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);

@@ -83,7 +83,7 @@ public final class RadarBackend {
      */
     public void application() {
         try {
-            go();
+            start();
         } catch (IOException ex) {
             log.error("FATAL ERROR! The current instance cannot start", ex);
             System.exit(1);
@@ -93,7 +93,7 @@ public final class RadarBackend {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                finish();
+                shutdown();
             } catch (Exception ex) {
                 log.error("Impossible to finalise the shutdown hook", ex);
             }
@@ -104,7 +104,7 @@ public final class RadarBackend {
      * Start here all needed StreamMaster
      * @see StreamMaster
      */
-    private void go() throws IOException, InterruptedException {
+    public void start() throws IOException, InterruptedException {
         log.info("STARTING");
 
         command = createCommand();
@@ -118,7 +118,7 @@ public final class RadarBackend {
      *
      * @see StreamMaster
      */
-    private void finish() throws InterruptedException, IOException {
+    public void shutdown() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");
 
         command.shutdown();

@@ -18,6 +18,9 @@ package org.radarcns.integration;
 
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.cli.ParseException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,10 +35,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DirectProducerTest {
-
-    private final static Logger logger = LoggerFactory.getLogger(DirectProducerTest.class);
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RadarBackend backend;
+
+    @Before
+    public void setUp() throws IOException, ParseException, InterruptedException {
+        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
+        RadarPropertyHandler propHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        if (!propHandler.isLoaded()) {
+            propHandler.load(propertiesPath);
+        }
+
+        String[] args = {"-c", propertiesPath, "stream"};
+
+        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+        propHandler.getRadarProperties().setStreamWorker("e4");
+        backend = new RadarBackend(opts, propHandler);
+        backend.start();
+    }
+
+    @After
+    public void tearDown() throws IOException, InterruptedException {
+        backend.shutdown();
+    }
 
     @Test(timeout = 150_000L)
     public void testDirect() throws Exception {
@@ -46,16 +69,6 @@ public class DirectProducerTest {
         mockProducer.start();
         Thread.sleep(mockConfig.getDuration());
         mockProducer.shutdown();
-
-        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
-        RadarPropertyHandler properties = RadarSingletonFactory.getRadarPropertyHandler();
-        properties.load(propertiesPath);
-
-        String[] args = {"-c", propertiesPath};
-
-        RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts, properties).application();
-
         consumeAggregated();
     }
 

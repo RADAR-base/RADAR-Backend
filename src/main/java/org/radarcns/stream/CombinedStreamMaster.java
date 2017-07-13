@@ -32,27 +32,7 @@ public class CombinedStreamMaster extends StreamMaster {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
         this.streamMasters = new ArrayList<>(streamMasters);
-        this.streamGroup = new StreamGroup() {
-            @Override
-            public List<String> getTopicNames() {
-                List<String> topics = new ArrayList<>();
-                for (StreamMaster master : streamMasters) {
-                    topics.addAll(master.getStreamGroup().getTopicNames());
-                }
-                return topics;
-            }
-
-            @Override
-            public StreamDefinition getStreamDefinition(String inputTopic) {
-                for (StreamMaster master : streamMasters) {
-                    if (master.getStreamGroup().getTopicNames().contains(inputTopic)) {
-                        return master.getStreamGroup().getStreamDefinition(inputTopic);
-                    }
-                }
-                throw new IllegalArgumentException("Stream definition for input topic " + inputTopic
-                        + " not found");
-            }
-        };
+        this.streamGroup = new CombinedStreamGroup();
     }
 
     @Override
@@ -66,5 +46,28 @@ public class CombinedStreamMaster extends StreamMaster {
     @Override
     protected StreamGroup getStreamGroup() {
         return this.streamGroup;
+    }
+
+    private class CombinedStreamGroup implements StreamGroup {
+        @Override
+        public List<String> getTopicNames() {
+            List<String> topics = new ArrayList<>();
+            for (StreamMaster master : streamMasters) {
+                topics.addAll(master.getStreamGroup().getTopicNames());
+            }
+            topics.sort(String.CASE_INSENSITIVE_ORDER);
+            return topics;
+        }
+
+        @Override
+        public StreamDefinition getStreamDefinition(String inputTopic) {
+            for (StreamMaster master : streamMasters) {
+                if (master.getStreamGroup().getTopicNames().contains(inputTopic)) {
+                    return master.getStreamGroup().getStreamDefinition(inputTopic);
+                }
+            }
+            throw new IllegalArgumentException("Stream definition for input topic " + inputTopic
+                    + " not found");
+        }
     }
 }
