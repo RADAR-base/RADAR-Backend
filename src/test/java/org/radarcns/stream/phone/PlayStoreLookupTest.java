@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.radarcns.phone;
+package org.radarcns.stream.phone;
 
+import java.io.IOException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,12 +24,12 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.radarcns.stream.phone.PlayStoreLookup;
+import org.radarcns.stream.phone.PlayStoreLookup.AppCategory;
 
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class PlayStoreParserTest {
+public class PlayStoreLookupTest {
     @Parameters(name = "{index}: {0}={1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
@@ -45,23 +46,22 @@ public class PlayStoreParserTest {
                 ,{ "com.android.chrome", "COMMUNICATION" }
                 ,{ "com.google.android.youtube", "VIDEO_PLAYERS" }
                 ,{ "com.withings.wiscale2", "HEALTH_AND_FITNESS" }
-                ,{ "com.android.systemui", "" }
-                ,{ "abc.abc", "" }
+                ,{ "com.android.systemui", null }
+                ,{ "abc.abc", null }
         });
     }
 
-    private String fInputPackageName;
+    private final String fInputPackageName;
+    private final String fExpectedCategory;
 
-    private String fExpectedCategory;
-
-    public PlayStoreParserTest(String input, String expected) {
-        fInputPackageName= input;
-        fExpectedCategory= expected;
+    public PlayStoreLookupTest(String input, String expected) {
+        fInputPackageName = input;
+        fExpectedCategory = expected;
     }
 
     @Test
-    public void fetchCategoryTest() {
-        String result = PlayStoreLookup.fetchCategory(fInputPackageName);
-        Assert.assertEquals(fExpectedCategory, result);
+    public void fetchCategoryTest() throws IOException {
+        AppCategory result = PlayStoreLookup.fetchCategory(fInputPackageName);
+        assertEquals(fExpectedCategory, result.getCategoryName());
     }
 }

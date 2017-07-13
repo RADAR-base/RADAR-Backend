@@ -33,12 +33,16 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
     //    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    private final PlayStoreLookup playStoreLookup = new PlayStoreLookup();
+    private static final int CACHE_TIMEOUT = 24 * 3600;
+    private static final int MAX_CACHE_SIZE = 1_000_000;
+
+    private final PlayStoreLookup playStoreLookup;
 
     public PhoneUsageStream(String clientId, int numThread, StreamMaster master,
-                       KafkaProperty kafkaProperties) {
+            KafkaProperty kafkaProperties) {
         super(PhoneStreams.getInstance().getUsageStream(), clientId,
                 numThread, master, kafkaProperties, log);
+        playStoreLookup =  new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
     }
 
     @Override
@@ -50,7 +54,7 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
-                return new KeyValue<>(key,value);
+                return new KeyValue<>(key, value);
             })
             .to(getStreamDefinition().getOutputTopic().getName());
     }
