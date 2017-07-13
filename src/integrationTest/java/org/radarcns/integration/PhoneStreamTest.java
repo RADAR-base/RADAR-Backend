@@ -163,7 +163,7 @@ public class PhoneStreamTest {
             }
         };
 
-        monitor.setPollTimeout(150_000L);
+        monitor.setPollTimeout(280_000L);
         monitor.start();
     }
 }
