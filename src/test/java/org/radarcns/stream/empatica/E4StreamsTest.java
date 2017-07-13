@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.empatica.topic;
+package org.radarcns.stream.empatica;
 
 import static org.junit.Assert.assertEquals;
 
@@ -66,6 +66,7 @@ public class E4StreamsTest {
         assertEquals("android_empatica_e4_inter_beat_interval->android_empatica_e4_heartrate", topic.getStateStoreName());
     }
 
+    @Test
     public void getInvalidTopic() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Topic something unknown");
