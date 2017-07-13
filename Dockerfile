@@ -1,9 +1,15 @@
 FROM openjdk:8-alpine
 
 ENV TERM=dumb
-COPY . /code
+
+RUN mkdir /code
 WORKDIR /code
 
-RUN ./gradlew downloadDependencies
+COPY gradle /code/gradle
+COPY gradle.properties build.gradle settings.gradle  gradlew /code/
+
+RUN ls * && ./gradlew downloadDependencies
+
+COPY src /code
 
 ENTRYPOINT ["./gradlew"]
