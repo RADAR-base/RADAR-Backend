@@ -18,12 +18,11 @@ package org.radarcns.stream.phone;
 
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -39,10 +38,8 @@ public class PhoneStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void announceTopics(@Nonnull Logger log) {
-        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
-                        + "before starting: \n  - {}",
-                String.join("\n  - ", PhoneStreams.getInstance().getTopicNames()));
+    protected StreamGroup getStreamGroup() {
+        return PhoneStreams.getInstance();
     }
 
     @Override

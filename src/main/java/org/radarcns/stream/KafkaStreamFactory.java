@@ -53,7 +53,7 @@ public class KafkaStreamFactory {
             case "phone":
                 return new PhoneStreamMaster(isStandalone);
             case "all":
-                return new CombinedKafkaWorker(Arrays.asList(
+                return new CombinedStreamMaster(Arrays.asList(
                         new E4StreamMaster(isStandalone),
                         new PhoneStreamMaster(isStandalone)
                         ));

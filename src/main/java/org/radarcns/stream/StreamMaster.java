@@ -51,7 +51,7 @@ public abstract class StreamMaster implements SubCommand {
 
     private ConfigRadar configRadar =
             RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
-    private final ScheduledExecutorService executor;
+    private ScheduledExecutorService executor;
 
     /**
      * @param standalone true means that the aggregator will assign one thread per stream
@@ -75,10 +75,6 @@ public abstract class StreamMaster implements SubCommand {
             highPriority = configRadar.threadsByPriority(Priority.HIGH, 4);
         }
 
-        executor = Executors.newSingleThreadScheduledExecutor();
-
-        announceTopics(log);
-
         list = new ArrayList<>();
 
         log.info("Creating StreamMaster instance for {}", nameSensor);
@@ -92,15 +88,13 @@ public abstract class StreamMaster implements SubCommand {
      */
     protected abstract List<StreamWorker<?,?>> createWorkers(int low, int normal, int high);
 
-    /**
-     * Informative function to log the topics list that the application is going to use
-     *
-     * @param log the logger instance that will be used to notify the user
-     */
-    protected abstract void announceTopics(@Nonnull Logger log);
-
     /** It starts all AggregatorWorkers controlled by this StreamMaster */
+    @Override
     public void start() throws IOException {
+        executor = Executors.newSingleThreadScheduledExecutor();
+
+        announceTopics();
+
         log.info("Starting all streams for {}", nameSensor);
 
         list.addAll(createWorkers(lowPriority, normalPriority, highPriority));
@@ -108,6 +102,7 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     /** It stops all AggregatorWorkers controlled by this StreamMaster */
+    @Override
     public void shutdown() throws InterruptedException {
         log.info("Shutting down all streams for {}", nameSensor);
 
@@ -169,7 +164,19 @@ public abstract class StreamMaster implements SubCommand {
         }
     }
 
+    /**
+     * Informative function to log the topics list that the application is going to use
+     */
+    protected void announceTopics() {
+        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
+                        + "before starting: \n  - {}",
+                String.join("\n  - ", getStreamGroup().getTopicNames()));
+    }
+
+
     protected void setConfigRadar(ConfigRadar configRadar) {
         this.configRadar = configRadar;
     }
+
+    protected abstract StreamGroup getStreamGroup();
 }
