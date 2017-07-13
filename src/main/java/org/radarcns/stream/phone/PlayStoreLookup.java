@@ -30,6 +30,9 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Google Play Store lookup backed by a cache.
+ */
 public final class PlayStoreLookup {
     /** Android app category. */
     public static class AppCategory {
@@ -72,6 +75,20 @@ public final class PlayStoreLookup {
         this.categoryCache = new LRUCache<>(maxCacheSize);
     }
 
+
+    /**
+     * Looks up a category from the play store, if possible from cache.
+     *
+     * The app category may have a null category name:
+     * - if the page could not be retrieved (not public)
+     * - category element on play store is not available
+     * - no connection can be made with the play store
+     *
+     * In the last event, the category name is not cached, so it will be retried in a next call.
+     *
+     * @param packageName name of the package as registered in the play store
+     * @return category as given by the play store
+     */
     public AppCategory lookupCategory(String packageName) {
         // If not yet in cache, fetch category for this package
         AppCategory category = categoryCache.get(packageName);
@@ -92,15 +109,15 @@ public final class PlayStoreLookup {
     }
 
     /**
-     * Fetches the app category by parsing the Play Store
-     * Returning empty string can mean:
-     * - Page can't be retrieved because app is not listed in play store
-     * - Category element on play store is not available
-     * - URL can't be parsed
+     * Fetches the app category by parsing apps Play Store page.
+     *
+     * The app category may have a null category name:
+     * - if the page could not be retrieved (not public)
+     * - category element on play store is not available
+     *
      * @param packageName name of the package as registered in the play store
      * @return category as given by the play store
-     * @throws IOException if the page could not be retrieved (not public) or the Google App store
-     *                     is down
+     * @throws IOException if no connection can be made with the Google App Store
      */
     public static AppCategory fetchCategory(String packageName) throws IOException {
         String url = URL_PLAY_STORE_APP_DETAILS + packageName;
@@ -115,6 +132,13 @@ public final class PlayStoreLookup {
         }
     }
 
+    /**
+     * Retrieve an AppCategory from a parsed play store document.
+     * @param doc parsed play store document
+     * @param packageName package name of the document being parsed
+     * @return the app category, with a null category name if the document did not contain a
+     *         category.
+     */
     static AppCategory getCategoryFromDocument(Document doc, String packageName) {
         Element categoryElement = doc.select(CATEGORY_ANCHOR_SELECTOR).first();
 
