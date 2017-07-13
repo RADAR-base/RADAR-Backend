@@ -17,11 +17,6 @@
 package org.radarcns.stream.phone;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Nullable;
 import org.apache.kafka.common.cache.LRUCache;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -34,34 +29,6 @@ import org.slf4j.LoggerFactory;
  * A Google Play Store lookup backed by a cache.
  */
 public final class PlayStoreLookup {
-    /** Android app category. */
-    public static class AppCategory {
-        private final String categoryName;
-        private final double fetchTimeStamp;
-
-        private AppCategory(String categoryName) {
-            this.categoryName = categoryName;
-            this.fetchTimeStamp = System.currentTimeMillis() / 1000d;
-        }
-
-        /**
-         * Get the app category name.
-         *
-         * @return category or null if the category is unknown.
-         */
-        public String getCategoryName() {
-            return categoryName;
-        }
-
-        /**
-         * Get the time that the app category was fetched from the Google Play Store.
-         * @return time from unix epoch UTC, in seconds
-         */
-        public double getFetchTimeStamp() {
-            return fetchTimeStamp;
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
     private static final String URL_PLAY_STORE_APP_DETAILS = "https://play.google.com/store/apps/details?id=";
     private static final String CATEGORY_ANCHOR_SELECTOR = "a.document-subtitle.category";
@@ -152,6 +119,34 @@ public final class PlayStoreLookup {
         log.warn("Could not find category of {}: "
                 + "element containing category could not be found", packageName);
         return new AppCategory(null);
+    }
+
+    /** Android app category. */
+    public static class AppCategory {
+        private final String categoryName;
+        private final double fetchTimeStamp;
+
+        private AppCategory(String categoryName) {
+            this.categoryName = categoryName;
+            this.fetchTimeStamp = System.currentTimeMillis() / 1000d;
+        }
+
+        /**
+         * Get the app category name.
+         *
+         * @return category or null if the category is unknown.
+         */
+        public String getCategoryName() {
+            return categoryName;
+        }
+
+        /**
+         * Get the time that the app category was fetched from the Google Play Store.
+         * @return time from unix epoch UTC, in seconds
+         */
+        public double getFetchTimeStamp() {
+            return fetchTimeStamp;
+        }
     }
 }
 

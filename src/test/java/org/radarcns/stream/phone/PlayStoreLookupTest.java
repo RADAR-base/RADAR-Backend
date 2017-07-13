@@ -45,7 +45,6 @@ public class PlayStoreLookupTest {
                 ,{ "com.strava", "HEALTH_AND_FITNESS" }
                 ,{ "com.android.chrome", "COMMUNICATION" }
                 ,{ "com.google.android.youtube", "VIDEO_PLAYERS" }
-                ,{ "com.withings.wiscale2", "HEALTH_AND_FITNESS" }
                 ,{ "com.android.systemui", null }
                 ,{ "abc.abc", null }
         });

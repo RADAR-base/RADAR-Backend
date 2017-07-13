@@ -19,14 +19,12 @@ package org.radarcns.stream.empatica;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.StreamGroup;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
 
 /**
  * Singleton StreamMaster for Empatica E4
