@@ -7,9 +7,7 @@ WORKDIR /code
 
 COPY gradle /code/gradle
 COPY gradle.properties build.gradle settings.gradle  gradlew /code/
-
-RUN ls * && ./gradlew downloadDependencies
-
-COPY src /code
+RUN ./gradlew downloadDependencies
+COPY src /code/src
 
 ENTRYPOINT ["./gradlew"]
