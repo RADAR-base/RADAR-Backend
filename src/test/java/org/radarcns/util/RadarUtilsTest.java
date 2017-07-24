@@ -39,13 +39,19 @@ public class RadarUtilsTest {
     @Test
     public void getWindowed() {
         String userId = "userId";
+        String sourceId = "sourceId";
+
         MeasurementKey measurementKey = new MeasurementKey();
         measurementKey.setUserId(userId);
+        measurementKey.setSourceId(sourceId);
+
         Window window = new TimeWindow(1, 4);
         Windowed<MeasurementKey> measurementKeyWindowed = new Windowed<>(measurementKey, window);
 
         WindowedKey windowedKey = radarUtilities.getWindowed(measurementKeyWindowed);
-        assertEquals(windowedKey.getUserID(), userId);
+
+        assertEquals(windowedKey.getUserId(), userId);
+        assertEquals(windowedKey.getSourceId(), sourceId);
     }
 
     @Test

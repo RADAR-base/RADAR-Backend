@@ -38,8 +38,8 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.4'
-ext.radarSchemasVersion = '0.1'
+ext.radarCommonsVersion = '0.4.2'
+ext.radarSchemasVersion = '0.2-alpha.1'
 ext.subethamailVersion = '3.1.7'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
@@ -69,6 +69,11 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
+configurations.all {
+    // Check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'SECONDS'
+}
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     // For working with dev-branch commons
@@ -81,6 +86,9 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
     maven { url  'http://dl.bintray.com/radar-cns/org.radarcns' }
+
+    //Useful to use SNAPSHOT releases
+    maven { url  'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
 
 // In this section you declare the dependencies for your production and test code
