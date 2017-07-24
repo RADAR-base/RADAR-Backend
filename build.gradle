@@ -38,8 +38,7 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsSnapshotVersion = '0.4.2-SNAPSHOT'
-ext.radarCommonsStableVersion = '0.4.1'
+ext.radarCommonsVersion = '0.4.2'
 ext.radarSchemasVersion = '0.2-alpha.1'
 ext.subethamailVersion = '3.1.7'
 
@@ -94,8 +93,8 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsSnapshotVersion
-    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsStableVersion
+    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
