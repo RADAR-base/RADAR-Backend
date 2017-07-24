@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.config.SubCommand;
+import org.radarcns.util.Monitor;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,4 +180,9 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     protected abstract StreamGroup getStreamGroup();
+
+    /** Add a monitor to the master. It will run every 30 seconds. */
+    void addMonitor(Monitor monitor) {
+        executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
+    }
 }

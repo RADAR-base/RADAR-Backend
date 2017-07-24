@@ -18,6 +18,8 @@ package org.radarcns.stream;
 
 import java.io.IOException;
 import java.util.Timer;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
@@ -34,7 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         implements Thread.UncaughtExceptionHandler {
-
     private static final Logger log = LoggerFactory.getLogger(StreamWorker.class);
 
     private final int numThreads;
@@ -45,7 +46,6 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
 
     private KafkaStreams streams;
     private KafkaProperty kafkaProperty;
-    private Timer timer;
 
     public StreamWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
             int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
@@ -61,7 +61,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
 
-        if (log == null) {
+        if (monitorLog == null) {
             this.monitor = null;
         } else {
             this.monitor = new Monitor(monitorLog, "records have been read from "
@@ -97,8 +97,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
 
         try {
             if (monitor != null) {
-                timer = new Timer();
-                timer.schedule(monitor, 0, 30_000);
+                master.addMonitor(monitor);
             }
             streams = new KafkaStreams(getBuilder(),
                     kafkaProperty
@@ -148,10 +147,6 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         if (streams != null) {
             streams.close();
             streams = null;
-        }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
         }
     }
 
