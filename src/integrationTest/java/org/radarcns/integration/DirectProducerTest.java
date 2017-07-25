@@ -16,6 +16,8 @@
 
 package org.radarcns.integration;
 
+import static org.radarcns.stream.KafkaStreamFactory.E4_STREAM;
+
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.cli.ParseException;
@@ -50,7 +52,7 @@ public class DirectProducerTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker("e4");
+        propHandler.getRadarProperties().setStreamWorker(E4_STREAM);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
@@ -69,10 +71,7 @@ public class DirectProducerTest {
         mockProducer.start();
         Thread.sleep(mockConfig.getDuration());
         mockProducer.shutdown();
-        consumeAggregated();
-    }
 
-    private void consumeAggregated() throws IOException {
         String clientId = "someclinet";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(),

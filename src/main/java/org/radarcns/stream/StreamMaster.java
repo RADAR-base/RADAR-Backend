@@ -80,13 +80,15 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     /**
-     * Populates an list with workers.
+     * Populates a list with workers.
      *
+     * @param list list to add workers to
      * @param low number of threads to use if a stream has low priority
      * @param normal number of threads to use if a stream has normal priority
      * @param high number of threads to use if a stream has high priority
      */
-    protected abstract List<StreamWorker<?,?>> createWorkers(int low, int normal, int high);
+    protected abstract void createWorkers(List<StreamWorker<?, ?>> list,
+            int low, int normal, int high);
 
     /** Starts all workers. */
     @Override
@@ -97,7 +99,7 @@ public abstract class StreamMaster implements SubCommand {
 
         log.info("Starting all streams for {}", nameSensor);
 
-        list.addAll(createWorkers(lowPriority, normalPriority, highPriority));
+        createWorkers(list, lowPriority, normalPriority, highPriority);
         list.forEach(v -> executor.submit(v::start));
     }
 

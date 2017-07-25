@@ -71,8 +71,3 @@ services:
       - schema-registry-1
     command:
       - integrationTest
-    volumes:
-      - ./src:/code/src
-      - ./build.gradle:/code/build.gradle
-      - ./build:/code/build:rw
-      - ${HOME}/.m2:/root/.m2

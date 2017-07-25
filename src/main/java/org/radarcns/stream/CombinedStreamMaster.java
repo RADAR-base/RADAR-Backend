@@ -23,7 +23,7 @@ import java.util.List;
 /** Combine multiple StreamMasters into a single object. */
 public class CombinedStreamMaster extends StreamMaster {
 
-    private final List<StreamMaster> streamMasters;
+    private final Collection<StreamMaster> streamMasters;
     private final StreamGroup streamGroup;
 
     /**
@@ -35,16 +35,15 @@ public class CombinedStreamMaster extends StreamMaster {
         if (streamMasters == null || streamMasters.isEmpty()) {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
-        this.streamMasters = new ArrayList<>(streamMasters);
+        this.streamMasters = streamMasters;
         this.streamGroup = new CombinedStreamGroup();
     }
 
     @Override
-    public List<StreamWorker<?,?>> createWorkers(int low, int normal, int high) {
-        // Create AggregatorWorkers from all streamMasters added
-        List<StreamWorker<?,?>> workers = new ArrayList<>();
-        this.streamMasters.forEach(w -> workers.addAll(w.createWorkers(low, normal, high)));
-        return workers;
+    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
+        for (StreamMaster master : streamMasters) {
+            master.createWorkers(list, low, normal, high);
+        }
     }
 
     @Override

@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.phone;
 
-import java.util.Arrays;
 import java.util.List;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
@@ -41,12 +40,9 @@ public class PhoneStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected List<StreamWorker<?,?>> createWorkers(int low, int normal, int high) {
+    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        return Arrays.asList(
-                new PhoneUsageStream(
-                        "PhoneUsageStream", low, this, kafkaProperty)
-        );
+        list.add(new PhoneUsageStream("PhoneUsageStream", low, this, kafkaProperty));
     }
 }

@@ -1,4 +1,4 @@
-FROM openjdk:8-alpine
+FROM confluentinc/cp-base:3.2.1-5
 
 ENV TERM=dumb
 

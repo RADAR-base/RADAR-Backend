@@ -78,13 +78,13 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         String inputTopic = definition.getInputTopic().getName();
         String outputTopic = definition.getOutputTopic().getName();
 
-        KStream<K, V> stream = builder.<K, V>stream(inputTopic)
+        KStream<K, V> inputStream = builder.<K, V>stream(inputTopic)
                 .map((k, v) -> {
                     incrementMonitor();
                     return new KeyValue<>(k, v);
                 });
 
-        defineStream(stream).to(outputTopic);
+        defineStream(inputStream).to(outputTopic);
 
         return builder;
     }

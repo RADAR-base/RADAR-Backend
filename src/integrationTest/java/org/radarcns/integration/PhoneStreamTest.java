@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.stream.KafkaStreamFactory.PHONE_STREAM;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.IOException;
@@ -92,7 +93,7 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker("phone");
+        propHandler.getRadarProperties().setStreamWorker(PHONE_STREAM);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }

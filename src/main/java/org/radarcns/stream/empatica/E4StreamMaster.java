@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.Arrays;
 import java.util.List;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
@@ -40,23 +39,18 @@ public class E4StreamMaster extends StreamMaster {
     }
 
     @Override
-    protected List<StreamWorker<?,?>> createWorkers(int low, int normal, int high) {
+    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        return Arrays.asList(
-                new E4AccelerationStream(
-                        "E4AccelerationStream", high, this, kafkaProperty),
-                new E4BatteryLevelStream(
-                        "E4BatteryLevelStream", low, this, kafkaProperty),
-                new E4BloodVolumePulseStream(
-                        "E4BloodVolumePulseStream", high, this, kafkaProperty),
-                new E4ElectroDermalActivityStream(
-                        "E4ElectroDermalActivityStream", normal, this, kafkaProperty),
-                new E4HeartRateStream(
-                        "E4HeartRateStream", high,this, kafkaProperty),
-                new E4InterBeatIntervalStream(
-                        "E4InterBeatIntervalStream", high,this, kafkaProperty),
-                new E4TemperatureStream(
-                        "E4TemperatureStream", high, this, kafkaProperty));
+        list.add(new E4AccelerationStream("E4AccelerationStream", high, this, kafkaProperty));
+        list.add(new E4BatteryLevelStream("E4BatteryLevelStream", low, this, kafkaProperty));
+        list.add(new E4BloodVolumePulseStream(
+                "E4BloodVolumePulseStream", high, this, kafkaProperty));
+        list.add(new E4ElectroDermalActivityStream(
+                "E4ElectroDermalActivityStream", normal, this, kafkaProperty));
+        list.add(new E4HeartRateStream("E4HeartRateStream", high,this, kafkaProperty));
+        list.add(new E4InterBeatIntervalStream(
+                "E4InterBeatIntervalStream", high,this, kafkaProperty));
+        list.add(new E4TemperatureStream("E4TemperatureStream", high, this, kafkaProperty));
     }
 }

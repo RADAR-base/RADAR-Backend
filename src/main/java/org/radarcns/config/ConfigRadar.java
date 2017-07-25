@@ -240,7 +240,7 @@ public class ConfigRadar {
     }
 
     public void setStreamWorker(String streamWorker) {
-        streamWorker = streamWorker;
+        this.streamWorker = streamWorker;
     }
 
     public String getPersistencePath() {
