@@ -67,12 +67,17 @@ The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. Th
   - android_empatica_e4_sensor_status_output
   - android_empatica_e4_temperature
   - android_empatica_e4_temperature_output
+  - android_phone_usage_event
+  - android_phone_usage_event_output
 3. Run `radarbackend.jar` with configured `radar.yml` and `stream` argument    
 
     ```shell
     java -jar radarbackend-1.0.jar -c path/to/radar.yml stream
     ```
        
+       
+The phone usage event stream uses an internal cache of 1 million elements, which may take about 50 MB of memory. Adjust `org.radarcns.stream.phone.PhoneUsageStream.MAX_CACHE_SIZE` to change it. 
+
 ### RADAR-backend monitors
 
 To get email notifications for Empatica E4 battery status, an email server without a password set up, for example on `localhost`.
