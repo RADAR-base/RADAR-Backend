@@ -30,7 +30,10 @@ import org.slf4j.LoggerFactory;
 /**
  * A Google Play Store lookup backed by a cache.
  *
- * This implementation is thread-safe
+ * This implementation is dependent on the current implementation details of the Google Play Store.
+ * It is not guaranteed to keep working if Google changes their page layout or access policy.
+ *
+ * This implementation is thread-safe.
  */
 public final class PlayStoreLookup {
     private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
