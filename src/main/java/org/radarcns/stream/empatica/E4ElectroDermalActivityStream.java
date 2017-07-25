@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -25,8 +24,8 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Definition of Kafka Stream for aggregating data about Blood Volume Pulse collected by Empatica E4
+ * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
  */
 public class E4ElectroDermalActivityStream extends
         StreamWorker<MeasurementKey, EmpaticaE4ElectroDermalActivity> {
@@ -50,22 +49,16 @@ public class E4ElectroDermalActivityStream extends
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> setStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream)
-            throws IOException {
+    protected KStream<WindowedKey, DoubleAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                    (k, v, valueCollector) -> valueCollector.add(v.getElectroDermalActivity()),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
-    }
-
-    private Float extractValue(EmpaticaE4ElectroDermalActivity record) {
-        incrementMonitor();
-        return record.getElectroDermalActivity();
     }
 }

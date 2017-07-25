@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -25,8 +24,8 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4Temperature;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4
+ * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4.
  */
 public class E4TemperatureStream extends StreamWorker<MeasurementKey, EmpaticaE4Temperature> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
@@ -47,23 +46,17 @@ public class E4TemperatureStream extends StreamWorker<MeasurementKey, EmpaticaE4
                 numThread, master, kafkaProperties, log);
     }
 
-
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream)
-            throws IOException {
+    protected KStream<WindowedKey, DoubleAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                         DoubleValueCollector::new,
-                        (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                        (k, v, valueCollector) -> valueCollector.add(v.getTemperature()),
                         TimeWindows.of(10 * 1000L),
                         RadarSerdes.getInstance().getDoubleCollector(),
                         getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
-    }
-
-    private Float extractValue(EmpaticaE4Temperature record) {
-        incrementMonitor();
-        return record.getTemperature();
     }
 }

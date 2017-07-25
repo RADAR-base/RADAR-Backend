@@ -17,12 +17,10 @@
 package org.radarcns.stream;
 
 import java.io.IOException;
-import java.util.Timer;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -32,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runnable abstraction of Kafka Stream Handler
+ * Abstraction of a Kafka Stream.
  */
 public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         implements Thread.UncaughtExceptionHandler {
@@ -43,9 +41,9 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
     private final StreamMaster master;
     private final StreamDefinition streamDefinition;
     private final Monitor monitor;
+    private final KafkaProperty kafkaProperty;
 
     private KafkaStreams streams;
-    private KafkaProperty kafkaProperty;
 
     public StreamWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
             int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
@@ -69,67 +67,73 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         }
     }
 
-    /** Create a Kafka Stream builder */
-    protected KStreamBuilder getBuilder() throws IOException {
+    /**
+     * Create a Kafka Stream builder. This implementation will create a stream from given
+     * input topic to given output topic. It monitors the amount of messages that are read.
+     */
+    protected KStreamBuilder createBuilder() throws IOException {
         KStreamBuilder builder = new KStreamBuilder();
 
-        StreamDefinition stream = getStreamDefinition();
-        String inputTopic = stream.getInputTopic().getName();
-        String outputTopic = stream.getOutputTopic().getName();
-        setStream(builder.stream(inputTopic)).to(outputTopic);
+        StreamDefinition definition = getStreamDefinition();
+        String inputTopic = definition.getInputTopic().getName();
+        String outputTopic = definition.getOutputTopic().getName();
+
+        KStream<K, V> stream = builder.<K, V>stream(inputTopic)
+                .map((k, v) -> {
+                    incrementMonitor();
+                    return new KeyValue<>(k, v);
+                });
+
+        defineStream(stream).to(outputTopic);
 
         return builder;
     }
 
     /**
-     *   it defines the stream computation
+     * Defines the stream computation.
      */
-    protected abstract KStream<?, ?> setStream(@Nonnull KStream<K, V> kstream) throws IOException;
+    protected abstract KStream<?, ?> defineStream(@Nonnull KStream<K, V> kstream);
 
     /**
-     * It starts the stream and notify the StreamMaster
+     * Starts the stream and notify the StreamMaster.
      */
     public void start() {
         if (streams != null) {
-            throw new IllegalStateException("Cannot start already started stream again");
+            throw new IllegalStateException("Streams already started. Cannot start them again.");
         }
+
         log.info("Creating the stream {} from topic {} to topic {}",
-                getClientId(), getStreamDefinition().getInputTopic(),
-                getStreamDefinition().getOutputTopic());
+                clientId, streamDefinition.getInputTopic(),
+                streamDefinition.getOutputTopic());
 
         try {
             if (monitor != null) {
                 master.addMonitor(monitor);
             }
-            streams = new KafkaStreams(getBuilder(),
-                    kafkaProperty
-                            .getStream(getClientId(), numThreads, DeviceTimestampExtractor.class));
+            streams = new KafkaStreams(createBuilder(),
+                    kafkaProperty.getStream(clientId, numThreads, DeviceTimestampExtractor.class));
             streams.setUncaughtExceptionHandler(this);
             streams.start();
 
-            master.notifyStartedStream(clientId);
+            master.notifyStartedStream(this);
         } catch (IOException ex) {
             uncaughtException(Thread.currentThread(), ex);
         }
     }
 
     /**
-     * It closes the stream and notify the StreamMaster
+     * Close the stream and notify the StreamMaster.
      */
     public void shutdown() {
-        log.info("Shutting down {} stream", getClientId());
+        log.info("Shutting down {} stream", clientId);
 
         closeStreams();
 
-        master.notifyClosedStream(clientId);
-    }
-
-    public String getClientId() {
-        return clientId;
+        master.notifyClosedStream(this);
     }
 
     /**
-     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * Handles exceptions that have been uncaught. It is called when a StreamThread is
      * terminating due to an exception.
      */
     @Override
@@ -152,19 +156,17 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         }
     }
 
-    protected KafkaStreams getStreams() {
-        return streams;
-    }
-
     protected StreamDefinition getStreamDefinition() {
         return streamDefinition;
     }
 
-    protected void setKafkaProperty(KafkaProperty kafkaProperty) {
-        this.kafkaProperty = kafkaProperty;
-    }
-
+    /** Increment the number of messages processed. */
     protected void incrementMonitor() {
         monitor.increment();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + clientId + '>';
     }
 }

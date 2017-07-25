@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 /**
  * A Google Play Store lookup backed by a cache.
  *
- * This implementation is dependent on the current implementation details of the Google Play Store.
- * It is not guaranteed to keep working if Google changes their page layout or access policy.
+ * <p>This implementation is dependent on the current implementation details of the Google Play
+ * Store. It is not guaranteed to keep working if Google changes their page layout or access policy.
  *
- * This implementation is thread-safe.
+ * <p>This implementation is thread-safe.
  */
 public final class PlayStoreLookup {
     private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
@@ -49,15 +49,13 @@ public final class PlayStoreLookup {
     }
 
     /**
-     * Looks up a category from the play store, if possible from cache.
-     *
-     * The app category may have a null category name:
+     * Looks up a category from the play store, if possible from cache. The app category may have a
+     * {@code null} category name:
      * - if the page could not be retrieved (not public)
      * - category element on play store is not available
      * - no connection can be made with the play store
      *
-     * In the last event, the category name is not cached, so it will be retried in a next call.
-     *
+     * <p>In the last event, the category name is not cached, so it will be retried in a next call.
      * @param packageName name of the package as registered in the play store
      * @return category as given by the play store
      */
@@ -81,12 +79,10 @@ public final class PlayStoreLookup {
     }
 
     /**
-     * Fetches the app category by parsing apps Play Store page.
-     *
-     * The app category may have a null category name:
+     * Fetches the app category by parsing apps Play Store page. The app category may have a
+     * {@code null} category name:
      * - if the page could not be retrieved (not public)
      * - category element on play store is not available
-     *
      * @param packageName name of the package as registered in the play store
      * @return category as given by the play store
      * @throws IOException if no connection can be made with the Google App Store
@@ -105,8 +101,8 @@ public final class PlayStoreLookup {
     }
 
     /**
-     * Retrieve an AppCategory from a parsed play store document.
-     * @param doc parsed play store document
+     * Retrieve an AppCategory from a parsed Play Store HTML document.
+     * @param doc parsed Play Store document
      * @param packageName package name of the document being parsed
      * @return the app category, with a null category name if the document did not contain a
      *         category.

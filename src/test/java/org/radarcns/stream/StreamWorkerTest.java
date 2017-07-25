@@ -24,15 +24,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import org.apache.kafka.streams.kstream.KStream;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.topic.KafkaTopic;
 /**
  * Created by nivethika on 20-12-16.
  */
-public class SensorAggregatorTest {
+public class StreamWorkerTest {
     private StreamWorker aggregator;
     @Before
     public void setUp() {
@@ -45,9 +44,10 @@ public class SensorAggregatorTest {
         String topicName = "TESTTopic";
         StreamDefinition sensorTopic = new StreamDefinition(new KafkaTopic(topicName), new KafkaTopic(topicName + "_output"));
         when(aggregator.getStreamDefinition()).thenReturn(sensorTopic);
-        doCallRealMethod().when(aggregator).getBuilder();
-        aggregator.getBuilder();
+        when(aggregator.defineStream(any())).thenReturn(mock(KStream.class));
+        doCallRealMethod().when(aggregator).createBuilder();
+        aggregator.createBuilder();
 
-        verify(aggregator, times(1)).setStream(any());
+        verify(aggregator, times(1)).defineStream(any());
     }
 }

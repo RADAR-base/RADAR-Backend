@@ -42,7 +42,7 @@ public final class RadarSerdes {
         return doubelCollector;
     }
 
-    public Serde<DoubleArrayCollector> getDoubelArrayCollector()  {
+    public Serde<DoubleArrayCollector> getDoubleArrayCollector()  {
         return doubelArrayCollector;
     }
 }

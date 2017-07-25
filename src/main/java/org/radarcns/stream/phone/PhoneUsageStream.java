@@ -16,18 +16,16 @@
 
 package org.radarcns.stream.phone;
 
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.phone.PhoneUsageEvent;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
 
 public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
@@ -48,8 +46,8 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
     }
 
     @Override
-    protected KStream<MeasurementKey, PhoneUsageEvent> setStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream)
-            throws IOException {
+    protected KStream<MeasurementKey, PhoneUsageEvent> defineStream(
+            @Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
         return kstream
             .map((key, value) -> {
                 String packageName = value.getPackageName();

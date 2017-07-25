@@ -27,6 +27,12 @@ public class Monitor implements Runnable {
     private final Logger log;
     private final String message;
 
+    /**
+     * Monitor a counter. Log messages with the count and the given message are sent to given
+     * logger, separated by a space.
+     * @param log logger to log messages to
+     * @param message message to append to the current count
+     */
     public Monitor(Logger log, String message) {
         if (log == null) {
             throw new IllegalArgumentException("Argument log may not be null");
@@ -37,9 +43,7 @@ public class Monitor implements Runnable {
     }
 
     /**
-     * Logs the current count and, if applicable buffer size.
-     *
-     * This resets the current count to 0.
+     * Logs the current count and, if applicable buffer size. This resets the current count to 0.
      */
     @Override
     public void run() {

@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -25,8 +24,8 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4BloodVolumePulse;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -34,6 +33,9 @@ import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Kafka Stream for aggregating data about Blood Volume Pulse collected by Empatica E4.
+ */
 public class E4BloodVolumePulseStream extends
         StreamWorker<MeasurementKey, EmpaticaE4BloodVolumePulse> {
     private static final Logger log = LoggerFactory.getLogger(E4BloodVolumePulseStream.class);
@@ -47,21 +49,16 @@ public class E4BloodVolumePulseStream extends
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator>  setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream)
-            throws IOException {
+    protected KStream<WindowedKey, DoubleAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                    (k, v, valueCollector) -> valueCollector.add(v.getBloodVolumePulse()),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
-    }
-
-    private Float extractValue(EmpaticaE4BloodVolumePulse record) {
-        incrementMonitor();
-        return record.getBloodVolumePulse();
     }
 }

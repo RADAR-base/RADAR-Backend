@@ -47,7 +47,7 @@ public class RadarSerdesTest {
 
     @Test
     public void getDoubleArrayCollector() {
-        Serde<DoubleArrayCollector> doubelArrayCollector = this.radarSerdes.getDoubelArrayCollector();
+        Serde<DoubleArrayCollector> doubelArrayCollector = this.radarSerdes.getDoubleArrayCollector();
         assertNotNull(doubelArrayCollector);
         assertNotNull(doubelArrayCollector.serializer());
         assertEquals(doubelArrayCollector.serializer().getClass(), JsonSerializer.class);

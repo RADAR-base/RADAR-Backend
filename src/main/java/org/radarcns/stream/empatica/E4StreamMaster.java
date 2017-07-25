@@ -26,7 +26,7 @@ import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
 
 /**
- * Singleton StreamMaster for Empatica E4
+ * Singleton StreamMaster for Empatica E4.
  * @see StreamMaster
  */
 public class E4StreamMaster extends StreamMaster {

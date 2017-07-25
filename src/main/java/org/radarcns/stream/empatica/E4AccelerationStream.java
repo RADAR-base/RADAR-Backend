@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -25,8 +24,8 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Definition of Kafka Stream for aggregating data collected by Empatica E4 Acceleromete
+ * Definition of Kafka Stream for aggregating data collected by Empatica E4 Accelerometer sensor.
  */
 public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE4Acceleration> {
     private static final Logger log = LoggerFactory.getLogger(E4AccelerationStream.class);
@@ -47,22 +46,17 @@ public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE
                 numThread, master, kafkaProperties, log);
     }
 
-
     @Override
-    protected KStream<WindowedKey, DoubleArrayAggregator> setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream) {
+    protected KStream<WindowedKey, DoubleArrayAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream) {
         return kstream.groupByKey()
             .aggregate(
                 DoubleArrayCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(converter(v)),
+                (k, v, valueCollector) -> valueCollector.add(utilities.accelerationToArray(v)),
                 TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubelArrayCollector(),
+                RadarSerdes.getInstance().getDoubleArrayCollector(),
                 getStreamDefinition().getStateStoreName())
             .toStream()
             .map(utilities::collectorToAvro);
-    }
-
-    private double[] converter(EmpaticaE4Acceleration record) {
-        incrementMonitor();
-        return utilities.accelerationToArray(record);
     }
 }

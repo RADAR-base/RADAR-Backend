@@ -16,18 +16,16 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.aggregator.DoubleAggregator;
-import org.radarcns.aggregator.DoubleArrayAggregator;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -36,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Definition of Kafka Stream for aggregating data about Empatica E4 battery level
+ * Kafka Stream for aggregating data about Empatica E4 battery level.
  */
 public class E4BatteryLevelStream extends StreamWorker<MeasurementKey, EmpaticaE4BatteryLevel> {
     private static final Logger log = LoggerFactory.getLogger(E4BatteryLevelStream.class);
@@ -49,21 +47,16 @@ public class E4BatteryLevelStream extends StreamWorker<MeasurementKey, EmpaticaE
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream)
-            throws IOException {
+    protected KStream<WindowedKey, DoubleAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                    (k, v, valueCollector) -> valueCollector.add(v.getBatteryLevel()),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
-    }
-
-    private Float extractValue(EmpaticaE4BatteryLevel record) {
-        incrementMonitor();
-        return record.getBatteryLevel();
     }
 }

@@ -26,11 +26,22 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * Sends emails.
+ */
 public class EmailSender {
     private final String from;
     private final List<String> to;
     private final Session session;
 
+    /**
+     * Email sender to simple SMTP host. The host must not use authentication
+     * @param host smtp host
+     * @param port port that the smtp service is configured on
+     * @param from MIME From header
+     * @param to list of recipients in the MIME To header
+     * @throws IOException if a connection cannot be established with the email provider.
+     */
     public EmailSender(String host, int port, String from, List<String> to) throws IOException {
         this.from = from;
         this.to = to;
@@ -59,6 +70,12 @@ public class EmailSender {
         }
     }
 
+    /**
+     * Send an email with given subject and text. The pre-configured From and To headers are used.
+     * @param subject email subject
+     * @param text plain text content of the email
+     * @throws MessagingException if the message could not be sent
+     */
     public void sendEmail(String subject, String text) throws MessagingException {
         // Create a default MimeMessage object.
         MimeMessage message = new MimeMessage(session);

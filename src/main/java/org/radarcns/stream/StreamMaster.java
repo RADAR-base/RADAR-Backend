@@ -33,9 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstraction of a set of StreamWorker
- *
- * @see StreamWorker
+ * Manages a set of {@link StreamWorker} objects.
  */
 public abstract class StreamMaster implements SubCommand {
     private static final Logger log = LoggerFactory.getLogger(StreamMaster.class);
@@ -54,11 +52,12 @@ public abstract class StreamMaster implements SubCommand {
     private ScheduledExecutorService executor;
 
     /**
+     * A stream master for given sensor type.
      * @param standalone true means that the aggregator will assign one thread per stream
      * @param nameSensor the name of the device that produced data that will be consumed. Only for
-     *                   debug
+     *                   debugging
      */
-    protected StreamMaster(boolean standalone, @Nonnull String nameSensor) {
+    protected StreamMaster(boolean standalone, String nameSensor) {
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
@@ -81,14 +80,15 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     /**
-     * Populates an StreamWorker list with workers
+     * Populates an list with workers.
      *
-     * @param low,normal,high: are the three available priority levels that can be used to start
-     *                       kafka streams
+     * @param low number of threads to use if a stream has low priority
+     * @param normal number of threads to use if a stream has normal priority
+     * @param high number of threads to use if a stream has high priority
      */
     protected abstract List<StreamWorker<?,?>> createWorkers(int low, int normal, int high);
 
-    /** It starts all AggregatorWorkers controlled by this StreamMaster */
+    /** Starts all workers. */
     @Override
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
@@ -101,9 +101,11 @@ public abstract class StreamMaster implements SubCommand {
         list.forEach(v -> executor.submit(v::start));
     }
 
-    /** It stops all AggregatorWorkers controlled by this StreamMaster */
+    /**
+     * Signal all workers to shut down. This does not wait for the workers to shut down.
+     */
     @Override
-    public void shutdown() throws InterruptedException {
+    public void shutdown() {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!list.isEmpty()) {
@@ -115,22 +117,22 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     /**
-     * Notification from StreamWorker that it has started its managed stream
+     * Notification from a worker that it has started.
      *
-     * @param stream the name of the stream that has been started. Useful for debug purpose
+     * @param stream the worker that has started
      */
-    public void notifyStartedStream(@Nonnull String stream) {
+    public void notifyStartedStream(@Nonnull StreamWorker<?, ?> stream) {
         int current = currentStream.incrementAndGet();
         log.info("[{}] {} is started. {}/{} streams are now running",
                 nameSensor, stream, current, list.size());
     }
 
     /**
-     * Notification from StreamWorker that it has closed its managed stream
+     * Notification from a worker that it has closed.
      *
-     * @param stream the name of the stream that has been closed. Useful for debug purpose
+     * @param stream the worker that has closed
      */
-    public void notifyClosedStream(@Nonnull String stream) {
+    public void notifyClosedStream(@Nonnull StreamWorker<?, ?> stream) {
         int current = currentStream.decrementAndGet();
 
         if (current == 0) {
@@ -155,7 +157,7 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     public void restartStream(final StreamWorker<?, ?> worker) {
-        log.info("Restarting stream {} for {}", worker.getClientId(), nameSensor);
+        log.info("Restarting stream {} for {}", worker, nameSensor);
 
         try {
             executor.schedule(worker::start, RETRY_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -165,7 +167,7 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     /**
-     * Informative function to log the topics list that the application is going to use
+     * Log the topic list that the application is going to use.
      */
     protected void announceTopics() {
         log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
