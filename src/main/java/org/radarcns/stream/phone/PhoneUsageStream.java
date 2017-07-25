@@ -31,9 +31,11 @@ import java.io.IOException;
 
 public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
-    //    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
+    // 1 day until an item is refreshed
     private static final int CACHE_TIMEOUT = 24 * 3600;
+
+    // Do not cache more than 1 million elements, for memory consumption reasons
     private static final int MAX_CACHE_SIZE = 1_000_000;
 
     private final PlayStoreLookup playStoreLookup;
