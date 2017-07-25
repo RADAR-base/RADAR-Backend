@@ -23,6 +23,10 @@ import org.radarcns.stream.empatica.E4StreamMaster;
 import org.radarcns.stream.phone.PhoneStreamMaster;
 
 public class KafkaStreamFactory {
+    private static final String E4_STREAM = "e4";
+    private static final String PHONE_STREAM = "phone";
+    private static final String ALL_STREAMS = "all";
+
     private final RadarPropertyHandler properties;
     private final RadarBackendOptions options;
 
@@ -46,11 +50,11 @@ public class KafkaStreamFactory {
 
         boolean isStandalone = properties.getRadarProperties().isStandalone();
         switch (streamType) {
-            case "e4":
+            case E4_STREAM:
                 return new E4StreamMaster(isStandalone);
-            case "phone":
+            case PHONE_STREAM:
                 return new PhoneStreamMaster(isStandalone);
-            case "all":
+            case ALL_STREAMS:
                 return new CombinedStreamMaster(Arrays.asList(
                         new E4StreamMaster(isStandalone),
                         new PhoneStreamMaster(isStandalone)
