@@ -16,17 +16,21 @@
 
 package org.radarcns.stream;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/** Combine multiple StreamMasters into a single object. */
 public class CombinedStreamMaster extends StreamMaster {
 
     private final List<StreamMaster> streamMasters;
     private final StreamGroup streamGroup;
 
-    public CombinedStreamMaster(Collection<StreamMaster> streamMasters) throws IOException {
+    /**
+     * Create a stream master that will act as a master over given stream masters.
+     * @param streamMasters stream masters to take care of
+     */
+    public CombinedStreamMaster(Collection<StreamMaster> streamMasters) {
         super(true, "Combined");
         if (streamMasters == null || streamMasters.isEmpty()) {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
@@ -48,6 +52,7 @@ public class CombinedStreamMaster extends StreamMaster {
         return this.streamGroup;
     }
 
+    /** A stream group that combines the stream groups of the stream masters it is managing. */
     private class CombinedStreamGroup implements StreamGroup {
         @Override
         public List<String> getTopicNames() {

@@ -16,13 +16,11 @@
 
 package org.radarcns.stream;
 
+import java.util.Arrays;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.empatica.E4StreamMaster;
 import org.radarcns.stream.phone.PhoneStreamMaster;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 public class KafkaStreamFactory {
     private final RadarPropertyHandler properties;
@@ -34,7 +32,7 @@ public class KafkaStreamFactory {
         this.properties = properties;
     }
 
-    public StreamMaster createStreamWorker() throws IOException {
+    public StreamMaster createStreamWorker() {
         String streamType = properties.getRadarProperties().getStreamWorker();
         if (streamType == null) {
             // Try to get the stream type from the commandline arguments

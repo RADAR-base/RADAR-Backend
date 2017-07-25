@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import org.radarcns.config.KafkaProperty;
@@ -32,7 +31,7 @@ import org.radarcns.util.RadarSingletonFactory;
  */
 public class E4StreamMaster extends StreamMaster {
 
-    public E4StreamMaster(boolean standalone) throws IOException {
+    public E4StreamMaster(boolean standalone) {
         super(standalone,"Empatica E4");
     }
 

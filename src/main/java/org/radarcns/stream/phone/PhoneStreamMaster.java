@@ -16,16 +16,14 @@
 
 package org.radarcns.stream.phone;
 
+import java.util.Arrays;
+import java.util.List;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.StreamGroup;
-import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Singleton StreamMaster for Phone
@@ -33,7 +31,7 @@ import java.util.List;
  */
 public class PhoneStreamMaster extends StreamMaster {
 
-    public PhoneStreamMaster(boolean standalone) throws IOException {
+    public PhoneStreamMaster(boolean standalone) {
         super(standalone,"Phone");
     }
 

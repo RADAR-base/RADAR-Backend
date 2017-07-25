@@ -16,7 +16,6 @@
 
 package org.radarcns.stream;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -59,7 +58,7 @@ public abstract class StreamMaster implements SubCommand {
      * @param nameSensor the name of the device that produced data that will be consumed. Only for
      *                   debug
      */
-    protected StreamMaster(boolean standalone, @Nonnull String nameSensor) throws IOException {
+    protected StreamMaster(boolean standalone, @Nonnull String nameSensor) {
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
@@ -91,7 +90,7 @@ public abstract class StreamMaster implements SubCommand {
 
     /** It starts all AggregatorWorkers controlled by this StreamMaster */
     @Override
-    public void start() throws IOException {
+    public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
 
         announceTopics();
