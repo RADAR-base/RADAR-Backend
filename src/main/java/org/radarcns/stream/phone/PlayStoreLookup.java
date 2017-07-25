@@ -17,7 +17,9 @@
 package org.radarcns.stream.phone;
 
 import java.io.IOException;
+import org.apache.kafka.common.cache.Cache;
 import org.apache.kafka.common.cache.LRUCache;
+import org.apache.kafka.common.cache.SynchronizedCache;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,21 +29,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A Google Play Store lookup backed by a cache.
+ *
+ * This implementation is thread-safe
  */
 public final class PlayStoreLookup {
     private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
     private static final String URL_PLAY_STORE_APP_DETAILS = "https://play.google.com/store/apps/details?id=";
     private static final String CATEGORY_ANCHOR_SELECTOR = "a.document-subtitle.category";
 
-    private final long cacheTimeoutSeconds;
-    // Do not cache more than 1 million elements, for memory consumption reasons
-    private final LRUCache<String, AppCategory> categoryCache;
+    private final long cacheTimeout;
+    private final Cache<String, AppCategory> categoryCache;
 
     public PlayStoreLookup(long cacheTimeoutSeconds, int maxCacheSize) {
-        this.cacheTimeoutSeconds = cacheTimeoutSeconds;
-        this.categoryCache = new LRUCache<>(maxCacheSize);
+        this.cacheTimeout = cacheTimeoutSeconds * 1000L;
+        this.categoryCache = new SynchronizedCache<>(new LRUCache<>(maxCacheSize));
     }
-
 
     /**
      * Looks up a category from the play store, if possible from cache.
@@ -57,10 +59,10 @@ public final class PlayStoreLookup {
      * @return category as given by the play store
      */
     public AppCategory lookupCategory(String packageName) {
-        // If not yet in cache, fetch category for this package
         AppCategory category = categoryCache.get(packageName);
 
-        long cacheThreshold = System.currentTimeMillis() / 1000L - cacheTimeoutSeconds;
+        // If not yet in cache, fetch category for this package
+        double cacheThreshold = (System.currentTimeMillis() - cacheTimeout) / 1000d;
         if (category == null || category.fetchTimeStamp < cacheThreshold) {
             try {
                 category = fetchCategory(packageName);
