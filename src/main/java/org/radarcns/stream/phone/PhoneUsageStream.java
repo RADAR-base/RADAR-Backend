@@ -46,17 +46,15 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
     }
 
     @Override
-    protected void setStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream)
+    protected KStream<MeasurementKey, PhoneUsageEvent> setStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream)
             throws IOException {
-        kstream
+        return kstream
             .map((key, value) -> {
-                String packageName = value.getPackageName().toString();
+                String packageName = value.getPackageName();
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
                 return new KeyValue<>(key, value);
-            })
-            .to(getStreamDefinition().getOutputTopic().getName());
+            });
     }
-
 }

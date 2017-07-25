@@ -20,9 +20,12 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.aggregator.DoubleAggregator;
+import org.radarcns.aggregator.DoubleArrayAggregator;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.collector.DoubleValueCollector;
@@ -46,9 +49,9 @@ public class E4BatteryLevelStream extends StreamWorker<MeasurementKey, EmpaticaE
     }
 
     @Override
-    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream)
+    protected KStream<WindowedKey, DoubleAggregator> setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BatteryLevel> kstream)
             throws IOException {
-        kstream.groupByKey()
+        return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
                     (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
@@ -56,8 +59,7 @@ public class E4BatteryLevelStream extends StreamWorker<MeasurementKey, EmpaticaE
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
-                .map(utilities::collectorToAvro)
-                .to(getStreamDefinition().getOutputTopic().getName());
+                .map(utilities::collectorToAvro);
     }
 
     private Float extractValue(EmpaticaE4BatteryLevel record) {

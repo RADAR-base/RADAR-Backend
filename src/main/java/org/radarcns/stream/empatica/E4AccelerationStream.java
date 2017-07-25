@@ -20,9 +20,11 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.aggregator.DoubleArrayAggregator;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.collector.DoubleArrayCollector;
@@ -47,9 +49,8 @@ public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE
 
 
     @Override
-    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream)
-            throws IOException {
-        kstream.groupByKey()
+    protected KStream<WindowedKey, DoubleArrayAggregator> setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream) {
+        return kstream.groupByKey()
             .aggregate(
                 DoubleArrayCollector::new,
                 (k, v, valueCollector) -> valueCollector.add(converter(v)),
@@ -57,8 +58,7 @@ public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE
                 RadarSerdes.getInstance().getDoubelArrayCollector(),
                 getStreamDefinition().getStateStoreName())
             .toStream()
-            .map(utilities::collectorToAvro)
-            .to(getStreamDefinition().getOutputTopic().getName());
+            .map(utilities::collectorToAvro);
     }
 
     private double[] converter(EmpaticaE4Acceleration record) {

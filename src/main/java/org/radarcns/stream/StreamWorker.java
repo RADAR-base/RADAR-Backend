@@ -73,8 +73,10 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
     protected KStreamBuilder getBuilder() throws IOException {
         KStreamBuilder builder = new KStreamBuilder();
 
-        String inputTopic = getStreamDefinition().getInputTopic().getName();
-        setStream(builder.stream(inputTopic));
+        StreamDefinition stream = getStreamDefinition();
+        String inputTopic = stream.getInputTopic().getName();
+        String outputTopic = stream.getOutputTopic().getName();
+        setStream(builder.stream(inputTopic)).to(outputTopic);
 
         return builder;
     }
@@ -82,7 +84,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
     /**
      *   it defines the stream computation
      */
-    protected abstract void setStream(@Nonnull KStream<K, V> kstream) throws IOException;
+    protected abstract KStream<?, ?> setStream(@Nonnull KStream<K, V> kstream) throws IOException;
 
     /**
      * It starts the stream and notify the StreamMaster
