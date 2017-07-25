@@ -29,18 +29,20 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 
 /**
- * Implements {@link RadarUtilities}
+ * Implements {@link RadarUtilities}.
  */
 public class RadarUtilitiesImpl implements RadarUtilities {
     protected RadarUtilitiesImpl() {
         // used for construction from RadarSingletonFactory
     }
 
+    @Override
     public WindowedKey getWindowed(Windowed<MeasurementKey> window) {
         return new WindowedKey(window.key().getUserId(), window.key().getSourceId(),
                 window.window().start(), window.window().end());
     }
 
+    @Override
     public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
     }
@@ -81,10 +83,12 @@ public class RadarUtilitiesImpl implements RadarUtilities {
                         collector.getIqr()));
     }
 
+    @Override
     public double ibiToHeartRate(float input) {
         return 60d / floatToDouble(input);
     }
 
+    @Override
     public double[] accelerationToArray(EmpaticaE4Acceleration value) {
         return new double[] {
                 floatToDouble(value.getX()),

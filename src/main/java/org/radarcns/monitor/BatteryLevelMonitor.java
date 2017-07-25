@@ -37,7 +37,10 @@ import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Monitors the battery level for any devices running empty */
+/**
+ * Monitors the battery level for any devices running empty. It will optionally notify someone when
+ * a battery level is running low and when the battery level has returned to normal again.
+ */
 public class BatteryLevelMonitor extends
         AbstractKafkaMonitor<GenericRecord, GenericRecord, BatteryLevelState> {
     private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
@@ -47,6 +50,14 @@ public class BatteryLevelMonitor extends
     private final long logInterval;
     private long messageNumber;
 
+    /**
+     * BatteryLevelMonitor constructor.
+     * @param radar RADAR properties
+     * @param topics topics to monitor, each of which has a "batteryLevel" value field
+     * @param sender email sender for notifications, null if no notifications should be sent.
+     * @param minLevel minimum battery level, below which a notification should be sent
+     * @param logInterval every how many messages to log, 0 for no log messages
+     */
     public BatteryLevelMonitor(RadarPropertyHandler radar, Collection<String> topics,
             EmailSender sender, Status minLevel, long logInterval) {
         super(radar, topics, "battery_monitors", "1", new BatteryLevelState());
@@ -60,6 +71,7 @@ public class BatteryLevelMonitor extends
         this.logInterval = logInterval;
     }
 
+    @Override
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         try {
             MeasurementKey key = extractKey(record);
@@ -141,6 +153,7 @@ public class BatteryLevelMonitor extends
         monitor.start();
     }
 
+    /** Battery level status. */
     public enum Status {
         NORMAL(1.0f), LOW(0.2f), CRITICAL(0.05f), EMPTY(0f);
 
@@ -150,11 +163,13 @@ public class BatteryLevelMonitor extends
             this.level = level;
         }
 
+        /** Battery level. */
         public float getLevel() {
             return this.level;
         }
     }
 
+    /** Persist messages that have been sent. */
     public static class BatteryLevelState {
         private Map<String, Float> levels = new HashMap<>();
 
@@ -162,10 +177,12 @@ public class BatteryLevelMonitor extends
             return levels;
         }
 
+        /** Set the last battery levels found. */
         public void setLevels(Map<String, Float> levels) {
             this.levels = levels;
         }
 
+        /** Update a single battery level. */
         public float updateLevel(MeasurementKey key, float level) {
             Float previousLevel = levels.put(measurementKeyToString(key), level);
             return previousLevel == null ? 1.0f : previousLevel;
