@@ -42,6 +42,8 @@ public interface RadarPropertyHandler {
 
     void load(String pathFile) throws IOException;
 
+    boolean isLoaded();
+
     KafkaProperty getKafkaProperties();
 
     /**

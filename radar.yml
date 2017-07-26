@@ -51,3 +51,6 @@ battery_monitor:
   email_user: no-reply@radarcns.org
   topics:
     - android_empatica_e4_battery_level
+
+#========================= Kafka stream ================================#
+stream_worker: e4 # 'phone' or 'all'

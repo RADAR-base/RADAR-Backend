@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.empatica.topic;
+package org.radarcns.stream.empatica;
 
 
 import org.radarcns.stream.GeneralStreamGroup;

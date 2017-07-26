@@ -13,8 +13,6 @@ The following are the prerequisites to run RADAR-Backend on your machine:
 
 - Java 8
 - [Confluent Platform 3.1.2](http://docs.confluent.io/3.1.2/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
-- MongoDB installed and running ( to use Hot-storage )
-- Hadoop 2.7.3 and HDFS installed and configured ( to use Cold-storage )
 - SMTP server to send notifications from the monitors.
 
 ## Installation
@@ -67,12 +65,17 @@ The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. Th
   - android_empatica_e4_sensor_status_output
   - android_empatica_e4_temperature
   - android_empatica_e4_temperature_output
+  - android_phone_usage_event
+  - android_phone_usage_event_output
 3. Run `radarbackend.jar` with configured `radar.yml` and `stream` argument    
 
     ```shell
     java -jar radarbackend-1.0.jar -c path/to/radar.yml stream
     ```
        
+       
+The phone usage event stream uses an internal cache of 1 million elements, which may take about 50 MB of memory. Adjust `org.radarcns.stream.phone.PhoneUsageStream.MAX_CACHE_SIZE` to change it. 
+
 ### RADAR-backend monitors
 
 To get email notifications for Empatica E4 battery status, an email server without a password set up, for example on `localhost`.
@@ -164,79 +167,6 @@ To get email notifications for Empatica E4 battery status, an email server witho
 
     The data sending will automatically be stopped.
 
-### To Run Radar-HDFS-Connector
-
-1. In addition to Zookeeper, Kafka-broker(s), Schema-registry and Rest-proxy, HDFS should be running
-2. Load the `radar-hdfs-connector-0.1.jar` to CLASSPATH
-
-    ```shell
-    export CLASSPATH=/path/to/radar-hdfs-connector-0.1.jar
-    ```
-      
-3. Configure HDFS Connector properties.
-
-    ```ini
-    name=radar-hdfs-sink
-    connector.class=io.confluent.connect.hdfs.HdfsSinkConnector
-    tasks.max=1
-    topics=mock_empatica_e4_battery_level,mock_empatica_e4_blood_volume_pulse
-    flush.size=1200
-    hdfs.url=hdfs://localhost:9000
-    format.class=org.radarcns.sink.HDFS.AvroFormatRadar
-    ```
-    For more details visit our [wiki](https://github.com/RADAR-CNS/RADAR-Backend/wiki/Guide-to-RADAR-HDFS-Connector) and [Kafka-HDFS-Connector](http://docs.confluent.io/3.1.2/connect/connect-hdfs/docs/hdfs_connector.html)
-   
-4. Run the connector. To run the connector in `standalone mode` (on an enviornment confluent platform is installed)
-   
-    ```shell
-    connect-standalone /etc/schema-registry/connect-avro-standalone.properties path-to-your-hdfs-connector.properties
-    ```
-   
-### To Run Radar-MongoDB-Connector
-
-1. In addition to Zookeeper, Kafka-broker(s), Schema-registry and Rest-proxy, MongoDB should be running with required credentials
-2. Load the `radar-mongodb-connector-0.1.jar` to CLASSPATH
-    
-    ```ini
-    export CLASSPATH=/path/to/radar-mongodb-connector-0.1.jar
-    ```
-      
-3. Configure MongoDB Connector properties.
-
-    ```ini
-    # Kafka consumer configuration
-    name=radar-connector-mongodb-sink
-
-    # Kafka connector configuration
-    connector.class=org.radarcns.mongodb.MongoDbSinkConnector
-    tasks.max=1
-
-    # Topics that will be consumed
-    topics=topics
-
-    # MongoDB server
-    mongo.host=localhost
-    mongo.port=27017
-
-    # MongoDB configuration
-    mongo.username=
-    mongo.password=
-    mongo.database=
-
-    # Collection name for putting data into the MongoDB database. The {$topic} token will be replaced
-    # by the Kafka topic name.
-    #mongo.collection.format={$topic}
-
-    # Factory class to do the actual record conversion
-    record.converter.class=org.radarcns.sink.mongodb.RecordConverterFactoryRadar
-    ```
-    For more details visit our [MongoDBConnector](https://github.com/RADAR-CNS/RADAR-MongoDbConnector) and [Kafka-Connect](http://docs.confluent.io/3.1.2/connect/quickstart.html)
-   
-4. Run the connector. To run the connector in `standalone mode` (on an enviornment where the Confluent platform is installed):
-   
-    ```shell
-    connect-standalone /etc/schema-registry/connect-avro-standalone.properties path-to-your-mongodb-connector.properties
-    ```   
    
 ## Contributing
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html).
@@ -274,6 +204,11 @@ And one internal topic:
 - [E4HeartRate][19]: starting from the inter-beat-interval, this aggregator computes the heart rate
 
 [DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.2/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
+
+#### Android Phone
+
+For the Android Phone, there is a stream to get an app category from the Google Play Store
+categories for app usage events.
 
 ### Extending RADAR-Monitor
 

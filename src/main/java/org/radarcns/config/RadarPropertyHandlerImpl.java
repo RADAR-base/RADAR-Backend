@@ -44,16 +44,20 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
 
     @Override
     public ConfigRadar getRadarProperties() {
-        if (properties == null) {
+        if (!isLoaded()) {
             throw new IllegalStateException(
                     "Properties cannot be accessed without calling load() first");
         }
         return properties;
     }
 
+    public boolean isLoaded() {
+        return properties != null;
+    }
+
     @Override
     public void load(String pathFile) throws IOException {
-        if (properties != null) {
+        if (isLoaded()) {
             throw new IllegalStateException("Properties class has been already loaded");
         }
 

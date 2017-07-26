@@ -1,6 +1,7 @@
 version: 1.0
 released: 2016-11-27
 
+
 #============================= Application =============================#
 log_path: src/integrationTest
 #Possible value are standalone or high_performance
@@ -36,7 +37,6 @@ schema_registry:
       port: 8081
       protocol: http
 
-
 battery_monitor:
   level: LOW
   email_address:
@@ -46,3 +46,5 @@ battery_monitor:
 
 extras:
   streaming_timeout_ms: 1000
+
+stream_worker: all

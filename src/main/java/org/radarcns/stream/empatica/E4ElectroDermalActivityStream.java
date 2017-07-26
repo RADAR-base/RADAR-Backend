@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.radarcns.empatica.streams;
+package org.radarcns.stream.empatica;
 
-import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4BloodVolumePulse;
-import org.radarcns.empatica.topic.E4Streams;
+import org.radarcns.empatica.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.stream.aggregator.AggregatorWorker;
-import org.radarcns.stream.aggregator.MasterAggregator;
+import org.radarcns.key.WindowedKey;
+import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -33,35 +33,32 @@ import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class E4BloodVolumePulse extends
-        AggregatorWorker<MeasurementKey, EmpaticaE4BloodVolumePulse> {
-    private static final Logger log = LoggerFactory.getLogger(E4BloodVolumePulse.class);
+/**
+ * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
+ */
+public class E4ElectroDermalActivityStream extends
+        StreamWorker<MeasurementKey, EmpaticaE4ElectroDermalActivity> {
+    private static final Logger log = LoggerFactory.getLogger(E4ElectroDermalActivityStream.class);
 
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public E4BloodVolumePulse(String clientId, int numThread, MasterAggregator master,
+    public E4ElectroDermalActivityStream(String clientId, int numThread, StreamMaster master,
             KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getBloodVolumePulseStream(),
+        super(E4Streams.getInstance().getElectroDermalActivityStream(),
                 clientId, numThread, master, kafkaProperties, log);
     }
 
     @Override
-    protected void setStream(@Nonnull KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream)
-            throws IOException {
-        kstream.groupByKey()
+    protected KStream<WindowedKey, DoubleAggregator> defineStream(
+            @Nonnull KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream) {
+        return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(extractValue(v)),
+                    (k, v, valueCollector) -> valueCollector.add(v.getElectroDermalActivity()),
                     TimeWindows.of(10 * 1000L),
                     RadarSerdes.getInstance().getDoubleCollector(),
                     getStreamDefinition().getStateStoreName())
                 .toStream()
-                .map(utilities::collectorToAvro)
-                .to(getStreamDefinition().getOutputTopic().getName());
-    }
-
-    private Float extractValue(EmpaticaE4BloodVolumePulse record) {
-        incrementMonitor();
-        return record.getBloodVolumePulse();
+                .map(utilities::collectorToAvro);
     }
 }

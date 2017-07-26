@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;

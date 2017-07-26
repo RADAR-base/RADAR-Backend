@@ -23,9 +23,10 @@ import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
-import org.radarcns.empatica.E4Worker;
 import org.radarcns.monitor.KafkaMonitorFactory;
+import org.radarcns.stream.KafkaStreamFactory;
 import org.radarcns.producer.MockProducerCommand;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public final class RadarBackend {
         }
         switch (subCommand) {
             case "stream":
-                return new E4Worker(radarPropertyHandler.getRadarProperties().isStandalone());
+                return new KafkaStreamFactory(options, radarPropertyHandler).createStreamWorker();
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":
@@ -82,7 +83,7 @@ public final class RadarBackend {
      */
     public void application() {
         try {
-            go();
+            start();
         } catch (IOException ex) {
             log.error("FATAL ERROR! The current instance cannot start", ex);
             System.exit(1);
@@ -92,7 +93,7 @@ public final class RadarBackend {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                finish();
+                shutdown();
             } catch (Exception ex) {
                 log.error("Impossible to finalise the shutdown hook", ex);
             }
@@ -100,10 +101,10 @@ public final class RadarBackend {
     }
 
     /**
-     * Start here all needed MasterAggregator
-     * @see org.radarcns.stream.aggregator.MasterAggregator
+     * Start here all needed StreamMaster
+     * @see StreamMaster
      */
-    private void go() throws IOException, InterruptedException {
+    public void start() throws IOException, InterruptedException {
         log.info("STARTING");
 
         command = createCommand();
@@ -115,9 +116,9 @@ public final class RadarBackend {
     /**
      * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
      *
-     * @see org.radarcns.stream.aggregator.MasterAggregator
+     * @see StreamMaster
      */
-    private void finish() throws InterruptedException, IOException {
+    public void shutdown() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");
 
         command.shutdown();

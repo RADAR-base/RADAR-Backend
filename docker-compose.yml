@@ -1,37 +1,25 @@
 ---
 version: '2'
 
-networks:
-  confluent:
-    driver: bridge
-  mongodb:
-    driver: bridge
-
 services:
-
   #---------------------------------------------------------------------------#
   # Zookeeper Cluster                                                         #
-  # *NB Zookeeper clust should prob go on separate network                    #
   #---------------------------------------------------------------------------#
   zookeeper-1:
     image: confluentinc/cp-zookeeper:3.2.1-5
-    networks:
-      - confluent
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper-1:22888:23888
+      ZOOKEEPER_SERVERS: zookeeper-1:2888:3888
 
   #---------------------------------------------------------------------------#
   # Kafka Cluster                                                             #
   #---------------------------------------------------------------------------#
   kafka-1:
     image: confluentinc/cp-kafka:3.2.1-5
-    networks:
-      - confluent
     depends_on:
       - zookeeper-1
     environment:
@@ -45,59 +33,41 @@ services:
   #---------------------------------------------------------------------------#
   schema-registry-1:
     image: confluentinc/cp-schema-registry:3.2.1-5
-    networks:
-      - confluent
     depends_on:
-      - "zookeeper-1"
+      - zookeeper-1
+      - kafka-1
     restart: always
     ports:
       - "8081:8081"
     environment:
-      #SR_KAFKASTORE_CONNECTION_URL: "zookeeper-sasl-1:2181"
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper-1:2181"
-      SCHEMA_REGISTRY_HOST_NAME: "schema-registry-1"
-      SCHEMA_REGISTRY_LISTENERS: "http://schema-registry-1:8081"
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper-1:2181
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   #---------------------------------------------------------------------------#
   # REST proxy                                                                #
   #---------------------------------------------------------------------------#
   rest-proxy-1:
     image: confluentinc/cp-kafka-rest:3.2.1-5
-    networks:
-      - confluent
     depends_on:
-      - "kafka-1"
-      - "schema-registry-1"
+      - kafka-1
+      - schema-registry-1
     ports:
       - "8082:8082"
     environment:
-      #RP_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      #RP_ZOOKEEPER_CONNECT: "zookeeper-sasl-1:2181"
-      KAFKA_REST_ZOOKEEPER_CONNECT: "zookeeper-1:2181"
-      KAFKA_REST_LISTENERS: "http://rest-proxy-1:8082"
-      KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry-1:8081"
-      KAFKA_REST_HOST_NAME: "rest-proxy-1"
+      KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_REST_LISTENERS: http://rest-proxy-1:8082
+      KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
+      KAFKA_REST_HOST_NAME: rest-proxy-1
 
   #---------------------------------------------------------------------------#
-  # Mongo DB                                                                  #
+  # Integration test                                                          #
   #---------------------------------------------------------------------------#
-  mongo:
-    image: mongo:3.3
-    volumes:
-      - /data/db
-    networks:
-      - mongodb
-    command: --smallfiles --rest --noauth
-
   integration-test:
     build: .
-    networks:
-      - confluent
-      - mongodb
+    # Right now, only direct connections to kafka are tested
+    depends_on:
+      - kafka-1
+      - schema-registry-1
     command:
       - integrationTest
-    volumes:
-      - ./src:/code/src
-      - ./build.gradle:/code/build.gradle
-      - ./build:/code/build:rw
-      - ${HOME}/.m2:/root/.m2

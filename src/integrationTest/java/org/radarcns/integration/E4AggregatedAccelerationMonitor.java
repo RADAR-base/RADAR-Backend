@@ -71,10 +71,10 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             }
             MeasurementKey measurementKey;
             Schema keySchema = key.getSchema();
-            if (keySchema.getField("userID") != null
-                    && keySchema.getField("sourceID") != null) {
-                measurementKey = new MeasurementKey((String) key.get("userID"),
-                        (String) key.get("sourceID"));
+            if (keySchema.getField("userId") != null
+                    && keySchema.getField("sourceId") != null) {
+                measurementKey = new MeasurementKey((String) key.get("userId"),
+                        (String) key.get("sourceId"));
                 assertNotNull(measurementKey);
             } else {
                 logger.error("Failed to process record {} with wrong key type {}.",
@@ -89,18 +89,18 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
             GenericData.Array min = (GenericData.Array) value.get(minFieldId);
             assertNotNull(min);
-            assertEquals((double)min.get(0), 15.0d, 0.0);
-            assertEquals((double)min.get(1), -15.0d, 0.0);
-            assertEquals((double)min.get(2), 64.0d, 0.0);
+            assertEquals(15.0d, (double)min.get(0), 0.0);
+            assertEquals(-15.0d, (double)min.get(1), 0.0);
+            assertEquals(64.0d, (double)min.get(2), 0.0);
 
             int maxFieldId = recordSchema.getField("max").pos();
             assertNotNull(maxFieldId);
 
             GenericData.Array max = (GenericData.Array) value.get(maxFieldId);
             assertNotNull(max);
-            assertEquals((double)max.get(0), 15.0d, 0.0);
-            assertEquals((double)max.get(1), Double.MIN_VALUE, 0.0d);
-            assertEquals((double)max.get(2), 64.0d, 0.0);
+            assertEquals(15.0d, (double)max.get(0), 0.0);
+            assertEquals(Double.MIN_VALUE, (double)max.get(1), 0.0d);
+            assertEquals(64.0d, (double)max.get(2), 0.0);
         }
     }
 }

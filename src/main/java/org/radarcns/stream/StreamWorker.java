@@ -14,42 +14,39 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
 import java.io.IOException;
-import java.util.Timer;
 import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.stream.StreamDefinition;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runnable abstraction of Kafka Stream Handler
+ * Abstraction of a Kafka Stream.
  */
-public abstract class AggregatorWorker<K extends SpecificRecord, V extends SpecificRecord>
+public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         implements Thread.UncaughtExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(AggregatorWorker.class);
+    private static final Logger log = LoggerFactory.getLogger(StreamWorker.class);
 
     private final int numThreads;
     private final String clientId;
-    private final MasterAggregator master;
+    private final StreamMaster master;
     private final StreamDefinition streamDefinition;
     private final Monitor monitor;
+    private final KafkaProperty kafkaProperty;
 
     private KafkaStreams streams;
-    private KafkaProperty kafkaProperty;
-    private Timer timer;
 
-    public AggregatorWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
-            int numThreads, @Nonnull MasterAggregator aggregator, KafkaProperty kafkaProperty,
+    public StreamWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
+            int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
             Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
@@ -62,7 +59,7 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
         this.kafkaProperty = kafkaProperty;
         this.streams = null;
 
-        if (log == null) {
+        if (monitorLog == null) {
             this.monitor = null;
         } else {
             this.monitor = new Monitor(monitorLog, "records have been read from "
@@ -70,66 +67,73 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
         }
     }
 
-    /** Create a Kafka Stream builder */
-    protected KStreamBuilder getBuilder() throws IOException {
+    /**
+     * Create a Kafka Stream builder. This implementation will create a stream from given
+     * input topic to given output topic. It monitors the amount of messages that are read.
+     */
+    protected KStreamBuilder createBuilder() throws IOException {
         KStreamBuilder builder = new KStreamBuilder();
 
-        String inputTopic = getStreamDefinition().getInputTopic().getName();
-        setStream(builder.stream(inputTopic));
+        StreamDefinition definition = getStreamDefinition();
+        String inputTopic = definition.getInputTopic().getName();
+        String outputTopic = definition.getOutputTopic().getName();
+
+        KStream<K, V> inputStream = builder.<K, V>stream(inputTopic)
+                .map((k, v) -> {
+                    incrementMonitor();
+                    return new KeyValue<>(k, v);
+                });
+
+        defineStream(inputStream).to(outputTopic);
 
         return builder;
     }
 
     /**
-     *   it defines the stream computation
+     * Defines the stream computation.
      */
-    protected abstract void setStream(@Nonnull KStream<K, V> kstream) throws IOException;
+    protected abstract KStream<?, ?> defineStream(@Nonnull KStream<K, V> kstream);
 
     /**
-     * It starts the stream and notify the MasterAggregator
+     * Starts the stream and notify the StreamMaster.
      */
     public void start() {
         if (streams != null) {
-            throw new IllegalStateException("Cannot start already started stream again");
+            throw new IllegalStateException("Streams already started. Cannot start them again.");
         }
+
         log.info("Creating the stream {} from topic {} to topic {}",
-                getClientId(), getStreamDefinition().getInputTopic(),
-                getStreamDefinition().getOutputTopic());
+                clientId, streamDefinition.getInputTopic(),
+                streamDefinition.getOutputTopic());
 
         try {
             if (monitor != null) {
-                timer = new Timer();
-                timer.schedule(monitor, 0, 30_000);
+                master.addMonitor(monitor);
             }
-            streams = new KafkaStreams(getBuilder(),
-                    kafkaProperty
-                            .getStream(getClientId(), numThreads, DeviceTimestampExtractor.class));
+            streams = new KafkaStreams(createBuilder(),
+                    kafkaProperty.getStream(clientId, numThreads, DeviceTimestampExtractor.class));
             streams.setUncaughtExceptionHandler(this);
             streams.start();
 
-            master.notifyStartedStream(clientId);
+            master.notifyStartedStream(this);
         } catch (IOException ex) {
             uncaughtException(Thread.currentThread(), ex);
         }
     }
 
     /**
-     * It closes the stream and notify the MasterAggregator
+     * Close the stream and notify the StreamMaster.
      */
     public void shutdown() {
-        log.info("Shutting down {} stream", getClientId());
+        log.info("Shutting down {} stream", clientId);
 
         closeStreams();
 
-        master.notifyClosedStream(clientId);
-    }
-
-    public String getClientId() {
-        return clientId;
+        master.notifyClosedStream(this);
     }
 
     /**
-     * It handles exceptions that have been uncaught. It is called when a StreamThread is
+     * Handles exceptions that have been uncaught. It is called when a StreamThread is
      * terminating due to an exception.
      */
     @Override
@@ -150,25 +154,19 @@ public abstract class AggregatorWorker<K extends SpecificRecord, V extends Speci
             streams.close();
             streams = null;
         }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-    protected KafkaStreams getStreams() {
-        return streams;
     }
 
     protected StreamDefinition getStreamDefinition() {
         return streamDefinition;
     }
 
-    protected void setKafkaProperty(KafkaProperty kafkaProperty) {
-        this.kafkaProperty = kafkaProperty;
-    }
-
+    /** Increment the number of messages processed. */
     protected void incrementMonitor() {
         monitor.increment();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + clientId + '>';
     }
 }

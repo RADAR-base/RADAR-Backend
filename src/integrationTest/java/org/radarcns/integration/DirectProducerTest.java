@@ -16,8 +16,13 @@
 
 package org.radarcns.integration;
 
+import static org.radarcns.stream.KafkaStreamFactory.ALL_STREAMS;
+
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.cli.ParseException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,16 +33,34 @@ import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DirectProducerTest {
-
-    private final static Logger logger = LoggerFactory.getLogger(DirectProducerTest.class);
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RadarBackend backend;
 
-    @Test
+    @Before
+    public void setUp() throws IOException, ParseException, InterruptedException {
+        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
+        RadarPropertyHandler propHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        if (!propHandler.isLoaded()) {
+            propHandler.load(propertiesPath);
+        }
+
+        String[] args = {"-c", propertiesPath, "stream"};
+
+        RadarBackendOptions opts = RadarBackendOptions.parse(args);
+        propHandler.getRadarProperties().setStreamWorker(ALL_STREAMS);
+        backend = new RadarBackend(opts, propHandler);
+        backend.start();
+    }
+
+    @After
+    public void tearDown() throws IOException, InterruptedException {
+        backend.shutdown();
+    }
+
+    @Test(timeout = 300_000L)
     public void testDirect() throws Exception {
         File file = new File(getClass().getResource("/mock_devices.yml").getFile());
         BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
@@ -47,26 +70,11 @@ public class DirectProducerTest {
         Thread.sleep(mockConfig.getDuration());
         mockProducer.shutdown();
 
-        String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
-        RadarPropertyHandler properties = RadarSingletonFactory.getRadarPropertyHandler();
-        properties.load(propertiesPath);
-
-        String[] args = {"-c", propertiesPath};
-
-        RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        new RadarBackend(opts, properties).application();
-
-        Thread.sleep(40_000L);
-
-        consumeAggregated();
-    }
-
-    private void consumeAggregated() throws IOException {
         String clientId = "someclinet";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(),
                 "android_empatica_e4_acceleration_output", clientId);
-        monitor.setPollTimeout(100_000L);
+        monitor.setPollTimeout(280_000L);
         monitor.start();
     }
 }

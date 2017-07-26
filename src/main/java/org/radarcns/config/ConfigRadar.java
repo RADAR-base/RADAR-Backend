@@ -51,6 +51,8 @@ public class ConfigRadar {
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
+    @JsonProperty("stream_worker")
+    private String streamWorker;
     @JsonProperty("persistence_path")
     private String persistencePath;
     private Map<String, Object> extras;
@@ -231,6 +233,14 @@ public class ConfigRadar {
 
     public void setDisconnectMonitor(DisconnectMonitorConfig disconnectMonitor) {
         this.disconnectMonitor = disconnectMonitor;
+    }
+
+    public String getStreamWorker() {
+        return streamWorker;
+    }
+
+    public void setStreamWorker(String streamWorker) {
+        this.streamWorker = streamWorker;
     }
 
     public String getPersistencePath() {

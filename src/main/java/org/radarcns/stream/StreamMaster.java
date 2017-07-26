@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.radarcns.stream.aggregator;
+package org.radarcns.stream;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -28,37 +27,37 @@ import javax.annotation.Nonnull;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.config.SubCommand;
+import org.radarcns.util.Monitor;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstraction of a set of AggregatorWorker
- *
- * @see org.radarcns.stream.aggregator.AggregatorWorker
+ * Manages a set of {@link StreamWorker} objects.
  */
-public abstract class MasterAggregator implements SubCommand {
-    private static final Logger log = LoggerFactory.getLogger(MasterAggregator.class);
+public abstract class StreamMaster implements SubCommand {
+    private static final Logger log = LoggerFactory.getLogger(StreamMaster.class);
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<AggregatorWorker<?,?>> list;
+    private final List<StreamWorker<?,?>> list;
     private final String nameSensor;
     private final AtomicInteger currentStream;
     private int lowPriority;
     private int normalPriority;
     private int highPriority;
 
-    private ConfigRadar configRadar =
+    private final ConfigRadar configRadar =
             RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
-    private final ScheduledExecutorService executor;
+    private ScheduledExecutorService executor;
 
     /**
+     * A stream master for given sensor type.
      * @param standalone true means that the aggregator will assign one thread per stream
      * @param nameSensor the name of the device that produced data that will be consumed. Only for
-     *                   debug
+     *                   debugging
      */
-    protected MasterAggregator(boolean standalone, @Nonnull String nameSensor) throws IOException {
+    protected StreamMaster(boolean standalone, String nameSensor) {
         this.nameSensor = nameSensor;
         this.currentStream = new AtomicInteger(0);
 
@@ -75,44 +74,44 @@ public abstract class MasterAggregator implements SubCommand {
             highPriority = configRadar.threadsByPriority(Priority.HIGH, 4);
         }
 
-        executor = Executors.newSingleThreadScheduledExecutor();
-
-        announceTopics(log);
-
         list = new ArrayList<>();
 
-        log.info("Creating MasterAggregator instance for {}", nameSensor);
+        log.info("Creating StreamMaster instance for {}", nameSensor);
     }
 
     /**
-     * Populates an AggregatorWorker list with workers
+     * Populates a list with workers.
      *
-     * @param low,normal,high: are the three available priority levels that can be used to start
-     *                       kafka streams
+     * @param list list to add workers to
+     * @param low number of threads to use if a stream has low priority
+     * @param normal number of threads to use if a stream has normal priority
+     * @param high number of threads to use if a stream has high priority
      */
-    protected abstract List<AggregatorWorker<?,?>> createWorkers(int low, int normal, int high);
+    protected abstract void createWorkers(List<StreamWorker<?, ?>> list,
+            int low, int normal, int high);
 
-    /**
-     * Informative function to log the topics list that the application is going to use
-     *
-     * @param log the logger instance that will be used to notify the user
-     */
-    protected abstract void announceTopics(@Nonnull Logger log);
+    /** Starts all workers. */
+    @Override
+    public void start() {
+        executor = Executors.newSingleThreadScheduledExecutor();
 
-    /** It starts all AggregatorWorkers controlled by this MasterAggregator */
-    public void start() throws IOException {
+        announceTopics();
+
         log.info("Starting all streams for {}", nameSensor);
 
-        list.addAll(createWorkers(lowPriority, normalPriority, highPriority));
+        createWorkers(list, lowPriority, normalPriority, highPriority);
         list.forEach(v -> executor.submit(v::start));
     }
 
-    /** It stops all AggregatorWorkers controlled by this MasterAggregator */
-    public void shutdown() throws InterruptedException {
+    /**
+     * Signal all workers to shut down. This does not wait for the workers to shut down.
+     */
+    @Override
+    public void shutdown() {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!list.isEmpty()) {
-            final AggregatorWorker<?, ?> worker = list.remove(list.size() - 1);
+            final StreamWorker<?, ?> worker = list.remove(list.size() - 1);
             executor.submit(worker::shutdown);
         }
 
@@ -120,22 +119,22 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Notification from AggregatorWorker that it has started its managed stream
+     * Notification from a worker that it has started.
      *
-     * @param stream the name of the stream that has been started. Useful for debug purpose
+     * @param stream the worker that has started
      */
-    public void notifyStartedStream(@Nonnull String stream) {
+    public void notifyStartedStream(@Nonnull StreamWorker<?, ?> stream) {
         int current = currentStream.incrementAndGet();
         log.info("[{}] {} is started. {}/{} streams are now running",
                 nameSensor, stream, current, list.size());
     }
 
     /**
-     * Notification from AggregatorWorker that it has closed its managed stream
+     * Notification from a worker that it has closed.
      *
-     * @param stream the name of the stream that has been closed. Useful for debug purpose
+     * @param stream the worker that has closed
      */
-    public void notifyClosedStream(@Nonnull String stream) {
+    public void notifyClosedStream(@Nonnull StreamWorker<?, ?> stream) {
         int current = currentStream.decrementAndGet();
 
         if (current == 0) {
@@ -147,7 +146,7 @@ public abstract class MasterAggregator implements SubCommand {
     }
 
     /**
-     * Function used by AggregatorWorker to notify a crash and trigger a forced shutdown.
+     * Function used by StreamWorker to notify a crash and trigger a forced shutdown.
      *
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
@@ -159,8 +158,8 @@ public abstract class MasterAggregator implements SubCommand {
         //TODO implement forcing shutdown
     }
 
-    public void restartStream(final AggregatorWorker<?, ?> worker) {
-        log.info("Restarting stream {} for {}", worker.getClientId(), nameSensor);
+    public void restartStream(final StreamWorker<?, ?> worker) {
+        log.info("Restarting stream {} for {}", worker, nameSensor);
 
         try {
             executor.schedule(worker::start, RETRY_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -169,7 +168,19 @@ public abstract class MasterAggregator implements SubCommand {
         }
     }
 
-    protected void setConfigRadar(ConfigRadar configRadar) {
-        this.configRadar = configRadar;
+    /**
+     * Log the topic list that the application is going to use.
+     */
+    protected void announceTopics() {
+        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
+                        + "before starting: \n  - {}",
+                String.join("\n  - ", getStreamGroup().getTopicNames()));
+    }
+
+    protected abstract StreamGroup getStreamGroup();
+
+    /** Add a monitor to the master. It will run every 30 seconds. */
+    void addMonitor(Monitor monitor) {
+        executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
     }
 }

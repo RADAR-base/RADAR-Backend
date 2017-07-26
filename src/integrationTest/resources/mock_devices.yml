@@ -1,7 +1,7 @@
 #=========================== Schema Registry ============================#
 #List of Schema Registry instances
 schema_registry:
-  protocol: https
+  protocol: http
   host: schema-registry-1
   port: 8081
 

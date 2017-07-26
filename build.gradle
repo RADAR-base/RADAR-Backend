@@ -41,6 +41,7 @@ ext.mockitoVersion = '2.2.29'
 ext.radarCommonsVersion = '0.4.2'
 ext.radarSchemasVersion = '0.2-alpha.1'
 ext.subethamailVersion = '3.1.7'
+ext.jsoupVersion = '1.10.2'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
 ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
@@ -114,6 +115,9 @@ dependencies {
     compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
     compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
+    // JSoup html parser
+    compile group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
+
     // Testing
     testCompile group: 'junit', name: 'junit', version: junitVersion
     testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
@@ -121,6 +125,17 @@ dependencies {
 
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
+
+    // For Topic name validation based on Kafka classes
+    testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
+        exclude group: 'org.apache.kafka', module: 'kafka-clients'
+        exclude group: 'net.sf.jopt-simple'
+        exclude group: 'com.yammer.metrics'
+        exclude group: 'org.scala-lang.modules'
+        exclude group: 'org.slf4j'
+        exclude group: 'com.101tec'
+        exclude group: 'org.apache.zookeeper'
+    }
 
     // Send data to codacy
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
