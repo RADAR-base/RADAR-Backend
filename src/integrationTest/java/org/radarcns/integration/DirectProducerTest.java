@@ -16,7 +16,7 @@
 
 package org.radarcns.integration;
 
-import static org.radarcns.stream.KafkaStreamFactory.E4_STREAM;
+import static org.radarcns.stream.KafkaStreamFactory.ALL_STREAMS;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,6 @@ import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DirectProducerTest {
     @Rule
@@ -52,7 +50,7 @@ public class DirectProducerTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker(E4_STREAM);
+        propHandler.getRadarProperties().setStreamWorker(ALL_STREAMS);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }

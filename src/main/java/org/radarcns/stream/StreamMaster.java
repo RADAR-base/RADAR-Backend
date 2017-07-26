@@ -47,7 +47,7 @@ public abstract class StreamMaster implements SubCommand {
     private int normalPriority;
     private int highPriority;
 
-    private ConfigRadar configRadar =
+    private final ConfigRadar configRadar =
             RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
     private ScheduledExecutorService executor;
 
@@ -175,11 +175,6 @@ public abstract class StreamMaster implements SubCommand {
         log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
                         + "before starting: \n  - {}",
                 String.join("\n  - ", getStreamGroup().getTopicNames()));
-    }
-
-
-    protected void setConfigRadar(ConfigRadar configRadar) {
-        this.configRadar = configRadar;
     }
 
     protected abstract StreamGroup getStreamGroup();

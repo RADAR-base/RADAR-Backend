@@ -25,7 +25,7 @@ import org.radarcns.stream.phone.PhoneStreamMaster;
 public class KafkaStreamFactory {
     public static final String E4_STREAM = "e4";
     public static final String PHONE_STREAM = "phone";
-    private static final String ALL_STREAMS = "all";
+    public static final String ALL_STREAMS = "all";
 
     private final RadarPropertyHandler properties;
     private final RadarBackendOptions options;
