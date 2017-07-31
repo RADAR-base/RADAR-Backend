@@ -20,6 +20,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;

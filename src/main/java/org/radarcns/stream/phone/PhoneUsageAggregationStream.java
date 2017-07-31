@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
+    private static final long dayInMs = 24 * 60 * 60 * 1000;
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public PhoneUsageAggregationStream(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId, int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty, Logger monitorLog) {
@@ -36,11 +37,11 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
 
     @Override
     protected KStream<?, ?> defineStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
-        return kstream.groupByKey()
+        return kstream.groupBy((k, v) -> k.getSourceId() + k.getUserId() + v.getPackageName())
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v.getEventType(), v.getTime(), v.getPackageName()),
-                        TimeWindows.of(10 * 1000L),
+                        TimeWindows.of(dayInMs),
                         RadarSerdes.getInstance().getPhoneUsageCollector(),
                         getStreamDefinition().getStateStoreName())
                 .toStream()

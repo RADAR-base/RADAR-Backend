@@ -22,6 +22,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
@@ -53,7 +54,13 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     public KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, PhoneUsageCollector collector
     ) {
-        return new KeyValue<>(getWindowed(window) ,new PhoneUsageAggregator());
+        return new KeyValue<>(getWindowed(window) , new PhoneUsageAggregator(
+                collector.getPackageName(),
+                collector.getTotalForegroundTime(),
+                collector.getTimesTurnedOn(),
+                null,
+                null
+        ));
     }
 
     @Override
