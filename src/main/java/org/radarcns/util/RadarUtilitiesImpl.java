@@ -27,6 +27,7 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**
  * Implements {@link RadarUtilities}.
@@ -45,6 +46,14 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     @Override
     public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
+    }
+
+
+    @Override
+    public KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, PhoneUsageCollector collector
+    ) {
+        return new KeyValue<>(getWindowed(window) ,new PhoneUsageAggregator());
     }
 
     @Override

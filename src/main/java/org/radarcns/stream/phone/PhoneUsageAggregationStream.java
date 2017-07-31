@@ -1,5 +1,6 @@
 package org.radarcns.stream.phone;
 
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
@@ -9,6 +10,7 @@ import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.empatica.E4BatteryLevelStream;
 import org.radarcns.util.serde.RadarSerdes;
@@ -37,11 +39,13 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
         return kstream.groupByKey()
                 .aggregate(
                         PhoneUsageCollector::new,
-                        (k, v, valueCollector) -> valueCollector.update(v.getEventType(), v.getPackageName(), v.getTime()),
+                        (k, v, valueCollector) -> valueCollector.update(v.getEventType(), v.getTime(), v.getPackageName()),
                         TimeWindows.of(10 * 1000L),
-                        RadarSerdes.getInstance().getDoubleCollector(),
+                        RadarSerdes.getInstance().getPhoneUsageCollector(),
                         getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
     }
+
+
 }

@@ -25,6 +25,7 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**
  * Interface that facades all utility functions that are required to support RadarBackend features.
@@ -43,6 +44,9 @@ public interface RadarUtilities {
 
     KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, DoubleValueCollector collector);
+
+    KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
+            Windowed<MeasurementKey> window, PhoneUsageCollector collector);
 
     double floatToDouble(float input);
 
