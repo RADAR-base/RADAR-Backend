@@ -18,17 +18,16 @@ public class PhoneUsageCollector {
 
     public PhoneUsageCollector update(UsageEventType eventType, double time, String packageName) {
         this.packageName = packageName;
-        if (UsageEventType.FOREGROUND.equals(eventType)) {
-            if(!inTheForeground ) {
-                lastForegroundEvent =  time;
-            }
+        if (eventType.equals(UsageEventType.FOREGROUND) && !inTheForeground) {
+            // Foreground event received and was not in the foreground already
+            // I am not sure if this is even possible, but will not hurt
+            timesTurnedOn++;
             inTheForeground = true;
-        } else if (UsageEventType.BACKGROUND.equals(eventType)) {
-            if(inTheForeground) {
-                timesTurnedOn++;
-                updateUsageTime(time);
-            }
+            lastForegroundEvent = time;
+        } else if (eventType.equals(UsageEventType.BACKGROUND) && inTheForeground) {
+            // Background event received for an app which was previously on.
             inTheForeground = false;
+            updateUsageTime(time);
         }
         return this;
     }
