@@ -43,7 +43,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
         return kstream.groupBy((k, v) -> getTuplekey(k, v.getPackageName()) )
                 .aggregate(
                         PhoneUsageCollector::new,
-                        (k, v, valueCollector) -> valueCollector.update(v.getEventType(), v.getTime(), v.getPackageName()),
+                        (k, phoneUsageEvent, valueCollector) -> valueCollector.update(phoneUsageEvent),
                         TimeWindows.of(dayInMs),
                         RadarSerdes.getInstance().getPhoneUsageCollector(),
                         getStreamDefinition().getStateStoreName())
