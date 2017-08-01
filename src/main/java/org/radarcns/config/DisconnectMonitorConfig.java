@@ -16,11 +16,16 @@
 
 package org.radarcns.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * POJO representing a disconnection status monitor configuration
  */
 public class DisconnectMonitorConfig extends MonitorConfig {
     private Long timeout; // 5 minutes
+
+    @JsonProperty("repeatitive_alert_delay")
+    private Long repetitiveAlertDelay;
 
     public Long getTimeout() {
         return timeout;
@@ -29,4 +34,13 @@ public class DisconnectMonitorConfig extends MonitorConfig {
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
     }
+
+    public Long getRepetitiveAlertDelay() {
+        return repetitiveAlertDelay;
+    }
+
+    public void setRepetitiveAlertDelay(Long repetitiveAlertDelay) {
+        this.repetitiveAlertDelay = repetitiveAlertDelay;
+    }
 }
+

@@ -58,7 +58,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final Format dayFormat;
     private final long logInterval;
     private long messageNumber;
-    private long periodicalDelay = 60_000L;
+    private long periodicalDelay = 3600_000L; // 1 hour
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
             EmailSender sender, long timeUntilReportedMissing, long logInterval , ScheduledExecutorService scheduler) {
@@ -67,7 +67,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         this.sender = sender;
         this.logInterval = logInterval;
         this.dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
-        this.scheduler = scheduler; // do not create new thread
+        this.scheduler = scheduler;
+        if(radar.getRadarProperties().getDisconnectMonitor()!=null && radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay() !=null) {
+            this.periodicalDelay = radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay();
+        }
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");

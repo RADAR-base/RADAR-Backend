@@ -83,16 +83,13 @@ public class DisconnectMonitorTest {
         sender = mock(EmailSender.class);
     }
 
-//    @Test
     public void evaluateRecords() throws Exception {
         ConfigRadar config = KafkaMonitorFactoryTest
-                .getBatteryMonitorConfig(25252, folder);
+                .getDisconnectMonitorConfig(25252, folder);
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
 
-         timeout = 10_000L;
-
-         long delay = 60_000L;
+        timeout = 10_000L;
 
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -128,7 +125,7 @@ public class DisconnectMonitorTest {
     public void evaluateRecordsWithScheduledAlerts() throws Exception {
         evaluateRecords();
         Thread.sleep(125_000L);
-        timesSent +=6;
+        timesSent +=6; // executed twice for 3 disconnected devices
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }
 
