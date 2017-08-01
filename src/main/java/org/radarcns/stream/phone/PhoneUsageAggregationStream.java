@@ -4,6 +4,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.phone.PhoneUsageEvent;
@@ -20,6 +21,8 @@ import org.radarcns.util.RadarUtilities;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.AbstractMap;
+import java.util.Map;
 
 
 /**
@@ -37,7 +40,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
 
     @Override
     protected KStream<?, ?> defineStream(@Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
-        return kstream.groupBy((k, v) -> k.getSourceId() + k.getUserId() + v.getPackageName())
+        return kstream.groupBy((k, v) -> getTuplekey(k, v.getPackageName()) )
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v.getEventType(), v.getTime(), v.getPackageName()),
@@ -46,6 +49,10 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
                         getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
+    }
+
+    private Map.Entry<MeasurementKey, String> getTuplekey(MeasurementKey key, String packageName) {
+        return new java.util.AbstractMap.SimpleEntry<>(key, packageName);
     }
 
 

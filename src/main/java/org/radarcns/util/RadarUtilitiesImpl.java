@@ -18,6 +18,8 @@ package org.radarcns.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
@@ -45,6 +47,13 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
+    public WindowedKey getWindowedTuple(Windowed<Map.Entry<MeasurementKey, String>> window) {
+        MeasurementKey measurementKey = window.key().getKey();
+        return new WindowedKey(measurementKey.getUserId(), measurementKey.getSourceId(),
+                window.window().start(), window.window().end());
+    }
+
+    @Override
     public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
     }
@@ -52,9 +61,9 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     @Override
     public KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
-            Windowed<MeasurementKey> window, PhoneUsageCollector collector
+            Windowed<Map.Entry<MeasurementKey, String>> window, PhoneUsageCollector collector
     ) {
-        return new KeyValue<>(getWindowed(window) , new PhoneUsageAggregator(
+        return new KeyValue<>(getWindowedTuple(window) , new PhoneUsageAggregator(
                 collector.getPackageName(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
