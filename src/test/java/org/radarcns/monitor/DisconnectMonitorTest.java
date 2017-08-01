@@ -102,7 +102,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "1", 0);
         sendMessage(monitor, "1", 1);
         sendMessage(monitor, "2", 0);
-        Thread.sleep(timeout + 1_000L);
+        Thread.sleep(timeout + 10_000L);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 2;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -114,7 +114,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "2", 0);
         sendMessage(monitor, "0", 0);
         timesSent +=1;
-        Thread.sleep(timeout + 1_000L);
+        Thread.sleep(timeout + 10_000L);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent +=3;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -124,7 +124,7 @@ public class DisconnectMonitorTest {
     @Test
     public void evaluateRecordsWithScheduledAlerts() throws Exception {
         evaluateRecords();
-        Thread.sleep(125_000L);
+        Thread.sleep(45_000L);
         timesSent +=6; // executed twice for 3 disconnected devices
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }

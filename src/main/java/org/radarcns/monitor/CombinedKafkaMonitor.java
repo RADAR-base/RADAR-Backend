@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -36,17 +36,17 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     private final List<KafkaMonitor> monitors;
     private final AtomicBoolean done;
 
-    private ScheduledExecutorService executor;
+    private ExecutorService executor;
     private IOException ioException;
     private InterruptedException interruptedException;
 
-    public CombinedKafkaMonitor(ScheduledExecutorService executor, Collection<KafkaMonitor> monitors) {
+    public CombinedKafkaMonitor(Collection<KafkaMonitor> monitors) {
         if (monitors == null || monitors.isEmpty()) {
             throw new IllegalArgumentException("Monitor collection may not be empty");
         }
         this.monitors = new ArrayList<>(monitors);
         this.done = new AtomicBoolean(false);
-        this.executor = executor;
+        this.executor = null;
         this.ioException = null;
         this.interruptedException = null;
     }
@@ -69,7 +69,7 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
             if (executor != null) {
                 throw new IllegalStateException("Cannot start monitor twice");
             }
-            executor = Executors.newScheduledThreadPool(monitors.size());
+            executor = Executors.newFixedThreadPool(monitors.size());
         }
 
         for (KafkaMonitor monitor : monitors) {

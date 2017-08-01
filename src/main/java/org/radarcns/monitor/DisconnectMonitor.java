@@ -21,6 +21,8 @@ import static org.radarcns.util.PersistentStateStore.missingRecordsReportToStrin
 import static org.radarcns.util.PersistentStateStore.stringToKey;
 import static org.radarcns.util.PersistentStateStore.stringToMissingRecordsReport;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -50,9 +52,10 @@ import org.slf4j.LoggerFactory;
  */
 public class DisconnectMonitor extends AbstractKafkaMonitor<
         GenericRecord, GenericRecord, DisconnectMonitorState> {
+
     private static final Logger logger = LoggerFactory.getLogger(DisconnectMonitor.class);
 
-    private ScheduledExecutorService scheduler ;
+    private final ScheduledExecutorService scheduler;
     private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
@@ -61,15 +64,19 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private long periodicalDelay = 3600_000L; // 1 hour
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing, long logInterval , ScheduledExecutorService scheduler) {
+            EmailSender sender, long timeUntilReportedMissing, long logInterval,
+            ScheduledExecutorService scheduler) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
         this.timeUntilReportedMissing = timeUntilReportedMissing;
         this.sender = sender;
         this.logInterval = logInterval;
         this.dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
         this.scheduler = scheduler;
-        if(radar.getRadarProperties().getDisconnectMonitor()!=null && radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay() !=null) {
-            this.periodicalDelay = radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay();
+        if (radar.getRadarProperties().getDisconnectMonitor() != null
+                && radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay()
+                != null) {
+            this.periodicalDelay = radar.getRadarProperties().getDisconnectMonitor()
+                    .getRepetitiveAlertDelay();
         }
 
         Properties props = new Properties();
@@ -79,13 +86,19 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         super.setPollTimeout(timeUntilReportedMissing);
     }
 
-  /**
-   * Schedules the repeatitive alert task
-   */
-  @Override
+    /**
+     * Schedules the repeatitive alert task
+     */
+    @Override
     public void start() {
         startScheduler();
         super.start();
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        scheduler.shutdown();
     }
 
     /**
@@ -93,10 +106,12 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * Protected method to support unit testing
      */
     protected void startScheduler() {
-        if(scheduler !=null ) {
-            logger.info("Start scheduler");
-            scheduler.scheduleWithFixedDelay(new ScheduledAlerts(), periodicalDelay, periodicalDelay,
-                TimeUnit.MILLISECONDS);
+        if (scheduler != null) {
+            logger.info("Start scheduled alert updates with the delay of {}", periodicalDelay);
+            scheduler
+                    .scheduleWithFixedDelay(new ScheduledAlertsUpdates(), periodicalDelay,
+                            periodicalDelay,
+                            TimeUnit.MILLISECONDS);
         }
     }
 
@@ -118,8 +133,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                 iterator.remove();
                 reportMissing(stringToKey(missingKey), timeout);
                 try {
-                  // store last seen and reportedMissing timestamp
-                    state.reportedMissing.put(missingKey, missingRecordsReportToString(new MissingRecordsReport(lastSeen , now)));
+                    // store last seen and reportedMissing timestamp
+                    state.reportedMissing.put(missingKey,
+                            missingRecordsReportToString(new MissingRecordsReport(lastSeen, now)));
                 } catch (IOException e) {
                     logger.error("Cannot serialize missing records data");
                 }
@@ -146,9 +162,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         String reportedMissingTime = state.reportedMissing.remove(keyString);
         if (reportedMissingTime != null) {
             try {
-                reportRecovered(key, stringToMissingRecordsReport(reportedMissingTime).getReportedMissing());
+                reportRecovered(key,
+                        stringToMissingRecordsReport(reportedMissingTime).getReportedMissing());
             } catch (IOException e) {
-               logger.error("Cannot deserialize missing report data");
+                logger.error("Cannot deserialize missing report data " , e);
             }
         }
     }
@@ -184,10 +201,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         }
     }
 
-  /**
-   * State of disconnect monitor
-   */
-  public static class DisconnectMonitorState {
+    /**
+     * State of disconnect monitor
+     */
+    public static class DisconnectMonitorState {
+
         private final Map<String, Long> lastSeen = new ConcurrentHashMap<>();
         private final Map<String, String> reportedMissing = new ConcurrentHashMap<>();
 
@@ -208,47 +226,51 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         }
     }
 
-  /**
-   * Stores data of data from missing records alert
-   * such as lastSeen and reportedTime
-   */
-  public static class MissingRecordsReport {
-      private Long lastSeen;
-      private Long reportedMissing;
+    /**
+     * Stores data of data from missing records alert
+     * such as lastSeen and reportedTime
+     */
+    public static class MissingRecordsReport {
 
-      public MissingRecordsReport() {}
-      MissingRecordsReport(Long lastSeen , Long reportedMissing) {
-        this.lastSeen = lastSeen;
-        this.reportedMissing = reportedMissing;
-      }
+        private Long lastSeen;
+        private Long reportedMissing;
 
-      public Long getLastSeen() {
-        return lastSeen;
-      }
-
-      public Long getReportedMissing() {
-        return reportedMissing;
-      }
-
-      public void setLastSeen(Long lastSeen) {
-            this.lastSeen = lastSeen;
+        public MissingRecordsReport() {
+            //default constructor for ObjectMapper
         }
 
-        public void setReportedMissing(Long reportedMissing) {
+        @JsonCreator
+        public MissingRecordsReport(@JsonProperty("lastSeen") Long lastSeen,
+                @JsonProperty("reportedMissing") Long reportedMissing) {
+            this.lastSeen = lastSeen;
             this.reportedMissing = reportedMissing;
         }
+
+        public Long getLastSeen() {
+            return lastSeen;
+        }
+
+        public Long getReportedMissing() {
+            return reportedMissing;
+        }
+
+
     }
 
-  /**
-   * Task that runs with scheduled delays to report if the device is still disconnected
-   */
-  private class ScheduledAlerts implements Runnable{
+    /**
+     * Task that runs with scheduled delays to report if the device is still disconnected
+     */
+    private class ScheduledAlertsUpdates implements Runnable {
+
+        private final Logger logger = LoggerFactory.getLogger(ScheduledAlertsUpdates.class);
+
         @Override
-        public void run(){
+        public void run() {
 
             long now = System.currentTimeMillis();
             logger.info("Scheduled alert updates at " + now);
-            Iterator<Map.Entry<String, String>> iterator = state.reportedMissing.entrySet().iterator();
+            Iterator<Map.Entry<String, String>> iterator = state.reportedMissing.entrySet()
+                    .iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, String> entry = iterator.next();
                 MissingRecordsReport missingRecordsReport = null;
@@ -258,10 +280,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                     if (timeout > timeUntilReportedMissing) {
                         String missingKey = entry.getKey();
                         reportMissing(stringToKey(missingKey), timeout);
-                        state.reportedMissing.put(missingKey, missingRecordsReportToString(new MissingRecordsReport(missingRecordsReport.getLastSeen() , now)));
+                        state.reportedMissing.put(missingKey, missingRecordsReportToString(
+                                new MissingRecordsReport(missingRecordsReport.getLastSeen(), now)));
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Cannot serialize/deserialize missing records data");
                 }
 
             }

@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KafkaMonitorFactory {
+
     private static final Logger logger = LoggerFactory.getLogger(KafkaMonitorFactory.class);
 
     private final RadarPropertyHandler properties;
@@ -61,9 +62,9 @@ public class KafkaMonitorFactory {
                 monitor = createDisconnectMonitor(Executors.newSingleThreadScheduledExecutor());
                 break;
             case "all":
-                ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
-                monitor = new CombinedKafkaMonitor(executorService, Arrays.asList(
-                        createBatteryLevelMonitor(), createDisconnectMonitor(executorService)));
+                monitor = new CombinedKafkaMonitor(Arrays.asList(
+                        createBatteryLevelMonitor(),
+                        createDisconnectMonitor(Executors.newSingleThreadScheduledExecutor())));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -95,7 +96,8 @@ public class KafkaMonitorFactory {
         return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
     }
 
-    private KafkaMonitor createDisconnectMonitor(ScheduledExecutorService executor) throws IOException {
+    private KafkaMonitor createDisconnectMonitor(ScheduledExecutorService executor)
+            throws IOException {
         DisconnectMonitorConfig config = properties.getRadarProperties().getDisconnectMonitor();
         EmailSender sender = getSender(config);
         long timeout = 300_000L;  // 5 minutes
@@ -108,7 +110,7 @@ public class KafkaMonitorFactory {
             logInterval = config.getLogInterval();
         }
         return new DisconnectMonitor(properties, topics, "temperature_disconnect", sender,
-                timeout, logInterval , executor);
+                timeout, logInterval, executor);
     }
 
     private EmailSender getSender(MonitorConfig config) throws IOException {
