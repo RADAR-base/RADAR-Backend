@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.MonitorConfig;
@@ -56,11 +58,12 @@ public class KafkaMonitorFactory {
                 monitor = createBatteryLevelMonitor();
                 break;
             case "disconnect":
-                monitor = createDisconnectMonitor();
+                monitor = createDisconnectMonitor(Executors.newSingleThreadScheduledExecutor());
                 break;
             case "all":
-                monitor = new CombinedKafkaMonitor(Arrays.asList(
-                        createBatteryLevelMonitor(), createDisconnectMonitor()));
+                ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+                monitor = new CombinedKafkaMonitor(executorService, Arrays.asList(
+                        createBatteryLevelMonitor(), createDisconnectMonitor(executorService)));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -92,7 +95,7 @@ public class KafkaMonitorFactory {
         return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
     }
 
-    private KafkaMonitor createDisconnectMonitor() throws IOException {
+    private KafkaMonitor createDisconnectMonitor(ScheduledExecutorService executor) throws IOException {
         DisconnectMonitorConfig config = properties.getRadarProperties().getDisconnectMonitor();
         EmailSender sender = getSender(config);
         long timeout = 300_000L;  // 5 minutes
@@ -105,7 +108,7 @@ public class KafkaMonitorFactory {
             logInterval = config.getLogInterval();
         }
         return new DisconnectMonitor(properties, topics, "temperature_disconnect", sender,
-                timeout, logInterval);
+                timeout, logInterval , executor);
     }
 
     private EmailSender getSender(MonitorConfig config) throws IOException {

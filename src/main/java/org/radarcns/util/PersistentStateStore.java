@@ -19,14 +19,17 @@ package org.radarcns.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.key.MeasurementKey;
+import org.radarcns.monitor.DisconnectMonitor.MissingRecordsReport;
 
 /** Store a state for a Kafka consumer. */
 public class PersistentStateStore {
     private final File basePath;
     private final YamlConfigLoader loader;
     private static final char SEPARATOR = '#';
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * State store that creates files at given directory. The directory will be created if it
@@ -99,10 +102,35 @@ public class PersistentStateStore {
         String sourceId = key.getSourceId();
         StringBuilder builder = new StringBuilder(userId.length() + 5 + sourceId.length());
         escape(userId, builder);
-        builder.append('#');
+        builder.append(SEPARATOR);
         escape(sourceId, builder);
         return builder.toString();
     }
+
+    /**
+     * serializes a MissingRecordsReport to a string. It can be deserialized with
+     * {@link #stringToMissingRecordsReport(String)}.
+     * @param reportedMissingValues key to serialize
+     * @return unique serialized form
+     */
+    public static String missingRecordsReportToString(MissingRecordsReport reportedMissingValues)
+        throws IOException {
+
+        return objectMapper.writeValueAsString(reportedMissingValues);
+    }
+
+    /**
+     * deserializes a string into a  MissingRecordsReport. It can be serialized with
+     * {@link #stringToKey(String)}.
+     * @param reportedMissingValues key to serialize
+     * @return unique deserialized form
+     */
+    public static MissingRecordsReport stringToMissingRecordsReport(String reportedMissingValues)
+        throws IOException {
+
+        return objectMapper.readValue(reportedMissingValues , MissingRecordsReport.class);
+    }
+
 
     private static void escape(String string, StringBuilder builder) {
         for (char c : string.toCharArray()) {

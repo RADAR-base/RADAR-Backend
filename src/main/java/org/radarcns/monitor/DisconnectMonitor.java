@@ -17,17 +17,22 @@
 package org.radarcns.monitor;
 
 import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+import static org.radarcns.util.PersistentStateStore.missingRecordsReportToString;
 import static org.radarcns.util.PersistentStateStore.stringToKey;
+import static org.radarcns.util.PersistentStateStore.stringToMissingRecordsReport;
 
+import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -47,25 +52,49 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         GenericRecord, GenericRecord, DisconnectMonitorState> {
     private static final Logger logger = LoggerFactory.getLogger(DisconnectMonitor.class);
 
+    private ScheduledExecutorService scheduler ;
     private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
     private final long logInterval;
     private long messageNumber;
+    private long periodicalDelay = 60_000L;
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing, long logInterval) {
+            EmailSender sender, long timeUntilReportedMissing, long logInterval , ScheduledExecutorService scheduler) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
         this.timeUntilReportedMissing = timeUntilReportedMissing;
         this.sender = sender;
         this.logInterval = logInterval;
         this.dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
+        this.scheduler = scheduler; // do not create new thread
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configure(props);
 
         super.setPollTimeout(timeUntilReportedMissing);
+    }
+
+  /**
+   * Schedules the repeatitive alert task
+   */
+  @Override
+    public void start() {
+        startScheduler();
+        super.start();
+    }
+
+    /**
+     * starts the scheduled alert updates.
+     * Protected method to support unit testing
+     */
+    protected void startScheduler() {
+        if(scheduler !=null ) {
+            logger.info("Start scheduler");
+            scheduler.scheduleWithFixedDelay(new ScheduledAlerts(), periodicalDelay, periodicalDelay,
+                TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
@@ -77,13 +106,23 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         Iterator<Map.Entry<String, Long>> iterator = state.lastSeen.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, Long> entry = iterator.next();
-            long timeout = now - entry.getValue();
+            // calculate timeout from current timestamp per device
+            long lastSeen = entry.getValue();
+            long timeout = now - lastSeen;
             if (timeout > timeUntilReportedMissing) {
                 String missingKey = entry.getKey();
+                // remove processed records to prevent repeatitive alerts
                 iterator.remove();
                 reportMissing(stringToKey(missingKey), timeout);
-                state.reportedMissing.put(missingKey, now);
+                try {
+                  // store last seen and reportedMissing timestamp
+                    state.reportedMissing.put(missingKey, missingRecordsReportToString(new MissingRecordsReport(lastSeen , now)));
+                } catch (IOException e) {
+                    logger.error("Cannot serialize missing records data");
+                }
+
             }
+
         }
     }
 
@@ -101,9 +140,13 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         String keyString = measurementKeyToString(key);
         state.lastSeen.put(keyString, now);
 
-        Long reportedMissingTime = state.reportedMissing.remove(keyString);
+        String reportedMissingTime = state.reportedMissing.remove(keyString);
         if (reportedMissingTime != null) {
-            reportRecovered(key, reportedMissingTime);
+            try {
+                reportRecovered(key, stringToMissingRecordsReport(reportedMissingTime).getReportedMissing());
+            } catch (IOException e) {
+               logger.error("Cannot deserialize missing report data");
+            }
         }
     }
 
@@ -138,9 +181,12 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         }
     }
 
-    public static class DisconnectMonitorState {
-        private final Map<String, Long> lastSeen = new HashMap<>();
-        private final Map<String, Long> reportedMissing = new HashMap<>();
+  /**
+   * State of disconnect monitor
+   */
+  public static class DisconnectMonitorState {
+        private final Map<String, Long> lastSeen = new ConcurrentHashMap<>();
+        private final Map<String, String> reportedMissing = new ConcurrentHashMap<>();
 
         public Map<String, Long> getLastSeen() {
             return lastSeen;
@@ -150,12 +196,72 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             this.lastSeen.putAll(lastSeen);
         }
 
-        public Map<String, Long> getReportedMissing() {
+        public Map<String, String> getReportedMissing() {
             return reportedMissing;
         }
 
-        public void setReportedMissing(Map<String, Long> reportedMissing) {
+        public void setReportedMissing(Map<String, String> reportedMissing) {
             this.reportedMissing.putAll(reportedMissing);
+        }
+    }
+
+  /**
+   * Stores data of data from missing records alert
+   * such as lastSeen and reportedTime
+   */
+  public static class MissingRecordsReport {
+      private Long lastSeen;
+      private Long reportedMissing;
+
+      public MissingRecordsReport() {}
+      MissingRecordsReport(Long lastSeen , Long reportedMissing) {
+        this.lastSeen = lastSeen;
+        this.reportedMissing = reportedMissing;
+      }
+
+      public Long getLastSeen() {
+        return lastSeen;
+      }
+
+      public Long getReportedMissing() {
+        return reportedMissing;
+      }
+
+      public void setLastSeen(Long lastSeen) {
+            this.lastSeen = lastSeen;
+        }
+
+        public void setReportedMissing(Long reportedMissing) {
+            this.reportedMissing = reportedMissing;
+        }
+    }
+
+  /**
+   * Task that runs with scheduled delays to report if the device is still disconnected
+   */
+  private class ScheduledAlerts implements Runnable{
+        @Override
+        public void run(){
+
+            long now = System.currentTimeMillis();
+            logger.info("Scheduled alert updates at " + now);
+            Iterator<Map.Entry<String, String>> iterator = state.reportedMissing.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = iterator.next();
+                MissingRecordsReport missingRecordsReport = null;
+                try {
+                    missingRecordsReport = stringToMissingRecordsReport(entry.getValue());
+                    long timeout = now - missingRecordsReport.getLastSeen();
+                    if (timeout > timeUntilReportedMissing) {
+                        String missingKey = entry.getKey();
+                        reportMissing(stringToKey(missingKey), timeout);
+                        state.reportedMissing.put(missingKey, missingRecordsReportToString(new MissingRecordsReport(missingRecordsReport.getLastSeen() , now)));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 }
