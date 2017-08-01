@@ -67,8 +67,8 @@ public class RadarUtilitiesImpl implements RadarUtilities {
                 collector.getPackageName(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
-                null,
-                null
+                collector.getCategoryName(),
+                collector.getCategoryNameFetchTime()
         ));
     }
 

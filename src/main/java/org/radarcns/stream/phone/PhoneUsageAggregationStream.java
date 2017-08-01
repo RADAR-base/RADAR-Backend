@@ -34,8 +34,12 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
     private static final long dayInMs = 24 * 60 * 60 * 1000;
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public PhoneUsageAggregationStream(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId, int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty, Logger monitorLog) {
-        super(streamDefinition, clientId, numThreads, aggregator, kafkaProperty, monitorLog);
+    public PhoneUsageAggregationStream(@Nonnull String clientId,
+                                       int numThreads,
+                                       @Nonnull StreamMaster master,
+                                       KafkaProperty kafkaProperties) {
+        super(PhoneStreams.getInstance().getUsageStream(), clientId,
+                numThreads, master, kafkaProperties, log);
     }
 
     @Override

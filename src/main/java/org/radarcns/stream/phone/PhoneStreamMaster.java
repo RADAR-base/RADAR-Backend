@@ -44,5 +44,6 @@ public class PhoneStreamMaster extends StreamMaster {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         list.add(new PhoneUsageStream("PhoneUsageStream", low, this, kafkaProperty));
+        list.add(new PhoneUsageAggregationStream("PhoneUsageAggregationStream", low, this, kafkaProperty));
     }
 }
