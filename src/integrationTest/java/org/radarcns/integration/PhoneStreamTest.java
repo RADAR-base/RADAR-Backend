@@ -134,6 +134,7 @@ public class PhoneStreamTest {
         }
         sender.close();
         consumePhone(offset);
+        consumeAggregated(offset);
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
@@ -167,4 +168,28 @@ public class PhoneStreamTest {
         monitor.setPollTimeout(280_000L);
         monitor.start();
     }
+
+    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+        String clientId = "someclient";
+        KafkaMonitor monitor = new AbstractKafkaMonitor<GenericRecord, GenericRecord, Object>(RadarSingletonFactory.getRadarPropertyHandler(),
+                Collections.singletonList("android_phone_usage_event_aggregated"), "new", clientId, null) {
+            int numRecordsRead = 0;
+            @Override
+            protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+                logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
+                GenericRecord value = record.value();
+                int timesOpen = (int)value.get("timesOpen");
+                assertTrue(timesOpen > 0);
+                if (++numRecordsRead == numRecordsExpected) {
+                    shutdown();
+                }
+            }
+        };
+
+        monitor.setPollTimeout(280_000L);
+        monitor.start();
+    }
+
+
+
 }

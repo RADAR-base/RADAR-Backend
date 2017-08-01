@@ -23,6 +23,7 @@ public final class PhoneStreams extends GeneralStreamGroup {
     private static final PhoneStreams INSTANCE = new PhoneStreams();
 
     private final StreamDefinition usageEventStream;
+    private final StreamDefinition usageEventAggregationStream;
 
     public static PhoneStreams getInstance() {
         return INSTANCE;
@@ -31,9 +32,16 @@ public final class PhoneStreams extends GeneralStreamGroup {
     private PhoneStreams() {
         usageEventStream = createSensorStream(
                 "android_phone_usage_event");
+        usageEventAggregationStream = createStream(
+                "android_phone_usage_event_output",
+                "android_phone_usage_event_aggregated");
     }
 
     public StreamDefinition getUsageStream() {
         return usageEventStream;
+    }
+
+    public StreamDefinition getUsageEventAggregationStream() {
+        return usageEventAggregationStream;
     }
 }

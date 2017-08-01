@@ -38,7 +38,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
                                        int numThreads,
                                        @Nonnull StreamMaster master,
                                        KafkaProperty kafkaProperties) {
-        super(PhoneStreams.getInstance().getUsageStream(), clientId,
+        super(PhoneStreams.getInstance().getUsageEventAggregationStream(), clientId,
                 numThreads, master, kafkaProperties, log);
     }
 
