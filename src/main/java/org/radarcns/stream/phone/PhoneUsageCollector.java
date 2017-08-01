@@ -31,11 +31,17 @@ public class PhoneUsageCollector {
             timesTurnedOn++;
             inTheForeground = true;
             lastForegroundEvent = time;
-        } else if (event.getEventType().equals(UsageEventType.BACKGROUND) && inTheForeground) {
+        } else if (event.getEventType().equals(UsageEventType.FOREGROUND) && inTheForeground) {
+            lastForegroundEvent = time; // We assume that a background event was missed. Time is reset.
+        }
+        else if (event.getEventType().equals(UsageEventType.BACKGROUND) && inTheForeground) {
             // Background event received for an app which was previously on.
             inTheForeground = false;
             updateUsageTime(time);
+        } else if (event.getEventType().equals(UsageEventType.BACKGROUND) && !inTheForeground) {
+            // TODO: do we need to handle this case in any way?
         }
+
         return this;
     }
 
