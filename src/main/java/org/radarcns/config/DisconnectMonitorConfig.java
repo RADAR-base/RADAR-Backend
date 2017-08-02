@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DisconnectMonitorConfig extends MonitorConfig {
     private Long timeout; // 5 minutes
 
-    @JsonProperty("repeatitive_alert_delay")
+    @JsonProperty("repetitive_alert_delay")
     private Long repetitiveAlertDelay;
 
     public Long getTimeout() {

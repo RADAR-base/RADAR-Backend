@@ -40,9 +40,21 @@ schema_registry:
 battery_monitor:
   level: LOW
   email_address:
-    - nivethika@thehyve.nl
+    - notifier@email
   topics:
     - android_empatica_e4_battery_level
+
+disconnect_monitor:
+  email_address:
+    - notifier2@email
+  email_host: localhost
+  email_port: 25
+  email_user: sender@email
+  topics:
+    - android_empatica_e4_temperature
+  timeout: 10000
+  repetitive_alert_delay: 20000
+
 
 extras:
   streaming_timeout_ms: 1000
