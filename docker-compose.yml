@@ -60,16 +60,6 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KAFKA_REST_HOST_NAME: rest-proxy-1
 
-  #---------------------------------------------------------------------------#
-  # Email server                                                              #
-  #---------------------------------------------------------------------------#
-  smtp:
-    image: namshi/smtp:latest
-    volumes:
-      - /var/spool/exim
-    restart: always
-    env_file:
-      - ./smtp.env
 
   #---------------------------------------------------------------------------#
   # Integration test                                                          #

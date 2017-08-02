@@ -22,7 +22,7 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - ./gradlew check
-  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 smtp && sleep 30 && sudo docker-compose run --rm integration-test
+  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
   - sudo docker-compose down
 after_script:
   - ./gradlew sendCoverageToCodacy
