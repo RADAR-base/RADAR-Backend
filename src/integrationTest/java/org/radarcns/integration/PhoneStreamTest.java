@@ -94,6 +94,7 @@ public class PhoneStreamTest {
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
         propHandler.getRadarProperties().setStreamWorker(PHONE_STREAM);
+        propHandler.getRadarProperties().setAutoCommitIntervalMs(1000);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
