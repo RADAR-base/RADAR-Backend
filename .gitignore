@@ -22,3 +22,5 @@ backend.log
 
 # Configuration
 smtp.env
+
+/out/

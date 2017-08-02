@@ -64,7 +64,7 @@ public class RadarUtilitiesImpl implements RadarUtilities {
             Windowed<Map.Entry<MeasurementKey, String>> window, PhoneUsageCollector collector
     ) {
         return new KeyValue<>(getWindowedTuple(window) , new PhoneUsageAggregator(
-                collector.getPackageName(),
+                window.key().getValue(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
                 collector.getCategoryName(),

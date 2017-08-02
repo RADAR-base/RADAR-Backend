@@ -33,7 +33,6 @@ import org.radarcns.topic.KafkaTopic;
  * method.
  */
 public class GeneralStreamGroup implements StreamGroup {
-
     public static final String OUTPUT_LABEL = "_output";
 
     private final Map<String, StreamDefinition> topicMap;

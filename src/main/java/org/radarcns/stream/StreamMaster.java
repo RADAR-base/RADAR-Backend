@@ -47,8 +47,6 @@ public abstract class StreamMaster implements SubCommand {
     private int normalPriority;
     private int highPriority;
 
-    private final ConfigRadar configRadar =
-            RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
     private ScheduledExecutorService executor;
 
     /**
@@ -68,7 +66,9 @@ public abstract class StreamMaster implements SubCommand {
         if (standalone) {
             log.info("[{}] STANDALONE MODE", nameSensor);
         } else {
-            log.info("[{}] GROUP MODE: {}", nameSensor, this.configRadar.infoThread());
+            ConfigRadar configRadar = RadarSingletonFactory.getRadarPropertyHandler()
+                    .getRadarProperties();
+            log.info("[{}] GROUP MODE: {}", nameSensor, configRadar.infoThread());
             lowPriority = configRadar.threadsByPriority(Priority.LOW, 1);
             normalPriority = configRadar.threadsByPriority(Priority.NORMAL, 2);
             highPriority = configRadar.threadsByPriority(Priority.HIGH, 4);
