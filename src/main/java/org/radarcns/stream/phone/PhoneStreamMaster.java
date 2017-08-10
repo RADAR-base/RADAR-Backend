@@ -46,5 +46,8 @@ public class PhoneStreamMaster extends StreamMaster {
         list.add(new PhoneUsageStream("PhoneUsageStream", low, this, kafkaProperty));
         list.add(new PhoneUsageAggregationStream(
                 "PhoneUsageAggregationStream", low, this, kafkaProperty));
+        list.add(new PhoneBatteryStream("PhoneBatteryStream", low, this, kafkaProperty));
+        list.add(new PhoneAccelerationStream("PhoneAccelerationStream", low, this,
+                kafkaProperty));
     }
 }
