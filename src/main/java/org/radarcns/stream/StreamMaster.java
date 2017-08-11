@@ -17,7 +17,6 @@
 package org.radarcns.stream;
 
 import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
@@ -32,6 +31,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.radarcns.config.RadarPropertyHandler.Priority.HIGH;
+import static org.radarcns.config.RadarPropertyHandler.Priority.LOW;
+import static org.radarcns.config.RadarPropertyHandler.Priority.NORMAL;
+
 /**
  * Manages a set of {@link StreamWorker} objects.
  */
@@ -43,9 +46,9 @@ public abstract class StreamMaster implements SubCommand {
     private final List<StreamWorker<?,?>> streamWorkers;
     private final AtomicInteger currentStream;
     private final String nameSensor;
-    private int lowPriority;
-    private int normalPriority;
-    private int highPriority;
+    private int lowPriorityThreads;
+    private int normalPriorityThreads;
+    private int highPriorityThreads;
 
     private ScheduledExecutorService executor;
 
@@ -55,9 +58,9 @@ public abstract class StreamMaster implements SubCommand {
     protected StreamMaster() {
         this.currentStream = new AtomicInteger(0);
 
-        lowPriority = 1;
-        normalPriority = 1;
-        highPriority = 1;
+        lowPriorityThreads = 1;
+        normalPriorityThreads = 1;
+        highPriorityThreads = 1;
 
         streamWorkers = new ArrayList<>();
         nameSensor = getClass().getSimpleName();
@@ -68,19 +71,18 @@ public abstract class StreamMaster implements SubCommand {
     /**
      * Set the number of threads to use for different priorities.
      * @param config configuration for threads
-     * @param singleThreaded use single threads for all workers
      */
     public synchronized void setNumberOfThreads(ConfigRadar config) {
         if (config.isStandalone()) {
             log.info("[{}] STANDALONE MODE", nameSensor);
-            lowPriority = 1;
-            normalPriority = 1;
-            highPriority = 1;
+            lowPriorityThreads = 1;
+            normalPriorityThreads = 1;
+            highPriorityThreads = 1;
         } else {
             log.info("[{}] GROUP MODE: {}", nameSensor, config.infoThread());
-            lowPriority = config.threadsByPriority(RadarPropertyHandler.Priority.LOW, 1);
-            normalPriority = config.threadsByPriority(RadarPropertyHandler.Priority.NORMAL, 2);
-            highPriority = config.threadsByPriority(RadarPropertyHandler.Priority.HIGH, 4);
+            lowPriorityThreads = config.threadsByPriority(LOW, 1);
+            normalPriorityThreads = config.threadsByPriority(NORMAL, 2);
+            highPriorityThreads = config.threadsByPriority(HIGH, 4);
         }
     }
 
@@ -186,14 +188,14 @@ public abstract class StreamMaster implements SubCommand {
     }
 
     protected synchronized int lowPriority() {
-        return lowPriority;
+        return lowPriorityThreads;
     }
 
     protected synchronized int normalPriority() {
-        return normalPriority;
+        return normalPriorityThreads;
     }
 
     protected synchronized int highPriority() {
-        return highPriority;
+        return highPriorityThreads;
     }
 }

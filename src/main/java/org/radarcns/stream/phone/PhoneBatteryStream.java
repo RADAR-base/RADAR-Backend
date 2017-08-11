@@ -21,7 +21,8 @@ public class PhoneBatteryStream extends StreamWorker<MeasurementKey, PhoneBatter
     private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public PhoneBatteryStream(String phoneBatteryStream, int priority, PhoneStreamMaster master, KafkaProperty kafkaProperty) {
+    public PhoneBatteryStream(String phoneBatteryStream, int priority, PhoneStreamMaster master,
+            KafkaProperty kafkaProperty) {
         super(PhoneStreams.getInstance().getBatteryStream(), phoneBatteryStream,
                 priority, master,
                 kafkaProperty, logger);

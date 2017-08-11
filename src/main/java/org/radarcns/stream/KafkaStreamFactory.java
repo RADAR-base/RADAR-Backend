@@ -16,6 +16,7 @@
 
 package org.radarcns.stream;
 
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.slf4j.Logger;
@@ -26,14 +27,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class KafkaStreamFactory {
-    private final RadarPropertyHandler properties;
+    private static final Logger logger = LoggerFactory.getLogger(
+            KafkaStreamFactory.class.getName());
+
+    private final ConfigRadar config;
     private final RadarBackendOptions options;
-    private static final Logger logger = LoggerFactory.getLogger(KafkaStreamFactory.class.getName());
 
     public KafkaStreamFactory(RadarBackendOptions options,
                               RadarPropertyHandler properties) {
         this.options = options;
-        this.properties = properties;
+        this.config = properties.getRadarProperties();
     }
 
     public StreamMaster createStreamWorker() {
@@ -44,7 +47,7 @@ public class KafkaStreamFactory {
         if (args != null && args.length > 0) {
             streamTypes = Arrays.asList(args);
         } else {
-            streamTypes = properties.getRadarProperties().getStreamMasters();
+            streamTypes = config.getStreamMasters();
         }
 
         List<StreamMaster> masters = new ArrayList<>(streamTypes.size());
@@ -69,7 +72,7 @@ public class KafkaStreamFactory {
             master = new CombinedStreamMaster(masters);
         }
 
-        master.setNumberOfThreads(properties.getRadarProperties());
+        master.setNumberOfThreads(config);
         return master;
     }
 }

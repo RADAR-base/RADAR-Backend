@@ -38,15 +38,19 @@ public class E4StreamMaster extends StreamMaster {
     protected void createWorkers(List<StreamWorker<?,?>> list) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new E4AccelerationStream("E4AccelerationStream", highPriority(), this, kafkaProperty));
-        list.add(new E4BatteryLevelStream("E4BatteryLevelStream", lowPriority(), this, kafkaProperty));
+        list.add(new E4AccelerationStream(
+                "E4AccelerationStream", highPriority(), this, kafkaProperty));
+        list.add(new E4BatteryLevelStream(
+                "E4BatteryLevelStream", lowPriority(), this, kafkaProperty));
         list.add(new E4BloodVolumePulseStream(
                 "E4BloodVolumePulseStream", highPriority(), this, kafkaProperty));
         list.add(new E4ElectroDermalActivityStream(
                 "E4ElectroDermalActivityStream", normalPriority(), this, kafkaProperty));
-        list.add(new E4HeartRateStream("E4HeartRateStream", highPriority(),this, kafkaProperty));
+        list.add(new E4HeartRateStream(
+                "E4HeartRateStream", highPriority(),this, kafkaProperty));
         list.add(new E4InterBeatIntervalStream(
                 "E4InterBeatIntervalStream", highPriority(),this, kafkaProperty));
-        list.add(new E4TemperatureStream("E4TemperatureStream", highPriority(), this, kafkaProperty));
+        list.add(new E4TemperatureStream(
+                "E4TemperatureStream", highPriority(), this, kafkaProperty));
     }
 }
