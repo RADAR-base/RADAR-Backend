@@ -22,7 +22,12 @@ import java.io.IOException;
  * Subcommand of RadarBackend to run.
  */
 public interface SubCommand {
-    /** Start the subcommand */
+    /**
+     * Start the subcommand. The command is not guaranteed to return
+     * immediately.
+     * @throws IOException if the command cannot be started
+     * @throws InterruptedException
+     */
     void start() throws IOException, InterruptedException;
 
     /** Stop the subcommand, possibly waiting for it to complete. */

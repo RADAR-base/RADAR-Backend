@@ -40,9 +40,12 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.InterruptException;
 import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.errors.WakeupException;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
@@ -139,6 +142,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      * <p>When a message is encountered that cannot be deserialized,
      * {@link #handleSerializationException()} is called.
      */
+    @Override
     public void start() {
         consumer = new KafkaConsumer<>(this.properties);
         consumer.subscribe(topics);
@@ -157,6 +161,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     logger.debug("Operations per second {}", (int) Math.round(ops.getAverage()));
                 } catch (SerializationException ex) {
                     handleSerializationException();
+                } catch (InterruptException | WakeupException ex) {
+                    logger.info("Consumer woke up");
+                } catch (KafkaException ex) {
+                    logger.error("Kafka consumer gave exception", ex);
                 }
             }
         } finally {
@@ -217,12 +225,15 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      *
      * <p>Override to have some stopping behaviour, this implementation always returns false.
      */
+    @Override
     public synchronized boolean isShutdown() {
         return done;
     }
 
+    @Override
     public synchronized void shutdown() {
         this.done = true;
+        this.consumer.wakeup();
     }
 
     public long getPollTimeout() {

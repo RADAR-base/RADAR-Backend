@@ -39,7 +39,7 @@ public class KafkaStreamFactory {
         this.config = properties.getRadarProperties();
     }
 
-    public StreamMaster createStreamWorker() {
+    public StreamMaster createStreamMaster() {
         List<String> streamTypes;
 
         // Try to get the stream type from the commandline arguments
