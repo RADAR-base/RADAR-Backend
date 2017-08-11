@@ -16,6 +16,8 @@
 
 package org.radarcns.stream;
 
+import org.radarcns.config.ConfigRadar;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +33,6 @@ public class CombinedStreamMaster extends StreamMaster {
      * @param streamMasters stream masters to take care of
      */
     public CombinedStreamMaster(Collection<StreamMaster> streamMasters) {
-        super(true, "Combined");
         if (streamMasters == null || streamMasters.isEmpty()) {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
@@ -40,9 +41,16 @@ public class CombinedStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
+    public void setNumberOfThreads(ConfigRadar config) {
         for (StreamMaster master : streamMasters) {
-            master.createWorkers(list, low, normal, high);
+            master.setNumberOfThreads(config);
+        }
+    }
+
+    @Override
+    protected void createWorkers(List<StreamWorker<?,?>> list) {
+        for (StreamMaster master : streamMasters) {
+            master.createWorkers(list);
         }
     }
 

@@ -47,4 +47,6 @@ battery_monitor:
 extras:
   streaming_timeout_ms: 1000
 
-stream_worker: all
+stream_masters:
+  - org.radarcns.stream.empatica.E4StreamMaster
+  - org.radarcns.stream.phone.PhoneStreamMaster

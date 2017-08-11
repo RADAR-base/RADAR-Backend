@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.stream.KafkaStreamFactory.PHONE_STREAM;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.IOException;
@@ -51,6 +50,7 @@ import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
@@ -93,7 +93,8 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker(PHONE_STREAM);
+        propHandler.getRadarProperties().setStreamMasters(
+                Collections.singletonList(PhoneStreamMaster.class.getName()));
         propHandler.getRadarProperties().setAutoCommitIntervalMs(1000);
         backend = new RadarBackend(opts, propHandler);
         backend.start();

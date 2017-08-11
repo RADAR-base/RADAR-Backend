@@ -53,4 +53,6 @@ battery_monitor:
     - android_empatica_e4_battery_level
 
 #========================= Kafka stream ================================#
-stream_worker: e4 # 'phone' or 'all'
+stream_masters:
+  - org.radarcns.stream.empatica.E4StreamMaster
+  - org.radarcns.stream.phone.PhoneStreamMaster
