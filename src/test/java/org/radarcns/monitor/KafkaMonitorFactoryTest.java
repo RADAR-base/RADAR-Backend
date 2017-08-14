@@ -79,7 +79,7 @@ public class KafkaMonitorFactoryTest {
         assertEquals(DisconnectMonitor.class, monitor.getClass());
         DisconnectMonitor disconnectMonitor = (DisconnectMonitor) monitor;
         disconnectMonitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
-        assertTrue(new File(config.getPersistencePath(), "temperature_disconnect_1.yml").isFile());
+        assertTrue(new File(config.getPersistencePath(), "disconnect_monitor_1.yml").isFile());
     }
 
     @Test

@@ -187,8 +187,8 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                 text += "\n\nThis is the final warning email for this device.";
                 subject += ". Final message";
             } else if (numRepetitions > 0) {
-                text += "\n\nThis is warning number " + record.messageNumber + " of " +
-                        numRepetitions;
+                text += "\n\nThis is warning number " + record.messageNumber + " of "
+                        + numRepetitions;
             }
 
             sender.sendEmail(subject, text);

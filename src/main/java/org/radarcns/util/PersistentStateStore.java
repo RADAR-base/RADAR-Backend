@@ -19,10 +19,8 @@ package org.radarcns.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.key.MeasurementKey;
-import org.radarcns.monitor.DisconnectMonitor.MissingRecordsReport;
 
 /** Store a state for a Kafka consumer. */
 public class PersistentStateStore {
