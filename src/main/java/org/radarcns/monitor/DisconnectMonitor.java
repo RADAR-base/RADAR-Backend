@@ -221,7 +221,6 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * State of disconnect monitor
      */
     public static class DisconnectMonitorState {
-
         private final Map<String, Long> lastSeen = new ConcurrentHashMap<>();
         private final Map<String, MissingRecordsReport> reportedMissing = new ConcurrentHashMap<>();
 

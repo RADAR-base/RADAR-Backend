@@ -29,7 +29,6 @@ public class PersistentStateStore {
     private final File basePath;
     private final YamlConfigLoader loader;
     private static final char SEPARATOR = '#';
-    private static ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * State store that creates files at given directory. The directory will be created if it
