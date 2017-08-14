@@ -52,9 +52,9 @@ disconnect_monitor:
   email_user: sender@email
   topics:
     - android_empatica_e4_temperature
-  timeout: 10000
-  repetitive_alert_delay: 20000
-
+  timeout: 10
+  alert_repeat_interval: 20
+  alert_repetitions: 2
 
 extras:
   streaming_timeout_ms: 1000

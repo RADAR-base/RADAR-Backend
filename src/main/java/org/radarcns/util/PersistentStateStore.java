@@ -107,31 +107,6 @@ public class PersistentStateStore {
         return builder.toString();
     }
 
-    /**
-     * serializes a MissingRecordsReport to a string. It can be deserialized with
-     * {@link #stringToMissingRecordsReport(String)}.
-     * @param reportedMissingValues key to serialize
-     * @return unique serialized form
-     */
-    public static String missingRecordsReportToString(MissingRecordsReport reportedMissingValues)
-        throws IOException {
-
-        return objectMapper.writeValueAsString(reportedMissingValues);
-    }
-
-    /**
-     * deserializes a string into a  MissingRecordsReport. It can be serialized with
-     * {@link #stringToKey(String)}.
-     * @param reportedMissingValues key to serialize
-     * @return unique deserialized form
-     */
-    public static MissingRecordsReport stringToMissingRecordsReport(String reportedMissingValues)
-        throws IOException {
-
-        return objectMapper.readValue(reportedMissingValues , MissingRecordsReport.class);
-    }
-
-
     private static void escape(String string, StringBuilder builder) {
         for (char c : string.toCharArray()) {
             if (c == '\\') {

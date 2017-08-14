@@ -16,13 +16,6 @@
 
 package org.radarcns.monitor;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.MonitorConfig;
@@ -31,6 +24,12 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.util.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
 
 public class KafkaMonitorFactory {
 
@@ -59,12 +58,12 @@ public class KafkaMonitorFactory {
                 monitor = createBatteryLevelMonitor();
                 break;
             case "disconnect":
-                monitor = createDisconnectMonitor(Executors.newSingleThreadScheduledExecutor());
+                monitor = createDisconnectMonitor();
                 break;
             case "all":
                 monitor = new CombinedKafkaMonitor(Arrays.asList(
                         createBatteryLevelMonitor(),
-                        createDisconnectMonitor(Executors.newSingleThreadScheduledExecutor())));
+                        createDisconnectMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -89,28 +88,23 @@ public class KafkaMonitorFactory {
             }
         }
         long logInterval = -1L;
-        if (config != null && config.getLogInterval() != null) {
+        if (config != null) {
             logInterval = config.getLogInterval();
         }
 
         return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
     }
 
-    private KafkaMonitor createDisconnectMonitor(ScheduledExecutorService executor)
+    private KafkaMonitor createDisconnectMonitor()
             throws IOException {
         DisconnectMonitorConfig config = properties.getRadarProperties().getDisconnectMonitor();
+        if (config == null) {
+            config = new DisconnectMonitorConfig();
+            properties.getRadarProperties().setDisconnectMonitor(config);
+        }
         EmailSender sender = getSender(config);
-        long timeout = 300_000L;  // 5 minutes
-        if (config != null && config.getTimeout() != null) {
-            timeout = config.getTimeout();
-        }
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
-        long logInterval = -1L;
-        if (config != null && config.getLogInterval() != null) {
-            logInterval = config.getLogInterval();
-        }
-        return new DisconnectMonitor(properties, topics, "temperature_disconnect", sender,
-                timeout, logInterval, executor);
+        return new DisconnectMonitor(properties, topics, "disconnect_monitor", sender);
     }
 
     private EmailSender getSender(MonitorConfig config) throws IOException {

@@ -16,16 +16,24 @@
 
 package org.radarcns.monitor;
 
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
-import static org.radarcns.util.PersistentStateStore.missingRecordsReportToString;
-import static org.radarcns.util.PersistentStateStore.stringToKey;
-import static org.radarcns.util.PersistentStateStore.stringToMissingRecordsReport;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.IOException;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
+import org.radarcns.util.EmailSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.mail.MessagingException;
+import java.text.DateFormat;
 import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -33,19 +41,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.mail.MessagingException;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
-import org.radarcns.util.EmailSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+import static org.radarcns.util.PersistentStateStore.stringToKey;
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
@@ -59,25 +61,26 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
-    private final long logInterval;
-    private long messageNumber;
-    private long periodicalDelay = 3600_000L; // 1 hour
+    private final int logInterval;
+    private final int numRepetitions;
+    private final long repetitionInterval;
+    private final long minRepetitionInterval;
+    private long messagesProcessed;
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-            EmailSender sender, long timeUntilReportedMissing, long logInterval,
-            ScheduledExecutorService scheduler) {
+            EmailSender sender) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
-        this.timeUntilReportedMissing = timeUntilReportedMissing;
         this.sender = sender;
-        this.logInterval = logInterval;
-        this.dayFormat = new SimpleDateFormat("EEE, d MMM 'at' HH:mm:ss z", Locale.US);
-        this.scheduler = scheduler;
-        if (radar.getRadarProperties().getDisconnectMonitor() != null
-                && radar.getRadarProperties().getDisconnectMonitor().getRepetitiveAlertDelay()
-                != null) {
-            this.periodicalDelay = radar.getRadarProperties().getDisconnectMonitor()
-                    .getRepetitiveAlertDelay();
-        }
+        this.dayFormat = DateFormat.getDateTimeInstance(
+                DateFormat.MEDIUM, DateFormat.SHORT, Locale.US);
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        DisconnectMonitorConfig config = radar.getRadarProperties().getDisconnectMonitor();
+        this.timeUntilReportedMissing = config.getTimeout() * 1000L;
+        this.logInterval = config.getLogInterval();
+        this.numRepetitions = config.getAlertRepetitions();
+        this.repetitionInterval = config.getAlertRepeatInterval() * 1000L;
+        this.minRepetitionInterval = repetitionInterval / 10;
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -106,12 +109,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * Protected method to support unit testing
      */
     protected void startScheduler() {
-        if (scheduler != null) {
-            logger.info("Start scheduled alert updates with the delay of {}", periodicalDelay);
-            scheduler
-                    .scheduleWithFixedDelay(new ScheduledAlertsUpdates(), periodicalDelay,
-                            periodicalDelay,
-                            TimeUnit.MILLISECONDS);
+        if (scheduler != null && numRepetitions > 0) {
+            logger.info("Start scheduled alert updates with the delay of {}", repetitionInterval);
+            for (Map.Entry<String, MissingRecordsReport> entry : state.reportedMissing.entrySet()) {
+                scheduleRepeat(entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -122,26 +124,17 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         long now = System.currentTimeMillis();
 
         Iterator<Map.Entry<String, Long>> iterator = state.lastSeen.entrySet().iterator();
+
         while (iterator.hasNext()) {
             Map.Entry<String, Long> entry = iterator.next();
             // calculate timeout from current timestamp per device
             long lastSeen = entry.getValue();
-            long timeout = now - lastSeen;
-            if (timeout > timeUntilReportedMissing) {
+            if (now - lastSeen > timeUntilReportedMissing) {
                 String missingKey = entry.getKey();
-                // remove processed records to prevent repeatitive alerts
+                // remove processed records to prevent adding alerts multiple times
                 iterator.remove();
-                reportMissing(stringToKey(missingKey), timeout);
-                try {
-                    // store last seen and reportedMissing timestamp
-                    state.reportedMissing.put(missingKey,
-                            missingRecordsReportToString(new MissingRecordsReport(lastSeen, now)));
-                } catch (IOException e) {
-                    logger.error("Cannot serialize missing records data");
-                }
-
+                reportMissing(missingKey, new MissingRecordsReport(lastSeen));
             }
-
         }
     }
 
@@ -149,40 +142,63 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         MeasurementKey key = extractKey(record);
 
-        if (logInterval > 0 && ((int) (messageNumber % logInterval)) == 0) {
+        if (logInterval > 0 && ((int) (messagesProcessed % logInterval)) == 0) {
             logger.info("Evaluating connection status of record offset {} of {} with value {}",
                     record.offset(), key, record.value());
         }
-        messageNumber++;
+        messagesProcessed++;
 
         long now = System.currentTimeMillis();
         String keyString = measurementKeyToString(key);
         state.lastSeen.put(keyString, now);
 
-        String reportedMissingTime = state.reportedMissing.remove(keyString);
-        if (reportedMissingTime != null) {
-            try {
-                reportRecovered(key,
-                        stringToMissingRecordsReport(reportedMissingTime).getReportedMissing());
-            } catch (IOException e) {
-                logger.error("Cannot deserialize missing report data " , e);
-            }
+        MissingRecordsReport missingRecord = state.reportedMissing.remove(keyString);
+        if (missingRecord != null) {
+            missingRecord.cancelRepetition();
+            reportRecovered(key, missingRecord.getReportedMissing());
         }
     }
 
-    private void reportMissing(MeasurementKey key, long timeout) {
-        logger.info("Device {} timeout {}. Reporting it missing.", key, timeout);
+    private void scheduleRepeat(final String missingKey, final MissingRecordsReport missingRecord) {
+        if (scheduler != null && missingRecord.messageNumber < numRepetitions) {
+            long passedInterval = System.currentTimeMillis() - missingRecord.reportedMissing;
+            long nextRepetition = Math.max(minRepetitionInterval,
+                    repetitionInterval - passedInterval);
+
+            missingRecord.setFuture(scheduler.schedule(
+                    () -> reportMissing(missingKey, missingRecord.newRepetition()),
+                    nextRepetition, TimeUnit.MILLISECONDS));
+        }
+    }
+
+    private void reportMissing(String keyString, MissingRecordsReport record) {
+        MeasurementKey key = stringToKey(keyString);
+        long timeout = record.getTimeout();
+        logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
+                timeout, record.messageNumber, numRepetitions);
         try {
-            Date lastSeenDate = new Date(System.currentTimeMillis() - timeout);
-            String lastSeen = dayFormat.format(lastSeenDate);
-            sender.sendEmail("[RADAR-CNS] device has disconnected",
-                    "The device " + key + " seems disconnected. "
-                            + "It was last seen on " + lastSeen + " (" + timeout / 1000L
-                            + " seconds ago). If this is not intended, please ensure that it gets "
-                            + "reconnected.");
+            String lastSeen = dayFormat.format(record.getLastSeenDate());
+            String text = "The device " + key + " seems disconnected. "
+                    + "It was last seen on " + lastSeen + " (" + timeout / 1000L
+                    + " seconds ago). If this is not intended, please ensure that it gets "
+                    + "reconnected.";
+            String subject = "[RADAR] Device has disconnected";
+            if (numRepetitions > 0 && record.messageNumber == numRepetitions) {
+                text += "\n\nThis is the final warning email for this device.";
+                subject += ". Final message";
+            } else if (numRepetitions > 0) {
+                text += "\n\nThis is warning number " + record.messageNumber + " of " +
+                        numRepetitions;
+            }
+
+            sender.sendEmail(subject, text);
             logger.debug("Sent disconnected message successfully");
         } catch (MessagingException mex) {
             logger.error("Failed to send disconnected message.", mex);
+        } finally {
+            // store last seen and reportedMissing timestamp
+            state.reportedMissing.put(keyString, record);
+            scheduleRepeat(keyString, record);
         }
     }
 
@@ -192,7 +208,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             Date reportedMissingDate = new Date(reportedMissingTime);
             String reportedMissing = dayFormat.format(reportedMissingDate);
 
-            sender.sendEmail("[RADAR-CNS] device has reconnected",
+            sender.sendEmail("[RADAR] device has reconnected",
                     "The device " + key + " that was reported disconnected on "
                             + reportedMissing + " has reconnected: it is sending new data.");
             logger.debug("Sent reconnected message successfully");
@@ -207,7 +223,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     public static class DisconnectMonitorState {
 
         private final Map<String, Long> lastSeen = new ConcurrentHashMap<>();
-        private final Map<String, String> reportedMissing = new ConcurrentHashMap<>();
+        private final Map<String, MissingRecordsReport> reportedMissing = new ConcurrentHashMap<>();
 
         public Map<String, Long> getLastSeen() {
             return lastSeen;
@@ -217,11 +233,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             this.lastSeen.putAll(lastSeen);
         }
 
-        public Map<String, String> getReportedMissing() {
+        public Map<String, MissingRecordsReport> getReportedMissing() {
             return reportedMissing;
         }
 
-        public void setReportedMissing(Map<String, String> reportedMissing) {
+        public void setReportedMissing(Map<String, MissingRecordsReport> reportedMissing) {
             this.reportedMissing.putAll(reportedMissing);
         }
     }
@@ -231,63 +247,62 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * such as lastSeen and reportedTime
      */
     public static class MissingRecordsReport {
+        private final long lastSeen;
+        private final long reportedMissing;
+        private final int messageNumber;
 
-        private Long lastSeen;
-        private Long reportedMissing;
-
-        public MissingRecordsReport() {
-            //default constructor for ObjectMapper
-        }
+        @JsonIgnore
+        private Future<?> future;
 
         @JsonCreator
-        public MissingRecordsReport(@JsonProperty("lastSeen") Long lastSeen,
-                @JsonProperty("reportedMissing") Long reportedMissing) {
+        public MissingRecordsReport(@JsonProperty("lastSeen") long lastSeen,
+                @JsonProperty("reportedMissing") long reportedMissing,
+                @JsonProperty("messagesProcessed") int messageNumber) {
             this.lastSeen = lastSeen;
             this.reportedMissing = reportedMissing;
+            this.messageNumber = messageNumber;
+            this.future = null;
         }
 
-        public Long getLastSeen() {
+        public MissingRecordsReport(long lastSeen) {
+            this(lastSeen, System.currentTimeMillis(), 0);
+        }
+
+        public long getLastSeen() {
             return lastSeen;
         }
 
-        public Long getReportedMissing() {
+        public long getReportedMissing() {
             return reportedMissing;
         }
 
+        @JsonIgnore
+        public long getTimeout() {
+            return reportedMissing - lastSeen;
+        }
 
-    }
+        @JsonIgnore
+        public Date getLastSeenDate() {
+            return new Date(lastSeen);
+        }
 
-    /**
-     * Task that runs with scheduled delays to report if the device is still disconnected
-     */
-    private class ScheduledAlertsUpdates implements Runnable {
+        public int getMessageNumber() {
+            return messageNumber;
+        }
 
-        private final Logger logger = LoggerFactory.getLogger(ScheduledAlertsUpdates.class);
+        public MissingRecordsReport newRepetition() {
+            return new MissingRecordsReport(
+                    lastSeen, System.currentTimeMillis(), messageNumber + 1);
+        }
 
-        @Override
-        public void run() {
-
-            long now = System.currentTimeMillis();
-            logger.info("Scheduled alert updates at " + now);
-            Iterator<Map.Entry<String, String>> iterator = state.reportedMissing.entrySet()
-                    .iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
-                MissingRecordsReport missingRecordsReport = null;
-                try {
-                    missingRecordsReport = stringToMissingRecordsReport(entry.getValue());
-                    long timeout = now - missingRecordsReport.getLastSeen();
-                    if (timeout > timeUntilReportedMissing) {
-                        String missingKey = entry.getKey();
-                        reportMissing(stringToKey(missingKey), timeout);
-                        state.reportedMissing.put(missingKey, missingRecordsReportToString(
-                                new MissingRecordsReport(missingRecordsReport.getLastSeen(), now)));
-                    }
-                } catch (IOException e) {
-                    logger.error("Cannot serialize/deserialize missing records data");
-                }
-
+        public synchronized void cancelRepetition() {
+            if (future != null) {
+                future.cancel(true);
             }
+        }
+
+        public synchronized void setFuture(Future<?> future) {
+            this.future = future;
         }
     }
 }

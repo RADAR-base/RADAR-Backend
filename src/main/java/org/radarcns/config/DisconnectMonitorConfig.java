@@ -22,10 +22,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * POJO representing a disconnection status monitor configuration
  */
 public class DisconnectMonitorConfig extends MonitorConfig {
-    private Long timeout; // 5 minutes
+    private long timeout = 1800L; // 30 minutes
 
-    @JsonProperty("repetitive_alert_delay")
-    private Long repetitiveAlertDelay;
+    @JsonProperty("alert_repeat_interval")
+    private long alertRepeatInterval = 86400; // 1 day
+
+    @JsonProperty("alert_repetitions")
+    private int alertRepetitions = 0;
 
     public Long getTimeout() {
         return timeout;
@@ -35,12 +38,19 @@ public class DisconnectMonitorConfig extends MonitorConfig {
         this.timeout = timeout;
     }
 
-    public Long getRepetitiveAlertDelay() {
-        return repetitiveAlertDelay;
+    public long getAlertRepeatInterval() {
+        return alertRepeatInterval;
     }
 
-    public void setRepetitiveAlertDelay(Long repetitiveAlertDelay) {
-        this.repetitiveAlertDelay = repetitiveAlertDelay;
+    public void setAlertRepeatInterval(long alertRepeatInterval) {
+        this.alertRepeatInterval = alertRepeatInterval;
+    }
+
+    public int getAlertRepetitions() {
+        return alertRepetitions;
+    }
+
+    public void setAlertRepetitions(int alertRepetitions) {
+        this.alertRepetitions = alertRepetitions;
     }
 }
-

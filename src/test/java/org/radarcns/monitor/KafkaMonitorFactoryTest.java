@@ -122,8 +122,8 @@ public class KafkaMonitorFactoryTest {
         disconnectConfig.setEmailAddress(Collections.singletonList("test@localhost"));
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
-        disconnectConfig.setTimeout(100L);
-        disconnectConfig.setRepetitiveAlertDelay(20_000L);
+        disconnectConfig.setTimeout(1L);
+        disconnectConfig.setAlertRepeatInterval(20L);
         return disconnectConfig;
     }
 
