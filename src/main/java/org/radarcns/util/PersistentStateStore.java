@@ -99,7 +99,7 @@ public class PersistentStateStore {
         String sourceId = key.getSourceId();
         StringBuilder builder = new StringBuilder(userId.length() + 5 + sourceId.length());
         escape(userId, builder);
-        builder.append('#');
+        builder.append(SEPARATOR);
         escape(sourceId, builder);
         return builder.toString();
     }

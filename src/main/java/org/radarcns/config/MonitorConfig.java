@@ -36,7 +36,7 @@ public class MonitorConfig {
     private String emailUser;
 
     @JsonProperty("log_interval")
-    private Long logInterval;
+    private int logInterval = 1000;
 
     private List<String> topics;
 
@@ -80,11 +80,11 @@ public class MonitorConfig {
         this.emailUser = emailUser;
     }
 
-    public Long getLogInterval() {
+    public int getLogInterval() {
         return logInterval;
     }
 
-    public void setLogInterval(Long logInterval) {
+    public void setLogInterval(int logInterval) {
         this.logInterval = logInterval;
     }
 }

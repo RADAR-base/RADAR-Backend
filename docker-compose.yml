@@ -60,6 +60,7 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KAFKA_REST_HOST_NAME: rest-proxy-1
 
+
   #---------------------------------------------------------------------------#
   # Integration test                                                          #
   #---------------------------------------------------------------------------#
