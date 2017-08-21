@@ -49,12 +49,6 @@ public class RadarUtilsTest {
     }
 
     @Test
-    public void floatToDouble() {
-        double value = radarUtilities.floatToDouble(1.0f);
-        assertEquals(value, 1.0d, 0.0d);
-    }
-
-    @Test
     public void ibiToHR() {
         double hR = radarUtilities.ibiToHeartRate(1.0f);
         assertEquals((60d / 1.0d), hR, 0.0d);
