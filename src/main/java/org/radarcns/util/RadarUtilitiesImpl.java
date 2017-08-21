@@ -16,8 +16,6 @@
 
 package org.radarcns.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
@@ -27,6 +25,9 @@ import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements {@link RadarUtilities}
@@ -39,10 +40,6 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     public WindowedKey getWindowed(Windowed<MeasurementKey> window) {
         return new WindowedKey(window.key().getUserId(), window.key().getSourceId(),
                 window.window().start(), window.window().end());
-    }
-
-    public double floatToDouble(float input) {
-        return Double.parseDouble(String.valueOf(input));
     }
 
     @Override
@@ -82,14 +79,11 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     public double ibiToHeartRate(float input) {
-        return 60d / floatToDouble(input);
+        return 60d / input;
     }
 
     public double[] accelerationToArray(EmpaticaE4Acceleration value) {
-        return new double[] {
-                floatToDouble(value.getX()),
-                floatToDouble(value.getY()),
-                floatToDouble(value.getZ())};
+        return new double[]{value.getX(), value.getY(), value.getZ()};
     }
 
 }

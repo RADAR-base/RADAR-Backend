@@ -44,8 +44,6 @@ public interface RadarUtilities {
     KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, DoubleValueCollector collector);
 
-    double floatToDouble(float input);
-
     double ibiToHeartRate(float input);
 
     double[] accelerationToArray(EmpaticaE4Acceleration value);
