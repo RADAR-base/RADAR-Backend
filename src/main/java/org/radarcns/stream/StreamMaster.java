@@ -16,6 +16,14 @@
 
 package org.radarcns.stream;
 
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SubCommand;
+import org.radarcns.util.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -23,14 +31,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler.Priority;
-import org.radarcns.config.SubCommand;
-import org.radarcns.util.Monitor;
-import org.radarcns.util.RadarSingletonFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manages a set of {@link StreamWorker} objects.
@@ -40,55 +40,56 @@ public abstract class StreamMaster implements SubCommand {
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<StreamWorker<?,?>> list;
-    private final String nameSensor;
+    private final List<StreamWorker<?,?>> streamWorkers;
     private final AtomicInteger currentStream;
+    private final String nameSensor;
     private int lowPriority;
     private int normalPriority;
     private int highPriority;
 
-    private final ConfigRadar configRadar =
-            RadarSingletonFactory.getRadarPropertyHandler().getRadarProperties();
     private ScheduledExecutorService executor;
 
     /**
      * A stream master for given sensor type.
-     * @param standalone true means that the aggregator will assign one thread per stream
-     * @param nameSensor the name of the device that produced data that will be consumed. Only for
-     *                   debugging
      */
-    protected StreamMaster(boolean standalone, String nameSensor) {
-        this.nameSensor = nameSensor;
+    protected StreamMaster() {
         this.currentStream = new AtomicInteger(0);
 
         lowPriority = 1;
         normalPriority = 1;
         highPriority = 1;
 
-        if (standalone) {
-            log.info("[{}] STANDALONE MODE", nameSensor);
-        } else {
-            log.info("[{}] GROUP MODE: {}", nameSensor, this.configRadar.infoThread());
-            lowPriority = configRadar.threadsByPriority(Priority.LOW, 1);
-            normalPriority = configRadar.threadsByPriority(Priority.NORMAL, 2);
-            highPriority = configRadar.threadsByPriority(Priority.HIGH, 4);
-        }
-
-        list = new ArrayList<>();
+        streamWorkers = new ArrayList<>();
+        nameSensor = getClass().getSimpleName();
 
         log.info("Creating StreamMaster instance for {}", nameSensor);
+    }
+
+    /**
+     * Set the number of threads to use for different priorities.
+     * @param config configuration for threads
+     * @param singleThreaded use single threads for all workers
+     */
+    public synchronized void setNumberOfThreads(ConfigRadar config) {
+        if (config.isStandalone()) {
+            log.info("[{}] STANDALONE MODE", nameSensor);
+            lowPriority = 1;
+            normalPriority = 1;
+            highPriority = 1;
+        } else {
+            log.info("[{}] GROUP MODE: {}", nameSensor, config.infoThread());
+            lowPriority = config.threadsByPriority(RadarPropertyHandler.Priority.LOW, 1);
+            normalPriority = config.threadsByPriority(RadarPropertyHandler.Priority.NORMAL, 2);
+            highPriority = config.threadsByPriority(RadarPropertyHandler.Priority.HIGH, 4);
+        }
     }
 
     /**
      * Populates a list with workers.
      *
      * @param list list to add workers to
-     * @param low number of threads to use if a stream has low priority
-     * @param normal number of threads to use if a stream has normal priority
-     * @param high number of threads to use if a stream has high priority
      */
-    protected abstract void createWorkers(List<StreamWorker<?, ?>> list,
-            int low, int normal, int high);
+    protected abstract void createWorkers(List<StreamWorker<?, ?>> list);
 
     /** Starts all workers. */
     @Override
@@ -99,8 +100,8 @@ public abstract class StreamMaster implements SubCommand {
 
         log.info("Starting all streams for {}", nameSensor);
 
-        createWorkers(list, lowPriority, normalPriority, highPriority);
-        list.forEach(v -> executor.submit(v::start));
+        createWorkers(streamWorkers);
+        streamWorkers.forEach(v -> executor.submit(v::start));
     }
 
     /**
@@ -110,8 +111,8 @@ public abstract class StreamMaster implements SubCommand {
     public void shutdown() {
         log.info("Shutting down all streams for {}", nameSensor);
 
-        while (!list.isEmpty()) {
-            final StreamWorker<?, ?> worker = list.remove(list.size() - 1);
+        while (!streamWorkers.isEmpty()) {
+            final StreamWorker<?, ?> worker = streamWorkers.remove(streamWorkers.size() - 1);
             executor.submit(worker::shutdown);
         }
 
@@ -126,7 +127,7 @@ public abstract class StreamMaster implements SubCommand {
     public void notifyStartedStream(@Nonnull StreamWorker<?, ?> stream) {
         int current = currentStream.incrementAndGet();
         log.info("[{}] {} is started. {}/{} streams are now running",
-                nameSensor, stream, current, list.size());
+                nameSensor, stream, current, streamWorkers.size());
     }
 
     /**
@@ -182,5 +183,17 @@ public abstract class StreamMaster implements SubCommand {
     /** Add a monitor to the master. It will run every 30 seconds. */
     void addMonitor(Monitor monitor) {
         executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
+    }
+
+    protected synchronized int lowPriority() {
+        return lowPriority;
+    }
+
+    protected synchronized int normalPriority() {
+        return normalPriority;
+    }
+
+    protected synchronized int highPriority() {
+        return highPriority;
     }
 }

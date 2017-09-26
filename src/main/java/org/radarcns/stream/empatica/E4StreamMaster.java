@@ -30,27 +30,23 @@ import org.radarcns.util.RadarSingletonFactory;
  */
 public class E4StreamMaster extends StreamMaster {
 
-    public E4StreamMaster(boolean standalone) {
-        super(standalone,"Empatica E4");
-    }
-
     protected StreamGroup getStreamGroup() {
         return  E4Streams.getInstance();
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
+    protected void createWorkers(List<StreamWorker<?,?>> list) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new E4AccelerationStream("E4AccelerationStream", high, this, kafkaProperty));
-        list.add(new E4BatteryLevelStream("E4BatteryLevelStream", low, this, kafkaProperty));
+        list.add(new E4AccelerationStream("E4AccelerationStream", highPriority(), this, kafkaProperty));
+        list.add(new E4BatteryLevelStream("E4BatteryLevelStream", lowPriority(), this, kafkaProperty));
         list.add(new E4BloodVolumePulseStream(
-                "E4BloodVolumePulseStream", high, this, kafkaProperty));
+                "E4BloodVolumePulseStream", highPriority(), this, kafkaProperty));
         list.add(new E4ElectroDermalActivityStream(
-                "E4ElectroDermalActivityStream", normal, this, kafkaProperty));
-        list.add(new E4HeartRateStream("E4HeartRateStream", high,this, kafkaProperty));
+                "E4ElectroDermalActivityStream", normalPriority(), this, kafkaProperty));
+        list.add(new E4HeartRateStream("E4HeartRateStream", highPriority(),this, kafkaProperty));
         list.add(new E4InterBeatIntervalStream(
-                "E4InterBeatIntervalStream", high,this, kafkaProperty));
-        list.add(new E4TemperatureStream("E4TemperatureStream", high, this, kafkaProperty));
+                "E4InterBeatIntervalStream", highPriority(),this, kafkaProperty));
+        list.add(new E4TemperatureStream("E4TemperatureStream", highPriority(), this, kafkaProperty));
     }
 }

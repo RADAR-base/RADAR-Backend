@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.stream.KafkaStreamFactory.PHONE_STREAM;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.IOException;
@@ -51,6 +50,7 @@ import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
@@ -93,7 +93,9 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker(PHONE_STREAM);
+        propHandler.getRadarProperties().setStreamMasters(
+                Collections.singletonList(PhoneStreamMaster.class.getName()));
+        propHandler.getRadarProperties().setAutoCommitIntervalMs(1000);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
@@ -103,7 +105,7 @@ public class PhoneStreamTest {
         backend.shutdown();
     }
 
-    @Test(timeout = 300_000L)
+    @Test(timeout = 600_000L)
     public void testDirect() throws Exception {
         ConfigRadar config = propHandler.getRadarProperties();
 
@@ -134,6 +136,7 @@ public class PhoneStreamTest {
         }
         sender.close();
         consumePhone(offset);
+        consumeAggregated(offset);
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
@@ -167,4 +170,28 @@ public class PhoneStreamTest {
         monitor.setPollTimeout(280_000L);
         monitor.start();
     }
+
+    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+        String clientId = "someclient";
+        KafkaMonitor monitor = new AbstractKafkaMonitor<GenericRecord, GenericRecord, Object>(RadarSingletonFactory.getRadarPropertyHandler(),
+                Collections.singletonList("android_phone_usage_event_aggregated"), "new", clientId, null) {
+            int numRecordsRead = 0;
+            @Override
+            protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+                logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
+                GenericRecord value = record.value();
+                int timesOpen = (int)value.get("timesOpen");
+                assertTrue(timesOpen > 0);
+                if (++numRecordsRead == numRecordsExpected) {
+                    shutdown();
+                }
+            }
+        };
+
+        monitor.setPollTimeout(280_000L);
+        monitor.start();
+    }
+
+
+
 }

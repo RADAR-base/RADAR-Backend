@@ -19,6 +19,7 @@ package org.radarcns.util.serde;
 import org.apache.kafka.common.serialization.Serde;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**
  * Set of Serde usefull for Kafka Streams
@@ -26,6 +27,7 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 public final class RadarSerdes {
     private final Serde<DoubleValueCollector> doubelCollector;
     private final Serde<DoubleArrayCollector> doubelArrayCollector;
+    private final Serde<PhoneUsageCollector> phoneUsageCollector;
 
     private static RadarSerdes instance = new RadarSerdes();
 
@@ -36,6 +38,7 @@ public final class RadarSerdes {
     private RadarSerdes() {
         doubelCollector = new RadarSerde<>(DoubleValueCollector.class).getSerde();
         doubelArrayCollector = new RadarSerde<>(DoubleArrayCollector.class).getSerde();
+        phoneUsageCollector = new RadarSerde<>(PhoneUsageCollector.class).getSerde();
     }
 
     public Serde<DoubleValueCollector> getDoubleCollector() {
@@ -44,5 +47,9 @@ public final class RadarSerdes {
 
     public Serde<DoubleArrayCollector> getDoubleArrayCollector()  {
         return doubelArrayCollector;
+    }
+
+    public Serde<PhoneUsageCollector> getPhoneUsageCollector() {
+        return phoneUsageCollector;
     }
 }

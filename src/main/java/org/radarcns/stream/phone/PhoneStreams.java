@@ -23,6 +23,9 @@ public final class PhoneStreams extends GeneralStreamGroup {
     private static final PhoneStreams INSTANCE = new PhoneStreams();
 
     private final StreamDefinition usageEventStream;
+    private final StreamDefinition usageEventAggregationStream;
+    private final StreamDefinition accelerationStream;
+    private final StreamDefinition batteryStream;
 
     public static PhoneStreams getInstance() {
         return INSTANCE;
@@ -31,9 +34,26 @@ public final class PhoneStreams extends GeneralStreamGroup {
     private PhoneStreams() {
         usageEventStream = createSensorStream(
                 "android_phone_usage_event");
+        usageEventAggregationStream = createStream(
+                "android_phone_usage_event_output",
+                "android_phone_usage_event_aggregated");
+        accelerationStream = createSensorStream("android_phone_acceleration");
+        batteryStream = createSensorStream("android_phone_battery_level");
     }
 
     public StreamDefinition getUsageStream() {
         return usageEventStream;
+    }
+
+    public StreamDefinition getUsageEventAggregationStream() {
+        return usageEventAggregationStream;
+    }
+
+    public StreamDefinition getAccelerationStream() {
+        return accelerationStream;
+    }
+
+    public StreamDefinition getBatteryStream() {
+        return batteryStream;
     }
 }

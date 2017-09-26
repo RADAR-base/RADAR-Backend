@@ -18,15 +18,19 @@ package org.radarcns.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**
  * Implements {@link RadarUtilities}.
@@ -43,8 +47,29 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
+    public WindowedKey getWindowedTuple(Windowed<Map.Entry<MeasurementKey, String>> window) {
+        MeasurementKey measurementKey = window.key().getKey();
+        return new WindowedKey(measurementKey.getUserId(), measurementKey.getSourceId(),
+                window.window().start(), window.window().end());
+    }
+
+    @Override
     public double floatToDouble(float input) {
         return Double.parseDouble(String.valueOf(input));
+    }
+
+
+    @Override
+    public KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
+            Windowed<Map.Entry<MeasurementKey, String>> window, PhoneUsageCollector collector
+    ) {
+        return new KeyValue<>(getWindowedTuple(window) , new PhoneUsageAggregator(
+                window.key().getValue(),
+                collector.getTotalForegroundTime(),
+                collector.getTimesTurnedOn(),
+                collector.getCategoryName(),
+                collector.getCategoryNameFetchTime()
+        ));
     }
 
     @Override
