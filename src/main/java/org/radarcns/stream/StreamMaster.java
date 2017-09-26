@@ -91,7 +91,7 @@ public abstract class StreamMaster implements SubCommand {
      *
      * @param list list to add workers to
      */
-    protected abstract void createWorkers(List<StreamWorker<?, ?>> list);
+    protected abstract void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master);
 
     /** Starts all workers. */
     @Override
@@ -102,7 +102,7 @@ public abstract class StreamMaster implements SubCommand {
 
         log.info("Starting all streams for {}", nameSensor);
 
-        createWorkers(streamWorkers);
+        createWorkers(streamWorkers, this);
         streamWorkers.forEach(v -> executor.submit(v::start));
     }
 

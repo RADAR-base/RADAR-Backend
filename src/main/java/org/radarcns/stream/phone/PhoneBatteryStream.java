@@ -7,6 +7,7 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.phone.PhoneBatteryLevel;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
@@ -21,7 +22,7 @@ public class PhoneBatteryStream extends StreamWorker<MeasurementKey, PhoneBatter
     private static final Logger logger = LoggerFactory.getLogger(PhoneBatteryStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public PhoneBatteryStream(String phoneBatteryStream, int priority, PhoneStreamMaster master,
+    public PhoneBatteryStream(String phoneBatteryStream, int priority, StreamMaster master,
             KafkaProperty kafkaProperty) {
         super(PhoneStreams.getInstance().getBatteryStream(), phoneBatteryStream,
                 priority, master,

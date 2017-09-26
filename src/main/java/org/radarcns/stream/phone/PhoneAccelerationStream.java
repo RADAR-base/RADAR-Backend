@@ -7,6 +7,7 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.phone.PhoneAcceleration;
+import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.util.RadarSingletonFactory;
@@ -24,7 +25,7 @@ public class PhoneAccelerationStream extends StreamWorker<MeasurementKey, PhoneA
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public PhoneAccelerationStream(String phoneAccelerationStream, int priority,
-            PhoneStreamMaster phoneStreamMaster, KafkaProperty kafkaProperty) {
+            StreamMaster phoneStreamMaster, KafkaProperty kafkaProperty) {
         super(PhoneStreams.getInstance().getAccelerationStream(), phoneAccelerationStream,
                 priority, phoneStreamMaster,
                 kafkaProperty, logger);
