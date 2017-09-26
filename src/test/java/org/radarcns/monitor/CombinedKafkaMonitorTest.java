@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
@@ -41,7 +42,7 @@ public class CombinedKafkaMonitorTest {
 
         doThrow(new IOException("failed to run!")).when(kafkaMonitor2).start();
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
 
         try {
             km.start();
@@ -62,7 +63,7 @@ public class CombinedKafkaMonitorTest {
 
         doThrow(new IOException("failed to run!")).when(kafkaMonitor1).start();
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
 
         try {
             km.start();
@@ -82,7 +83,7 @@ public class CombinedKafkaMonitorTest {
         KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
         KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
@@ -127,6 +128,7 @@ public class CombinedKafkaMonitorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNull() {
+        ScheduledExecutorService executorService = mock(ScheduledExecutorService.class);
         new CombinedKafkaMonitor(null);
     }
 }
