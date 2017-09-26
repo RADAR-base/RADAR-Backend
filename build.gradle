@@ -133,6 +133,8 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+
     // For Topic name validation based on Kafka classes
     testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
         exclude group: 'org.apache.kafka', module: 'kafka-clients'
