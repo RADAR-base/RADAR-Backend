@@ -40,6 +40,9 @@ public class MonitorConfig {
 
     private List<String> topics;
 
+    @JsonProperty("message")
+    private String message = null;
+
     public List<String> getEmailAddress() {
         return emailAddress;
     }
@@ -86,5 +89,13 @@ public class MonitorConfig {
 
     public void setLogInterval(int logInterval) {
         this.logInterval = logInterval;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

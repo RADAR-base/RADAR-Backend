@@ -41,7 +41,7 @@ public class StreamDefinitionTest {
                 definition.getStateStoreName());
     }
 
-    @Test(expected = InvalidTopicException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void faultyNameValidation() {
         KafkaTopic inputTopic = new KafkaTopic(INPUT + "$");
         KafkaTopic outputTopic = new KafkaTopic(OUTPUT);

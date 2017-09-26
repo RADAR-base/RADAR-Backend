@@ -35,7 +35,7 @@ public class PhoneStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?,?>> list) {
+    protected void createWorkers(List<StreamWorker<?, ?>> list) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         list.add(new PhoneUsageStream("PhoneUsageStream", lowPriority(), this, kafkaProperty));

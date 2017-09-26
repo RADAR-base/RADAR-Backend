@@ -28,6 +28,7 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,26 +62,27 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final long timeUntilReportedMissing;
     private final EmailSender sender;
     private final Format dayFormat;
-    private final int logInterval;
     private final int numRepetitions;
-    private final long repetitionInterval;
+    private final long repeatInterval;
     private final long minRepetitionInterval;
-    private long messagesProcessed;
+    private final Monitor monitor;
+    private final String message;
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-            EmailSender sender) {
+                             EmailSender sender) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
         this.sender = sender;
         this.dayFormat = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM, DateFormat.SHORT, Locale.US);
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
+        this.monitor = new Monitor(logger, " records monitored for Disconnect");
 
         DisconnectMonitorConfig config = radar.getRadarProperties().getDisconnectMonitor();
         this.timeUntilReportedMissing = config.getTimeout() * 1000L;
-        this.logInterval = config.getLogInterval();
         this.numRepetitions = config.getAlertRepetitions();
-        this.repetitionInterval = config.getAlertRepeatInterval() * 1000L;
-        this.minRepetitionInterval = repetitionInterval / 10;
+        this.repeatInterval = config.getAlertRepeatInterval() * 1000L;
+        this.message = config.getMessage();
+        this.minRepetitionInterval = repeatInterval / 10;
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -90,10 +92,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     /**
-     * Schedules the repeatitive alert task
+     * Schedules the repetitive alert task
      */
     @Override
     public void start() {
+        scheduler.scheduleAtFixedRate(this.monitor, 5, 5, TimeUnit.MINUTES);
         startScheduler();
         super.start();
     }
@@ -105,15 +108,13 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     /**
-     * starts the scheduled alert updates.
+     * Starts the scheduled alert updates.
      * Protected method to support unit testing
      */
     protected void startScheduler() {
-        if (scheduler != null && numRepetitions > 0) {
-            logger.info("Start scheduled alert updates with the delay of {}", repetitionInterval);
-            for (Map.Entry<String, MissingRecordsReport> entry : state.reportedMissing.entrySet()) {
-                scheduleRepeat(entry.getKey(), entry.getValue());
-            }
+        if (numRepetitions > 0) {
+            logger.info("Start scheduled alert updates with the delay of {}", repeatInterval);
+            state.reportedMissing.forEach(this::scheduleRepetition);
         }
     }
 
@@ -142,52 +143,54 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         MeasurementKey key = extractKey(record);
 
-        if (logInterval > 0 && ((int) (messagesProcessed % logInterval)) == 0) {
-            logger.info("Evaluating connection status of record offset {} of {} with value {}",
-                    record.offset(), key, record.value());
-        }
-        messagesProcessed++;
+        this.monitor.increment();
 
         long now = System.currentTimeMillis();
         String keyString = measurementKeyToString(key);
         state.lastSeen.put(keyString, now);
 
-        MissingRecordsReport missingRecord = state.reportedMissing.remove(keyString);
-        if (missingRecord != null) {
-            missingRecord.cancelRepetition();
-            reportRecovered(key, missingRecord.getReportedMissing());
+        MissingRecordsReport missingReport = state.reportedMissing.remove(keyString);
+        if (missingReport != null) {
+            missingReport.cancelRepetition();
+            reportRecovered(key, missingReport.getReportedMissing());
         }
     }
 
-    private void scheduleRepeat(final String missingKey, final MissingRecordsReport missingRecord) {
-        if (scheduler != null && missingRecord.messageNumber < numRepetitions) {
-            long passedInterval = System.currentTimeMillis() - missingRecord.reportedMissing;
-            long nextRepetition = Math.max(minRepetitionInterval,
-                    repetitionInterval - passedInterval);
+    /**
+     * Schedule a missing device message to be sent again.
+     * @param key record key
+     * @param report missing record details
+     */
+    private void scheduleRepetition(final String key, final MissingRecordsReport report) {
+        if (report.messageNumber < numRepetitions) {
+            long passedInterval = System.currentTimeMillis() - report.reportedMissing;
+            long nextRepetition = Math.max(minRepetitionInterval, repeatInterval - passedInterval);
 
-            missingRecord.setFuture(scheduler.schedule(
-                    () -> reportMissing(missingKey, missingRecord.newRepetition()),
+            report.setFuture(scheduler.schedule(() -> reportMissing(key, report.newRepetition()),
                     nextRepetition, TimeUnit.MILLISECONDS));
         }
     }
 
-    private void reportMissing(String keyString, MissingRecordsReport record) {
+    private void reportMissing(String keyString, MissingRecordsReport report) {
         MeasurementKey key = stringToKey(keyString);
-        long timeout = record.getTimeout();
+        long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
-                timeout, record.messageNumber, numRepetitions);
+                timeout, report.messageNumber, numRepetitions);
         try {
-            String lastSeen = dayFormat.format(record.getLastSeenDate());
+            String lastSeen = dayFormat.format(report.getLastSeenDate());
             String text = "The device " + key + " seems disconnected. "
                     + "It was last seen on " + lastSeen + " (" + timeout / 1000L
                     + " seconds ago). If this is not intended, please ensure that it gets "
                     + "reconnected.";
+            if (message != null) {
+                text += "\n\n" + message;
+            }
             String subject = "[RADAR] Device has disconnected";
-            if (numRepetitions > 0 && record.messageNumber == numRepetitions) {
+            if (numRepetitions > 0 && report.messageNumber == numRepetitions) {
                 text += "\n\nThis is the final warning email for this device.";
                 subject += ". Final message";
             } else if (numRepetitions > 0) {
-                text += "\n\nThis is warning number " + record.messageNumber + " of "
+                text += "\n\nThis is warning number " + report.messageNumber + " of "
                         + numRepetitions;
             }
 
@@ -197,8 +200,8 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             logger.error("Failed to send disconnected message.", mex);
         } finally {
             // store last seen and reportedMissing timestamp
-            state.reportedMissing.put(keyString, record);
-            scheduleRepeat(keyString, record);
+            state.reportedMissing.put(keyString, report);
+            scheduleRepetition(keyString, report);
         }
     }
 

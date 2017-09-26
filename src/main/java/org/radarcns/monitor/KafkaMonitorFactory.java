@@ -53,6 +53,7 @@ public class KafkaMonitorFactory {
         } else {
             commandType = args[0];
         }
+
         switch (commandType) {
             case "battery":
                 monitor = createBatteryLevelMonitor();

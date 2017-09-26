@@ -2,7 +2,6 @@ version: 1.0
 released: 2016-11-27
 
 #============================= Application =============================#
-log_path:
 #Possible value are standalone or high_performance
 mode: standalone
 
@@ -35,6 +34,7 @@ schema_registry:
     - host: localhost
       port: 8081
       protocol: http
+
 rest_proxy:
     host: radar-test.thehyve.net
     port: 8082
@@ -44,13 +44,24 @@ rest_proxy:
 battery_monitor:
   level: LOW
   email_address:
-    - test@thehyve.nl
     - radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org
   topics:
     - android_empatica_e4_battery_level
+
+#======================= Disconnection monitor==========================#
+disconnect_monitor:
+  email_address:
+    - test@thehyve.nl
+  email_host: localhost
+  email_port: 25
+  email_user: no-reply@radarcns.org
+  topics:
+    - android_empatica_e4_temperature
+  timeout: 1800  # seconds after which a stream is set disconnected
+  alert_repetitions: 2  # number of additional emails to send after the first
 
 #========================= Kafka stream ================================#
 stream_masters:

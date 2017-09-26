@@ -32,8 +32,6 @@ import org.radarcns.config.RadarPropertyHandler.Priority;
 public class ConfigRadar {
     private Date released;
     private String version;
-    @JsonProperty("log_path")
-    private String logPath;
     private String mode;
     private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
@@ -71,14 +69,6 @@ public class ConfigRadar {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getLogPath() {
-        return logPath;
-    }
-
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
     }
 
     public boolean isStandalone() {

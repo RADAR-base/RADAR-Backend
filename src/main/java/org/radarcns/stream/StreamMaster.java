@@ -43,7 +43,7 @@ public abstract class StreamMaster implements SubCommand {
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<StreamWorker<?,?>> streamWorkers;
+    private final List<StreamWorker<?, ?>> streamWorkers;
     private final AtomicInteger currentStream;
     private final String nameSensor;
     private int lowPriorityThreads;

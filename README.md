@@ -42,10 +42,6 @@ The following are the prerequisites to run RADAR-Backend on your machine:
 
 The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. The `stream` command will start all streams, the `monitor command` will start all monitors, and the `mock` command will send mock data to the backend. Before any of these commands are issued,  start the Confluent platform with the zookeeper, kafka, schema-registry and rest-proxy components. Put the `build/libs/radarbackend-1.0.jar` and `radar.yml` in the same folder, and then modify `radar.yml`:
 
-1. Insert Zookeeper server, Kafka-broker, Schema-registry information
-2. [OPTIONAL] Provide a custom `log_path` ( It must be a folder)
-
-
 ### RADAR-Backend streams
 
 1. In `radar.yml`, Specify in which `mode` you want to run the application. There are two alternatives: `standalone` and `high_performance`. The `standalone` starts one thread for each streams without checking the priority, whereas the `high_performance` starts as many thread as the related priority value

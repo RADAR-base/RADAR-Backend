@@ -48,7 +48,7 @@ public interface RadarPropertyHandler {
 
     /**
      * Create a {@link PersistentStateStore} if so configured in the radar properties. Notably, the
-     * {@code persistent_directory} must be set.
+     * {@code persistence_path} must be set.
      * @return PersistentStateStore or null if none is configured.
      * @throws IOException if the persistence store cannot be reached.
      */

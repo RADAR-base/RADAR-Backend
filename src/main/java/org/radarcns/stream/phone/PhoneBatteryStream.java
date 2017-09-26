@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 
 public class PhoneBatteryStream extends StreamWorker<MeasurementKey, PhoneBatteryLevel> {
-    private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(PhoneBatteryStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
     public PhoneBatteryStream(String phoneBatteryStream, int priority, PhoneStreamMaster master,
