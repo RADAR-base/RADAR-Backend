@@ -3,7 +3,7 @@
     "name": "TemporaryPackageKey",
     "type": "record",
     "fields": [
-        {"name": "key", "type": "org.radarcns.key.MeasurementKey", "doc": "Observation key."},
+        {"name": "key", "type": "org.radarcns.kafka.ObservationKey", "doc": "Observation key."},
         {"name": "packageName", "type": "string", "doc": "Package name."}
     ]
 }

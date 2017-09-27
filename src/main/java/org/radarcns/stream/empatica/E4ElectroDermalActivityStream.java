@@ -19,13 +19,13 @@ package org.radarcns.stream.empatica;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4ElectroDermalActivity;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
  */
 public class E4ElectroDermalActivityStream extends
-        StreamWorker<MeasurementKey, EmpaticaE4ElectroDermalActivity> {
+        StreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
     private static final Logger log = LoggerFactory.getLogger(E4ElectroDermalActivityStream.class);
 
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
@@ -49,8 +49,8 @@ public class E4ElectroDermalActivityStream extends
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4ElectroDermalActivity> kstream) {
+    protected KStream<AggregateKey, DoubleAggregation> defineStream(
+            @Nonnull KStream<ObservationKey, EmpaticaE4ElectroDermalActivity> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                     DoubleValueCollector::new,

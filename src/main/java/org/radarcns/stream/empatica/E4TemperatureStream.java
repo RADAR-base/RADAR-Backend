@@ -19,13 +19,13 @@ package org.radarcns.stream.empatica;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4Temperature;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.passive.empatica.EmpaticaE4Temperature;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4.
  */
-public class E4TemperatureStream extends StreamWorker<MeasurementKey, EmpaticaE4Temperature> {
+public class E4TemperatureStream extends StreamWorker<ObservationKey, EmpaticaE4Temperature> {
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
     private static final Logger log = LoggerFactory.getLogger(E4TemperatureStream.class);
 
@@ -47,8 +47,8 @@ public class E4TemperatureStream extends StreamWorker<MeasurementKey, EmpaticaE4
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4Temperature> kstream) {
+    protected KStream<AggregateKey, DoubleAggregation> defineStream(
+            @Nonnull KStream<ObservationKey, EmpaticaE4Temperature> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                         DoubleValueCollector::new,

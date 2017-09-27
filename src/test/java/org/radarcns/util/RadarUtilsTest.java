@@ -23,9 +23,9 @@ import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.TimeWindow;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.empatica.EmpaticaE4Acceleration;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
 
 public class RadarUtilsTest {
 
@@ -41,14 +41,14 @@ public class RadarUtilsTest {
         String userId = "userId";
         String sourceId = "sourceId";
 
-        MeasurementKey measurementKey = new MeasurementKey();
+        ObservationKey measurementKey = new ObservationKey();
         measurementKey.setUserId(userId);
         measurementKey.setSourceId(sourceId);
 
         Window window = new TimeWindow(1, 4);
-        Windowed<MeasurementKey> measurementKeyWindowed = new Windowed<>(measurementKey, window);
+        Windowed<ObservationKey> measurementKeyWindowed = new Windowed<>(measurementKey, window);
 
-        WindowedKey windowedKey = radarUtilities.getWindowed(measurementKeyWindowed);
+        AggregateKey windowedKey = radarUtilities.getWindowed(measurementKeyWindowed);
 
         assertEquals(windowedKey.getUserId(), userId);
         assertEquals(windowedKey.getSourceId(), sourceId);

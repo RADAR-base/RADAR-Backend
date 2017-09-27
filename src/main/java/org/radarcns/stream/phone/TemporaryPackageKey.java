@@ -14,7 +14,7 @@ import org.apache.avro.message.SchemaStore;
 @org.apache.avro.specific.AvroGenerated
 public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   private static final long serialVersionUID = -8584100260725184052L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarcns.stream.phone\",\"fields\":[{\"name\":\"key\",\"type\":{\"type\":\"record\",\"name\":\"MeasurementKey\",\"namespace\":\"org.radarcns.key\",\"doc\":\"Key of an observation.\",\"fields\":[{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User Identifier created during the enrolment.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Unique identifier associated with the source.\"}]},\"doc\":\"Observation key.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarcns.stream.phone\",\"fields\":[{\"name\":\"key\",\"type\":{\"type\":\"record\",\"name\":\"ObservationKey\",\"namespace\":\"org.radarcns.key\",\"doc\":\"Key of an observation.\",\"fields\":[{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User Identifier created during the enrolment.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Unique identifier associated with the source.\"}]},\"doc\":\"Observation key.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -52,7 +52,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
   }
 
   /** Observation key. */
-  @Deprecated public org.radarcns.key.MeasurementKey key;
+  @Deprecated public org.radarcns.kafka.ObservationKey key;
   /** Package name. */
   @Deprecated public java.lang.String packageName;
 
@@ -68,7 +68,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
    * @param key Observation key.
    * @param packageName Package name.
    */
-  public TemporaryPackageKey(org.radarcns.key.MeasurementKey key, java.lang.String packageName) {
+  public TemporaryPackageKey(org.radarcns.kafka.ObservationKey key, java.lang.String packageName) {
     this.key = key;
     this.packageName = packageName;
   }
@@ -87,7 +87,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: key = (org.radarcns.key.MeasurementKey)value$; break;
+    case 0: key = (org.radarcns.kafka.ObservationKey)value$; break;
     case 1: packageName = (java.lang.String)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
@@ -97,7 +97,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
    * Gets the value of the 'key' field.
    * @return Observation key.
    */
-  public org.radarcns.key.MeasurementKey getKey() {
+  public org.radarcns.kafka.ObservationKey getKey() {
     return key;
   }
 
@@ -106,7 +106,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
    * Observation key.
    * @param value the value to set.
    */
-  public void setKey(org.radarcns.key.MeasurementKey value) {
+  public void setKey(org.radarcns.kafka.ObservationKey value) {
     this.key = value;
   }
 
@@ -160,8 +160,8 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
     implements org.apache.avro.data.RecordBuilder<TemporaryPackageKey> {
 
     /** Observation key. */
-    private org.radarcns.key.MeasurementKey key;
-    private org.radarcns.key.MeasurementKey.Builder keyBuilder;
+    private org.radarcns.kafka.ObservationKey key;
+    private org.radarcns.kafka.ObservationKey.Builder keyBuilder;
     /** Package name. */
     private java.lang.String packageName;
 
@@ -181,7 +181,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
         fieldSetFlags()[0] = true;
       }
       if (other.hasKeyBuilder()) {
-        this.keyBuilder = org.radarcns.key.MeasurementKey.newBuilder(other.getKeyBuilder());
+        this.keyBuilder = org.radarcns.kafka.ObservationKey.newBuilder(other.getKeyBuilder());
       }
       if (isValidValue(fields()[1], other.packageName)) {
         this.packageName = data().deepCopy(fields()[1].schema(), other.packageName);
@@ -211,7 +211,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
       * Observation key.
       * @return The value.
       */
-    public org.radarcns.key.MeasurementKey getKey() {
+    public org.radarcns.kafka.ObservationKey getKey() {
       return key;
     }
 
@@ -221,7 +221,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'key'.
       * @return This builder.
       */
-    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKey(org.radarcns.key.MeasurementKey value) {
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKey(org.radarcns.kafka.ObservationKey value) {
       validate(fields()[0], value);
       this.keyBuilder = null;
       this.key = value;
@@ -243,12 +243,12 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
      * Observation key.
      * @return This builder.
      */
-    public org.radarcns.key.MeasurementKey.Builder getKeyBuilder() {
+    public org.radarcns.kafka.ObservationKey.Builder getKeyBuilder() {
       if (keyBuilder == null) {
         if (hasKey()) {
-          setKeyBuilder(org.radarcns.key.MeasurementKey.newBuilder(key));
+          setKeyBuilder(org.radarcns.kafka.ObservationKey.newBuilder(key));
         } else {
-          setKeyBuilder(org.radarcns.key.MeasurementKey.newBuilder());
+          setKeyBuilder(org.radarcns.kafka.ObservationKey.newBuilder());
         }
       }
       return keyBuilder;
@@ -260,7 +260,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
      * @param value The builder instance that must be set.
      * @return This builder.
      */
-    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKeyBuilder(org.radarcns.key.MeasurementKey.Builder value) {
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKeyBuilder(org.radarcns.kafka.ObservationKey.Builder value) {
       clearKey();
       keyBuilder = value;
       return this;
@@ -338,7 +338,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
         if (keyBuilder != null) {
           record.key = this.keyBuilder.build();
         } else {
-          record.key = fieldSetFlags()[0] ? this.key : (org.radarcns.key.MeasurementKey) defaultValue(fields()[0]);
+          record.key = fieldSetFlags()[0] ? this.key : (org.radarcns.kafka.ObservationKey) defaultValue(fields()[0]);
         }
         record.packageName = fieldSetFlags()[1] ? this.packageName : (java.lang.String) defaultValue(fields()[1]);
         return record;

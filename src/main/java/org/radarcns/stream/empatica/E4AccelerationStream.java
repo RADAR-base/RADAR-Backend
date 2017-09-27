@@ -19,11 +19,11 @@ package org.radarcns.stream.empatica;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.stream.aggregator.DoubleArrayAggregation;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4Acceleration;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleArrayCollector;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Definition of Kafka Stream for aggregating data collected by Empatica E4 Accelerometer sensor.
  */
-public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE4Acceleration> {
+public class E4AccelerationStream extends StreamWorker<ObservationKey, EmpaticaE4Acceleration> {
     private static final Logger log = LoggerFactory.getLogger(E4AccelerationStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
@@ -47,8 +47,8 @@ public class E4AccelerationStream extends StreamWorker<MeasurementKey, EmpaticaE
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleArrayAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4Acceleration> kstream) {
+    protected KStream<AggregateKey, DoubleArrayAggregation> defineStream(
+            @Nonnull KStream<ObservationKey, EmpaticaE4Acceleration> kstream) {
         return kstream.groupByKey()
             .aggregate(
                 DoubleArrayCollector::new,

@@ -20,14 +20,14 @@ import javax.annotation.Nonnull;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.phone.PhoneUsageEvent;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
+public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
 
     // 1 day until an item is refreshed
@@ -46,8 +46,8 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
     }
 
     @Override
-    protected KStream<MeasurementKey, PhoneUsageEvent> defineStream(
-            @Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
+    protected KStream<ObservationKey, PhoneUsageEvent> defineStream(
+            @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream
             .map((key, value) -> {
                 String packageName = value.getPackageName();

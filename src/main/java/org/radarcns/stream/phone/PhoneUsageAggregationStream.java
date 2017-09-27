@@ -4,9 +4,9 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
-import org.radarcns.phone.PhoneUsageEvent;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 /**
  * Created by piotrzakrzewski on 26/07/2017.
  */
-public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
+public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
     private static final long DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -35,8 +35,8 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
     }
 
     @Override
-    protected KStream<WindowedKey, PhoneUsageAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
+    protected KStream<AggregateKey, PhoneUsageAggregator> defineStream(
+            @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream.groupBy((k, v) -> new TemporaryPackageKey(k, v.getPackageName()))
                 .aggregate(
                         PhoneUsageCollector::new,

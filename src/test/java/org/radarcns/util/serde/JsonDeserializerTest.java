@@ -18,14 +18,14 @@ package org.radarcns.util.serde;
 
 import java.nio.charset.Charset;
 import junit.framework.TestCase;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class JsonDeserializerTest extends TestCase {
     public void testSerialize() throws Exception {
         byte[] json = "{\"userId\":\"user\",\"sourceId\":\"source\"}"
                 .getBytes(Charset.forName("UTF-8"));
-        JsonDeserializer<MeasurementKey> serializer = new JsonDeserializer<>(MeasurementKey.class);
-        MeasurementKey key = serializer.deserialize("mytest", json);
+        JsonDeserializer<ObservationKey> serializer = new JsonDeserializer<>(ObservationKey.class);
+        ObservationKey key = serializer.deserialize("mytest", json);
         assertEquals("user", key.getUserId());
         assertEquals("source", key.getSourceId());
     }

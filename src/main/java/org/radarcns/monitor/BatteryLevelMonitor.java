@@ -30,7 +30,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.RadarSingletonFactory;
@@ -74,7 +74,7 @@ public class BatteryLevelMonitor extends
     @Override
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         try {
-            MeasurementKey key = extractKey(record);
+            ObservationKey key = extractKey(record);
             float batteryLevel = extractBatteryLevel(record);
             float previousLevel = state.updateLevel(key, batteryLevel);
 
@@ -106,7 +106,7 @@ public class BatteryLevelMonitor extends
         }
     }
 
-    private void updateStatus(MeasurementKey key, Status status) {
+    private void updateStatus(ObservationKey key, Status status) {
         if (sender == null) {
             return;
         }
@@ -183,7 +183,7 @@ public class BatteryLevelMonitor extends
         }
 
         /** Update a single battery level. */
-        public float updateLevel(MeasurementKey key, float level) {
+        public float updateLevel(ObservationKey key, float level) {
             Float previousLevel = levels.put(measurementKeyToString(key), level);
             return previousLevel == null ? 1.0f : previousLevel;
         }

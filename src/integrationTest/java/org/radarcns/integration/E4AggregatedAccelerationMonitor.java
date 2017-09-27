@@ -33,7 +33,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
@@ -73,11 +73,11 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
                 logger.error("Failed to process record {} without a key.", record);
                 return;
             }
-            MeasurementKey measurementKey;
+            ObservationKey measurementKey;
             Schema keySchema = key.getSchema();
             if (keySchema.getField("userId") != null
                     && keySchema.getField("sourceId") != null) {
-                measurementKey = new MeasurementKey(key.get("userId").toString(),
+                measurementKey = new ObservationKey("test", key.get("userId").toString(),
                         key.get("sourceId").toString());
                 assertNotNull(measurementKey);
             } else {

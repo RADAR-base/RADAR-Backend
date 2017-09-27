@@ -49,11 +49,11 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
-import org.radarcns.phone.PhoneUsageEvent;
-import org.radarcns.phone.UsageEventType;
+import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.passive.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.stream.phone.PhoneStreamMaster;
@@ -127,16 +127,16 @@ public class PhoneStreamTest {
         properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
-        DirectSender<MeasurementKey, SpecificRecord> sender = new DirectSender<>(properties);
-        AvroTopic<MeasurementKey, PhoneUsageEvent> topic = new AvroTopic<>(
+        DirectSender<ObservationKey, SpecificRecord> sender = new DirectSender<>(properties);
+        AvroTopic<ObservationKey, PhoneUsageEvent> topic = new AvroTopic<>(
                 "android_phone_usage_event",
-                MeasurementKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
-                MeasurementKey.class, PhoneUsageEvent.class);
+                ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
+                ObservationKey.class, PhoneUsageEvent.class);
 
         long offset = 0;
         double time = System.currentTimeMillis() / 1000d - 10d;
-        MeasurementKey key = new MeasurementKey("a", "c");
-        try (KafkaTopicSender<MeasurementKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
+        ObservationKey key = new ObservationKey("test", "a", "c");
+        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
             topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND));
             topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND));
             topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND));

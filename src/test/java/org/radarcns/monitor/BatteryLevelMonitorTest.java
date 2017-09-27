@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.PersistentStateStore;
@@ -60,6 +60,7 @@ public class BatteryLevelMonitorTest {
     public void setUp() {
         Parser parser = new Parser();
         keySchema = parser.parse("{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
+                + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
                 + "{\"name\": \"userId\", \"type\": \"string\"},"
                 + "{\"name\": \"sourceId\", \"type\": \"string\"}"
                 + "]}");
@@ -102,6 +103,7 @@ public class BatteryLevelMonitorTest {
     private void sendMessage(BatteryLevelMonitor monitor, float batteryLevel, boolean sentMessage)
             throws MessagingException {
         Record key = new Record(keySchema);
+        key.put("projectId", "test");
         key.put("sourceId", "1");
         key.put("userId", "me");
 
@@ -121,7 +123,7 @@ public class BatteryLevelMonitorTest {
         File base = folder.newFolder();
         PersistentStateStore stateStore = new PersistentStateStore(base);
         BatteryLevelState state = new BatteryLevelState();
-        MeasurementKey key1 = new MeasurementKey("a", "b");
+        ObservationKey key1 = new ObservationKey("test", "a", "b");
         state.updateLevel(key1, 0.1f);
         stateStore.storeState("one", "two", state);
 

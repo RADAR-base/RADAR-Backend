@@ -2,11 +2,11 @@ package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.stream.aggregator.DoubleArrayAggregation;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
-import org.radarcns.phone.PhoneAcceleration;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.passive.phone.PhoneAcceleration;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.collector.DoubleArrayCollector;
@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 
 import static org.radarcns.util.Serialization.floatToDouble;
 
-public class PhoneAccelerationStream extends StreamWorker<MeasurementKey, PhoneAcceleration> {
+public class PhoneAccelerationStream extends StreamWorker<ObservationKey, PhoneAcceleration> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
     private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
@@ -32,8 +32,8 @@ public class PhoneAccelerationStream extends StreamWorker<MeasurementKey, PhoneA
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleArrayAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, PhoneAcceleration> kstream) {
+    protected KStream<AggregateKey, DoubleArrayAggregation> defineStream(
+            @Nonnull KStream<ObservationKey, PhoneAcceleration> kstream) {
         return kstream.groupByKey()
                 .aggregate(
                         DoubleArrayCollector::new,
