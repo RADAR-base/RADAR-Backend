@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.cli.ParseException;
@@ -146,7 +148,7 @@ public class PhoneStreamTest {
         }
         sender.close();
         consumePhone(offset);
-        consumeAggregated(offset);
+        consumeAggregated(offset / 2);
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
@@ -171,7 +173,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_output"), "new", clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_output"), UUID.randomUUID().toString(), clientId, null);
             this.numRecordsExpected = numRecordsExpected;
 
             Properties props = new Properties();
@@ -182,9 +184,10 @@ public class PhoneStreamTest {
         }
 
         @Override
-        protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
-            logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
-            GenericRecord value = records.value();
+        protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+            logger.info("Read phone usage output {} of {} with value {}", numRecordsRead,
+                    numRecordsExpected, record.value());
+            GenericRecord value = record.value();
             Double fetchTime = (Double)value.get("categoryNameFetchTime");
             assertNotNull(fetchTime);
             assertTrue(fetchTime > System.currentTimeMillis() / 1000L - 300);
@@ -209,7 +212,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), "new", clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), UUID.randomUUID().toString(), clientId, null);
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -220,7 +223,8 @@ public class PhoneStreamTest {
 
         @Override
         protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-            logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
+            logger.info("Read phone aggregate output {} of {} with value {}", numRecordsRead,
+                    numRecordsExpected, record.value());
             GenericRecord value = record.value();
             int timesOpen = (int)value.get("timesOpen");
             assertTrue(timesOpen > 0);

@@ -89,7 +89,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             Schema recordSchema = value.getSchema();
 
             int minFieldId = recordSchema.getField("min").pos();
-            assertNotNull(minFieldId);
 
             GenericData.Array min = (GenericData.Array) value.get(minFieldId);
             assertNotNull(min);
@@ -98,7 +97,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             assertEquals(64.0d, (double)min.get(2), 0.0);
 
             int maxFieldId = recordSchema.getField("max").pos();
-            assertNotNull(maxFieldId);
 
             GenericData.Array max = (GenericData.Array) value.get(maxFieldId);
             assertNotNull(max);
