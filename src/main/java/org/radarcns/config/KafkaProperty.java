@@ -48,7 +48,7 @@ public class KafkaProperty {
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
-
+        props.putAll(configRadar.getStreamProperties());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
@@ -62,7 +62,7 @@ public class KafkaProperty {
      */
     public Properties getStream(@Nonnull String clientId, @Nonnull int numThread,
                                 @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
-        Properties props = getStream(clientId,numThread);
+        Properties props = getStream(clientId, numThread);
 
         props.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, timestampExtractor.getName());
 

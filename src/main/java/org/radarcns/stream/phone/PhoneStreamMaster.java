@@ -29,20 +29,21 @@ import org.radarcns.util.RadarSingletonFactory;
  * @see StreamMaster
  */
 public class PhoneStreamMaster extends StreamMaster {
-
-    public PhoneStreamMaster(boolean standalone) {
-        super(standalone,"Phone");
-    }
-
     @Override
     protected StreamGroup getStreamGroup() {
         return PhoneStreams.getInstance();
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?,?>> list, int low, int normal, int high) {
+    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new PhoneUsageStream("PhoneUsageStream", low, this, kafkaProperty));
+        list.add(new PhoneUsageStream("PhoneUsageStream", lowPriority(), master, kafkaProperty));
+        list.add(new PhoneUsageAggregationStream(
+                "PhoneUsageAggregationStream", lowPriority(), master, kafkaProperty));
+        list.add(new PhoneBatteryStream("PhoneBatteryStream", lowPriority(), master,
+                kafkaProperty));
+        list.add(new PhoneAccelerationStream("PhoneAccelerationStream", normalPriority(), master,
+                kafkaProperty));
     }
 }

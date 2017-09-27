@@ -8,6 +8,7 @@ plugins {
     id 'checkstyle'
     id "com.avast.gradle.docker-compose" version "0.3.16"
     id "com.jfrog.bintray" version "1.7.3"
+    id 'com.github.johnrengelman.shadow' version '2.0.1'
     id 'maven-publish'
 }
 
@@ -20,6 +21,7 @@ version = '0.1-alpha.3-SNAPSHOT'
 ext.description = 'Kafka backend for processing device data.'
 
 mainClassName = 'org.radarcns.RadarBackend'
+applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
 
 ext.githubRepoName = 'RADAR-CNS/RADAR-Backend'
 
@@ -28,7 +30,7 @@ sourceCompatibility = '1.8'
 
 ext.boundaryVersion = '1.0.6'
 ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '3.1.2'
+ext.confluentVersion = '3.2.1'
 ext.hamcrestVersion = '1.3'
 ext.kafkaVersion = '0.10.2.1'
 ext.jacksonVersion='2.8.5'
@@ -38,10 +40,12 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.4.2'
+ext.radarCommonsVersion = '0.5'
 ext.radarSchemasVersion = '0.2-alpha.1'
 ext.subethamailVersion = '3.1.7'
 ext.jsoupVersion = '1.10.2'
+ext.slf4jVersion = '1.7.21'
+ext.avroVersion = '1.8.2'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
 ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
@@ -95,12 +99,17 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
-    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
+    compile group: 'org.apache.avro', name: 'avro', version: avroVersion
+    compile (group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion) {
+        exclude group: 'org.slf4j', module: 'slf4j-simple'
+    }
     compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    compile group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion
+    compile (group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion) {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
 
     // Nonnull annotation
     compile group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
@@ -126,6 +135,9 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+
     // For Topic name validation based on Kafka classes
     testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
         exclude group: 'org.apache.kafka', module: 'kafka-clients'
@@ -139,20 +151,6 @@ dependencies {
 
     // Send data to codacy
     codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
-}
-
-//---------------------------------------------------------------------------//
-// Packaging                                                                 //
-//---------------------------------------------------------------------------//
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'RADAR-CNS Back-End',
-                    'Implementation-Version': version,
-                    'Main-Class': mainClassName
-    }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
 }
 
 //---------------------------------------------------------------------------//
@@ -184,6 +182,13 @@ pmd {
 
 tasks.withType(Pmd) {
     exclude '**/org/radarcns/config/ConfigRadar.java'
+    exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
+}
+
+tasks.withType(Checkstyle) {
+    exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
 }
 
 //---------------------------------------------------------------------------//
@@ -191,34 +196,8 @@ tasks.withType(Pmd) {
 //---------------------------------------------------------------------------//
 
 tasks.matching {it instanceof Test}.all {
-    def stdout = new LinkedList<String>()
-    beforeTest { TestDescriptor td ->
-        stdout.clear()
-    }
-
-    onOutput { TestDescriptor td, TestOutputEvent toe ->
-        stdout.addAll(toe.getMessage().split('(?m)$'))
-        while (stdout.size() > 100) {
-            stdout.remove()
-        }
-    }
-
-    afterTest { TestDescriptor td, TestResult tr ->
-        if (tr.resultType == TestResult.ResultType.FAILURE) {
-            println()
-            print("${td.className}.${td.name} FAILED")
-            if (stdout.empty) {
-                println(" without any output")
-            } else {
-                println(" with last 100 lines of output:")
-                println('=' * 100)
-                stdout.each { print(it) }
-                println('=' * 100)
-            }
-        }
-    }
-
     testLogging {
+        showStandardStreams = true
         showExceptions = true
         showCauses = true
         showStackTraces = true
@@ -226,10 +205,10 @@ tasks.matching {it instanceof Test}.all {
     }
 }
 
-task integrationTest(type: Test){
+task integrationTest(type: Test) {
     description = "Run integration tests (located in src/integrationTest/...)."
-    testClassesDir project.sourceSets.integrationTest.output.classesDir
-    classpath = project.sourceSets.integrationTest.runtimeClasspath
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
 check.dependsOn integrationTestClasses
@@ -312,12 +291,25 @@ def pomConfig = {
 }
 
 ext.sharedManifest = manifest {
-    attributes("Implementation-Title": rootProject.name,
+    attributes(
+            "Implementation-Title": rootProject.name,
             "Implementation-Version": version)
 }
 
+//---------------------------------------------------------------------------//
+// Packaging                                                                 //
+//---------------------------------------------------------------------------//
+
 jar {
-    manifest.from sharedManifest
+    manifest {
+        from sharedManifest
+        attributes('Main-Class': mainClassName)
+    }
+}
+
+shadowJar {
+    mergeServiceFiles()
+    exclude 'log4j.properties'
 }
 
 // custom tasks for creating source/javadoc jars
@@ -335,7 +327,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 // add javadoc/source jar tasks as artifacts
 artifacts {
-    archives sourcesJar, javadocJar
+    archives sourcesJar, javadocJar, shadowJar
 }
 
 publishing {
@@ -344,6 +336,7 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
+            artifact shadowJar
             groupId project.group
             artifactId rootProject.name
             version project.version
@@ -386,7 +379,7 @@ bintray {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '4.1'
     distributionUrl distributionUrl.replace("bin", "all")
 }
 

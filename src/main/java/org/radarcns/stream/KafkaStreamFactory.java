@@ -16,51 +16,63 @@
 
 package org.radarcns.stream;
 
-import java.util.Arrays;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.stream.empatica.E4StreamMaster;
-import org.radarcns.stream.phone.PhoneStreamMaster;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class KafkaStreamFactory {
-    public static final String E4_STREAM = "e4";
-    public static final String PHONE_STREAM = "phone";
-    public static final String ALL_STREAMS = "all";
+    private static final Logger logger = LoggerFactory.getLogger(
+            KafkaStreamFactory.class.getName());
 
-    private final RadarPropertyHandler properties;
+    private final ConfigRadar config;
     private final RadarBackendOptions options;
 
     public KafkaStreamFactory(RadarBackendOptions options,
                               RadarPropertyHandler properties) {
         this.options = options;
-        this.properties = properties;
+        this.config = properties.getRadarProperties();
     }
 
-    public StreamMaster createStreamWorker() {
-        String streamType = properties.getRadarProperties().getStreamWorker();
-        if (streamType == null) {
-            // Try to get the stream type from the commandline arguments
-            String[] args = options.getSubCommandArgs();
-            if (args == null || args.length == 0) {
-                streamType = "all";
-            } else {
-                streamType = args[0];
+    public StreamMaster createStreamMaster() {
+        List<String> streamTypes;
+
+        // Try to get the stream type from the commandline arguments
+        String[] args = options.getSubCommandArgs();
+        if (args != null && args.length > 0) {
+            streamTypes = Arrays.asList(args);
+        } else {
+            streamTypes = config.getStreamMasters();
+        }
+
+        List<StreamMaster> masters = new ArrayList<>(streamTypes.size());
+
+        for (String streamType : streamTypes) {
+            try {
+                masters.add((StreamMaster) Class.forName(streamType).newInstance());
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                logger.error("Cannot instantiate StreamMaster class {}", streamType, e);
+            } catch (ClassCastException e) {
+                logger.error("Given type {} is not a StreamMaster", streamType);
             }
         }
 
-        boolean isStandalone = properties.getRadarProperties().isStandalone();
-        switch (streamType) {
-            case E4_STREAM:
-                return new E4StreamMaster(isStandalone);
-            case PHONE_STREAM:
-                return new PhoneStreamMaster(isStandalone);
-            case ALL_STREAMS:
-                return new CombinedStreamMaster(Arrays.asList(
-                        new E4StreamMaster(isStandalone),
-                        new PhoneStreamMaster(isStandalone)
-                        ));
-            default:
-                throw new IllegalArgumentException("Cannot create unknown stream " + streamType);
+        StreamMaster master;
+
+        if (masters.isEmpty()) {
+            throw new IllegalArgumentException("No StreamMasters specified");
+        } else if (masters.size() == 1) {
+            master = masters.get(0);
+        } else {
+            master = new CombinedStreamMaster(masters);
         }
+
+        master.setNumberOfThreads(config);
+        return master;
     }
 }

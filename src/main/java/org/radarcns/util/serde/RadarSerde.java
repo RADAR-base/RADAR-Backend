@@ -41,6 +41,6 @@ public class RadarSerde<T> {
     public Serde<Windowed<T>> getWindowed() {
         WindowedSerializer<T> windowedSerializer = new WindowedSerializer<>(jsonSerializer);
         WindowedDeserializer<T> windowedDeserializer = new WindowedDeserializer<>(jsonDeserializer);
-        return Serdes.serdeFrom(windowedSerializer,windowedDeserializer);
+        return Serdes.serdeFrom(windowedSerializer, windowedDeserializer);
     }
 }

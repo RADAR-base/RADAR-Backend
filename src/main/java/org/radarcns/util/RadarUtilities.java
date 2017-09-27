@@ -20,11 +20,14 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.aggregator.DoubleAggregator;
 import org.radarcns.aggregator.DoubleArrayAggregator;
+import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.empatica.EmpaticaE4Acceleration;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.phone.PhoneUsageCollector;
+import org.radarcns.stream.phone.TemporaryPackageKey;
 
 /**
  * Interface that facades all utility functions that are required to support RadarBackend features.
@@ -38,11 +41,16 @@ public interface RadarUtilities {
      */
     WindowedKey getWindowed(Windowed<MeasurementKey> window);
 
+    WindowedKey getWindowedTuple(Windowed<TemporaryPackageKey> window);
+
     KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, DoubleArrayCollector collector);
 
     KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, DoubleValueCollector collector);
+
+    KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
+            Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector);
 
     double floatToDouble(float input);
 

@@ -16,24 +16,20 @@
 
 package org.radarcns.config;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import java.lang.reflect.Field;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import java.lang.reflect.Field;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Created by nivethika on 19-12-16.
@@ -82,15 +78,12 @@ public class RadarPropertyHandlerTest {
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
         assertEquals("standalone", properties.getMode());
-        assertNull(properties.getLogPath());
         assertNotNull(properties.getBroker());
         assertNotNull(properties.getBrokerPaths());
         assertNotNull(properties.getReleased());
         assertNotNull(properties.getSchemaRegistry());
         assertNotNull(properties.getSchemaRegistryPaths());
         assertNotNull(properties.getZookeeper());
-        assertNotNull(properties.getAutoCommitIntervalMs());
-        assertNotNull(properties.getSessionTimeoutMs());
         assertNotNull(properties.getZookeeperPaths());
         assertNotNull(properties.getVersion());
         assertThat(properties.getExtras(), hasEntry("somethingother", "bla"));
@@ -117,50 +110,6 @@ public class RadarPropertyHandlerTest {
         propertyHandler.load("again.yml");
         ConfigRadar propertiesS = propertyHandler.getRadarProperties();
         assertNotNull(propertiesS);
-    }
-
-    @Test
-    public void loadWithLogPath() throws Exception{
-        RadarPropertyHandlerImpl radarPropertyHandler = mock(RadarPropertyHandlerImpl.class);
-        ConfigRadar configs = mock(ConfigRadar.class);
-        when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLogPath()).thenReturn("src/test");
-
-        doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
-        radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLogPath();
-    }
-
-    @Test
-    public void loadWithInvalidLogPath() throws Exception{
-        Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
-        properties.setAccessible(true);
-        properties.set(this.propertyHandler,null);
-        RadarPropertyHandlerImpl radarPropertyHandler = mock(RadarPropertyHandlerImpl.class);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("User Log path does not exist");
-        ConfigRadar configs = mock(ConfigRadar.class);
-        when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLogPath()).thenReturn("hack");
-        doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
-        radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLogPath();
-
-    }
-
-    @Test
-    public void loadWithFileLogPath() throws Exception{
-
-        RadarPropertyHandlerImpl radarPropertyHandler = mock(RadarPropertyHandlerImpl.class);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("User Log path is not a directory");
-        ConfigRadar configs = mock(ConfigRadar.class);
-        when(radarPropertyHandler.getRadarProperties()).thenReturn(configs);
-        when(configs.getLogPath()).thenReturn("backend.log");
-        doCallRealMethod().when(radarPropertyHandler).load("radar.yml");
-        radarPropertyHandler.load("radar.yml");
-        verify(configs, times(2)).getLogPath();
-
     }
 
     @Test

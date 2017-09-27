@@ -16,10 +16,10 @@
 
 package org.radarcns.integration;
 
-import static org.radarcns.stream.KafkaStreamFactory.ALL_STREAMS;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.cli.ParseException;
 import org.junit.After;
 import org.junit.Before;
@@ -32,6 +32,8 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
+import org.radarcns.stream.empatica.E4StreamMaster;
+import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.util.RadarSingletonFactory;
 
 public class DirectProducerTest {
@@ -50,7 +52,10 @@ public class DirectProducerTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker(ALL_STREAMS);
+        propHandler.getRadarProperties().setStreamMasters(Arrays.asList(
+                E4StreamMaster.class.getName(),
+                PhoneStreamMaster.class.getName()
+        ));
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }

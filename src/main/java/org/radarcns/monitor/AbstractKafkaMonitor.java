@@ -16,6 +16,34 @@
 
 package org.radarcns.monitor;
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.InterruptException;
+import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.errors.WakeupException;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.key.MeasurementKey;
+import org.radarcns.util.PersistentStateStore;
+import org.radarcns.util.RollingTimeAverage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
+
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
@@ -26,30 +54,6 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVA
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
-
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicLong;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.SerializationException;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.util.PersistentStateStore;
-import org.radarcns.util.RollingTimeAverage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Monitor a list of topics for anomalous behavior.
@@ -118,10 +122,14 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         if (stateStore != null && stateDefault != null) {
             try {
                 localState = stateStore.retrieveState(groupId, clientId, stateDefault);
+                logger.info("Using existing {} from persistence store.",
+                        stateDefault.getClass().getName());
             } catch (IOException ex) {
-                logger.error("Cannot retrieve persistent state {}. Restarting from empty state.",
+                logger.warn("Cannot retrieve persistent state {}. Restarting from empty state.",
                         stateDefault.getClass().getName(), ex);
             }
+        } else if (stateDefault != null) {
+            logger.info("Persistence path not specified; not retrieving or storing state.");
         }
         state = localState;
     }
@@ -139,6 +147,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      * <p>When a message is encountered that cannot be deserialized,
      * {@link #handleSerializationException()} is called.
      */
+    @Override
     public void start() {
         consumer = new KafkaConsumer<>(this.properties);
         consumer.subscribe(topics);
@@ -152,11 +161,13 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     @SuppressWarnings("unchecked")
                     ConsumerRecords<K, V> records = consumer.poll(getPollTimeout());
                     ops.add(records.count());
-                    logger.info("Received {} records", records.count());
                     evaluateRecords(records);
-                    logger.debug("Operations per second {}", (int) Math.round(ops.getAverage()));
                 } catch (SerializationException ex) {
                     handleSerializationException();
+                } catch (InterruptException | WakeupException ex) {
+                    logger.info("Consumer woke up");
+                } catch (KafkaException ex) {
+                    logger.error("Kafka consumer gave exception", ex);
                 }
             }
         } finally {
@@ -217,12 +228,15 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      *
      * <p>Override to have some stopping behaviour, this implementation always returns false.
      */
+    @Override
     public synchronized boolean isShutdown() {
         return done;
     }
 
+    @Override
     public synchronized void shutdown() {
         this.done = true;
+        this.consumer.wakeup();
     }
 
     public long getPollTimeout() {
@@ -250,7 +264,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     + key.getSchema() + " without source ID.");
         }
         return new MeasurementKey(
-                (String) key.get(userIdField.pos()),
-                (String) key.get(sourceIdField.pos()));
+                key.get(userIdField.pos()).toString(),
+                key.get(sourceIdField.pos()).toString());
     }
 }

@@ -16,20 +16,20 @@
 
 package org.radarcns;
 
-import java.io.IOException;
-import java.util.Arrays;
-import javax.annotation.Nonnull;
 import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
 import org.radarcns.monitor.KafkaMonitorFactory;
-import org.radarcns.stream.KafkaStreamFactory;
 import org.radarcns.producer.MockProducerCommand;
-import org.radarcns.stream.StreamMaster;
+import org.radarcns.stream.KafkaStreamFactory;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Core class that initialises configurations and then start all needed Kafka streams
@@ -67,7 +67,7 @@ public final class RadarBackend {
         }
         switch (subCommand) {
             case "stream":
-                return new KafkaStreamFactory(options, radarPropertyHandler).createStreamWorker();
+                return new KafkaStreamFactory(options, radarPropertyHandler).createStreamMaster();
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":
@@ -102,7 +102,9 @@ public final class RadarBackend {
 
     /**
      * Start here all needed StreamMaster
-     * @see StreamMaster
+     *
+     * @throws IOException if the command failed to start up
+     * @throws InterruptedException if the command was interrupted
      */
     public void start() throws IOException, InterruptedException {
         log.info("STARTING");
@@ -114,9 +116,10 @@ public final class RadarBackend {
     }
 
     /**
-     * Stop here all MasterAggregators started inside the @link org.radarcns.RadarBackend#run
+     * Stop here all commands started inside {@link #start()}.
      *
-     * @see StreamMaster
+     * @throws IOException if the command failed to shut down
+     * @throws InterruptedException if the command was interrupted before completely shutting down
      */
     public void shutdown() throws InterruptedException, IOException {
         log.info("SHUTTING DOWN");

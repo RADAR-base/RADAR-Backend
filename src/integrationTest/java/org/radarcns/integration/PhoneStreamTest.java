@@ -16,6 +16,9 @@
 
 package org.radarcns.integration;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
@@ -23,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.radarcns.stream.KafkaStreamFactory.PHONE_STREAM;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.IOException;
@@ -31,9 +33,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.cli.ParseException;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.After;
 import org.junit.Before;
@@ -51,6 +56,7 @@ import org.radarcns.phone.PhoneUsageEvent;
 import org.radarcns.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
@@ -93,7 +99,15 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamWorker(PHONE_STREAM);
+        propHandler.getRadarProperties().setStreamMasters(
+                Collections.singletonList(PhoneStreamMaster.class.getName()));
+
+        Map<String, String> streamProps = new HashMap<>();
+        streamProps.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
+        streamProps.put(SESSION_TIMEOUT_MS_CONFIG, String.valueOf(5_000));
+        streamProps.put(HEARTBEAT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
+
+        propHandler.getRadarProperties().setStreamProperties(streamProps);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
@@ -103,7 +117,7 @@ public class PhoneStreamTest {
         backend.shutdown();
     }
 
-    @Test(timeout = 300_000L)
+    @Test(timeout = 600_000L)
     public void testDirect() throws Exception {
         ConfigRadar config = propHandler.getRadarProperties();
 
@@ -134,37 +148,89 @@ public class PhoneStreamTest {
         }
         sender.close();
         consumePhone(offset);
+        consumeAggregated(offset / 2);
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
         String clientId = "someclinet";
-        KafkaMonitor monitor = new AbstractKafkaMonitor<GenericRecord, GenericRecord, Object>(RadarSingletonFactory.getRadarPropertyHandler(),
-                Collections.singletonList("android_phone_usage_event_output"), "new", clientId, null) {
-            int numRecordsRead = 0;
-            @Override
-            protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
-                logger.info("Read record {} of {}", numRecordsRead, numRecordsExpected);
-                GenericRecord value = records.value();
-                Double fetchTime = (Double)value.get("categoryNameFetchTime");
-                assertNotNull(fetchTime);
-                assertTrue(fetchTime > System.currentTimeMillis() / 1000L - 300);
-                Object category = value.get("categoryName");
-                String packageName = value.get("packageName").toString();
-                assertTrue(CATEGORIES.containsKey(packageName));
-                String result = CATEGORIES.get(packageName);
-                if (result == null) {
-                    assertNull(category);
-                } else {
-                    assertEquals(result, category.toString());
-                }
-
-                if (++numRecordsRead == numRecordsExpected) {
-                    shutdown();
-                }
-            }
-        };
+        KafkaMonitor monitor = new PhoneOutputMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
 
         monitor.setPollTimeout(280_000L);
         monitor.start();
+    }
+
+    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+        String clientId = "someclient";
+        KafkaMonitor monitor = new PhoneAggregateMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
+
+        monitor.setPollTimeout(280_000L);
+        monitor.start();
+    }
+
+
+    private static class PhoneOutputMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
+        private final long numRecordsExpected;
+        int numRecordsRead;
+
+        public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
+            super(radar, Collections.singletonList("android_phone_usage_event_output"), UUID.randomUUID().toString(), clientId, null);
+            this.numRecordsExpected = numRecordsExpected;
+
+            Properties props = new Properties();
+            props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            props.putAll(radar.getRadarProperties().getStreamProperties());
+            configure(props);
+            numRecordsRead = 0;
+        }
+
+        @Override
+        protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+            logger.info("Read phone usage output {} of {} with value {}", numRecordsRead,
+                    numRecordsExpected, record.value());
+            GenericRecord value = record.value();
+            Double fetchTime = (Double)value.get("categoryNameFetchTime");
+            assertNotNull(fetchTime);
+            assertTrue(fetchTime > System.currentTimeMillis() / 1000L - 300);
+            Object category = value.get("categoryName");
+            String packageName = value.get("packageName").toString();
+            assertTrue(CATEGORIES.containsKey(packageName));
+            String result = CATEGORIES.get(packageName);
+            if (result == null) {
+                assertNull(category);
+            } else {
+                assertEquals(result, category.toString());
+            }
+
+            if (++numRecordsRead == numRecordsExpected) {
+                shutdown();
+            }
+        }
+    }
+
+    private static class PhoneAggregateMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
+        private final long numRecordsExpected;
+        int numRecordsRead;
+
+        public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
+            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), UUID.randomUUID().toString(), clientId, null);
+            this.numRecordsExpected = numRecordsExpected;
+            Properties props = new Properties();
+            props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            props.putAll(radar.getRadarProperties().getStreamProperties());
+            configure(props);
+            numRecordsRead = 0;
+        }
+
+        @Override
+        protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
+            logger.info("Read phone aggregate output {} of {} with value {}", numRecordsRead,
+                    numRecordsExpected, record.value());
+            GenericRecord value = record.value();
+            int timesOpen = (int)value.get("timesOpen");
+            assertTrue(timesOpen > 0);
+            if (++numRecordsRead == numRecordsExpected) {
+                shutdown();
+            }
+        }
     }
 }

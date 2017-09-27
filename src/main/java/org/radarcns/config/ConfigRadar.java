@@ -32,8 +32,6 @@ import org.radarcns.config.RadarPropertyHandler.Priority;
 public class ConfigRadar {
     private Date released;
     private String version;
-    @JsonProperty("log_path")
-    private String logPath;
     private String mode;
     private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
@@ -41,21 +39,19 @@ public class ConfigRadar {
     private List<ServerConfig> schemaRegistry;
     @JsonProperty("rest_proxy")
     private ServerConfig restProxy;
-    @JsonProperty("auto_commit_interval_ms")
-    private Integer autoCommitIntervalMs;
-    @JsonProperty("session_timeout_ms")
-    private Integer sessionTimeoutMs;
     @JsonIgnore
     private Map<Priority, Integer> streamPriority;
     @JsonProperty("battery_monitor")
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
-    @JsonProperty("stream_worker")
-    private String streamWorker;
+    @JsonProperty("stream_masters")
+    private List<String> streamMasters;
     @JsonProperty("persistence_path")
     private String persistencePath;
     private Map<String, Object> extras;
+    @JsonProperty("stream_properties")
+    private Map<String, String> streamProperties = new HashMap<>();
 
     public Date getReleased() {
         return released;
@@ -71,14 +67,6 @@ public class ConfigRadar {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getLogPath() {
-        return logPath;
-    }
-
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
     }
 
     public boolean isStandalone() {
@@ -109,20 +97,12 @@ public class ConfigRadar {
         this.broker = broker;
     }
 
-    public Integer getAutoCommitIntervalMs() {
-        return autoCommitIntervalMs;
+    public Map<String, String> getStreamProperties() {
+        return streamProperties;
     }
 
-    public void setAutoCommitIntervalMs(Integer autoCommitIntervalMs) {
-        this.autoCommitIntervalMs = autoCommitIntervalMs;
-    }
-
-    public Integer getSessionTimeoutMs() {
-        return sessionTimeoutMs;
-    }
-
-    public void setSessionTimeoutMs(Integer sessionTimeoutMs) {
-        this.sessionTimeoutMs = sessionTimeoutMs;
+    public void setStreamProperties(Map<String, String> streamProperties) {
+        this.streamProperties = streamProperties;
     }
 
     @JsonProperty("stream_priority")
@@ -235,12 +215,12 @@ public class ConfigRadar {
         this.disconnectMonitor = disconnectMonitor;
     }
 
-    public String getStreamWorker() {
-        return streamWorker;
+    public List<String> getStreamMasters() {
+        return streamMasters;
     }
 
-    public void setStreamWorker(String streamWorker) {
-        this.streamWorker = streamWorker;
+    public void setStreamMasters(List<String> streamWorker) {
+        this.streamMasters = streamWorker;
     }
 
     public String getPersistencePath() {

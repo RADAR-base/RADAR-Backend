@@ -16,6 +16,8 @@
 
 package org.radarcns.integration;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +35,7 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
 import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.AbstractKafkaMonitor;
+import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.putAll(radar.getRadarProperties().getStreamProperties());
         configure(props);
     }
 
@@ -73,8 +77,8 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             Schema keySchema = key.getSchema();
             if (keySchema.getField("userId") != null
                     && keySchema.getField("sourceId") != null) {
-                measurementKey = new MeasurementKey((String) key.get("userId"),
-                        (String) key.get("sourceId"));
+                measurementKey = new MeasurementKey(key.get("userId").toString(),
+                        key.get("sourceId").toString());
                 assertNotNull(measurementKey);
             } else {
                 logger.error("Failed to process record {} with wrong key type {}.",
@@ -85,7 +89,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             Schema recordSchema = value.getSchema();
 
             int minFieldId = recordSchema.getField("min").pos();
-            assertNotNull(minFieldId);
 
             GenericData.Array min = (GenericData.Array) value.get(minFieldId);
             assertNotNull(min);
@@ -94,7 +97,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             assertEquals(64.0d, (double)min.get(2), 0.0);
 
             int maxFieldId = recordSchema.getField("max").pos();
-            assertNotNull(maxFieldId);
 
             GenericData.Array max = (GenericData.Array) value.get(maxFieldId);
             assertNotNull(max);
