@@ -27,6 +27,7 @@ import org.radarcns.key.WindowedKey;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
+import org.radarcns.stream.phone.TemporaryPackageKey;
 
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public interface RadarUtilities {
      */
     WindowedKey getWindowed(Windowed<MeasurementKey> window);
 
-    WindowedKey getWindowedTuple(Windowed<Map.Entry<MeasurementKey, String>> window);
+    WindowedKey getWindowedTuple(Windowed<TemporaryPackageKey> window);
 
     KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(
             Windowed<MeasurementKey> window, DoubleArrayCollector collector);
@@ -51,7 +52,7 @@ public interface RadarUtilities {
             Windowed<MeasurementKey> window, DoubleValueCollector collector);
 
     KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
-            Windowed<Map.Entry<MeasurementKey, String>> window, PhoneUsageCollector collector);
+            Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector);
 
     double floatToDouble(float input);
 

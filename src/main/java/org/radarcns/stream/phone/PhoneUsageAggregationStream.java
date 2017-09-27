@@ -16,9 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.AbstractMap;
-import java.util.Map;
-
 
 /**
  * Created by piotrzakrzewski on 26/07/2017.
@@ -40,7 +37,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
     @Override
     protected KStream<WindowedKey, PhoneUsageAggregator> defineStream(
             @Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
-        return kstream.groupBy((k, v) -> createTuple(k, v.getPackageName()))
+        return kstream.groupBy((k, v) -> new TemporaryPackageKey(k, v.getPackageName()))
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v),
@@ -49,9 +46,5 @@ public class PhoneUsageAggregationStream extends StreamWorker<MeasurementKey, Ph
                         getStreamDefinition().getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
-    }
-
-    private static <K, V> Map.Entry<K, V> createTuple(K key, V value) {
-        return new AbstractMap.SimpleEntry<>(key, value);
     }
 }
