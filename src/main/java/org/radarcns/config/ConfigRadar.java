@@ -39,10 +39,6 @@ public class ConfigRadar {
     private List<ServerConfig> schemaRegistry;
     @JsonProperty("rest_proxy")
     private ServerConfig restProxy;
-    @JsonProperty("auto_commit_interval_ms")
-    private Integer autoCommitIntervalMs;
-    @JsonProperty("session_timeout_ms")
-    private Integer sessionTimeoutMs;
     @JsonIgnore
     private Map<Priority, Integer> streamPriority;
     @JsonProperty("battery_monitor")
@@ -54,6 +50,8 @@ public class ConfigRadar {
     @JsonProperty("persistence_path")
     private String persistencePath;
     private Map<String, Object> extras;
+    @JsonProperty("stream_properties")
+    private Map<String, String> streamProperties = new HashMap<>();
 
     public Date getReleased() {
         return released;
@@ -99,20 +97,12 @@ public class ConfigRadar {
         this.broker = broker;
     }
 
-    public Integer getAutoCommitIntervalMs() {
-        return autoCommitIntervalMs;
+    public Map<String, String> getStreamProperties() {
+        return streamProperties;
     }
 
-    public void setAutoCommitIntervalMs(Integer autoCommitIntervalMs) {
-        this.autoCommitIntervalMs = autoCommitIntervalMs;
-    }
-
-    public Integer getSessionTimeoutMs() {
-        return sessionTimeoutMs;
-    }
-
-    public void setSessionTimeoutMs(Integer sessionTimeoutMs) {
-        this.sessionTimeoutMs = sessionTimeoutMs;
+    public void setStreamProperties(Map<String, String> streamProperties) {
+        this.streamProperties = streamProperties;
     }
 
     @JsonProperty("stream_priority")

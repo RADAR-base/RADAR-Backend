@@ -84,8 +84,6 @@ public class RadarPropertyHandlerTest {
         assertNotNull(properties.getSchemaRegistry());
         assertNotNull(properties.getSchemaRegistryPaths());
         assertNotNull(properties.getZookeeper());
-        assertNotNull(properties.getAutoCommitIntervalMs());
-        assertNotNull(properties.getSessionTimeoutMs());
         assertNotNull(properties.getZookeeperPaths());
         assertNotNull(properties.getVersion());
         assertThat(properties.getExtras(), hasEntry("somethingother", "bla"));

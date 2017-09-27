@@ -48,12 +48,7 @@ public class KafkaProperty {
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
-
-        if (configRadar.getAutoCommitIntervalMs() != null) {
-            props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, configRadar
-                    .getAutoCommitIntervalMs());
-        }
-
+        props.putAll(configRadar.getStreamProperties());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
