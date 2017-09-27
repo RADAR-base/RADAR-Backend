@@ -183,10 +183,12 @@ pmd {
 tasks.withType(Pmd) {
     exclude '**/org/radarcns/config/ConfigRadar.java'
     exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
 }
 
 tasks.withType(Checkstyle) {
     exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
 }
 
 //---------------------------------------------------------------------------//

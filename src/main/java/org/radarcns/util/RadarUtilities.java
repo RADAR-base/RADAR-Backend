@@ -29,8 +29,6 @@ import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 import org.radarcns.stream.phone.TemporaryPackageKey;
 
-import java.util.Map;
-
 /**
  * Interface that facades all utility functions that are required to support RadarBackend features.
  */
