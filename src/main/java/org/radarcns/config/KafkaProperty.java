@@ -29,7 +29,7 @@ public class KafkaProperty {
 
     private final ConfigRadar configRadar;
 
-    protected KafkaProperty(ConfigRadar configRadar) {
+    public KafkaProperty(ConfigRadar configRadar) {
         this.configRadar = configRadar;
     }
 
@@ -38,7 +38,7 @@ public class KafkaProperty {
      * @param numThread number of threads to execute stream processing
      * @return Properties for a Kafka Stream
      */
-    public Properties getStream(@Nonnull String clientId, @Nonnull int numThread) {
+    public Properties getStreamProperties(@Nonnull String clientId, @Nonnull int numThread) {
         Properties props = new Properties();
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientId);
@@ -60,9 +60,9 @@ public class KafkaProperty {
      * @param timestampExtractor custom timestamp extract that overrides the out-of-the-box
      * @return Properties for a Kafka Stream
      */
-    public Properties getStream(@Nonnull String clientId, @Nonnull int numThread,
+    public Properties getStreamProperties(@Nonnull String clientId, @Nonnull int numThread,
                                 @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
-        Properties props = getStream(clientId, numThread);
+        Properties props = getStreamProperties(clientId, numThread);
 
         props.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, timestampExtractor.getName());
 

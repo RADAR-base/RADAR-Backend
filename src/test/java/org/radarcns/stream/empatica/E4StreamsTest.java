@@ -19,12 +19,14 @@ package org.radarcns.stream.empatica;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.stream.StreamDefinition;
+import org.radarcns.stream.TimeWindowMetadata;
 import org.radarcns.stream.empatica.E4Streams;
 
 /**
@@ -49,32 +51,33 @@ public class E4StreamsTest {
                 "android_empatica_e4_blood_volume_pulse",
                 "android_empatica_e4_electrodermal_activity",
                 "android_empatica_e4_inter_beat_interval",
-                "android_empatica_e4_sensor_status",
                 "android_empatica_e4_temperature");
 
         for(String topicName : topicNames) {
-            StreamDefinition topic = this.e4Streams.getStreamDefinition(topicName);
-            assertEquals(topic.getInputTopic().getName(), topicName);
+            Collection<StreamDefinition> topic = this.e4Streams.getStreamDefinition(topicName);
+            assertEquals(topic.iterator().next().getInputTopic().getName(), topicName);
         }
     }
 
     @Test
     public void getInternalTopic() {
-        StreamDefinition topic = this.e4Streams.getStreamDefinition("android_empatica_e4_inter_beat_interval");
+        StreamDefinition topic = this.e4Streams.getStreamDefinition("android_empatica_e4_inter_beat_interval").iterator().next();
         assertEquals("android_empatica_e4_inter_beat_interval", topic.getInputTopic().getName());
-        assertEquals("android_empatica_e4_heartrate", topic.getOutputTopic().getName());
-        assertEquals("From-android_empatica_e4_inter_beat_interval-To-android_empatica_e4_heartrate", topic.getStateStoreName());
+        assertEquals("android_empatica_e4_heart_rate_10min", topic.getOutputTopic().getName());
+        assertEquals("From-android_empatica_e4_inter_beat_interval-To-android_empatica_e4_heart_rate_10min", topic.getStateStoreName());
     }
 
     @Test
     public void getInvalidTopic() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Topic something unknown");
-        StreamDefinition topic = this.e4Streams.getStreamDefinition("something");
+        this.e4Streams.getStreamDefinition("something");
     }
 
     @Test
     public void getTopicNames() {
-        assertEquals(15, this.e4Streams.getTopicNames().size()); // sort removes the redundant
+        System.out.println(this.e4Streams.getTopicNames());
+        assertEquals(8 * TimeWindowMetadata.values().length,
+                this.e4Streams.getTopicNames().size()); // sort removes the redundant
     }
 }

@@ -78,7 +78,7 @@ public class DirectProducerTest {
         String clientId = "someclinet";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(),
-                "android_empatica_e4_acceleration_output", clientId);
+                "android_empatica_e4_acceleration_10sec", clientId);
         monitor.setPollTimeout(280_000L);
         monitor.start();
     }

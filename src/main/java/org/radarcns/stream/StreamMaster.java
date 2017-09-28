@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -183,8 +184,8 @@ public abstract class StreamMaster implements SubCommand {
     protected abstract StreamGroup getStreamGroup();
 
     /** Add a monitor to the master. It will run every 30 seconds. */
-    void addMonitor(Monitor monitor) {
-        executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
+    ScheduledFuture<?> addMonitor(Monitor monitor) {
+        return executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
     }
 
     protected synchronized int lowPriority() {

@@ -16,47 +16,35 @@
 
 package org.radarcns.stream.empatica;
 
-import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
-import org.radarcns.kafka.ObservationKey;
 import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.aggregator.DoubleAggregation;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Kafka Stream for aggregating data about Empatica E4 battery level.
  */
 public class E4BatteryLevelStream extends StreamWorker<ObservationKey, EmpaticaE4BatteryLevel> {
-    private static final Logger log = LoggerFactory.getLogger(E4BatteryLevelStream.class);
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private static final Logger logger = LoggerFactory.getLogger(E4BatteryLevelStream.class);
 
-    public E4BatteryLevelStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getBatteryLevelStream(), clientId,
-                numThread, master, kafkaProperties, log);
+    public E4BatteryLevelStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, KafkaProperty kafkaProperties) {
+        super(definitions, numThread, master, kafkaProperties, logger);
     }
 
     @Override
-    protected KStream<AggregateKey, DoubleAggregation> defineStream(
+    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4BatteryLevel> kstream) {
-        return kstream.groupByKey()
-                .aggregate(
-                    DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getBatteryLevel()),
-                    TimeWindows.of(10 * 1000L),
-                    RadarSerdes.getInstance().getDoubleCollector(),
-                    getStreamDefinition().getStateStoreName())
-                .toStream()
-                .map(utilities::collectorToAvro);
+        return aggregateFloat(definition, kstream, EmpaticaE4BatteryLevel::getBatteryLevel);
     }
 }

@@ -19,13 +19,16 @@ package org.radarcns.stream.phone;
 import org.radarcns.stream.GeneralStreamGroup;
 import org.radarcns.stream.StreamDefinition;
 
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+
 public final class PhoneStreams extends GeneralStreamGroup {
     private static final PhoneStreams INSTANCE = new PhoneStreams();
 
-    private final StreamDefinition usageEventStream;
-    private final StreamDefinition usageEventAggregationStream;
-    private final StreamDefinition accelerationStream;
-    private final StreamDefinition batteryStream;
+    private final Collection<StreamDefinition> usageEventStream;
+    private final Collection<StreamDefinition> usageEventAggregationStream;
+    private final Collection<StreamDefinition> accelerationStream;
+    private final Collection<StreamDefinition> batteryStream;
 
     public static PhoneStreams getInstance() {
         return INSTANCE;
@@ -36,24 +39,25 @@ public final class PhoneStreams extends GeneralStreamGroup {
                 "android_phone_usage_event");
         usageEventAggregationStream = createStream(
                 "android_phone_usage_event_output",
-                "android_phone_usage_event_aggregated");
+                "android_phone_usage_event_aggregated",
+                TimeUnit.DAYS.toMillis(1));
         accelerationStream = createSensorStream("android_phone_acceleration");
         batteryStream = createSensorStream("android_phone_battery_level");
     }
 
-    public StreamDefinition getUsageStream() {
+    public Collection<StreamDefinition> getUsageStream() {
         return usageEventStream;
     }
 
-    public StreamDefinition getUsageEventAggregationStream() {
+    public Collection<StreamDefinition> getUsageEventAggregationStream() {
         return usageEventAggregationStream;
     }
 
-    public StreamDefinition getAccelerationStream() {
+    public Collection<StreamDefinition> getAccelerationStream() {
         return accelerationStream;
     }
 
-    public StreamDefinition getBatteryStream() {
+    public Collection<StreamDefinition> getBatteryStream() {
         return batteryStream;
     }
 }

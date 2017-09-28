@@ -38,12 +38,14 @@ public class PhoneStreamMaster extends StreamMaster {
     protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new PhoneUsageStream("PhoneUsageStream", lowPriority(), master, kafkaProperty));
+        PhoneStreams defs = PhoneStreams.getInstance();
+        list.add(new PhoneUsageStream(
+                defs.getUsageStream(), lowPriority(), master, kafkaProperty));
         list.add(new PhoneUsageAggregationStream(
-                "PhoneUsageAggregationStream", lowPriority(), master, kafkaProperty));
-        list.add(new PhoneBatteryStream("PhoneBatteryStream", lowPriority(), master,
-                kafkaProperty));
-        list.add(new PhoneAccelerationStream("PhoneAccelerationStream", normalPriority(), master,
-                kafkaProperty));
+                defs.getUsageEventAggregationStream(), lowPriority(), master, kafkaProperty));
+        list.add(new PhoneBatteryStream(
+                defs.getBatteryStream(), lowPriority(), master, kafkaProperty));
+        list.add(new PhoneAccelerationStream(
+                defs.getAccelerationStream(), normalPriority(), master, kafkaProperty));
     }
 }

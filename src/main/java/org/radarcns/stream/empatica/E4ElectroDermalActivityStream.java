@@ -16,49 +16,38 @@
 
 package org.radarcns.stream.empatica;
 
-import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
-import org.radarcns.kafka.ObservationKey;
 import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.stream.aggregator.DoubleAggregation;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
  */
 public class E4ElectroDermalActivityStream extends
         StreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
-    private static final Logger log = LoggerFactory.getLogger(E4ElectroDermalActivityStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+            E4ElectroDermalActivityStream.class);
 
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
-
-    public E4ElectroDermalActivityStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getElectroDermalActivityStream(),
-                clientId, numThread, master, kafkaProperties, log);
+    public E4ElectroDermalActivityStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, KafkaProperty kafkaProperties) {
+        super(definitions, numThread, master, kafkaProperties, logger);
     }
 
     @Override
-    protected KStream<AggregateKey, DoubleAggregation> defineStream(
+    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4ElectroDermalActivity> kstream) {
-        return kstream.groupByKey()
-                .aggregate(
-                    DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getElectroDermalActivity()),
-                    TimeWindows.of(10 * 1000L),
-                    RadarSerdes.getInstance().getDoubleCollector(),
-                    getStreamDefinition().getStateStoreName())
-                .toStream()
-                .map(utilities::collectorToAvro);
+        return aggregateFloat(definition, kstream,
+                EmpaticaE4ElectroDermalActivity::getElectroDermalActivity);
     }
 }

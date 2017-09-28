@@ -16,47 +16,41 @@
 
 package org.radarcns.stream.empatica;
 
-import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.stream.aggregator.DoubleArrayAggregation;
 import org.radarcns.config.KafkaProperty;
-import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
-import org.radarcns.kafka.ObservationKey;
 import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
+import org.radarcns.stream.aggregator.DoubleArrayAggregation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+
+import static org.radarcns.util.Serialization.floatToDouble;
 
 /**
  * Definition of Kafka Stream for aggregating data collected by Empatica E4 Accelerometer sensor.
  */
 public class E4AccelerationStream extends StreamWorker<ObservationKey, EmpaticaE4Acceleration> {
-    private static final Logger log = LoggerFactory.getLogger(E4AccelerationStream.class);
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    private static final Logger logger = LoggerFactory.getLogger(E4AccelerationStream.class);
 
-    public E4AccelerationStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getAccelerationStream(), clientId,
-                numThread, master, kafkaProperties, log);
+    public E4AccelerationStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, KafkaProperty kafkaProperties) {
+        super(definitions, numThread, master, kafkaProperties, logger);
     }
 
     @Override
-    protected KStream<AggregateKey, DoubleArrayAggregation> defineStream(
+    protected KStream<AggregateKey, DoubleArrayAggregation> implementStream(
+            StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4Acceleration> kstream) {
-        return kstream.groupByKey()
-            .aggregate(
-                DoubleArrayCollector::new,
-                (k, v, valueCollector) -> valueCollector.add(utilities.accelerationToArray(v)),
-                TimeWindows.of(10 * 1000L),
-                RadarSerdes.getInstance().getDoubleArrayCollector(),
-                getStreamDefinition().getStateStoreName())
-            .toStream()
-            .map(utilities::collectorToAvro);
+        return aggregateDoubleArray(definition, kstream, v -> new double[] {
+                floatToDouble(v.getX()),
+                floatToDouble(v.getY()),
+                floatToDouble(v.getZ())});
     }
 }

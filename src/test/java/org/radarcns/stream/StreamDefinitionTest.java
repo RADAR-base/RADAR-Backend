@@ -1,5 +1,3 @@
-package org.radarcns.stream;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,9 +14,10 @@ package org.radarcns.stream;
  * limitations under the License.
  */
 
+package org.radarcns.stream;
+
 import static org.junit.Assert.assertEquals;
 
-import org.apache.kafka.common.errors.InvalidTopicException;
 import org.junit.Test;
 import org.radarcns.topic.KafkaTopic;
 
@@ -36,8 +35,8 @@ public class StreamDefinitionTest {
 
         kafka.common.Topic.validate(definition.getStateStoreName());
 
-        assertEquals("From-" + "android_empatica_e4_blood_volume_pulse" + "-To-" +
-                "android_empatica_e4_blood_volume_pulse" + "_output",
+        assertEquals("From-android_empatica_e4_blood_volume_pulse"
+                        + "-To-android_empatica_e4_blood_volume_pulse_output",
                 definition.getStateStoreName());
     }
 

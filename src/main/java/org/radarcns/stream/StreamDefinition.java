@@ -16,35 +16,64 @@
 
 package org.radarcns.stream;
 
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.topic.KafkaTopic;
 
-public class StreamDefinition {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
-    public static final String FROM_LABEL = "From-";
-    public static final String TO_LABEL = "-To-";
+import static org.radarcns.util.Comparison.compare;
 
+public class StreamDefinition implements Comparable<StreamDefinition> {
     private final KafkaTopic inputTopic;
     private final KafkaTopic outputTopic;
+    private final TimeWindows window;
+
+    /**
+     * Constructor. It takes in input the topic name to be consumed and to topic name where the
+     *      related stream will write the computed values. Default 0 window is used.
+     * @param input source {@link KafkaTopic}
+     * @param output output {@link KafkaTopic}
+     */
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output) {
+        this(input, output, 0L);
+    }
 
     /**
      * Constructor. It takes in input the topic name to be consumed and to topic name where the
      *      related stream will write the computed values.
-     *
      * @param input source {@link KafkaTopic}
      * @param output output {@link KafkaTopic}
+     * @param window time window for aggregation.
      */
-    public StreamDefinition(KafkaTopic input, KafkaTopic output) {
-        if (input == null || output == null) {
-            throw new IllegalArgumentException("Input and output topic may not be null");
-        }
-        this.inputTopic = input;
-        this.outputTopic = output;
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window) {
+        this(input, output, window == 0 ? null : TimeWindows.of(window));
     }
 
+    /**
+     * Constructor. It takes in input the topic name to be consumed and to topic name where the
+     *      related stream will write the computed values.
+     * @param input source {@link KafkaTopic}
+     * @param output output {@link KafkaTopic}
+     * @param window time window for aggregation.
+     */
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output,
+            @Nullable TimeWindows window) {
+        Objects.requireNonNull(input);
+        Objects.requireNonNull(output);
+
+        this.inputTopic = input;
+        this.outputTopic = output;
+        this.window = window;
+    }
+
+    @Nonnull
     public KafkaTopic getInputTopic() {
         return inputTopic;
     }
 
+    @Nonnull
     public KafkaTopic getOutputTopic() {
         return outputTopic;
     }
@@ -56,7 +85,43 @@ public class StreamDefinition {
      *
      * @return {@code String} representing the changelog topic name
      */
+    @Nonnull
     public String getStateStoreName() {
-        return FROM_LABEL + getInputTopic().getName() + TO_LABEL + getOutputTopic().getName();
+        return "From-" + getInputTopic().getName() + "-To-" + getOutputTopic().getName();
+    }
+
+    @Nullable
+    public TimeWindows getTimeWindows() {
+        return window;
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StreamDefinition that = (StreamDefinition) o;
+        return Objects.equals(inputTopic, that.inputTopic)
+                && Objects.equals(outputTopic, that.outputTopic)
+                && Objects.equals(window, that.window);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inputTopic, outputTopic, window);
+    }
+
+    @Override
+    public int compareTo(@Nonnull StreamDefinition o) {
+        return compare((StreamDefinition d) -> d.getInputTopic().getName())
+                .then(d -> d.getOutputTopic().getName())
+                .then(d -> d.getTimeWindows() == null ? 0 : d.getTimeWindows().sizeMs)
+                .then(d -> d.getTimeWindows() == null ? 0 : d.getTimeWindows().advanceMs)
+                .apply(this, o);
     }
 }

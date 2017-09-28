@@ -22,13 +22,16 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
-    private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(PhoneUsageStream.class);
 
     // 1 day until an item is refreshed
     private static final int CACHE_TIMEOUT = 24 * 3600;
@@ -38,15 +41,14 @@ public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEve
 
     private final PlayStoreLookup playStoreLookup;
 
-    public PhoneUsageStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(PhoneStreams.getInstance().getUsageStream(), clientId,
-                numThread, master, kafkaProperties, log);
+    public PhoneUsageStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, KafkaProperty kafkaProperties) {
+        super(definitions, numThread, master, kafkaProperties, logger);
         playStoreLookup =  new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
     }
 
     @Override
-    protected KStream<ObservationKey, PhoneUsageEvent> defineStream(
+    protected KStream<ObservationKey, PhoneUsageEvent> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream
             .map((key, value) -> {

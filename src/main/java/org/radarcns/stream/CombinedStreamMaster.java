@@ -72,7 +72,7 @@ public class CombinedStreamMaster extends StreamMaster {
         }
 
         @Override
-        public StreamDefinition getStreamDefinition(String inputTopic) {
+        public Collection<StreamDefinition> getStreamDefinition(String inputTopic) {
             for (StreamMaster master : streamMasters) {
                 if (master.getStreamGroup().getTopicNames().contains(inputTopic)) {
                     return master.getStreamGroup().getStreamDefinition(inputTopic);
