@@ -41,8 +41,8 @@ public final class PhoneStreams extends GeneralStreamGroup {
                 "android_phone_usage_event_output",
                 "android_phone_usage_event_aggregated",
                 TimeUnit.DAYS.toMillis(1));
-        accelerationStream = createSensorStream("android_phone_acceleration");
-        batteryStream = createSensorStream("android_phone_battery_level");
+        accelerationStream = createWindowedSensorStream("android_phone_acceleration");
+        batteryStream = createWindowedSensorStream("android_phone_battery_level");
     }
 
     public Collection<StreamDefinition> getUsageStream() {

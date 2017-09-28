@@ -29,8 +29,10 @@ import static org.junit.Assert.assertTrue;
 import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -128,26 +130,45 @@ public class PhoneStreamTest {
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
         DirectSender<ObservationKey, SpecificRecord> sender = new DirectSender<>(properties);
+
+        long offset = 0;
+        double time = System.currentTimeMillis() / 1000d - 10d;
+        ObservationKey key = new ObservationKey("test", "a", "c");
+
+        List<PhoneUsageEvent> events = Arrays.asList(
+                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+
         AvroTopic<ObservationKey, PhoneUsageEvent> topic = new AvroTopic<>(
                 "android_phone_usage_event",
                 ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
                 ObservationKey.class, PhoneUsageEvent.class);
 
-        long offset = 0;
-        double time = System.currentTimeMillis() / 1000d - 10d;
-        ObservationKey key = new ObservationKey("test", "a", "c");
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+            for (PhoneUsageEvent event : events) {
+                topicSender.send(offset++, key, event);
+            }
         }
+
+        AvroTopic<ObservationKey, PhoneUsageEvent> outputTopic = new AvroTopic<>(
+                "android_phone_usage_event_output",
+                ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
+                ObservationKey.class, PhoneUsageEvent.class);
+
+        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(outputTopic)) {
+            for (PhoneUsageEvent event : events) {
+                topicSender.send(offset++, key, event);
+            }
+        }
+
         sender.close();
-        consumePhone(offset);
+        consumePhone(offset / 2);
         consumeAggregated(offset / 2);
     }
 
