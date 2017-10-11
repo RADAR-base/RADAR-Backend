@@ -21,13 +21,16 @@ broker:
 #Kafka internal parameters
 stream_properties:
   auto.commit.interval.ms: 1000
-  session.timeout.ms: 10000
+  session.timeout.ms: 4000
   buffered.records.per.partition: 1
-  request.timeout.ms: 1000
+  request.timeout.ms: 70000
+  fetch.timeout.ms: 3000
   batch.size: 1
   metadata.max.age.ms: 10000
   metadata.fetch.timeout.ms: 5000
   timeout.ms: 5000
+  commit.interval.ms: 1000
+  buffered.records.per.partition: 1
 
 #============================ Kafka Streams ============================#
 #The number of threads that a stream must be run according is priority

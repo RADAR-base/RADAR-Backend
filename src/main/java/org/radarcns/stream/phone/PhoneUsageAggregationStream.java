@@ -31,7 +31,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, Ph
     protected KStream<AggregateKey, PhoneUsageAggregator> implementStream(
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
-        return kstream.groupBy((k, v) -> new TemporaryPackageKey(k, v.getPackageName()))
+        return kstream.groupBy(PhoneUsageAggregationStream::temporaryKey)
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v),
@@ -40,5 +40,10 @@ public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, Ph
                         definition.getStateStoreName())
                 .toStream()
                 .map(utilities::collectorToAvro);
+    }
+
+    private static TemporaryPackageKey temporaryKey(ObservationKey key, PhoneUsageEvent value) {
+        return new TemporaryPackageKey(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                value.getPackageName());
     }
 }

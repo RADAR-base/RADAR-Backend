@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
+import static org.apache.kafka.streams.KeyValue.pair;
+
 public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageStream.class);
 
@@ -44,7 +46,7 @@ public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEve
     public PhoneUsageStream(Collection<StreamDefinition> definitions, int numThread,
             StreamMaster master, KafkaProperty kafkaProperties) {
         super(definitions, numThread, master, kafkaProperties, logger);
-        playStoreLookup =  new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
+        playStoreLookup = new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
     }
 
     @Override
@@ -54,9 +56,10 @@ public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEve
             .map((key, value) -> {
                 String packageName = value.getPackageName();
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
+                logger.info("Looked up {}: {}", packageName, category.getCategoryName());
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
-                return new KeyValue<>(key, value);
+                return pair(key, value);
             });
     }
 }
