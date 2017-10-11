@@ -21,9 +21,9 @@ broker:
 #Kafka internal parameters
 stream_properties:
   auto.commit.interval.ms: 1000
-  session.timeout.ms: 4000
+  session.timeout.ms: 10000
   buffered.records.per.partition: 1
-  request.timeout.ms: 70000
+  request.timeout.ms: 11000
   fetch.timeout.ms: 3000
   batch.size: 1
   metadata.max.age.ms: 10000

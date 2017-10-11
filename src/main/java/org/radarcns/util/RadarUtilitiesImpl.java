@@ -48,9 +48,9 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     @Override
     public AggregateKey getWindowedTuple(Windowed<TemporaryPackageKey> window) {
-        TemporaryPackageKey k = window.key();
-        ObservationKey measurementKey = new ObservationKey(k.getProjectId(), k.getUserId(),
-                k.getSourceId());
+        TemporaryPackageKey temp = window.key();
+        ObservationKey measurementKey = new ObservationKey(temp.getProjectId(), temp.getUserId(),
+                temp.getSourceId());
         return new AggregateKey(measurementKey.getProjectId(), measurementKey.getUserId(),
                 measurementKey.getSourceId(), window.window().start(), window.window().end());
     }
