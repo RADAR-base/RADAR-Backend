@@ -53,13 +53,13 @@ public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEve
     protected KStream<ObservationKey, PhoneUsageEvent> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream
-            .map((key, value) -> {
+            .mapValues(value -> {
                 String packageName = value.getPackageName();
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
                 logger.info("Looked up {}: {}", packageName, category.getCategoryName());
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
-                return pair(key, value);
+                return value;
             });
     }
 }
