@@ -20,8 +20,8 @@ broker:
 
 #Kafka internal parameters
 stream_properties:
-  auto_commit_interval_ms: 1000
-  session_timeout_ms: 10000
+  auto.commit.interval.ms: 1000
+  session.timeout.ms: 10000
 
 #============================ Kafka Streams ============================#
 #The number of threads that a stream must be run according is priority

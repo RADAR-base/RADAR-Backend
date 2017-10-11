@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.commons.cli.ParseException;
 import org.junit.After;
 import org.junit.Before;

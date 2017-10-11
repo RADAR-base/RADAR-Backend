@@ -30,9 +30,9 @@ sourceCompatibility = '1.8'
 
 ext.boundaryVersion = '1.0.6'
 ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '3.2.1'
+ext.confluentVersion = '3.3.0'
 ext.hamcrestVersion = '1.3'
-ext.kafkaVersion = '0.10.2.1'
+ext.kafkaVersion = '0.11.0.1'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
@@ -40,7 +40,7 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.5'
+ext.radarCommonsVersion = '0.6-SNAPSHOT'
 ext.radarSchemasVersion = '0.2-alpha.3-SNAPSHOT'
 ext.subethamailVersion = '3.1.7'
 ext.jsoupVersion = '1.10.2'
@@ -81,9 +81,6 @@ configurations.all {
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // For working with dev-branch commons
-    maven { url "${rootProject.projectDir}/libs" }
-
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
@@ -105,8 +102,11 @@ dependencies {
 
     // Kafka streaming API
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    compile (group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion) {
+    compile (group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'log4j', module: 'log4j'
+        exclude group: 'jline', module: 'jline'
+        exclude group: 'io.netty', module: 'netty'
     }
 
     // Nonnull annotation

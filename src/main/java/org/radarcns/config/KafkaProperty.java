@@ -19,10 +19,11 @@ package org.radarcns.config;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import java.util.Properties;
 import javax.annotation.Nonnull;
+
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.processor.TimestampExtractor;
-import org.radarcns.util.serde.SpecificAvroSerde;
 
 // TODO this class should substitute org.radarcns.util.RadarConfig
 public class KafkaProperty {
@@ -38,15 +39,15 @@ public class KafkaProperty {
      * @param numThread number of threads to execute stream processing
      * @return Properties for a Kafka Stream
      */
-    public Properties getStreamProperties(@Nonnull String clientId, @Nonnull int numThread) {
+    public Properties getStreamProperties(@Nonnull String clientId, int numThread) {
         Properties props = new Properties();
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, configRadar.getBrokerPaths());
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
                 configRadar.getSchemaRegistryPaths());
-        props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
-        props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
         props.putAll(configRadar.getStreamProperties());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -60,11 +61,12 @@ public class KafkaProperty {
      * @param timestampExtractor custom timestamp extract that overrides the out-of-the-box
      * @return Properties for a Kafka Stream
      */
-    public Properties getStreamProperties(@Nonnull String clientId, @Nonnull int numThread,
+    public Properties getStreamProperties(@Nonnull String clientId, int numThread,
                                 @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
         Properties props = getStreamProperties(clientId, numThread);
 
-        props.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, timestampExtractor.getName());
+        props.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG,
+                timestampExtractor.getName());
 
         return props;
     }

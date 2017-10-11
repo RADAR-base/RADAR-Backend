@@ -164,8 +164,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     evaluateRecords(records);
                 } catch (SerializationException ex) {
                     handleSerializationException();
-                } catch (InterruptException | WakeupException ex) {
+                } catch (WakeupException ex) {
                     logger.info("Consumer woke up");
+                } catch (InterruptException ex) {
+                    logger.info("Consumer was interrupted");
+                    shutdown();
                 } catch (KafkaException ex) {
                     logger.error("Kafka consumer gave exception", ex);
                 }
@@ -235,6 +238,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
     @Override
     public synchronized void shutdown() {
+        logger.info("Shutting down monitor {}", getClass().getSimpleName());
         this.done = true;
         this.consumer.wakeup();
     }
