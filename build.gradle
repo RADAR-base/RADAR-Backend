@@ -44,7 +44,8 @@ ext.radarCommonsVersion = '0.6-SNAPSHOT'
 ext.radarSchemasVersion = '0.2-alpha.3-SNAPSHOT'
 ext.subethamailVersion = '3.1.7'
 ext.jsoupVersion = '1.10.2'
-ext.slf4jVersion = '1.7.21'
+ext.slf4jVersion = '1.7.25'
+ext.log4jVersion = '1.2.17'
 ext.avroVersion = '1.8.2'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
@@ -133,8 +134,12 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     // For Topic name validation based on Kafka classes
     testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
@@ -347,6 +352,11 @@ publishing {
                 root.appendNode('description', description)
                 root.appendNode('name', rootProject.name)
                 root.appendNode('url', githubUrl)
+                root.dependencies.'*'.findAll() {
+                    it.artifactId.text() in ['log4j', 'slf4j-log4j12']
+                }.each() {
+                    it.parent().remove(it)
+                }
                 root.children().last() + pomConfig
             }
         }

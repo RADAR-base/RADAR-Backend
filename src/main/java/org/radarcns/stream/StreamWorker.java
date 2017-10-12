@@ -162,6 +162,8 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
             stream.setUncaughtExceptionHandler(this);
             stream.start();
         });
+
+        master.notifyStartedStream(this);
     }
 
     /**

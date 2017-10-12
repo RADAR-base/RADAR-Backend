@@ -27,14 +27,13 @@ stream_properties:
   request.timeout.ms: 11000
   fetch.timeout.ms: 3000
   batch.size: 1
-  metadata.max.age.ms: 10000
+  metadata.max.age.ms: 15000
   metadata.fetch.timeout.ms: 5000
   timeout.ms: 5000
   commit.interval.ms: 1000
-  buffered.records.per.pasrtition: 1
   metadata.max.age.ms: 10000
   state.cleanup.delay.ms: 15000
-  cache.max.bytes.buffering: 1
+  cache.max.bytes.buffering: 1000
 
 #============================ Kafka Streams ============================#
 #The number of threads that a stream must be run according is priority
