@@ -105,16 +105,6 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamMasters(Arrays.asList(
-                PhoneStreamMaster.class.getName(),
-                E4StreamMaster.class.getName()));
-
-        Map<String, String> streamProps = new HashMap<>();
-        streamProps.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
-        streamProps.put(SESSION_TIMEOUT_MS_CONFIG, String.valueOf(5_000));
-        streamProps.put(HEARTBEAT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
-
-        propHandler.getRadarProperties().getStreamProperties().putAll(streamProps);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }

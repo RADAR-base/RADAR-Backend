@@ -20,19 +20,6 @@ broker:
 
 #Kafka internal parameters
 stream_properties:
-  max.poll.interval.ms: 10000
-  auto.commit.interval.ms: 1000
-  session.timeout.ms: 10000
-  buffered.records.per.partition: 1
-  request.timeout.ms: 11000
-  fetch.timeout.ms: 3000
-  batch.size: 1
-  metadata.max.age.ms: 15000
-  metadata.fetch.timeout.ms: 5000
-  timeout.ms: 5000
-  commit.interval.ms: 1000
-  metadata.max.age.ms: 10000
-  state.cleanup.delay.ms: 15000
   cache.max.bytes.buffering: 1000
 
 #============================ Kafka Streams ============================#
