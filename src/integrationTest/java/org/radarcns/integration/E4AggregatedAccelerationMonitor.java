@@ -73,36 +73,20 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
                 logger.error("Failed to process record {} without a key.", record);
                 return;
             }
-            ObservationKey measurementKey;
             Schema keySchema = key.getSchema();
             if (keySchema.getField("userId") != null
                     && keySchema.getField("sourceId") != null) {
-                measurementKey = new ObservationKey("test", key.get("userId").toString(),
-                        key.get("sourceId").toString());
-                assertNotNull(measurementKey);
+                assertNotNull(key.get("userId"));
+                assertNotNull(key.get("sourceId");
             } else {
                 logger.error("Failed to process record {} with wrong key type {}.",
                         record, key.getSchema());
                 return;
             }
             GenericRecord value = record.value();
-            Schema recordSchema = value.getSchema();
-
-            int minFieldId = recordSchema.getField("min").pos();
-
-            GenericData.Array min = (GenericData.Array) value.get(minFieldId);
-            assertNotNull(min);
-            assertEquals(15.0d, (double)min.get(0), 0.0);
-            assertEquals(-15.0d, (double)min.get(1), 0.0);
-            assertEquals(64.0d, (double)min.get(2), 0.0);
-
-            int maxFieldId = recordSchema.getField("max").pos();
-
-            GenericData.Array max = (GenericData.Array) value.get(maxFieldId);
-            assertNotNull(max);
-            assertEquals(15.0d, (double)max.get(0), 0.0);
-            assertEquals(Double.MIN_VALUE, (double)max.get(1), 0.0d);
-            assertEquals(64.0d, (double)max.get(2), 0.0);
+            GenericData.Array count = (GenericData.Array) value.get("count");
+            logger.info("Received [{}, {}, {}] E4 messages",
+                    count.get(0), count.get(1), count.get(2));
         }
     }
 }
