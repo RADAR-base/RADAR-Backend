@@ -77,7 +77,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             if (keySchema.getField("userId") != null
                     && keySchema.getField("sourceId") != null) {
                 assertNotNull(key.get("userId"));
-                assertNotNull(key.get("sourceId");
+                assertNotNull(key.get("sourceId"));
             } else {
                 logger.error("Failed to process record {} with wrong key type {}.",
                         record, key.getSchema());
