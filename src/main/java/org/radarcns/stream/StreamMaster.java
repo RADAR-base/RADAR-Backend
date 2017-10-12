@@ -155,7 +155,7 @@ public abstract class StreamMaster implements SubCommand {
      *
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
-    public void notifyCrashedStream(@Nonnull String stream) throws InterruptedException {
+    public void notifyCrashedStream(@Nonnull String stream) {
         log.error("[{}] {} is crashed", nameSensor, stream);
 
         log.info("Forcing shutdown of {}", nameSensor);
