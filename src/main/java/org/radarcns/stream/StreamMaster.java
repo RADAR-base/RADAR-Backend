@@ -111,7 +111,7 @@ public abstract class StreamMaster implements SubCommand {
      * Signal all workers to shut down. This does not wait for the workers to shut down.
      */
     @Override
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!streamWorkers.isEmpty()) {
@@ -120,6 +120,7 @@ public abstract class StreamMaster implements SubCommand {
         }
 
         executor.shutdown();
+        executor.awaitTermination(30, TimeUnit.SECONDS);
     }
 
     /**

@@ -56,10 +56,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
     @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        if (records.isEmpty()) {
-            shutdown();
-            return;
-        }
         assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
@@ -82,6 +78,10 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             GenericData.Array count = (GenericData.Array) value.get("count");
             logger.info("Received [{}, {}, {}] E4 messages",
                     count.get(0), count.get(1), count.get(2));
+
+            if ((Double)count.get(0) > 200) {
+                shutdown();
+            }
         }
     }
 }

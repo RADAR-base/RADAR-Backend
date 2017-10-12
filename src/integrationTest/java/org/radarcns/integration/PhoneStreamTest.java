@@ -114,7 +114,7 @@ public class PhoneStreamTest {
         streamProps.put(SESSION_TIMEOUT_MS_CONFIG, String.valueOf(5_000));
         streamProps.put(HEARTBEAT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
 
-        propHandler.getRadarProperties().setStreamProperties(streamProps);
+        propHandler.getRadarProperties().getStreamProperties().putAll(streamProps);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
