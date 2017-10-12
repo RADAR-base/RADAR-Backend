@@ -81,3 +81,6 @@ services:
       - schema-registry-1
     command:
       - integrationTest
+    volumes:
+      - ./build/jacoco:/code/build/jacoco
+      - ./build/reports:/code/build/reports
