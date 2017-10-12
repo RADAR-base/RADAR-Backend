@@ -155,12 +155,16 @@ public abstract class StreamMaster implements SubCommand {
      *
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
-    public void notifyCrashedStream(@Nonnull String stream) {
+    public void notifyCrashedStream(@Nonnull String stream) throws InterruptedException {
         log.error("[{}] {} is crashed", nameSensor, stream);
 
         log.info("Forcing shutdown of {}", nameSensor);
 
-        //TODO implement forcing shutdown
+        try {
+            shutdown();
+        } catch (InterruptedException ex) {
+            log.warn("Shutdown interrupted");
+        }
     }
 
     public void restartStream(final StreamWorker<?, ?> worker) {
