@@ -30,13 +30,17 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.kafka.ObservationKey;
+import org.radarcns.mock.MockProducer;
+import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.passive.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.empatica.E4StreamMaster;
 import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
@@ -44,6 +48,7 @@ import org.radarcns.util.serde.KafkaAvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,8 +106,9 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamMasters(
-                Collections.singletonList(PhoneStreamMaster.class.getName()));
+        propHandler.getRadarProperties().setStreamMasters(Arrays.asList(
+                PhoneStreamMaster.class.getName(),
+                E4StreamMaster.class.getName()));
 
         Map<String, String> streamProps = new HashMap<>();
         streamProps.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
@@ -157,12 +163,31 @@ public class PhoneStreamTest {
         }
 
         sender.close();
+
+        File file = new File(getClass().getResource("/mock_devices.yml").getFile());
+        BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
+
+        MockProducer mockProducer = new MockProducer(mockConfig);
+        mockProducer.start();
+        Thread.sleep(mockConfig.getDuration());
+        mockProducer.shutdown();
+
         consumePhone(offset);
         consumeAggregated(offset / 2);
+        consumeE4();
+    }
+
+    private void consumeE4() throws IOException {
+        String clientId = "consumeE4";
+        E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(),
+                "android_empatica_e4_acceleration_10sec", clientId);
+        monitor.setPollTimeout(280_000L);
+        monitor.start();
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
-        String clientId = "someclinet";
+        String clientId = "consumePhone";
         KafkaMonitor monitor = new PhoneOutputMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
 
         monitor.setPollTimeout(280_000L);
@@ -170,7 +195,7 @@ public class PhoneStreamTest {
     }
 
     private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
-        String clientId = "someclient";
+        String clientId = "consumeAggregated";
         KafkaMonitor monitor = new PhoneAggregateMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
 
         monitor.setPollTimeout(280_000L);
@@ -183,7 +208,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_output"), UUID.randomUUID().toString(), clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_output"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
 
             Properties props = new Properties();
@@ -222,7 +247,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), UUID.randomUUID().toString(), clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
