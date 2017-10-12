@@ -17,7 +17,7 @@
 package org.radarcns.stream.empatica;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
@@ -39,8 +39,8 @@ public class E4InterBeatIntervalStream extends
     private static final Logger logger = LoggerFactory.getLogger(E4InterBeatIntervalStream.class);
 
     public E4InterBeatIntervalStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override

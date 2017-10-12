@@ -24,6 +24,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.aggregator.DoubleAggregation;
@@ -61,6 +62,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
     private final int numThreads;
     private final StreamMaster master;
     private final Collection<StreamDefinition> streamDefinitions;
+    private final String buildVersion;
     private Collection<ScheduledFuture<?>> monitors;
     private final KafkaProperty kafkaProperty;
 
@@ -69,7 +71,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
     private List<KafkaStreams> streams;
 
     public StreamWorker(@Nonnull Collection<StreamDefinition> streamDefinitions,
-            int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
+            int numThreads, @Nonnull StreamMaster aggregator, RadarPropertyHandler properties,
             Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
@@ -78,7 +80,8 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         this.master = aggregator;
         this.streamDefinitions = streamDefinitions;
         this.numThreads = numThreads;
-        this.kafkaProperty = kafkaProperty;
+        this.buildVersion = properties.getRadarProperties().getBuildVersion();
+        this.kafkaProperty = properties.getKafkaProperties();
         this.streams = null;
         this.monitors = null;
         this.monitorLog = monitorLog;
@@ -118,7 +121,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
      * @return Properties for a Kafka Stream
      */
     protected Properties getStreamProperties(@Nonnull StreamDefinition definition) {
-        String localClientId = getClass().getName();
+        String localClientId = getClass().getName() + "-" + buildVersion;
         TimeWindows window = definition.getTimeWindows();
         if (window != null) {
             localClientId += '-' + window.sizeMs + '-' + window.advanceMs;

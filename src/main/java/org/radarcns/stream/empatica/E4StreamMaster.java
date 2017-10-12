@@ -16,13 +16,13 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.List;
-import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
+
+import java.util.List;
 
 /**
  * Singleton StreamMaster for Empatica E4.
@@ -37,21 +37,20 @@ public class E4StreamMaster extends StreamMaster {
     @Override
     protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
         E4Streams defs = E4Streams.getInstance();
         list.add(new E4AccelerationStream(
-                defs.getAccelerationStream(), highPriority(), master, kafkaProperty));
+                defs.getAccelerationStream(), highPriority(), master, propertyHandler));
         list.add(new E4BatteryLevelStream(
-                defs.getBatteryLevelStream(), lowPriority(), master, kafkaProperty));
+                defs.getBatteryLevelStream(), lowPriority(), master, propertyHandler));
         list.add(new E4BloodVolumePulseStream(
-                defs.getBloodVolumePulseStream(), highPriority(), master, kafkaProperty));
+                defs.getBloodVolumePulseStream(), highPriority(), master, propertyHandler));
         list.add(new E4ElectroDermalActivityStream(
-                defs.getElectroDermalActivityStream(), normalPriority(), master, kafkaProperty));
+                defs.getElectroDermalActivityStream(), normalPriority(), master, propertyHandler));
         list.add(new E4HeartRateStream(
-                defs.getHeartRateStream(), lowPriority(), master, kafkaProperty));
+                defs.getHeartRateStream(), lowPriority(), master, propertyHandler));
         list.add(new E4InterBeatIntervalStream(
-                defs.getInterBeatIntervalStream(), lowPriority(), master, kafkaProperty));
+                defs.getInterBeatIntervalStream(), lowPriority(), master, propertyHandler));
         list.add(new E4TemperatureStream(
-                defs.getTemperatureStream(), lowPriority(), master, kafkaProperty));
+                defs.getTemperatureStream(), lowPriority(), master, propertyHandler));
     }
 }

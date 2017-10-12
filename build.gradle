@@ -298,6 +298,10 @@ ext.sharedManifest = manifest {
 // Packaging                                                                 //
 //---------------------------------------------------------------------------//
 
+processResources {
+    expand(version: version)
+}
+
 jar {
     manifest {
         from sharedManifest

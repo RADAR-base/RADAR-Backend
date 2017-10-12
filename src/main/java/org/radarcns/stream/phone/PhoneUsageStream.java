@@ -17,7 +17,7 @@
 package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamDefinition;
@@ -41,8 +41,8 @@ public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEve
     private final PlayStoreLookup playStoreLookup;
 
     public PhoneUsageStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
         playStoreLookup = new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
     }
 

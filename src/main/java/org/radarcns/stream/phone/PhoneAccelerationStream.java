@@ -1,7 +1,7 @@
 package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneAcceleration;
@@ -21,8 +21,8 @@ public class PhoneAccelerationStream extends StreamWorker<ObservationKey, PhoneA
     private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
 
     public PhoneAccelerationStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override

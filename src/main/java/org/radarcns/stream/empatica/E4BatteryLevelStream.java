@@ -17,7 +17,7 @@
 package org.radarcns.stream.empatica;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
@@ -38,8 +38,8 @@ public class E4BatteryLevelStream extends StreamWorker<ObservationKey, EmpaticaE
     private static final Logger logger = LoggerFactory.getLogger(E4BatteryLevelStream.class);
 
     public E4BatteryLevelStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override

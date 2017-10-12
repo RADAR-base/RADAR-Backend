@@ -17,7 +17,7 @@
 package org.radarcns.stream.empatica;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
@@ -40,8 +40,8 @@ public class E4ElectroDermalActivityStream extends
             E4ElectroDermalActivityStream.class);
 
     public E4ElectroDermalActivityStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override

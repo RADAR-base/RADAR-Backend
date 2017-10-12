@@ -1,7 +1,7 @@
 package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneBatteryLevel;
@@ -19,8 +19,8 @@ public class PhoneBatteryStream extends StreamWorker<ObservationKey, PhoneBatter
     private static final Logger logger = LoggerFactory.getLogger(PhoneBatteryStream.class);
 
     public PhoneBatteryStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, KafkaProperty kafkaProperties) {
-        super(definitions, numThread, master, kafkaProperties, logger);
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override
