@@ -1,0 +1,64 @@
+version: 1.0
+released: 2016-11-27
+
+
+#============================= Application =============================#
+#Possible value are standalone or high_performance
+mode: standalone
+
+#============================== Zookeeper ==============================#
+#List of Zookeeper instances
+zookeeper:
+    - host: zookeeper-1
+      port: 2181
+
+#================================ Kafka ================================#
+#List of Kafka brokers
+broker:
+    - host: kafka-1
+      port: 9092
+
+#Kafka internal parameters
+stream_properties:
+  auto_commit_interval_ms: 1000
+  session_timeout_ms: 10000
+
+#============================ Kafka Streams ============================#
+#The number of threads that a stream must be run according is priority
+stream_priority:
+  low: 1
+  normal: 2
+  high: 4
+
+#=========================== Schema Registry ===========================#
+#List of Schema Registry instances
+schema_registry:
+    - host: schema-registry-1
+      port: 8081
+      protocol: http
+
+battery_monitor:
+  level: LOW
+  email_address:
+    - notifier@email
+  topics:
+    - android_empatica_e4_battery_level
+
+disconnect_monitor:
+  email_address:
+    - notifier2@email
+  email_host: localhost
+  email_port: 25
+  email_user: sender@email
+  topics:
+    - android_empatica_e4_temperature
+  timeout: 10
+  alert_repeat_interval: 20
+  alert_repetitions: 2
+
+extras:
+  streaming_timeout_ms: 1000
+
+stream_masters:
+  - org.radarcns.stream.empatica.E4StreamMaster
+  - org.radarcns.stream.phone.PhoneStreamMaster

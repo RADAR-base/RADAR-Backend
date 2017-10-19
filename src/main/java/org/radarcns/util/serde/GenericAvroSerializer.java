@@ -1,31 +1,41 @@
+/*
+ * Copyright 2017 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.radarcns.util.serde;
 
 /**
  * Created by Francesco Nobilia on 12/10/2016.
  */
 
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
-
 
 public class GenericAvroSerializer implements Serializer<GenericRecord> {
 
-    KafkaAvroSerializer inner;
+    private final KafkaAvroSerializer inner;
 
     /**
      * Constructor used by Kafka Streams.
      */
     public GenericAvroSerializer() {
         inner = new KafkaAvroSerializer();
-    }
-
-    public GenericAvroSerializer(SchemaRegistryClient client) {
-        inner = new KafkaAvroSerializer(client);
     }
 
     @Override

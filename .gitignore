@@ -2,6 +2,7 @@
 .idea/
 *.iml
 *.iws
+classes/
 
 # Mac
 .DS_Store
@@ -15,3 +16,11 @@ log/
 
 # Build
 /build/
+
+# logs
+backend.log
+
+# Configuration
+smtp.env
+
+/out/

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<ruleset name="Ruleset from Codacy"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+  <description>
+  This ruleset was parsed from the Codacy default codestyle.
+  </description>
+
+  <rule ref="rulesets/java/strings.xml">
+    <exclude name="ConsecutiveAppendsShouldReuse"/>
+  </rule>
+
+  <rule ref="rulesets/java/unusedcode.xml">
+    <exclude name="UnusedFormalParameter"/>
+  </rule>
+
+  <rule ref="rulesets/java/unnecessary.xml"/>
+  <rule ref="rulesets/java/basic.xml"/>
+
+  <rule ref="rulesets/java/logging-java.xml/SystemPrintln"/>
+  <rule ref="rulesets/java/logging-java.xml/AvoidPrintStackTrace"/>
+
+  <rule ref="rulesets/java/naming.xml">
+    <exclude name="LongVariable"/>
+    <exclude name="ShortVariable"/>
+    <exclude name="BooleanGetMethodName"/>
+    <exclude name="AbstractNaming"/>
+  </rule>
+  <rule ref="rulesets/java/naming.xml/ShortMethodName">
+    <properties>
+      <property name="minimum" value="2"/>
+    </properties>
+  </rule>
+  <rule ref="rulesets/java/naming.xml/VariableNamingConventions">
+    <properties>
+      <property name="violationSuppressRegex" value=".*, 'log(ger)?' is not all capitals\."/>
+    </properties>
+  </rule>
+
+  <rule ref="rulesets/java/imports.xml">
+    <exclude name="TooManyStaticImports"/>
+  </rule>
+
+  <rule ref="rulesets/java/strictexception.xml">
+    <exclude name="AvoidCatchingGenericException"/>
+  </rule>
+
+  <rule ref="rulesets/java/design.xml">
+    <exclude name="AvoidDeeplyNestedIfStmts"/>
+    <exclude name="SwitchDensity"/>
+    <exclude name="AccessorClassGeneration"/>
+    <exclude name="ConstructorCallsOverridableMethod"/>
+    <exclude name="AvoidSynchronizedAtMethodLevel"/>
+    <exclude name="TooFewBranchesForASwitchStatement"/>
+    <exclude name="PositionLiteralsFirstInComparisons"/>
+    <exclude name="ConfusingTernary"/>
+    <exclude name="UseVarargs"/>
+  </rule>
+
+  <rule ref="rulesets/java/codesize.xml">
+    <exclude name="CyclomaticComplexity"/>
+    <exclude name="ExcessiveClassLength"/>
+    <exclude name="ExcessivePublicCount"/>
+    <exclude name="TooManyFields"/>
+    <exclude name="TooManyMethods"/>
+  </rule>
+
+  <rule ref="rulesets/java/empty.xml">
+    <exclude name="EmptyCatchBlock"/>
+  </rule>
+
+  <rule ref="rulesets/java/finalizers.xml"/>
+  <rule ref="rulesets/java/braces.xml"/>
+  <rule ref="rulesets/java/clone.xml"/>
+
+  <rule ref="rulesets/java/controversial.xml/AssignmentInOperand"/>
+  <rule ref="rulesets/java/controversial.xml/OneDeclarationPerLine"/>
+  <rule ref="rulesets/java/controversial.xml/SuspiciousOctalEscape"/>
+  <rule ref="rulesets/java/controversial.xml/UnnecessaryParentheses"/>
+
+  <rule ref="rulesets/java/optimizations.xml/UseArrayListInsteadOfVector"/>
+  <rule ref="rulesets/java/optimizations.xml/UseArraysAsList"/>
+  <rule ref="rulesets/java/optimizations.xml/AvoidArrayLoops"/>
+  <rule ref="rulesets/java/optimizations.xml/UnnecessaryWrapperObjectCreation"/>
+  <rule ref="rulesets/java/optimizations.xml/AddEmptyString"/>
+  <rule ref="rulesets/java/optimizations.xml/PrematureDeclaration"/>
+</ruleset>

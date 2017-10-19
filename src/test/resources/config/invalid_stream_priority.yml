@@ -1,0 +1,11 @@
+version: 1.0
+released: 2016-11-27
+
+#============================= Application =============================#
+#Possible value are standalone or high_performance
+mode: standalone
+
+stream_priority:
+  low: 0
+  medium: 1
+  high: 1

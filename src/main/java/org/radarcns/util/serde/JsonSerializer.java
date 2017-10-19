@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.radarcns.util.serde;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -14,9 +30,9 @@ import java.util.Map;
 
 public class JsonSerializer<T> implements Serializer<T> {
     
-    private final static Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
     
-    private final static ObjectWriter writer = getFieldMapper().writer();
+    private static final ObjectWriter WRITER = getFieldMapper().writer();
 
     private static ObjectMapper getFieldMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -29,13 +45,13 @@ public class JsonSerializer<T> implements Serializer<T> {
 
     @Override
     public void configure(Map<String, ?> map, boolean b) {
-
+        // no configuration needed
     }
 
     @Override
     public byte[] serialize(String topic, T t) {
         try {
-            return writer.writeValueAsBytes(t);
+            return WRITER.writeValueAsBytes(t);
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize value {} in topic {}", t, topic, e);
             return null;
@@ -44,6 +60,6 @@ public class JsonSerializer<T> implements Serializer<T> {
 
     @Override
     public void close() {
-
+        // noop
     }
 }

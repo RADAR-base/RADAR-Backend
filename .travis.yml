@@ -1,9 +1,40 @@
 language: java
-# Update to the latest version of Java 8
-sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
 jdk:
   - oraclejdk8
+sudo: required
+services:
+  - docker
+env:
+  DOCKER_COMPOSE_VERSION: 1.9.0
+  TERM: dumb
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+before_install:
+  - mkdir -p "$HOME/bin";
+  - export PATH="$PATH:$HOME/bin";
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > "$HOME/bin/docker-compose";
+  - chmod +x "$HOME/bin/docker-compose";
+script:
+  - ./gradlew check
+  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
+  - sudo docker-compose down
+after_script:
+  - ./gradlew sendCoverageToCodacy
+
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file_glob: true
+  file: "build/libs/*.jar"
+  skip_cleanup: true
+  on:
+    tags: true
+
+after_deploy:
+  - ./gradlew bintrayUpload

@@ -1,32 +1,57 @@
+/*
+ * Copyright 2017 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.radarcns.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 
 /**
- * Created by Francesco Nobilia on 10/11/2016.
+ * POJO representing the yml file
  */
 public class ConfigRadar {
-
-    private final Logger logger = LoggerFactory.getLogger(ConfigRadar.class);
-
     private Date released;
     private String version;
-    private String log_path;
     private String mode;
-    private List<Server> zookeeper;
-    private List<Server> broker;
-    private List<Server> schema_registry;
-    private Integer auto_commit_interval_ms;
-    private Integer session_timeout_ms;
-    private Map<String,Integer> stream_priority;
-
-    public ConfigRadar() {}
+    private List<ServerConfig> zookeeper;
+    private List<ServerConfig> broker;
+    @JsonProperty("schema_registry")
+    private List<ServerConfig> schemaRegistry;
+    @JsonProperty("rest_proxy")
+    private ServerConfig restProxy;
+    @JsonIgnore
+    private Map<Priority, Integer> streamPriority;
+    @JsonProperty("battery_monitor")
+    private BatteryMonitorConfig batteryMonitor;
+    @JsonProperty("disconnect_monitor")
+    private DisconnectMonitorConfig disconnectMonitor;
+    @JsonProperty("stream_masters")
+    private List<String> streamMasters;
+    @JsonProperty("persistence_path")
+    private String persistencePath;
+    private Map<String, Object> extras;
+    @JsonProperty("stream_properties")
+    private Map<String, String> streamProperties = new HashMap<>();
 
     public Date getReleased() {
         return released;
@@ -44,14 +69,6 @@ public class ConfigRadar {
         this.version = version;
     }
 
-    public String getLog_path() {
-        return log_path;
-    }
-
-    public void setLog_path(String log_path) {
-        this.log_path = log_path;
-    }
-
     public boolean isStandalone() {
         return mode.equals("standalone");
     }
@@ -64,106 +81,166 @@ public class ConfigRadar {
         return mode;
     }
 
-    public List<Server> getZookeeper() {
+    public List<ServerConfig> getZookeeper() {
         return zookeeper;
     }
 
-    public void setZookeeper(List<Server> zookeeper) {
+    public void setZookeeper(List<ServerConfig> zookeeper) {
         this.zookeeper = zookeeper;
     }
 
-    public List<Server> getBroker() {
+    public List<ServerConfig> getBroker() {
         return broker;
     }
 
-    public void setBroker(List<Server> broker) {
+    public void setBroker(List<ServerConfig> broker) {
         this.broker = broker;
     }
 
-    public Integer getAuto_commit_interval_ms() {
-        return auto_commit_interval_ms;
+    public Map<String, String> getStreamProperties() {
+        return streamProperties;
     }
 
-    public void setAuto_commit_interval_ms(Integer auto_commit_interval_ms) {
-        this.auto_commit_interval_ms = auto_commit_interval_ms;
+    public void setStreamProperties(Map<String, String> streamProperties) {
+        this.streamProperties = streamProperties;
     }
 
-    public Integer getSession_timeout_ms() {
-        return session_timeout_ms;
+    @JsonProperty("stream_priority")
+    public Map<String, Integer> getStreamPriority() {
+        if (streamPriority == null) {
+            return null;
+        }
+        Map<String, Integer> stringStreamPriority = new HashMap<>();
+        for (Map.Entry<Priority, Integer> entry : streamPriority.entrySet()) {
+            stringStreamPriority.put(entry.getKey().getParam(), entry.getValue());
+        }
+        return stringStreamPriority;
     }
 
-    public void setSession_timeout_ms(Integer session_timeout_ms) {
-        this.session_timeout_ms = session_timeout_ms;
+    @JsonProperty("stream_priority")
+    public void setStreamPriority(Map<String, Integer> streamPriority) {
+        if (streamPriority == null) {
+            this.streamPriority = null;
+            return;
+        }
+
+        this.streamPriority = new EnumMap<>(Priority.class);
+
+        for (Map.Entry<String, Integer> entry : streamPriority.entrySet()) {
+            if (entry.getValue() < 1) {
+                throw new IllegalArgumentException("Stream priorities cannot be smaller than 1");
+            }
+            Priority priority = Priority.valueOf(entry.getKey().toUpperCase(Locale.US));
+            this.streamPriority.put(priority, entry.getValue());
+        }
     }
 
-    public Map<String, Integer> getStream_priority() {
-        return stream_priority;
+    public List<ServerConfig> getSchemaRegistry() {
+        return schemaRegistry;
     }
 
-    public void setStream_priority(Map<String, Integer> stream_priority) {
-        this.stream_priority = stream_priority;
+    public void setSchemaRegistry(List<ServerConfig> schemaRegistry) {
+        this.schemaRegistry = schemaRegistry;
     }
 
-    public List<Server> getSchema_registry() {
-        return schema_registry;
+    public ServerConfig getRestProxy() {
+        return restProxy;
     }
 
-    public void setSchema_registry(List<Server> schema_registry) {
-        this.schema_registry = schema_registry;
+    public void setRestProxy(ServerConfig restProxy) {
+        this.restProxy = restProxy;
     }
 
-    public Integer threadsByPriority(PropertiesRadar.Priority level){
-        return stream_priority.get(level.getParam());
+    public int threadsByPriority(Priority level, int defaultValue) {
+        if (defaultValue <= 0) {
+            throw new IllegalArgumentException("Default number of threads must be larger than 0");
+        }
+        if (streamPriority == null) {
+            return defaultValue;
+        }
+        Integer mapValue = streamPriority.get(level);
+        if (mapValue == null) {
+            return defaultValue;
+        }
+        return mapValue;
     }
 
-    public String getZookeeperPath(){
-        return zookeeper.get(0).getPath();
+    public String getZookeeperPaths() {
+        if (zookeeper == null) {
+            throw new IllegalStateException("'zookeeper' is not configured");
+        }
+        return ServerConfig.getPaths(zookeeper);
     }
 
-    public String getBrokerPath(){
-        return broker.get(0).getPath();
+    public String getBrokerPaths() {
+        if (broker == null) {
+            throw new IllegalStateException("Kafka 'broker' is not configured");
+        }
+        return ServerConfig.getPaths(broker);
     }
 
-    public String getSchemaRegistryPath(){
-        return schema_registry.get(0).getPath();
+    public String getSchemaRegistryPaths() {
+        if (schemaRegistry == null) {
+            throw new IllegalStateException("'schema_registry' is not configured");
+        }
+
+        return ServerConfig.getPaths(schemaRegistry);
     }
 
-    public String infoThread(){
-        String tab = "  ";
-        return "{" + "\n" + stream_priority.keySet().stream().map(item -> tab + tab + item.toLowerCase() + "=" + stream_priority.get(item)).collect(Collectors.joining(" \n")) + "\n" + tab + "}";
+    public String getRestProxyPath() {
+        if (restProxy == null) {
+            throw new IllegalStateException("'rest_proxy' is not configured");
+        }
+
+        return restProxy.getPath();
+    }
+
+    public String infoThread() {
+        return streamPriority.toString();
+    }
+
+    public BatteryMonitorConfig getBatteryMonitor() {
+        return batteryMonitor;
+    }
+
+    public void setBatteryMonitor(BatteryMonitorConfig batteryMonitor) {
+        this.batteryMonitor = batteryMonitor;
+    }
+
+    public DisconnectMonitorConfig getDisconnectMonitor() {
+        return disconnectMonitor;
+    }
+
+    public void setDisconnectMonitor(DisconnectMonitorConfig disconnectMonitor) {
+        this.disconnectMonitor = disconnectMonitor;
+    }
+
+    public List<String> getStreamMasters() {
+        return streamMasters;
+    }
+
+    public void setStreamMasters(List<String> streamWorker) {
+        this.streamMasters = streamWorker;
+    }
+
+    public String getPersistencePath() {
+        return persistencePath;
+    }
+
+    public void setPersistencePath(String persistencePath) {
+        this.persistencePath = persistencePath;
+    }
+
+    public Map<String, Object> getExtras() {
+        return extras;
+    }
+
+    public void setExtras(Map<String, Object> extras) {
+        this.extras = extras;
     }
 
     @Override
     public String toString() {
-        return "Settings{" + "\n" +
-                "  " + "released=" + released + "\n" +
-                "  " + "version='" + version + '\'' + "\n" +
-                "  " + "log_path='" + log_path + '\'' + "\n" +
-                "  " + "mode='" + mode + '\'' + "\n" +
-                "  " + "zookeeper=" + zookeeper + "\n" +
-                "  " + "broker=" + broker + "\n" +
-                "  " + "schema_registry=" + schema_registry + "\n" +
-                "  " + "auto_commit_interval_ms=" + auto_commit_interval_ms + "\n" +
-                "  " + "session_timeout_ms=" + session_timeout_ms + "\n" +
-                "  " + "streams_priority=" + stream_priority + "\n" +
-                '}';
-    }
-
-    public String info() {
-
-        String tab = "  ";
-
-        return "Settings{" + "\n" +
-                tab + "released=" + released + "\n" +
-                tab + "version='" + version + '\'' + "\n" +
-                tab + "log_path='" + log_path + '\'' + "\n" +
-                tab + "mode='" + mode + '\'' + "\n" +
-                tab + "zookeeper={" + "\n" + zookeeper.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "broker={" + "\n" + broker.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "schema_registry={" + "\n" + schema_registry.stream().map(item -> tab + tab + item.info()).collect(Collectors.joining(" \n")) + "\n" + tab + "}" + "\n" +
-                tab + "auto_commit_interval_ms=" + auto_commit_interval_ms + "\n" +
-                tab + "session_timeout_ms=" + session_timeout_ms + "\n" +
-                tab + "streams_priority=" + infoThread() + "\n" +
-                '}';
+        return new YamlConfigLoader().prettyString(this);
     }
 }
