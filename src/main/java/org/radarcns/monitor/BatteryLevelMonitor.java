@@ -97,8 +97,9 @@ public class BatteryLevelMonitor extends
                             key.getSourceId(), key.getUserId(), record.value());
                 }
             } else if (previousLevel <= Status.LOW.getLevel()) {
-                 // Remove the email alert for battery monitor for normal level because it is not crucial 
-                //  and to prevent spamming a user's email account. Uncomment the line below if needed.
+                // Remove the email alert for battery monitor for normal level because 
+                // it is not crucial and to prevent spamming a user's email account. 
+                // Uncomment the line below if needed.
                 // updateStatus(key, Status.NORMAL);
                 logger.info("Battery of sensor {} of user {} is has returned to normal: {}",
                         key.getSourceId(), key.getUserId(), record.value());
