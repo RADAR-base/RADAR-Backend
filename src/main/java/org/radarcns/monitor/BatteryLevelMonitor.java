@@ -97,7 +97,7 @@ public class BatteryLevelMonitor extends
                             key.getSourceId(), key.getUserId(), record.value());
                 }
             } else if (previousLevel <= Status.LOW.getLevel()) {
-                updateStatus(key, Status.NORMAL);
+                // updateStatus(key, Status.NORMAL);
                 logger.info("Battery of sensor {} of user {} is has returned to normal: {}",
                         key.getSourceId(), key.getUserId(), record.value());
             }
