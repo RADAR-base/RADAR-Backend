@@ -55,7 +55,8 @@ public class KafkaMonitorFactoryTest {
         assertEquals(BatteryLevelMonitor.class, monitor.getClass());
         BatteryLevelMonitor batteryMonitor = (BatteryLevelMonitor) monitor;
         batteryMonitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
-        assertTrue(new File(config.getPersistencePath(), "battery_monitors_2.yml").isFile());
+        assertTrue(new File(config.getPersistencePath(), "battery_monitors_" +
+                BatteryLevelMonitor.class.getName() + "-1.yml").isFile());
     }
 
     @Test(expected = IOException.class)
@@ -79,7 +80,8 @@ public class KafkaMonitorFactoryTest {
         assertEquals(DisconnectMonitor.class, monitor.getClass());
         DisconnectMonitor disconnectMonitor = (DisconnectMonitor) monitor;
         disconnectMonitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
-        assertTrue(new File(config.getPersistencePath(), "disconnect_monitor_1.yml").isFile());
+        assertTrue(new File(config.getPersistencePath(), "disconnect_monitor_" +
+                DisconnectMonitor.class.getName() + "-1.yml").isFile());
     }
 
     @Test

@@ -60,7 +60,7 @@ public class BatteryLevelMonitor extends
      */
     public BatteryLevelMonitor(RadarPropertyHandler radar, Collection<String> topics,
             EmailSender sender, Status minLevel, long logInterval) {
-        super(radar, topics, "battery_monitors", "2", new BatteryLevelState());
+        super(radar, topics, "battery_monitors", "1", new BatteryLevelState());
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
