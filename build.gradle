@@ -319,6 +319,11 @@ shadowJar {
     exclude 'log4j.properties'
 }
 
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar.gz'
+}
+
 // custom tasks for creating source/javadoc jars
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -392,7 +397,7 @@ bintray {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.1'
-    distributionUrl distributionUrl.replace("bin", "all")
+    distributionType 'all'
 }
 
 run {
