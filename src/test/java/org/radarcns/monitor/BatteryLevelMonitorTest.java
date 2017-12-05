@@ -90,14 +90,14 @@ public class BatteryLevelMonitorTest {
         sendMessage(monitor, 1.0f, false);
         sendMessage(monitor, 0.1f, true);
         sendMessage(monitor, 0.1f, false);
-        sendMessage(monitor, 0.3f, true);
+        sendMessage(monitor, 0.3f, false);
         sendMessage(monitor, 0.4f, false);
         sendMessage(monitor, 0.01f, true);
         sendMessage(monitor, 0.01f, false);
         sendMessage(monitor, 0.1f, false);
         sendMessage(monitor, 0.1f, false);
         sendMessage(monitor, 0.01f, true);
-        sendMessage(monitor, 1f, true);
+        sendMessage(monitor, 1f, false);
     }
 
     private void sendMessage(BatteryLevelMonitor monitor, float batteryLevel, boolean sentMessage)

@@ -88,10 +88,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
+        String monitorClientId = getClass().getName() + "-" + clientId;
         properties.setProperty(KEY_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         properties.setProperty(GROUP_ID_CONFIG, groupId);
-        properties.setProperty(CLIENT_ID_CONFIG, clientId);
+        properties.setProperty(CLIENT_ID_CONFIG, monitorClientId);
         properties.setProperty(ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.setProperty(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1001");
         properties.setProperty(SESSION_TIMEOUT_MS_CONFIG, "15101");
@@ -105,7 +106,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         this.topics = topics;
         this.pollTimeout = new AtomicLong(Long.MAX_VALUE);
         this.done = false;
-        this.clientId = clientId;
+        this.clientId = monitorClientId;
         this.groupId = groupId;
 
         PersistentStateStore localStateStore;
@@ -121,7 +122,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         S localState = stateDefault;
         if (stateStore != null && stateDefault != null) {
             try {
-                localState = stateStore.retrieveState(groupId, clientId, stateDefault);
+                localState = stateStore.retrieveState(groupId, monitorClientId, stateDefault);
                 logger.info("Using existing {} from persistence store.",
                         stateDefault.getClass().getName());
             } catch (IOException ex) {
