@@ -1,5 +1,5 @@
 data:
   - file: integration_test.csv
     topic: integration_test
-    key_schema: org.radarcns.key.MeasurementKey
+    key_schema: org.radarcns.kafka.ObservationKey
     value_schema: org.radarcns.aggregator.DoubleArrayAggregator

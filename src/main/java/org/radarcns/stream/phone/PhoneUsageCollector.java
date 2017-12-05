@@ -1,7 +1,7 @@
 package org.radarcns.stream.phone;
 
-import org.radarcns.phone.PhoneUsageEvent;
-import org.radarcns.phone.UsageEventType;
+import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.passive.phone.UsageEventType;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

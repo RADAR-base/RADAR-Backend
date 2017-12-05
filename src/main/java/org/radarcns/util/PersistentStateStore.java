@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.radarcns.config.YamlConfigLoader;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 
 /** Store a state for a Kafka consumer. */
 public class PersistentStateStore {
@@ -94,10 +94,17 @@ public class PersistentStateStore {
      * @param key key to serialize
      * @return unique serialized form
      */
-    public static String measurementKeyToString(MeasurementKey key) {
+    public static String measurementKeyToString(ObservationKey key) {
+        String projectId = key.getProjectId();
         String userId = key.getUserId();
         String sourceId = key.getSourceId();
-        StringBuilder builder = new StringBuilder(userId.length() + 5 + sourceId.length());
+        StringBuilder builder = new StringBuilder(
+                (projectId == null ? 0 : projectId.length())
+                        + userId.length() + 6 + sourceId.length());
+        if (projectId != null) {
+            escape(projectId, builder);
+        }
+        builder.append(SEPARATOR);
         escape(userId, builder);
         builder.append(SEPARATOR);
         escape(sourceId, builder);
@@ -118,15 +125,16 @@ public class PersistentStateStore {
 
     /**
      * Efficiently serializes a measurement key serialized with
-     * {@link #measurementKeyToString(MeasurementKey)}.
+     * {@link #measurementKeyToString(ObservationKey)}.
      *
      * @param string serialized form
      * @return original measurement key
      */
-    public static MeasurementKey stringToKey(String string) {
+    public static ObservationKey stringToKey(String string) {
         StringBuilder builder = new StringBuilder(string.length());
-        MeasurementKey key = new MeasurementKey();
+        ObservationKey key = new ObservationKey();
         boolean hasSlash = false;
+        int numFound = 0;
         for (char c : string.toCharArray()) {
             if (c == '\\') {
                 if (hasSlash) {
@@ -140,8 +148,18 @@ public class PersistentStateStore {
                     builder.append(c);
                     hasSlash = false;
                 } else {
-                    key.setUserId(builder.toString());
-                    builder.setLength(0);
+                    if (numFound == 0) {
+                        numFound++;
+                        if (builder.length() == 0) {
+                            key.setProjectId(null);
+                        } else {
+                            key.setProjectId(builder.toString());
+                            builder.setLength(0);
+                        }
+                    } else {
+                        key.setUserId(builder.toString());
+                        builder.setLength(0);
+                    }
                 }
             } else {
                 builder.append(c);

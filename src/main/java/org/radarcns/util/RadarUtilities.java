@@ -18,12 +18,12 @@ package org.radarcns.util;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.radarcns.aggregator.DoubleAggregator;
-import org.radarcns.aggregator.DoubleArrayAggregator;
 import org.radarcns.aggregator.PhoneUsageAggregator;
-import org.radarcns.empatica.EmpaticaE4Acceleration;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.stream.aggregator.DoubleAggregation;
+import org.radarcns.stream.aggregator.DoubleArrayAggregation;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
@@ -35,21 +35,21 @@ import org.radarcns.stream.phone.TemporaryPackageKey;
 public interface RadarUtilities {
 
     /**
-     * Creates a WindowedKey for a window of MeasurementKey.
+     * Creates a AggregateKey for a window of ObservationKey.
      * @param window Windowed measurement keys
-     * @return relevant WindowedKey
+     * @return relevant AggregateKey
      */
-    WindowedKey getWindowed(Windowed<MeasurementKey> window);
+    AggregateKey getWindowed(Windowed<ObservationKey> window);
 
-    WindowedKey getWindowedTuple(Windowed<TemporaryPackageKey> window);
+    AggregateKey getWindowedTuple(Windowed<TemporaryPackageKey> window);
 
-    KeyValue<WindowedKey, DoubleArrayAggregator> collectorToAvro(
-            Windowed<MeasurementKey> window, DoubleArrayCollector collector);
+    KeyValue<AggregateKey, DoubleArrayAggregation> collectorToAvro(
+            Windowed<ObservationKey> window, DoubleArrayCollector collector);
 
-    KeyValue<WindowedKey, DoubleAggregator> collectorToAvro(
-            Windowed<MeasurementKey> window, DoubleValueCollector collector);
+    KeyValue<AggregateKey, DoubleAggregation> collectorToAvro(
+            Windowed<ObservationKey> window, DoubleValueCollector collector);
 
-    KeyValue<WindowedKey, PhoneUsageAggregator> collectorToAvro(
+    KeyValue<AggregateKey, PhoneUsageAggregator> collectorToAvro(
             Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector);
 
     double floatToDouble(float input);

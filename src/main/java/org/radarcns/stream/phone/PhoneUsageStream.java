@@ -16,19 +16,21 @@
 
 package org.radarcns.stream.phone;
 
-import javax.annotation.Nonnull;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.KafkaProperty;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.phone.PhoneUsageEvent;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEvent> {
-    private static final Logger log = LoggerFactory.getLogger(PhoneUsageStream.class);
+import javax.annotation.Nonnull;
+import java.util.Collection;
+
+public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
+    private static final Logger logger = LoggerFactory.getLogger(PhoneUsageStream.class);
 
     // 1 day until an item is refreshed
     private static final int CACHE_TIMEOUT = 24 * 3600;
@@ -38,23 +40,23 @@ public class PhoneUsageStream extends StreamWorker<MeasurementKey, PhoneUsageEve
 
     private final PlayStoreLookup playStoreLookup;
 
-    public PhoneUsageStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(PhoneStreams.getInstance().getUsageStream(), clientId,
-                numThread, master, kafkaProperties, log);
-        playStoreLookup =  new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
+    public PhoneUsageStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
+        playStoreLookup = new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
     }
 
     @Override
-    protected KStream<MeasurementKey, PhoneUsageEvent> defineStream(
-            @Nonnull KStream<MeasurementKey, PhoneUsageEvent> kstream) {
+    protected KStream<ObservationKey, PhoneUsageEvent> implementStream(StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream
-            .map((key, value) -> {
+            .mapValues(value -> {
                 String packageName = value.getPackageName();
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
+                logger.info("Looked up {}: {}", packageName, category.getCategoryName());
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
-                return new KeyValue<>(key, value);
+                return value;
             });
     }
 }

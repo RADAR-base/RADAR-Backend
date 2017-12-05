@@ -53,6 +53,9 @@ public class ConfigRadar {
     @JsonProperty("stream_properties")
     private Map<String, String> streamProperties = new HashMap<>();
 
+    @JsonProperty("build_version")
+    private String buildVersion;
+
     public Date getReleased() {
         return released;
     }
@@ -242,5 +245,13 @@ public class ConfigRadar {
     @Override
     public String toString() {
         return new YamlConfigLoader().prettyString(this);
+    }
+
+    public String getBuildVersion() {
+        return buildVersion;
+    }
+
+    public void setBuildVersion(String buildVersion) {
+        this.buildVersion = buildVersion;
     }
 }

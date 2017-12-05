@@ -16,18 +16,40 @@
 
 package org.radarcns.stream;
 
-import java.io.IOException;
-import javax.annotation.Nonnull;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.config.KafkaProperty;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.stream.aggregator.DoubleAggregation;
+import org.radarcns.stream.aggregator.DoubleArrayAggregation;
+import org.radarcns.stream.collector.DoubleArrayCollector;
+import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.util.Monitor;
+import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarUtilities;
+import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ScheduledFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.apache.kafka.streams.KeyValue.pair;
+import static org.radarcns.util.Serialization.floatToDouble;
+import static org.radarcns.util.StreamUtil.first;
+import static org.radarcns.util.StreamUtil.second;
 
 /**
  * Abstraction of a Kafka Stream.
@@ -36,63 +58,84 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         implements Thread.UncaughtExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(StreamWorker.class);
 
+    private final Logger monitorLog;
     private final int numThreads;
-    private final String clientId;
     private final StreamMaster master;
-    private final StreamDefinition streamDefinition;
-    private final Monitor monitor;
+    private final Collection<StreamDefinition> streamDefinitions;
+    private final String buildVersion;
+    private Collection<ScheduledFuture<?>> monitors;
     private final KafkaProperty kafkaProperty;
 
-    private KafkaStreams streams;
+    protected final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    public StreamWorker(@Nonnull StreamDefinition streamDefinition, @Nonnull String clientId,
-            int numThreads, @Nonnull StreamMaster aggregator, KafkaProperty kafkaProperty,
+    private List<KafkaStreams> streams;
+
+    public StreamWorker(@Nonnull Collection<StreamDefinition> streamDefinitions,
+            int numThreads, @Nonnull StreamMaster aggregator, RadarPropertyHandler properties,
             Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
         }
-        this.clientId = clientId;
         this.master = aggregator;
-        this.streamDefinition = streamDefinition;
+        this.streamDefinitions = streamDefinitions;
         this.numThreads = numThreads;
-        this.kafkaProperty = kafkaProperty;
+        this.buildVersion = properties.getRadarProperties().getBuildVersion();
+        this.kafkaProperty = properties.getKafkaProperties();
         this.streams = null;
-
-        if (monitorLog == null) {
-            this.monitor = null;
-        } else {
-            this.monitor = new Monitor(monitorLog, "records have been read from "
-                    + streamDefinition.getInputTopic());
-        }
+        this.monitors = null;
+        this.monitorLog = monitorLog;
     }
 
     /**
      * Create a Kafka Stream builder. This implementation will create a stream from given
      * input topic to given output topic. It monitors the amount of messages that are read.
      */
-    protected KStreamBuilder createBuilder() throws IOException {
+    protected KeyValue<ScheduledFuture<?>, KafkaStreams> createBuilder(StreamDefinition def) {
+        Monitor monitor;
+        ScheduledFuture<?> future = null;
+        if (monitorLog != null) {
+            monitor = new Monitor(monitorLog, "records have been read from "
+                    + def.getInputTopic() + " to " + def.getOutputTopic());
+            future = master.addMonitor(monitor);
+        } else {
+            monitor = null;
+        }
+
         KStreamBuilder builder = new KStreamBuilder();
 
-        StreamDefinition definition = getStreamDefinition();
-        String inputTopic = definition.getInputTopic().getName();
-        String outputTopic = definition.getOutputTopic().getName();
+        implementStream(def,
+                builder.<K, V>stream(def.getInputTopic().getName())
+                    .map((k, v) -> {
+                        if (monitor != null) {
+                            monitor.increment();
+                        }
+                        return pair(k, v);
+                    })
+        ).to(def.getOutputTopic().getName());
 
-        KStream<K, V> inputStream = builder.<K, V>stream(inputTopic)
-                .map((k, v) -> {
-                    incrementMonitor();
-                    return new KeyValue<>(k, v);
-                });
+        return pair(future, new KafkaStreams(builder, getStreamProperties(def)));
+    }
 
-        defineStream(inputStream).to(outputTopic);
+    /**
+     * @return Properties for a Kafka Stream
+     */
+    protected Properties getStreamProperties(@Nonnull StreamDefinition definition) {
+        String localClientId = getClass().getName() + "-" + buildVersion;
+        TimeWindows window = definition.getTimeWindows();
+        if (window != null) {
+            localClientId += '-' + window.sizeMs + '-' + window.advanceMs;
+        }
 
-        return builder;
+        return kafkaProperty.getStreamProperties(localClientId, numThreads,
+                DeviceTimestampExtractor.class);
     }
 
     /**
      * Defines the stream computation.
      */
-    protected abstract KStream<?, ?> defineStream(@Nonnull KStream<K, V> kstream);
+    protected abstract KStream<?, ?> implementStream(StreamDefinition definition,
+            @Nonnull KStream<K, V> kstream);
 
     /**
      * Starts the stream and notify the StreamMaster.
@@ -102,30 +145,32 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
             throw new IllegalStateException("Streams already started. Cannot start them again.");
         }
 
-        log.info("Creating the stream {} from topic {} to topic {}",
-                clientId, streamDefinition.getInputTopic(),
-                streamDefinition.getOutputTopic());
+        List<KeyValue<ScheduledFuture<?>, KafkaStreams>> streamBuilders = getStreamDefinitions()
+                .parallelStream()
+                .map(this::createBuilder)
+                .collect(Collectors.toList());
 
-        try {
-            if (monitor != null) {
-                master.addMonitor(monitor);
-            }
-            streams = new KafkaStreams(createBuilder(),
-                    kafkaProperty.getStream(clientId, numThreads, DeviceTimestampExtractor.class));
-            streams.setUncaughtExceptionHandler(this);
-            streams.start();
+        monitors = streamBuilders.stream()
+                .map(first())
+                .collect(Collectors.toList());
 
-            master.notifyStartedStream(this);
-        } catch (IOException ex) {
-            uncaughtException(Thread.currentThread(), ex);
-        }
+        streams = streamBuilders.stream()
+                .map(second())
+                .collect(Collectors.toList());
+
+        streams.forEach(stream -> {
+            stream.setUncaughtExceptionHandler(this);
+            stream.start();
+        });
+
+        master.notifyStartedStream(this);
     }
 
     /**
      * Close the stream and notify the StreamMaster.
      */
     public void shutdown() {
-        log.info("Shutting down {} stream", clientId);
+        log.info("Shutting down {} stream", getClass().getSimpleName());
 
         closeStreams();
 
@@ -145,28 +190,62 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         if (e instanceof StreamsException) {
             master.restartStream(this);
         } else {
-            master.notifyCrashedStream(clientId);
+            master.notifyCrashedStream(getClass().getSimpleName());
         }
     }
 
     private void closeStreams() {
         if (streams != null) {
-            streams.close();
+            streams.forEach(KafkaStreams::close);
             streams = null;
+        }
+
+        if (monitors != null) {
+            monitors.forEach(f -> f.cancel(false));
+            monitors = null;
         }
     }
 
-    protected StreamDefinition getStreamDefinition() {
-        return streamDefinition;
+    protected Collection<StreamDefinition> getStreamDefinitions() {
+        return streamDefinitions;
     }
 
-    /** Increment the number of messages processed. */
-    protected void incrementMonitor() {
-        monitor.increment();
+    protected final KStream<AggregateKey, DoubleAggregation> aggregateFloat(
+            StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, V> kstream, Function<V, Float> field) {
+        return aggregateDouble(definition, kstream, v -> floatToDouble(field.apply(v)));
+    }
+
+    protected final KStream<AggregateKey, DoubleAggregation> aggregateDouble(
+            StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, V> kstream, Function<V, Double> field) {
+        return kstream.groupByKey()
+                .aggregate(
+                        DoubleValueCollector::new,
+                        (k, v, valueCollector) -> valueCollector.add(field.apply(v)),
+                        definition.getTimeWindows(),
+                        RadarSerdes.getInstance().getDoubleCollector(),
+                        definition.getStateStoreName())
+                .toStream()
+                .map(utilities::collectorToAvro);
+    }
+
+    protected final KStream<AggregateKey, DoubleArrayAggregation> aggregateDoubleArray(
+            StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, V> kstream, Function<V, double[]> field) {
+        return kstream.groupByKey()
+                .aggregate(
+                        DoubleArrayCollector::new,
+                        (k, v, valueCollector) -> valueCollector.add(field.apply(v)),
+                        definition.getTimeWindows(),
+                        RadarSerdes.getInstance().getDoubleArrayCollector(),
+                        definition.getStateStoreName())
+                .toStream()
+                .map(utilities::collectorToAvro);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '<' + clientId + '>';
+        return getClass().getSimpleName();
     }
 }

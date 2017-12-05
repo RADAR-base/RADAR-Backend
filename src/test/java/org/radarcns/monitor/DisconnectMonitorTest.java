@@ -30,7 +30,7 @@ import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.monitor.DisconnectMonitor.MissingRecordsReport;
 import org.radarcns.util.EmailSender;
@@ -68,6 +68,7 @@ public class DisconnectMonitorTest {
     public void setUp() {
         Parser parser = new Parser();
         keySchema = parser.parse("{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
+                + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
                 + "{\"name\": \"userId\", \"type\": \"string\"},"
                 + "{\"name\": \"sourceId\", \"type\": \"string\"}"
                 + "]}");
@@ -135,6 +136,7 @@ public class DisconnectMonitorTest {
     private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages)
             throws MessagingException {
         Record key = new Record(keySchema);
+        key.put("projectId", "test");
         key.put("sourceId", source);
         key.put("userId", "me");
 
@@ -154,9 +156,9 @@ public class DisconnectMonitorTest {
         File base = folder.newFolder();
         PersistentStateStore stateStore = new PersistentStateStore(base);
         DisconnectMonitorState state = new DisconnectMonitorState();
-        MeasurementKey key1 = new MeasurementKey("a", "b");
-        MeasurementKey key2 = new MeasurementKey("b", "c");
-        MeasurementKey key3 = new MeasurementKey("c", "d");
+        ObservationKey key1 = new ObservationKey("test", "a", "b");
+        ObservationKey key2 = new ObservationKey("test", "b", "c");
+        ObservationKey key3 = new ObservationKey("test", "c", "d");
         long now = System.currentTimeMillis();
         state.getLastSeen().put(measurementKeyToString(key1), now);
         state.getLastSeen().put(measurementKeyToString(key2), now + 1L);

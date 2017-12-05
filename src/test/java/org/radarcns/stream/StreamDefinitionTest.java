@@ -1,5 +1,3 @@
-package org.radarcns.stream;
-
 /*
  * Copyright 2017 King's College London and The Hyve
  *
@@ -16,13 +14,19 @@ package org.radarcns.stream;
  * limitations under the License.
  */
 
-import static org.junit.Assert.assertEquals;
+package org.radarcns.stream;
 
-import org.apache.kafka.common.errors.InvalidTopicException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.radarcns.topic.KafkaTopic;
 
+import java.util.regex.Pattern;
+
 public class StreamDefinitionTest {
+    private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
 
     private static final String INPUT = "android_empatica_e4_blood_volume_pulse";
     private static final String OUTPUT = INPUT + GeneralStreamGroup.OUTPUT_LABEL;
@@ -34,10 +38,9 @@ public class StreamDefinitionTest {
 
         StreamDefinition definition = new StreamDefinition(inputTopic, outputTopic);
 
-        kafka.common.Topic.validate(definition.getStateStoreName());
-
-        assertEquals("From-" + "android_empatica_e4_blood_volume_pulse" + "-To-" +
-                "android_empatica_e4_blood_volume_pulse" + "_output",
+        assertTrue(TOPIC_PATTERN.matcher(definition.getStateStoreName()).matches());
+        assertEquals("From-android_empatica_e4_blood_volume_pulse"
+                        + "-To-android_empatica_e4_blood_volume_pulse_output",
                 definition.getStateStoreName());
     }
 
@@ -47,7 +50,6 @@ public class StreamDefinitionTest {
         KafkaTopic outputTopic = new KafkaTopic(OUTPUT);
 
         StreamDefinition definition = new StreamDefinition(inputTopic, outputTopic);
-
-        kafka.common.Topic.validate(definition.getStateStoreName());
+        assertFalse(TOPIC_PATTERN.matcher(definition.getStateStoreName()).matches());
     }
 }

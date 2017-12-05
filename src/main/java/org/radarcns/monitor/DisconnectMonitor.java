@@ -25,7 +25,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.Monitor;
@@ -141,7 +141,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
     @Override
     protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-        MeasurementKey key = extractKey(record);
+        ObservationKey key = extractKey(record);
 
         this.monitor.increment();
 
@@ -172,7 +172,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     private void reportMissing(String keyString, MissingRecordsReport report) {
-        MeasurementKey key = stringToKey(keyString);
+        ObservationKey key = stringToKey(keyString);
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
                 timeout, report.messageNumber, numRepetitions);
@@ -205,7 +205,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         }
     }
 
-    private void reportRecovered(MeasurementKey key, long reportedMissingTime) {
+    private void reportRecovered(ObservationKey key, long reportedMissingTime) {
         logger.info("Device {} seen again. Reporting it recovered.", key);
         try {
             Date reportedMissingDate = new Date(reportedMissingTime);

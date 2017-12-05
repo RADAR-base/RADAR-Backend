@@ -13,8 +13,8 @@ import org.apache.avro.message.SchemaStore;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -8584100260725184052L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarcns.stream.phone\",\"fields\":[{\"name\":\"key\",\"type\":{\"type\":\"record\",\"name\":\"MeasurementKey\",\"namespace\":\"org.radarcns.key\",\"doc\":\"Key of an observation.\",\"fields\":[{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User Identifier created during the enrolment.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Unique identifier associated with the source.\"}]},\"doc\":\"Observation key.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
+  private static final long serialVersionUID = 5825691401492875312L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarcns.stream.phone\",\"fields\":[{\"name\":\"projectId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Project ID.\"},{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User ID.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Source ID.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -51,8 +51,12 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
     return DECODER.decode(b);
   }
 
-  /** Observation key. */
-  @Deprecated public org.radarcns.key.MeasurementKey key;
+  /** Project ID. */
+  @Deprecated public java.lang.String projectId;
+  /** User ID. */
+  @Deprecated public java.lang.String userId;
+  /** Source ID. */
+  @Deprecated public java.lang.String sourceId;
   /** Package name. */
   @Deprecated public java.lang.String packageName;
 
@@ -65,11 +69,15 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
 
   /**
    * All-args constructor.
-   * @param key Observation key.
+   * @param projectId Project ID.
+   * @param userId User ID.
+   * @param sourceId Source ID.
    * @param packageName Package name.
    */
-  public TemporaryPackageKey(org.radarcns.key.MeasurementKey key, java.lang.String packageName) {
-    this.key = key;
+  public TemporaryPackageKey(java.lang.String projectId, java.lang.String userId, java.lang.String sourceId, java.lang.String packageName) {
+    this.projectId = projectId;
+    this.userId = userId;
+    this.sourceId = sourceId;
     this.packageName = packageName;
   }
 
@@ -77,8 +85,10 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
   // Used by DatumWriter.  Applications should not call.
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return key;
-    case 1: return packageName;
+    case 0: return projectId;
+    case 1: return userId;
+    case 2: return sourceId;
+    case 3: return packageName;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -87,27 +97,63 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: key = (org.radarcns.key.MeasurementKey)value$; break;
-    case 1: packageName = (java.lang.String)value$; break;
+    case 0: projectId = (java.lang.String)value$; break;
+    case 1: userId = (java.lang.String)value$; break;
+    case 2: sourceId = (java.lang.String)value$; break;
+    case 3: packageName = (java.lang.String)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
   /**
-   * Gets the value of the 'key' field.
-   * @return Observation key.
+   * Gets the value of the 'projectId' field.
+   * @return Project ID.
    */
-  public org.radarcns.key.MeasurementKey getKey() {
-    return key;
+  public java.lang.String getProjectId() {
+    return projectId;
   }
 
   /**
-   * Sets the value of the 'key' field.
-   * Observation key.
+   * Sets the value of the 'projectId' field.
+   * Project ID.
    * @param value the value to set.
    */
-  public void setKey(org.radarcns.key.MeasurementKey value) {
-    this.key = value;
+  public void setProjectId(java.lang.String value) {
+    this.projectId = value;
+  }
+
+  /**
+   * Gets the value of the 'userId' field.
+   * @return User ID.
+   */
+  public java.lang.String getUserId() {
+    return userId;
+  }
+
+  /**
+   * Sets the value of the 'userId' field.
+   * User ID.
+   * @param value the value to set.
+   */
+  public void setUserId(java.lang.String value) {
+    this.userId = value;
+  }
+
+  /**
+   * Gets the value of the 'sourceId' field.
+   * @return Source ID.
+   */
+  public java.lang.String getSourceId() {
+    return sourceId;
+  }
+
+  /**
+   * Sets the value of the 'sourceId' field.
+   * Source ID.
+   * @param value the value to set.
+   */
+  public void setSourceId(java.lang.String value) {
+    this.sourceId = value;
   }
 
   /**
@@ -159,9 +205,12 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<TemporaryPackageKey>
     implements org.apache.avro.data.RecordBuilder<TemporaryPackageKey> {
 
-    /** Observation key. */
-    private org.radarcns.key.MeasurementKey key;
-    private org.radarcns.key.MeasurementKey.Builder keyBuilder;
+    /** Project ID. */
+    private java.lang.String projectId;
+    /** User ID. */
+    private java.lang.String userId;
+    /** Source ID. */
+    private java.lang.String sourceId;
     /** Package name. */
     private java.lang.String packageName;
 
@@ -176,16 +225,21 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
      */
     private Builder(org.radarcns.stream.phone.TemporaryPackageKey.Builder other) {
       super(other);
-      if (isValidValue(fields()[0], other.key)) {
-        this.key = data().deepCopy(fields()[0].schema(), other.key);
+      if (isValidValue(fields()[0], other.projectId)) {
+        this.projectId = data().deepCopy(fields()[0].schema(), other.projectId);
         fieldSetFlags()[0] = true;
       }
-      if (other.hasKeyBuilder()) {
-        this.keyBuilder = org.radarcns.key.MeasurementKey.newBuilder(other.getKeyBuilder());
-      }
-      if (isValidValue(fields()[1], other.packageName)) {
-        this.packageName = data().deepCopy(fields()[1].schema(), other.packageName);
+      if (isValidValue(fields()[1], other.userId)) {
+        this.userId = data().deepCopy(fields()[1].schema(), other.userId);
         fieldSetFlags()[1] = true;
+      }
+      if (isValidValue(fields()[2], other.sourceId)) {
+        this.sourceId = data().deepCopy(fields()[2].schema(), other.sourceId);
+        fieldSetFlags()[2] = true;
+      }
+      if (isValidValue(fields()[3], other.packageName)) {
+        this.packageName = data().deepCopy(fields()[3].schema(), other.packageName);
+        fieldSetFlags()[3] = true;
       }
     }
 
@@ -195,95 +249,150 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
      */
     private Builder(org.radarcns.stream.phone.TemporaryPackageKey other) {
             super(SCHEMA$);
-      if (isValidValue(fields()[0], other.key)) {
-        this.key = data().deepCopy(fields()[0].schema(), other.key);
+      if (isValidValue(fields()[0], other.projectId)) {
+        this.projectId = data().deepCopy(fields()[0].schema(), other.projectId);
         fieldSetFlags()[0] = true;
       }
-      this.keyBuilder = null;
-      if (isValidValue(fields()[1], other.packageName)) {
-        this.packageName = data().deepCopy(fields()[1].schema(), other.packageName);
+      if (isValidValue(fields()[1], other.userId)) {
+        this.userId = data().deepCopy(fields()[1].schema(), other.userId);
         fieldSetFlags()[1] = true;
+      }
+      if (isValidValue(fields()[2], other.sourceId)) {
+        this.sourceId = data().deepCopy(fields()[2].schema(), other.sourceId);
+        fieldSetFlags()[2] = true;
+      }
+      if (isValidValue(fields()[3], other.packageName)) {
+        this.packageName = data().deepCopy(fields()[3].schema(), other.packageName);
+        fieldSetFlags()[3] = true;
       }
     }
 
     /**
-      * Gets the value of the 'key' field.
-      * Observation key.
+      * Gets the value of the 'projectId' field.
+      * Project ID.
       * @return The value.
       */
-    public org.radarcns.key.MeasurementKey getKey() {
-      return key;
+    public java.lang.String getProjectId() {
+      return projectId;
     }
 
     /**
-      * Sets the value of the 'key' field.
-      * Observation key.
-      * @param value The value of 'key'.
+      * Sets the value of the 'projectId' field.
+      * Project ID.
+      * @param value The value of 'projectId'.
       * @return This builder.
       */
-    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKey(org.radarcns.key.MeasurementKey value) {
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setProjectId(java.lang.String value) {
       validate(fields()[0], value);
-      this.keyBuilder = null;
-      this.key = value;
+      this.projectId = value;
       fieldSetFlags()[0] = true;
       return this;
     }
 
     /**
-      * Checks whether the 'key' field has been set.
-      * Observation key.
-      * @return True if the 'key' field has been set, false otherwise.
+      * Checks whether the 'projectId' field has been set.
+      * Project ID.
+      * @return True if the 'projectId' field has been set, false otherwise.
       */
-    public boolean hasKey() {
+    public boolean hasProjectId() {
       return fieldSetFlags()[0];
     }
 
-    /**
-     * Gets the Builder instance for the 'key' field and creates one if it doesn't exist yet.
-     * Observation key.
-     * @return This builder.
-     */
-    public org.radarcns.key.MeasurementKey.Builder getKeyBuilder() {
-      if (keyBuilder == null) {
-        if (hasKey()) {
-          setKeyBuilder(org.radarcns.key.MeasurementKey.newBuilder(key));
-        } else {
-          setKeyBuilder(org.radarcns.key.MeasurementKey.newBuilder());
-        }
-      }
-      return keyBuilder;
-    }
 
     /**
-     * Sets the Builder instance for the 'key' field
-     * Observation key.
-     * @param value The builder instance that must be set.
-     * @return This builder.
-     */
-    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setKeyBuilder(org.radarcns.key.MeasurementKey.Builder value) {
-      clearKey();
-      keyBuilder = value;
+      * Clears the value of the 'projectId' field.
+      * Project ID.
+      * @return This builder.
+      */
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder clearProjectId() {
+      projectId = null;
+      fieldSetFlags()[0] = false;
       return this;
     }
 
     /**
-     * Checks whether the 'key' field has an active Builder instance
-     * Observation key.
-     * @return True if the 'key' field has an active Builder instance
-     */
-    public boolean hasKeyBuilder() {
-      return keyBuilder != null;
+      * Gets the value of the 'userId' field.
+      * User ID.
+      * @return The value.
+      */
+    public java.lang.String getUserId() {
+      return userId;
     }
 
     /**
-      * Clears the value of the 'key' field.
-      * Observation key.
+      * Sets the value of the 'userId' field.
+      * User ID.
+      * @param value The value of 'userId'.
       * @return This builder.
       */
-    public org.radarcns.stream.phone.TemporaryPackageKey.Builder clearKey() {
-      key = null;
-      keyBuilder = null;
-      fieldSetFlags()[0] = false;
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setUserId(java.lang.String value) {
+      validate(fields()[1], value);
+      this.userId = value;
+      fieldSetFlags()[1] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'userId' field has been set.
+      * User ID.
+      * @return True if the 'userId' field has been set, false otherwise.
+      */
+    public boolean hasUserId() {
+      return fieldSetFlags()[1];
+    }
+
+
+    /**
+      * Clears the value of the 'userId' field.
+      * User ID.
+      * @return This builder.
+      */
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder clearUserId() {
+      userId = null;
+      fieldSetFlags()[1] = false;
+      return this;
+    }
+
+    /**
+      * Gets the value of the 'sourceId' field.
+      * Source ID.
+      * @return The value.
+      */
+    public java.lang.String getSourceId() {
+      return sourceId;
+    }
+
+    /**
+      * Sets the value of the 'sourceId' field.
+      * Source ID.
+      * @param value The value of 'sourceId'.
+      * @return This builder.
+      */
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder setSourceId(java.lang.String value) {
+      validate(fields()[2], value);
+      this.sourceId = value;
+      fieldSetFlags()[2] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'sourceId' field has been set.
+      * Source ID.
+      * @return True if the 'sourceId' field has been set, false otherwise.
+      */
+    public boolean hasSourceId() {
+      return fieldSetFlags()[2];
+    }
+
+
+    /**
+      * Clears the value of the 'sourceId' field.
+      * Source ID.
+      * @return This builder.
+      */
+    public org.radarcns.stream.phone.TemporaryPackageKey.Builder clearSourceId() {
+      sourceId = null;
+      fieldSetFlags()[2] = false;
       return this;
     }
 
@@ -303,9 +412,9 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
       * @return This builder.
       */
     public org.radarcns.stream.phone.TemporaryPackageKey.Builder setPackageName(java.lang.String value) {
-      validate(fields()[1], value);
+      validate(fields()[3], value);
       this.packageName = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[3] = true;
       return this;
     }
 
@@ -315,7 +424,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
       * @return True if the 'packageName' field has been set, false otherwise.
       */
     public boolean hasPackageName() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[3];
     }
 
 
@@ -326,7 +435,7 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
       */
     public org.radarcns.stream.phone.TemporaryPackageKey.Builder clearPackageName() {
       packageName = null;
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[3] = false;
       return this;
     }
 
@@ -335,12 +444,10 @@ public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecord
     public TemporaryPackageKey build() {
       try {
         TemporaryPackageKey record = new TemporaryPackageKey();
-        if (keyBuilder != null) {
-          record.key = this.keyBuilder.build();
-        } else {
-          record.key = fieldSetFlags()[0] ? this.key : (org.radarcns.key.MeasurementKey) defaultValue(fields()[0]);
-        }
-        record.packageName = fieldSetFlags()[1] ? this.packageName : (java.lang.String) defaultValue(fields()[1]);
+        record.projectId = fieldSetFlags()[0] ? this.projectId : (java.lang.String) defaultValue(fields()[0]);
+        record.userId = fieldSetFlags()[1] ? this.userId : (java.lang.String) defaultValue(fields()[1]);
+        record.sourceId = fieldSetFlags()[2] ? this.sourceId : (java.lang.String) defaultValue(fields()[2]);
+        record.packageName = fieldSetFlags()[3] ? this.packageName : (java.lang.String) defaultValue(fields()[3]);
         return record;
       } catch (java.lang.Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

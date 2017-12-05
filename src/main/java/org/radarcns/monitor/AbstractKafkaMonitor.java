@@ -32,7 +32,7 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.errors.WakeupException;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.util.PersistentStateStore;
 import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
@@ -165,8 +165,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     evaluateRecords(records);
                 } catch (SerializationException ex) {
                     handleSerializationException();
-                } catch (InterruptException | WakeupException ex) {
+                } catch (WakeupException ex) {
                     logger.info("Consumer woke up");
+                } catch (InterruptException ex) {
+                    logger.info("Consumer was interrupted");
+                    shutdown();
                 } catch (KafkaException ex) {
                     logger.error("Kafka consumer gave exception", ex);
                 }
@@ -236,6 +239,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
     @Override
     public synchronized void shutdown() {
+        logger.info("Shutting down monitor {}", getClass().getSimpleName());
         this.done = true;
         this.consumer.wakeup();
     }
@@ -248,12 +252,17 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         this.pollTimeout.set(pollTimeout);
     }
 
-    protected MeasurementKey extractKey(ConsumerRecord<GenericRecord, ?> record) {
+    protected ObservationKey extractKey(ConsumerRecord<GenericRecord, ?> record) {
         GenericRecord key = record.key();
         if (key == null) {
             throw new IllegalArgumentException("Failed to process record without a key.");
         }
         Schema keySchema = key.getSchema();
+        Field projectIdField = keySchema.getField("projectId");
+        if (projectIdField == null) {
+            throw new IllegalArgumentException("Failed to process record with key type "
+                    + key.getSchema() + " without project ID.");
+        }
         Field userIdField = keySchema.getField("userId");
         if (userIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
@@ -264,7 +273,8 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
             throw new IllegalArgumentException("Failed to process record with key type "
                     + key.getSchema() + " without source ID.");
         }
-        return new MeasurementKey(
+        return new ObservationKey(
+                key.get(projectIdField.pos()).toString(),
                 key.get(userIdField.pos()).toString(),
                 key.get(sourceIdField.pos()).toString());
     }

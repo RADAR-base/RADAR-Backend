@@ -16,6 +16,7 @@
 
 package org.radarcns.stream;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -35,5 +36,5 @@ public interface StreamGroup {
      * @return stream definition of given input topic
      * @throws IllegalArgumentException if the input topic is not found.
      */
-    StreamDefinition getStreamDefinition(String inputTopic);
+    Collection<StreamDefinition> getStreamDefinition(String inputTopic);
 }

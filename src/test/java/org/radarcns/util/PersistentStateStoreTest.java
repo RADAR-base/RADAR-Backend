@@ -28,7 +28,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 
 public class PersistentStateStoreTest {
@@ -40,14 +40,14 @@ public class PersistentStateStoreTest {
         File base = folder.newFolder();
         PersistentStateStore stateStore = new PersistentStateStore(base);
         BatteryLevelState state = new BatteryLevelState();
-        MeasurementKey key1 = new MeasurementKey("a", "b");
+        ObservationKey key1 = new ObservationKey("test", "a", "b");
         state.updateLevel(key1, 0.1f);
         stateStore.storeState("one", "two", state);
 
         File outputFile = new File(base, "one_two.yml");
         assertThat(outputFile.exists(), is(true));
         String rawFile = new String(Files.readAllBytes(outputFile.toPath()));
-        assertThat(rawFile, equalTo("---\nlevels:\n  a#b: 0.1\n"));
+        assertThat(rawFile, equalTo("---\nlevels:\n  test#a#b: 0.1\n"));
 
         PersistentStateStore stateStore2 = new PersistentStateStore(base);
         BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());

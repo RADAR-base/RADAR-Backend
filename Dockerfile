@@ -1,4 +1,4 @@
-FROM confluentinc/cp-base:3.2.1-5
+FROM confluentinc/cp-base:3.3.0
 
 ENV TERM=dumb
 

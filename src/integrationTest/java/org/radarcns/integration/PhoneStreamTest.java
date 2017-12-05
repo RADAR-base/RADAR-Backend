@@ -16,25 +16,6 @@
 
 package org.radarcns.integration;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.cli.ParseException;
@@ -49,19 +30,44 @@ import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.mock.MockProducer;
+import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
-import org.radarcns.phone.PhoneUsageEvent;
-import org.radarcns.phone.UsageEventType;
+import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.passive.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.empatica.E4StreamMaster;
 import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
@@ -99,15 +105,6 @@ public class PhoneStreamTest {
         String[] args = {"-c", propertiesPath, "stream"};
 
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
-        propHandler.getRadarProperties().setStreamMasters(
-                Collections.singletonList(PhoneStreamMaster.class.getName()));
-
-        Map<String, String> streamProps = new HashMap<>();
-        streamProps.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
-        streamProps.put(SESSION_TIMEOUT_MS_CONFIG, String.valueOf(5_000));
-        streamProps.put(HEARTBEAT_INTERVAL_MS_CONFIG, String.valueOf(1_000));
-
-        propHandler.getRadarProperties().setStreamProperties(streamProps);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
     }
@@ -127,32 +124,59 @@ public class PhoneStreamTest {
         properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
-        DirectSender<MeasurementKey, SpecificRecord> sender = new DirectSender<>(properties);
-        AvroTopic<MeasurementKey, PhoneUsageEvent> topic = new AvroTopic<>(
-                "android_phone_usage_event",
-                MeasurementKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
-                MeasurementKey.class, PhoneUsageEvent.class);
+        DirectSender<ObservationKey, SpecificRecord> sender = new DirectSender<>(properties);
 
         long offset = 0;
         double time = System.currentTimeMillis() / 1000d - 10d;
-        MeasurementKey key = new MeasurementKey("a", "c");
-        try (KafkaTopicSender<MeasurementKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.BACKGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND));
-            topicSender.send(offset++, key, new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+        ObservationKey key = new ObservationKey("test", "a", "c");
+
+        List<PhoneUsageEvent> events = Arrays.asList(
+                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+
+        AvroTopic<ObservationKey, PhoneUsageEvent> topic = new AvroTopic<>(
+                "android_phone_usage_event",
+                ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
+                ObservationKey.class, PhoneUsageEvent.class);
+
+        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
+            for (PhoneUsageEvent event : events) {
+                topicSender.send(offset++, key, event);
+            }
         }
+
         sender.close();
+
+        File file = new File(getClass().getResource("/mock_devices.yml").getFile());
+        BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
+
+        MockProducer mockProducer = new MockProducer(mockConfig);
+        mockProducer.start();
+        Thread.sleep(mockConfig.getDuration());
+        mockProducer.shutdown();
+
         consumePhone(offset);
         consumeAggregated(offset / 2);
+        consumeE4();
+    }
+
+    private void consumeE4() throws IOException {
+        String clientId = "consumeE4";
+        E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(),
+                "android_empatica_e4_acceleration_10sec", clientId);
+        monitor.setPollTimeout(280_000L);
+        monitor.start();
     }
 
     private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
-        String clientId = "someclinet";
+        String clientId = "consumePhone";
         KafkaMonitor monitor = new PhoneOutputMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
 
         monitor.setPollTimeout(280_000L);
@@ -160,7 +184,7 @@ public class PhoneStreamTest {
     }
 
     private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
-        String clientId = "someclient";
+        String clientId = "consumeAggregated";
         KafkaMonitor monitor = new PhoneAggregateMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
 
         monitor.setPollTimeout(280_000L);
@@ -173,7 +197,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_output"), UUID.randomUUID().toString(), clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_output"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
 
             Properties props = new Properties();
@@ -212,7 +236,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), UUID.randomUUID().toString(), clientId, null);
+            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

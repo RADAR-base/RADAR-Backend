@@ -16,48 +16,37 @@
 
 package org.radarcns.stream.empatica;
 
-import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleAggregator;
-import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4InterBeatInterval;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
+import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4.
  */
 public class E4InterBeatIntervalStream extends
-        StreamWorker<MeasurementKey, EmpaticaE4InterBeatInterval> {
-    private static final Logger log = LoggerFactory.getLogger(E4InterBeatIntervalStream.class);
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+        StreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
+    private static final Logger logger = LoggerFactory.getLogger(E4InterBeatIntervalStream.class);
 
-    public E4InterBeatIntervalStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getInterBeatIntervalStream(),
-                clientId, numThread, master, kafkaProperties, log);
+    public E4InterBeatIntervalStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4InterBeatInterval> kstream) {
-        return kstream.groupByKey()
-                .aggregate(
-                    DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getInterBeatInterval()),
-                    TimeWindows.of(10 * 1000L),
-                    RadarSerdes.getInstance().getDoubleCollector(),
-                    getStreamDefinition().getStateStoreName())
-                .toStream()
-                .map(utilities::collectorToAvro);
+    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, EmpaticaE4InterBeatInterval> kstream) {
+        return aggregateFloat(definition, kstream,
+                EmpaticaE4InterBeatInterval::getInterBeatInterval);
     }
 }

@@ -16,13 +16,13 @@
 
 package org.radarcns.stream.phone;
 
-import java.util.List;
-import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
+
+import java.util.List;
 
 /**
  * Singleton StreamMaster for Phone
@@ -37,13 +37,14 @@ public class PhoneStreamMaster extends StreamMaster {
     @Override
     protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
-        list.add(new PhoneUsageStream("PhoneUsageStream", lowPriority(), master, kafkaProperty));
+        PhoneStreams defs = PhoneStreams.getInstance();
+        list.add(new PhoneUsageStream(
+                defs.getUsageStream(), lowPriority(), master, propertyHandler));
         list.add(new PhoneUsageAggregationStream(
-                "PhoneUsageAggregationStream", lowPriority(), master, kafkaProperty));
-        list.add(new PhoneBatteryStream("PhoneBatteryStream", lowPriority(), master,
-                kafkaProperty));
-        list.add(new PhoneAccelerationStream("PhoneAccelerationStream", normalPriority(), master,
-                kafkaProperty));
+                defs.getUsageEventAggregationStream(), lowPriority(), master, propertyHandler));
+        list.add(new PhoneBatteryStream(
+                defs.getBatteryStream(), lowPriority(), master, propertyHandler));
+        list.add(new PhoneAccelerationStream(
+                defs.getAccelerationStream(), normalPriority(), master, propertyHandler));
     }
 }

@@ -30,9 +30,9 @@ sourceCompatibility = '1.8'
 
 ext.boundaryVersion = '1.0.6'
 ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '3.2.1'
+ext.confluentVersion = '3.3.0'
 ext.hamcrestVersion = '1.3'
-ext.kafkaVersion = '0.10.2.1'
+ext.kafkaVersion = '0.11.0.1'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
@@ -40,11 +40,12 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.5'
-ext.radarSchemasVersion = '0.2-alpha.1'
+ext.radarCommonsVersion = '0.6.3'
+ext.radarSchemasVersion = '0.2.2'
 ext.subethamailVersion = '3.1.7'
 ext.jsoupVersion = '1.10.2'
-ext.slf4jVersion = '1.7.21'
+ext.slf4jVersion = '1.7.25'
+ext.log4jVersion = '1.2.17'
 ext.avroVersion = '1.8.2'
 
 ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
@@ -81,9 +82,6 @@ configurations.all {
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // For working with dev-branch commons
-    maven { url "${rootProject.projectDir}/libs" }
-
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
@@ -100,15 +98,16 @@ repositories {
 dependencies {
     compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
     compile group: 'org.apache.avro', name: 'avro', version: avroVersion
-    compile (group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion) {
-        exclude group: 'org.slf4j', module: 'slf4j-simple'
-    }
+    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
     compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
     compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    compile (group: 'io.confluent', name: 'kafka-avro-serializer', version: confluentVersion) {
+    compile (group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'log4j', module: 'log4j'
+        exclude group: 'jline', module: 'jline'
+        exclude group: 'io.netty', module: 'netty'
     }
 
     // Nonnull annotation
@@ -135,8 +134,12 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
-    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     // For Topic name validation based on Kafka classes
     testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
@@ -300,6 +303,10 @@ ext.sharedManifest = manifest {
 // Packaging                                                                 //
 //---------------------------------------------------------------------------//
 
+processResources {
+    expand(version: version)
+}
+
 jar {
     manifest {
         from sharedManifest
@@ -309,7 +316,11 @@ jar {
 
 shadowJar {
     mergeServiceFiles()
-    exclude 'log4j.properties'
+}
+
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    extension = 'tar.gz'
 }
 
 // custom tasks for creating source/javadoc jars
@@ -345,6 +356,11 @@ publishing {
                 root.appendNode('description', description)
                 root.appendNode('name', rootProject.name)
                 root.appendNode('url', githubUrl)
+                root.dependencies.'*'.findAll() {
+                    it.artifactId.text() in ['log4j', 'slf4j-log4j12']
+                }.each() {
+                    it.parent().remove(it)
+                }
                 root.children().last() + pomConfig
             }
         }
@@ -380,7 +396,7 @@ bintray {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.1'
-    distributionUrl distributionUrl.replace("bin", "all")
+    distributionType 'all'
 }
 
 run {
