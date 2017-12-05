@@ -316,7 +316,6 @@ jar {
 
 shadowJar {
     mergeServiceFiles()
-    exclude 'log4j.properties'
 }
 
 tasks.withType(Tar){
