@@ -16,13 +16,18 @@
 
 package org.radarcns.stream;
 
+import org.radarcns.topic.KafkaTopic;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.radarcns.topic.KafkaTopic;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of a {@link StreamGroup}. Override to create specific streams for a given
@@ -35,12 +40,12 @@ import org.radarcns.topic.KafkaTopic;
 public class GeneralStreamGroup implements StreamGroup {
     public static final String OUTPUT_LABEL = "_output";
 
-    private final Map<String, StreamDefinition> topicMap;
+    private final Map<String, Collection<StreamDefinition>> topicMap;
     private final Set<String> topicNames;
 
     public GeneralStreamGroup() {
         topicMap = new HashMap<>();
-        topicNames = new HashSet<>();
+        topicNames = new TreeSet<>();
     }
 
     /**
@@ -50,8 +55,21 @@ public class GeneralStreamGroup implements StreamGroup {
      * @param output output topic name
      * @return stream definition.
      */
-    protected StreamDefinition createStream(String input, String output) {
-        StreamDefinition ret = new StreamDefinition(new KafkaTopic(input), new KafkaTopic(output));
+    protected Collection<StreamDefinition> createStream(String input, String output) {
+        return createStream(input, output, 0L);
+    }
+
+    /**
+     * Create a stream from input to output topic. By using this method, {@link #getTopicNames()}
+     * and {@link #getStreamDefinition(String)} automatically get updated.
+     * @param input input topic name
+     * @param output output topic name
+     * @param window time windows size in milliseconds, 0 if none.
+     * @return stream definition.
+     */
+    protected Collection<StreamDefinition> createStream(String input, String output, long window) {
+        Collection<StreamDefinition> ret = Collections.singleton(
+                new StreamDefinition(new KafkaTopic(input), new KafkaTopic(output), window));
         topicMap.put(input, ret);
         topicNames.add(input);
         topicNames.add(output);
@@ -64,13 +82,45 @@ public class GeneralStreamGroup implements StreamGroup {
      * @param input input topic name
      * @return sensor stream definition
      */
-    protected StreamDefinition createSensorStream(String input) {
-        return createStream(input, input + OUTPUT_LABEL);
+    protected Collection<StreamDefinition> createSensorStream(String input) {
+        return createStream(input, input + OUTPUT_LABEL, 0L);
+    }
+
+    protected Collection<StreamDefinition> createAggregateStream(String input, long window) {
+        return createStream(input, input + OUTPUT_LABEL, window);
+    }
+
+    protected Collection<StreamDefinition> createWindowedSensorStream(String input) {
+        return createWindowedSensorStream(input, input);
+    }
+
+    protected Collection<StreamDefinition> createWindowedSensorStream(String input,
+            String outputBase) {
+
+        topicNames.add(input);
+        Collection<StreamDefinition> streams = new TreeSet<>(
+                Arrays.stream(TimeWindowMetadata.values())
+                        .map(w -> new StreamDefinition(new KafkaTopic(input),
+                                new KafkaTopic(w.getTopicLabel(outputBase)),
+                                w.getIntervalInMilliSec()))
+                        .collect(Collectors.toList()));
+
+        topicNames.addAll(streams.stream()
+                .map(t -> t.getOutputTopic().getName())
+                .collect(Collectors.toList()));
+
+        topicMap.merge(input, streams, (v1, v2) -> {
+            Set<StreamDefinition> newSet = new TreeSet<>(v1);
+            newSet.addAll(v2);
+            return newSet;
+        });
+
+        return streams;
     }
 
     @Override
-    public StreamDefinition getStreamDefinition(String inputTopic) {
-        StreamDefinition topic = topicMap.get(inputTopic);
+    public Collection<StreamDefinition> getStreamDefinition(String inputTopic) {
+        Collection<StreamDefinition> topic = topicMap.get(inputTopic);
         if (topic == null) {
             throw new IllegalArgumentException("Topic " + inputTopic + " unknown");
         }

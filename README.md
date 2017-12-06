@@ -135,8 +135,8 @@ To get email notifications for Empatica E4 battery status, an email server witho
     data:
       - topic: topic1
         file: topic1.csv
-        key_schema: org.radarcns.key.MeasurementKey
-        value_schema: org.radarcns.empatica.EmpaticaE4Acceleration
+        key_schema: org.radarcns.kafka.ObservationKey
+        value_schema: org.radarcns.passive.empatica.EmpaticaE4Acceleration
     ```
 
     Each value has a topic to send the data to, a file containing the data, a schema class for the key and a schema class for the value. Also create a CSV file for each of these entries:
@@ -177,7 +177,7 @@ RADAR-Stream is a layer on top of Kafka streams. Topics are processed by streams
 KafkaStreams currently communicates using master-slave model. The [MasterAggregator][1] defines the stream-master, while [AggregatorWorker][2] represents the stream-slave. The master-stream creates, starts and stops a list of stream-slaves registered with the corresponding master. 
 While the classical Kafka Consumer requires two implementations to support standalone and group executions, the AggregatorWorker provides both behaviors with one implementation.
 
-To extend the RADAR-Stream API, follow these steps (see the `org.radarcns.empatica` package as an example):
+To extend the RADAR-Stream API, follow these steps (see the `org.radarcns.passive.empatica` package as an example):
 
 - Create a stream group by overriding [GeneralStreamGroup][8]. Use its `createSensorStream` and `createStream` methods to create the stream definitions.
 - For each topic, create a [AggregatorWorker][2].

@@ -3,7 +3,9 @@
     "name": "TemporaryPackageKey",
     "type": "record",
     "fields": [
-        {"name": "key", "type": "org.radarcns.key.MeasurementKey", "doc": "Observation key."},
+        {"name": "projectId", "type": ["null", "string"], "doc": "Project ID."},
+        {"name": "userId", "type": "string", "doc": "User ID."},
+        {"name": "sourceId", "type": "string", "doc": "Source ID."},
         {"name": "packageName", "type": "string", "doc": "Package name."}
     ]
 }

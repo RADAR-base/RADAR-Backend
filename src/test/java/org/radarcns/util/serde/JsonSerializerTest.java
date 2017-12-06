@@ -17,13 +17,13 @@
 package org.radarcns.util.serde;
 
 import junit.framework.TestCase;
-import org.radarcns.key.MeasurementKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class JsonSerializerTest extends TestCase {
     public void testSerialize() throws Exception {
-        JsonSerializer<MeasurementKey> serializer = new JsonSerializer<>();
-        MeasurementKey key = new MeasurementKey("user", "source");
+        JsonSerializer<ObservationKey> serializer = new JsonSerializer<>();
+        ObservationKey key = new ObservationKey("test", "user", "source");
         String result = new String(serializer.serialize("mytest", key));
-        assertEquals("{\"userId\":\"user\",\"sourceId\":\"source\"}", result);
+        assertEquals("{\"projectId\":\"test\",\"userId\":\"user\",\"sourceId\":\"source\"}", result);
     }
 }

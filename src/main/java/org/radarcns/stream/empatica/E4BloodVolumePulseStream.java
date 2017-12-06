@@ -16,49 +16,36 @@
 
 package org.radarcns.stream.empatica;
 
-import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.aggregator.DoubleAggregator;
-import org.radarcns.config.KafkaProperty;
-import org.radarcns.empatica.EmpaticaE4BloodVolumePulse;
-import org.radarcns.key.MeasurementKey;
-import org.radarcns.key.WindowedKey;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4BloodVolumePulse;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.collector.DoubleValueCollector;
-import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerdes;
+import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Kafka Stream for aggregating data about Blood Volume Pulse collected by Empatica E4.
  */
 public class E4BloodVolumePulseStream extends
-        StreamWorker<MeasurementKey, EmpaticaE4BloodVolumePulse> {
-    private static final Logger log = LoggerFactory.getLogger(E4BloodVolumePulseStream.class);
+        StreamWorker<ObservationKey, EmpaticaE4BloodVolumePulse> {
+    private static final Logger logger = LoggerFactory.getLogger(E4BloodVolumePulseStream.class);
 
-    private final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
-
-    public E4BloodVolumePulseStream(String clientId, int numThread, StreamMaster master,
-            KafkaProperty kafkaProperties) {
-        super(E4Streams.getInstance().getBloodVolumePulseStream(),
-                clientId, numThread, master, kafkaProperties, log);
+    public E4BloodVolumePulseStream(Collection<StreamDefinition> definitions, int numThread,
+            StreamMaster master, RadarPropertyHandler properties) {
+        super(definitions, numThread, master, properties, logger);
     }
 
     @Override
-    protected KStream<WindowedKey, DoubleAggregator> defineStream(
-            @Nonnull KStream<MeasurementKey, EmpaticaE4BloodVolumePulse> kstream) {
-        return kstream.groupByKey()
-                .aggregate(
-                    DoubleValueCollector::new,
-                    (k, v, valueCollector) -> valueCollector.add(v.getBloodVolumePulse()),
-                    TimeWindows.of(10 * 1000L),
-                    RadarSerdes.getInstance().getDoubleCollector(),
-                    getStreamDefinition().getStateStoreName())
-                .toStream()
-                .map(utilities::collectorToAvro);
+    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
+            @Nonnull KStream<ObservationKey, EmpaticaE4BloodVolumePulse> kstream) {
+        return aggregateFloat(definition, kstream, EmpaticaE4BloodVolumePulse::getBloodVolumePulse);
     }
 }

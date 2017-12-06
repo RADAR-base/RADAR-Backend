@@ -20,6 +20,8 @@ package org.radarcns.stream.empatica;
 import org.radarcns.stream.GeneralStreamGroup;
 import org.radarcns.stream.StreamDefinition;
 
+import java.util.Collection;
+
 /**
  * Singleton class representing the list of Empatica E4 topics
  */
@@ -27,71 +29,64 @@ public final class E4Streams extends GeneralStreamGroup {
     private static final E4Streams INSTANCE = new E4Streams();
 
     //All sensor topics
-    private final StreamDefinition accelerationStream;
-    private final StreamDefinition batteryLevelStream;
-    private final StreamDefinition bloodVolumePulseStream;
-    private final StreamDefinition electroDermalActivityStream;
-    private final StreamDefinition interBeatIntervalStream;
-    private final StreamDefinition sensorStatusStream;
-    private final StreamDefinition temperatureStream;
+    private final Collection<StreamDefinition> accelerationStream;
+    private final Collection<StreamDefinition> batteryLevelStream;
+    private final Collection<StreamDefinition> bloodVolumePulseStream;
+    private final Collection<StreamDefinition> electroDermalActivityStream;
+    private final Collection<StreamDefinition> interBeatIntervalStream;
+    private final Collection<StreamDefinition> temperatureStream;
 
     // Internal topics
-    private final StreamDefinition heartRateStream;
+    private final Collection<StreamDefinition> heartRateStream;
 
     public static E4Streams getInstance() {
         return INSTANCE;
     }
 
     private E4Streams() {
-        accelerationStream = createSensorStream(
+        accelerationStream = createWindowedSensorStream(
                 "android_empatica_e4_acceleration");
-        batteryLevelStream = createSensorStream(
+        batteryLevelStream = createWindowedSensorStream(
                 "android_empatica_e4_battery_level");
-        bloodVolumePulseStream = createSensorStream(
+        bloodVolumePulseStream = createWindowedSensorStream(
                 "android_empatica_e4_blood_volume_pulse");
-        electroDermalActivityStream = createSensorStream(
+        electroDermalActivityStream = createWindowedSensorStream(
                 "android_empatica_e4_electrodermal_activity");
-        interBeatIntervalStream = createSensorStream(
+        interBeatIntervalStream = createWindowedSensorStream(
                 "android_empatica_e4_inter_beat_interval");
-        sensorStatusStream = createSensorStream(
-                "android_empatica_e4_sensor_status");
-        temperatureStream = createSensorStream(
+        temperatureStream = createWindowedSensorStream(
                 "android_empatica_e4_temperature");
 
-        heartRateStream = createStream(
+        heartRateStream = createWindowedSensorStream(
                 "android_empatica_e4_inter_beat_interval",
-                "android_empatica_e4_heartrate");
+                "android_empatica_e4_heart_rate");
     }
 
-    public StreamDefinition getAccelerationStream() {
+    public Collection<StreamDefinition> getAccelerationStream() {
         return accelerationStream;
     }
 
-    public StreamDefinition getBatteryLevelStream() {
+    public Collection<StreamDefinition> getBatteryLevelStream() {
         return batteryLevelStream;
     }
 
-    public StreamDefinition getBloodVolumePulseStream() {
+    public Collection<StreamDefinition> getBloodVolumePulseStream() {
         return bloodVolumePulseStream;
     }
 
-    public StreamDefinition getElectroDermalActivityStream() {
+    public Collection<StreamDefinition> getElectroDermalActivityStream() {
         return electroDermalActivityStream;
     }
 
-    public StreamDefinition getInterBeatIntervalStream() {
+    public Collection<StreamDefinition> getInterBeatIntervalStream() {
         return interBeatIntervalStream;
     }
 
-    public StreamDefinition getSensorStatusStream() {
-        return sensorStatusStream;
-    }
-
-    public StreamDefinition getTemperatureStream() {
+    public Collection<StreamDefinition> getTemperatureStream() {
         return temperatureStream;
     }
 
-    public StreamDefinition getHeartRateStream() {
+    public Collection<StreamDefinition> getHeartRateStream() {
         return heartRateStream;
     }
 }

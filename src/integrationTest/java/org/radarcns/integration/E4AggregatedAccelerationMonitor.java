@@ -16,15 +16,6 @@
 
 package org.radarcns.integration;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -32,12 +23,16 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.RadarPropertyHandlerImpl;
-import org.radarcns.key.MeasurementKey;
 import org.radarcns.monitor.AbstractKafkaMonitor;
-import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Consumer for Aggregated Acceleration Stream
@@ -61,10 +56,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
     @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        if (records.isEmpty()) {
-            shutdown();
-            return;
-        }
         assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
@@ -73,36 +64,24 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
                 logger.error("Failed to process record {} without a key.", record);
                 return;
             }
-            MeasurementKey measurementKey;
             Schema keySchema = key.getSchema();
             if (keySchema.getField("userId") != null
                     && keySchema.getField("sourceId") != null) {
-                measurementKey = new MeasurementKey(key.get("userId").toString(),
-                        key.get("sourceId").toString());
-                assertNotNull(measurementKey);
+                assertNotNull(key.get("userId"));
+                assertNotNull(key.get("sourceId"));
             } else {
                 logger.error("Failed to process record {} with wrong key type {}.",
                         record, key.getSchema());
                 return;
             }
             GenericRecord value = record.value();
-            Schema recordSchema = value.getSchema();
+            GenericData.Array count = (GenericData.Array) value.get("count");
+            logger.info("Received [{}, {}, {}] E4 messages",
+                    count.get(0), count.get(1), count.get(2));
 
-            int minFieldId = recordSchema.getField("min").pos();
-
-            GenericData.Array min = (GenericData.Array) value.get(minFieldId);
-            assertNotNull(min);
-            assertEquals(15.0d, (double)min.get(0), 0.0);
-            assertEquals(-15.0d, (double)min.get(1), 0.0);
-            assertEquals(64.0d, (double)min.get(2), 0.0);
-
-            int maxFieldId = recordSchema.getField("max").pos();
-
-            GenericData.Array max = (GenericData.Array) value.get(maxFieldId);
-            assertNotNull(max);
-            assertEquals(15.0d, (double)max.get(0), 0.0);
-            assertEquals(Double.MIN_VALUE, (double)max.get(1), 0.0d);
-            assertEquals(64.0d, (double)max.get(2), 0.0);
+            if ((Double)count.get(0) > 200) {
+                shutdown();
+            }
         }
     }
 }

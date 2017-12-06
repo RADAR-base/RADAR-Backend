@@ -23,8 +23,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 import static org.radarcns.util.Strings.isNullOrEmpty;
 
@@ -76,6 +78,17 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         }
 
         properties = new YamlConfigLoader().load(file, ConfigRadar.class);
+
+        Properties buildProperties = new Properties();
+        try (InputStream in = getClass().getResourceAsStream("/build.properties")) {
+            if (in != null) {
+                buildProperties.load(in);
+            }
+        }
+        String version = buildProperties.getProperty("version");
+        if (version != null) {
+            properties.setBuildVersion(version);
+        }
     }
 
     private File getDefaultFile() throws IOException {

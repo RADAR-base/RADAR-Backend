@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -110,7 +111,7 @@ public abstract class StreamMaster implements SubCommand {
      * Signal all workers to shut down. This does not wait for the workers to shut down.
      */
     @Override
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
         log.info("Shutting down all streams for {}", nameSensor);
 
         while (!streamWorkers.isEmpty()) {
@@ -119,6 +120,7 @@ public abstract class StreamMaster implements SubCommand {
         }
 
         executor.shutdown();
+        executor.awaitTermination(30, TimeUnit.SECONDS);
     }
 
     /**
@@ -158,7 +160,11 @@ public abstract class StreamMaster implements SubCommand {
 
         log.info("Forcing shutdown of {}", nameSensor);
 
-        //TODO implement forcing shutdown
+        try {
+            shutdown();
+        } catch (InterruptedException ex) {
+            log.warn("Shutdown interrupted");
+        }
     }
 
     public void restartStream(final StreamWorker<?, ?> worker) {
@@ -183,8 +189,8 @@ public abstract class StreamMaster implements SubCommand {
     protected abstract StreamGroup getStreamGroup();
 
     /** Add a monitor to the master. It will run every 30 seconds. */
-    void addMonitor(Monitor monitor) {
-        executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
+    ScheduledFuture<?> addMonitor(Monitor monitor) {
+        return executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
     }
 
     protected synchronized int lowPriority() {
