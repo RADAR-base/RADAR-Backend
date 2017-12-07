@@ -18,7 +18,6 @@ package org.radarcns.util;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
