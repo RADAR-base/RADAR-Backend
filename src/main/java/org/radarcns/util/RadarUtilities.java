@@ -24,6 +24,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
 import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.radarcns.stream.aggregator.DoubleArrayAggregation;
+import org.radarcns.stream.aggregator.PhoneUsageAggregation;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
@@ -49,7 +50,7 @@ public interface RadarUtilities {
     KeyValue<AggregateKey, DoubleAggregation> collectorToAvro(
             Windowed<ObservationKey> window, DoubleValueCollector collector);
 
-    KeyValue<AggregateKey, PhoneUsageAggregator> collectorToAvro(
+    KeyValue<AggregateKey, PhoneUsageAggregation> collectorToAvro(
             Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector);
 
     double floatToDouble(float input);
