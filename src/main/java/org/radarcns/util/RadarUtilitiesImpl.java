@@ -18,12 +18,12 @@ package org.radarcns.util;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
-import org.radarcns.aggregator.PhoneUsageAggregator;
-import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
-import org.radarcns.kafka.ObservationKey;
 import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
 import org.radarcns.stream.aggregator.DoubleAggregation;
 import org.radarcns.stream.aggregator.DoubleArrayAggregation;
+import org.radarcns.stream.aggregator.PhoneUsageAggregation;
 import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
@@ -31,6 +31,8 @@ import org.radarcns.stream.phone.TemporaryPackageKey;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.kafka.streams.KeyValue.pair;
 
 /**
  * Implements {@link RadarUtilities}.
@@ -62,10 +64,10 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
 
     @Override
-    public KeyValue<AggregateKey, PhoneUsageAggregator> collectorToAvro(
+    public KeyValue<AggregateKey, PhoneUsageAggregation> collectorToAvro(
             Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector
     ) {
-        return new KeyValue<>(getWindowedTuple(window) , new PhoneUsageAggregator(
+        return pair(getWindowedTuple(window) , new PhoneUsageAggregation(
                 window.key().getPackageName(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
@@ -97,14 +99,14 @@ public class RadarUtilitiesImpl implements RadarUtilities {
             quartile.add(subcollector.getQuartile());
         }
 
-        return new KeyValue<>(getWindowed(window),
+        return pair(getWindowed(window),
                 new DoubleArrayAggregation(min, max, sum, count, avg, quartile, iqr));
     }
 
     @Override
     public KeyValue<AggregateKey, DoubleAggregation> collectorToAvro(
             Windowed<ObservationKey> window, DoubleValueCollector collector) {
-        return new KeyValue<>(getWindowed(window),
+        return pair(getWindowed(window),
                 new DoubleAggregation(collector.getMin(), collector.getMax(), collector.getSum(),
                         collector.getCount(), collector.getAvg(), collector.getQuartile(),
                         collector.getIqr()));
