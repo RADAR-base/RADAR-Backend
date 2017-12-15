@@ -16,6 +16,12 @@
 
 package org.radarcns.integration;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -26,13 +32,6 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Consumer for Aggregated Acceleration Stream
@@ -50,31 +49,38 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
     }
 
     @Override
-    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-
-        GenericRecord key = record.key();
-        if (key == null) {
-            logger.error("Failed to process record {} without a key.", record);
-            return;
-        }
-        Schema keySchema = key.getSchema();
-        if (keySchema.getField("userId") != null
-                && keySchema.getField("sourceId") != null) {
-            assertNotNull(key.get("userId"));
-            assertNotNull(key.get("sourceId"));
-        } else {
-            logger.error("Failed to process record {} with wrong key type {}.",
-                    record, key.getSchema());
-            return;
-        }
-        GenericRecord value = record.value();
-        GenericData.Array count = (GenericData.Array) value.get("count");
-        logger.debug("Received [{}, {}, {}] E4 messages",
-                count.get(0), count.get(1), count.get(2));
-
-        if ((Double)count.get(0) > 200) {
-            shutdown();
-        }
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
+        // noop
     }
 
+    @Override
+    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
+        assertTrue(records.count() > 0);
+        for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
+
+            GenericRecord key = record.key();
+            if (key == null) {
+                logger.error("Failed to process record {} without a key.", record);
+                return;
+            }
+            Schema keySchema = key.getSchema();
+            if (keySchema.getField("userId") != null
+                    && keySchema.getField("sourceId") != null) {
+                assertNotNull(key.get("userId"));
+                assertNotNull(key.get("sourceId"));
+            } else {
+                logger.error("Failed to process record {} with wrong key type {}.",
+                        record, key.getSchema());
+                return;
+            }
+            GenericRecord value = record.value();
+            GenericData.Array count = (GenericData.Array) value.get("count");
+            logger.info("Received [{}, {}, {}] E4 messages",
+                    count.get(0), count.get(1), count.get(2));
+
+            if ((Double)count.get(0) > 200) {
+                shutdown();
+            }
+        }
+    }
 }

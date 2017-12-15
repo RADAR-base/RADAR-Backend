@@ -108,7 +108,7 @@ public class PhoneStreamTest {
         backend.shutdown();
     }
 
-    @Test(timeout = 4000_000L)
+    @Test(timeout = 3000_000L)
     public void testDirect() throws Exception {
         ConfigRadar config = propHandler.getRadarProperties();
 
@@ -118,7 +118,7 @@ public class PhoneStreamTest {
         properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
-        DirectSender sender = new DirectSender(properties);
+        DirectSender<ObservationKey, SpecificRecord> sender = new DirectSender<>(properties);
 
         long offset = 0;
         double time = System.currentTimeMillis() / 1000d - 10d;
@@ -141,8 +141,7 @@ public class PhoneStreamTest {
 
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
             for (PhoneUsageEvent event : events) {
-                topicSender.send( key, event);
-                offset++;
+                topicSender.send(offset++, key, event);
             }
         }
 
