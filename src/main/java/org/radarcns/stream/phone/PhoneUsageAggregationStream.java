@@ -1,7 +1,6 @@
 package org.radarcns.stream.phone;
 
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.aggregator.PhoneUsageAggregator;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
@@ -9,6 +8,7 @@ import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.aggregator.PhoneUsageAggregation;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, Ph
     }
 
     @Override
-    protected KStream<AggregateKey, PhoneUsageAggregator> implementStream(
+    protected KStream<AggregateKey, PhoneUsageAggregation> implementStream(
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream.groupBy(PhoneUsageAggregationStream::temporaryKey)
