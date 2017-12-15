@@ -50,38 +50,31 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
     }
 
     @Override
-    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
-        // noop
-    }
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
 
-    @Override
-    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        assertTrue(records.count() > 0);
-        for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
+        GenericRecord key = record.key();
+        if (key == null) {
+            logger.error("Failed to process record {} without a key.", record);
+            return;
+        }
+        Schema keySchema = key.getSchema();
+        if (keySchema.getField("userId") != null
+                && keySchema.getField("sourceId") != null) {
+            assertNotNull(key.get("userId"));
+            assertNotNull(key.get("sourceId"));
+        } else {
+            logger.error("Failed to process record {} with wrong key type {}.",
+                    record, key.getSchema());
+            return;
+        }
+        GenericRecord value = record.value();
+        GenericData.Array count = (GenericData.Array) value.get("count");
+        logger.debug("Received [{}, {}, {}] E4 messages",
+                count.get(0), count.get(1), count.get(2));
 
-            GenericRecord key = record.key();
-            if (key == null) {
-                logger.error("Failed to process record {} without a key.", record);
-                return;
-            }
-            Schema keySchema = key.getSchema();
-            if (keySchema.getField("userId") != null
-                    && keySchema.getField("sourceId") != null) {
-                assertNotNull(key.get("userId"));
-                assertNotNull(key.get("sourceId"));
-            } else {
-                logger.error("Failed to process record {} with wrong key type {}.",
-                        record, key.getSchema());
-                return;
-            }
-            GenericRecord value = record.value();
-            GenericData.Array count = (GenericData.Array) value.get("count");
-            logger.info("Received [{}, {}, {}] E4 messages",
-                    count.get(0), count.get(1), count.get(2));
-
-            if ((Double)count.get(0) > 200) {
-                shutdown();
-            }
+        if ((Double)count.get(0) > 200) {
+            shutdown();
         }
     }
+
 }
