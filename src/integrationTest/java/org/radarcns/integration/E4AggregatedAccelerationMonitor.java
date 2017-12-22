@@ -56,7 +56,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
     @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
             GenericRecord key = record.key();
