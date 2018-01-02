@@ -395,8 +395,7 @@ bintray {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
-    distributionType 'all'
+    gradleVersion = '4.4'
 }
 
 run {
