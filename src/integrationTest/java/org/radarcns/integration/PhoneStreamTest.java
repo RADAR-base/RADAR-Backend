@@ -16,8 +16,24 @@
 
 package org.radarcns.integration;
 
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -40,34 +56,11 @@ import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.passive.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
-import org.radarcns.stream.empatica.E4StreamMaster;
-import org.radarcns.stream.phone.PhoneStreamMaster;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
@@ -114,7 +107,7 @@ public class PhoneStreamTest {
         backend.shutdown();
     }
 
-    @Test(timeout = 3000_000L)
+    @Test(timeout = 600_000L)
     public void testDirect() throws Exception {
         ConfigRadar config = propHandler.getRadarProperties();
 
@@ -126,7 +119,6 @@ public class PhoneStreamTest {
 
         DirectSender sender = new DirectSender(properties);
 
-        long offset = 0;
         double time = System.currentTimeMillis() / 1000d - 10d;
         ObservationKey key = new ObservationKey("test", "a", "c");
 
@@ -161,8 +153,8 @@ public class PhoneStreamTest {
         Thread.sleep(mockConfig.getDuration());
         mockProducer.shutdown();
 
-        consumePhone(offset);
-        consumeAggregated(offset / 2);
+        consumePhone();
+        consumeAggregated();
         consumeE4();
     }
 
@@ -175,17 +167,19 @@ public class PhoneStreamTest {
         monitor.start();
     }
 
-    private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
+    private void consumePhone() throws IOException, InterruptedException {
         String clientId = "consumePhone";
-        KafkaMonitor monitor = new PhoneOutputMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
+        KafkaMonitor monitor = new PhoneOutputMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(), clientId,8L);
 
         monitor.setPollTimeout(280_000L);
         monitor.start();
     }
 
-    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+    private void consumeAggregated() throws IOException, InterruptedException {
         String clientId = "consumeAggregated";
-        KafkaMonitor monitor = new PhoneAggregateMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
+        KafkaMonitor monitor = new PhoneAggregateMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(), clientId, 4L);
 
         monitor.setPollTimeout(280_000L);
         monitor.start();
@@ -209,7 +203,7 @@ public class PhoneStreamTest {
 
         @Override
         protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-            logger.info("Read phone usage output {} of {} with value {}", numRecordsRead,
+            logger.info("Read phone usage output {} of {} with value {}", ++numRecordsRead,
                     numRecordsExpected, record.value());
             GenericRecord value = record.value();
             Double fetchTime = (Double)value.get("categoryNameFetchTime");
@@ -225,7 +219,7 @@ public class PhoneStreamTest {
                 assertEquals(result, category.toString());
             }
 
-            if (++numRecordsRead == numRecordsExpected) {
+            if (numRecordsRead == numRecordsExpected) {
                 shutdown();
             }
         }
