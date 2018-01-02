@@ -241,12 +241,12 @@ public class PhoneStreamTest {
 
         @Override
         protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-            logger.info("Read phone aggregate output {} of {} with value {}", numRecordsRead,
+            logger.info("Read phone aggregate output {} of {} with value {}", ++numRecordsRead,
                     numRecordsExpected, record.value());
             GenericRecord value = record.value();
             int timesOpen = (int)value.get("timesOpen");
             assertTrue(timesOpen > 0);
-            if (++numRecordsRead == numRecordsExpected) {
+            if (numRecordsRead == numRecordsExpected) {
                 shutdown();
             }
         }
