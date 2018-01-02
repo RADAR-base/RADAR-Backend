@@ -1,3 +1,7 @@
-.idea
-.gradle*
-build
+/.idea/
+/.gradle*
+/.git*
+/out/
+/config/
+/build/
+/libs/

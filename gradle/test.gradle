@@ -1,0 +1,68 @@
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+//---------------------------------------------------------------------------//
+// Source Set                                                                //
+//---------------------------------------------------------------------------//
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output + test.compileClasspath
+            runtimeClasspath += main.output + test.output + test.compileClasspath
+        }
+        resources {
+            srcDir 'src/integrationTest/resources'
+        }
+    }
+}
+
+dependencies {
+    // Testing
+    testCompile group: 'junit', name: 'junit', version: junitVersion
+    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+
+    // Mock mail server
+    testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
+
+    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
+    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+
+    // For Topic name validation based on Kafka classes
+    testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
+        exclude group: 'org.apache.kafka', module: 'kafka-clients'
+        exclude group: 'net.sf.jopt-simple'
+        exclude group: 'com.yammer.metrics'
+        exclude group: 'org.scala-lang.modules'
+        exclude group: 'org.slf4j'
+        exclude group: 'com.101tec'
+        exclude group: 'org.apache.zookeeper'
+    }
+}
+
+tasks.matching {it instanceof Test}.all {
+    testLogging {
+        showStandardStreams = true
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat "full"
+    }
+}
+
+task integrationTest(type: Test) {
+    description = "Run integration tests (located in src/integrationTest/...)."
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    testLogging.events "skipped", "failed", "passed"
+}
+
+check.dependsOn integrationTest
+
+test.testLogging.events "skipped", "failed"
+
