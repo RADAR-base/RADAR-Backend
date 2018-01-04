@@ -63,7 +63,8 @@ task integrationTest(type: Test) {
     testLogging.events "skipped", "failed", "passed"
 }
 
-check.dependsOn integrationTest
+// Do not do integration test yet, but check if integration tests compile
+check.dependsOn integrationTestClasses
 
 test.testLogging.events "skipped", "failed"
 
