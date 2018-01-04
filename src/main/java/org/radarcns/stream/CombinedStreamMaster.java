@@ -37,7 +37,7 @@ public class CombinedStreamMaster extends StreamMaster {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
         this.streamMasters = streamMasters;
-        this.streamGroup = new CombinedStreamGroup();
+        this.streamGroup = new CombinedStreamGroup(streamMasters);
     }
 
     @Override
@@ -60,7 +60,13 @@ public class CombinedStreamMaster extends StreamMaster {
     }
 
     /** A stream group that combines the stream groups of the stream masters it is managing. */
-    private class CombinedStreamGroup implements StreamGroup {
+    private static class CombinedStreamGroup implements StreamGroup {
+        private final Collection<StreamMaster> streamMasters;
+
+        private CombinedStreamGroup(Collection<StreamMaster> streamMasters) {
+            this.streamMasters = streamMasters;
+        }
+
         @Override
         public List<String> getTopicNames() {
             List<String> topics = new ArrayList<>();

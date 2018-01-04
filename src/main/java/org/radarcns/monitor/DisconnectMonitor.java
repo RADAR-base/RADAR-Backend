@@ -162,8 +162,8 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * @param report missing record details
      */
     private void scheduleRepetition(final String key, final MissingRecordsReport report) {
-        if (report.messageNumber < numRepetitions) {
-            long passedInterval = System.currentTimeMillis() - report.reportedMissing;
+        if (report.getMessageNumber() < numRepetitions) {
+            long passedInterval = System.currentTimeMillis() - report.getReportedMissing();
             long nextRepetition = Math.max(minRepetitionInterval, repeatInterval - passedInterval);
 
             report.setFuture(scheduler.schedule(() -> reportMissing(key, report.newRepetition()),
@@ -175,7 +175,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         ObservationKey key = stringToKey(keyString);
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
-                timeout, report.messageNumber, numRepetitions);
+                timeout, report.getMessageNumber(), numRepetitions);
         try {
             String lastSeen = dayFormat.format(report.getLastSeenDate());
             String text = "The device " + key + " seems disconnected. "
@@ -186,11 +186,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                 text += "\n\n" + message;
             }
             String subject = "[RADAR] Device has disconnected";
-            if (numRepetitions > 0 && report.messageNumber == numRepetitions) {
+            if (numRepetitions > 0 && report.getMessageNumber() == numRepetitions) {
                 text += "\n\nThis is the final warning email for this device.";
                 subject += ". Final message";
             } else if (numRepetitions > 0) {
-                text += "\n\nThis is warning number " + report.messageNumber + " of "
+                text += "\n\nThis is warning number " + report.getMessageNumber() + " of "
                         + numRepetitions;
             }
 
@@ -200,7 +200,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             logger.error("Failed to send disconnected message.", mex);
         } finally {
             // store last seen and reportedMissing timestamp
-            state.reportedMissing.put(keyString, report);
+            state.getReportedMissing().put(keyString, report);
             scheduleRepetition(keyString, report);
         }
     }

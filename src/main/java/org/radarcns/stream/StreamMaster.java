@@ -16,31 +16,29 @@
 
 package org.radarcns.stream;
 
+import static org.radarcns.config.RadarPropertyHandler.Priority.HIGH;
+import static org.radarcns.config.RadarPropertyHandler.Priority.LOW;
+import static org.radarcns.config.RadarPropertyHandler.Priority.NORMAL;
+
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.SubCommand;
-import org.radarcns.util.Monitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.radarcns.config.RadarPropertyHandler.Priority.HIGH;
-import static org.radarcns.config.RadarPropertyHandler.Priority.LOW;
-import static org.radarcns.config.RadarPropertyHandler.Priority.NORMAL;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.SubCommand;
+import org.radarcns.util.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages a set of {@link StreamWorker} objects.
@@ -63,7 +61,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      * A stream master for given sensor type.
      */
     protected StreamMaster() {
-        this.currentStream = new AtomicInteger(0);
+        currentStream = new AtomicInteger(0);
 
         lowPriorityThreads = 1;
         normalPriorityThreads = 1;
@@ -104,8 +102,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
     @Override
     public void start() throws IOException {
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.execute(() ->
-                Thread.currentThread().setUncaughtExceptionHandler(StreamMaster.this));
+        executor.execute(() -> Thread.currentThread().setUncaughtExceptionHandler(this));
 
         announceTopics();
 
