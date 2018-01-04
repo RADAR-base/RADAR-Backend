@@ -86,14 +86,25 @@ public class GeneralStreamGroup implements StreamGroup {
         return createStream(input, input + OUTPUT_LABEL, 0L);
     }
 
-    protected Collection<StreamDefinition> createAggregateStream(String input, long window) {
-        return createStream(input, input + OUTPUT_LABEL, window);
-    }
-
+    /**
+     * Create a set of sensor streams, for each of the RADAR standard time frames. An input topic
+     * {@code my_input} will create, e.g., {@code my_input_10sec}, {@code my_input_10min} output
+     * topics.
+     * @param input topic to stream from
+     * @return stream definitions to stream
+     */
     protected Collection<StreamDefinition> createWindowedSensorStream(String input) {
         return createWindowedSensorStream(input, input);
     }
 
+    /**
+     * Create a set of sensor streams, for each of the RADAR standard time frames. An input topic
+     * {@code my_input} with output base {@code my_output} will create, e.g.,
+     * {@code my_output_10sec}, {@code my_output_10min} output topics.
+     * @param input topic to stream from
+     * @param outputBase base topic name to stream to
+     * @return stream definitions to stream
+     */
     protected Collection<StreamDefinition> createWindowedSensorStream(String input,
             String outputBase) {
 

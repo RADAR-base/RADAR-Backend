@@ -56,7 +56,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
     @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
             GenericRecord key = record.key();
@@ -79,7 +78,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             logger.info("Received [{}, {}, {}] E4 messages",
                     count.get(0), count.get(1), count.get(2));
 
-            if ((Double)count.get(0) > 200) {
+            if ((Double)count.get(0) > 100) {
                 shutdown();
             }
         }

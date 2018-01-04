@@ -146,7 +146,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         }
 
         List<KeyValue<ScheduledFuture<?>, KafkaStreams>> streamBuilders = getStreamDefinitions()
-                .parallelStream()
+                .stream()
                 .map(this::createBuilder)
                 .collect(Collectors.toList());
 

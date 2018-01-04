@@ -1,15 +1,9 @@
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
-    id 'idea'
     id 'application'
-    id 'jacoco'
-    id 'pmd'
-    id 'checkstyle'
-    id "com.avast.gradle.docker-compose" version "0.3.16"
-    id "com.jfrog.bintray" version "1.7.3"
-    id 'com.github.johnrengelman.shadow' version '2.0.1'
-    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.7.3' apply false
+
 }
 
 //---------------------------------------------------------------------------//
@@ -30,9 +24,9 @@ sourceCompatibility = '1.8'
 
 ext.boundaryVersion = '1.0.6'
 ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '3.3.0'
+ext.confluentVersion = '3.3.1'
 ext.hamcrestVersion = '1.3'
-ext.kafkaVersion = '0.11.0.1'
+ext.kafkaVersion = '0.11.0.2'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'
@@ -40,7 +34,7 @@ ext.mathVersion = '3.0'
 ext.findbugVersion = '3.0.1'
 ext.commonsCliVersion = '1.2'
 ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.6.3'
+ext.radarCommonsVersion = '0.7'
 ext.radarSchemasVersion = '0.2.3'
 ext.subethamailVersion = '3.1.7'
 ext.jsoupVersion = '1.10.2'
@@ -53,45 +47,20 @@ ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
 ext.website = 'http://radar-cns.org'
 
 //---------------------------------------------------------------------------//
-// Sources and classpath configurations                                      //
+// Sources and classpath configurations                                        //
 //---------------------------------------------------------------------------//
-
-sourceSets {
-    // Note that just declaring this sourceset creates two configurations.
-    integrationTest {
-        java {
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-        }
-        resources {
-            srcDir 'src/integrationTest/resources'
-        }
-    }
-}
-
-configurations {
-    codacy
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
-
-configurations.all {
-    // Check for updates every build
-    resolutionStrategy.cacheChangingModulesFor 0, 'SECONDS'
-}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    // Non-jcenter radar releases
+    maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
+    // Kafka/confluent releases
     maven { url 'http://packages.confluent.io/maven/' }
+    // For working with dev-branches
+    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    // Github code
     maven { url 'https://jitpack.io' }
-    maven { url 'http://dl.bintray.com/typesafe/maven-releases' }
-    maven { url  'http://dl.bintray.com/radar-cns/org.radarcns' }
-
-    //Useful to use SNAPSHOT releases
-    maven { url  'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -126,277 +95,8 @@ dependencies {
     // JSoup html parser
     compile group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
 
-    // Testing
-    testCompile group: 'junit', name: 'junit', version: junitVersion
-    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-
-    // Mock mail server
-    testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
-
     runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
     runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-
-    // For Topic name validation based on Kafka classes
-    testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
-        exclude group: 'org.apache.kafka', module: 'kafka-clients'
-        exclude group: 'net.sf.jopt-simple'
-        exclude group: 'com.yammer.metrics'
-        exclude group: 'org.scala-lang.modules'
-        exclude group: 'org.slf4j'
-        exclude group: 'com.101tec'
-        exclude group: 'org.apache.zookeeper'
-    }
-
-    // Send data to codacy
-    codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: codacyVersion
-}
-
-//---------------------------------------------------------------------------//
-// Style checking                                                            //
-//---------------------------------------------------------------------------//
-
-checkstyle {
-    // codacy version
-    toolVersion '6.16'
-    ignoreFailures false
-
-    // ignore tests
-    sourceSets = [sourceSets.main]
-}
-
-pmd {
-    // codacy version
-    toolVersion = '5.5.2'
-    ignoreFailures = false
-
-    // ignore tests
-    sourceSets = [sourceSets.main]
-
-    consoleOutput = true
-
-    ruleSets = []
-    ruleSetFiles = files("config/pmd/ruleset.xml")
-}
-
-tasks.withType(Pmd) {
-    exclude '**/org/radarcns/config/ConfigRadar.java'
-    exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
-    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
-}
-
-tasks.withType(Checkstyle) {
-    exclude '**/org/radarcns/aggregator/PhoneUsageAggregator.java'
-    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
-}
-
-//---------------------------------------------------------------------------//
-// Testing                                                                   //
-//---------------------------------------------------------------------------//
-
-tasks.matching {it instanceof Test}.all {
-    testLogging {
-        showStandardStreams = true
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-        exceptionFormat "full"
-    }
-}
-
-task integrationTest(type: Test) {
-    description = "Run integration tests (located in src/integrationTest/...)."
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-}
-
-check.dependsOn integrationTestClasses
-
-//---------------------------------------------------------------------------//
-// Code coverage and codacy                                                  //
-//---------------------------------------------------------------------------//
-
-jacocoTestReport {
-    executionData test, integrationTest
-    reports {
-        xml.enabled true
-        csv.enabled false
-        html.enabled true
-    }
-}
-
-task downloadDependencies(type: Exec) {
-    configurations.testRuntime.files
-    configurations.codacy.files
-    configurations.jacocoAnt.files
-    commandLine 'echo', 'Downloaded all dependencies'
-}
-
-task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
-    main = 'com.codacy.CodacyCoverageReporter'
-    classpath = configurations.codacy
-    args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
-}
-
-//---------------------------------------------------------------------------//
-// Build system metadata                                                     //
-//---------------------------------------------------------------------------//
-idea {
-    module {
-        downloadSources = true
-    }
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution 'repo'
-        }
-    }
-    developers {
-        developer {
-            id 'nivemaham'
-            name 'Nivethika Mahasivam'
-            email 'nivethika@thehyve.nl'
-            organization 'The Hyve'
-        }
-        developer {
-            id 'fnobilia'
-            name 'Francesco Nobilia'
-            email 'francesco.nobilia@kcl.ac.uk'
-            organization 'King\'s College London'
-        }
-        developer {
-            id 'blootsvoets'
-            name 'Joris Borgdorff'
-            email 'joris@thehyve.nl'
-            organization 'The Hyve'
-        }
-    }
-    issueManagement {
-        system 'GitHub'
-        url issueUrl
-    }
-    organization {
-        name 'RADAR-CNS'
-        url website
-    }
-    scm {
-        connection 'scm:git:' + githubUrl
-        url githubUrl
-    }
-}
-
-ext.sharedManifest = manifest {
-    attributes(
-            "Implementation-Title": rootProject.name,
-            "Implementation-Version": version)
-}
-
-//---------------------------------------------------------------------------//
-// Packaging                                                                 //
-//---------------------------------------------------------------------------//
-
-processResources {
-    expand(version: version)
-}
-
-jar {
-    manifest {
-        from sharedManifest
-        attributes('Main-Class': mainClassName)
-    }
-}
-
-shadowJar {
-    mergeServiceFiles()
-}
-
-tasks.withType(Tar){
-    compression = Compression.GZIP
-    extension = 'tar.gz'
-}
-
-// custom tasks for creating source/javadoc jars
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-    manifest.from sharedManifest
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-    manifest.from sharedManifest
-}
-
-// add javadoc/source jar tasks as artifacts
-artifacts {
-    archives sourcesJar, javadocJar, shadowJar
-}
-
-publishing {
-    publications {
-        RadarBackendPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-            artifact shadowJar
-            groupId project.group
-            artifactId rootProject.name
-            version project.version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', description)
-                root.appendNode('name', rootProject.name)
-                root.appendNode('url', githubUrl)
-                root.dependencies.'*'.findAll() {
-                    it.artifactId.text() in ['log4j', 'slf4j-log4j12']
-                }.each() {
-                    it.parent().remove(it)
-                }
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
-
-
-bintray {
-    user = System.getenv('BINTRAY_USER')? System.getenv('BINTRAY_USER') : project.property('bintrayUser')
-    key = System.getenv('BINTRAY_API_KEY') ? System.getenv('BINTRAY_API_KEY') : project.property('bintrayApiKey')
-    override = false
-    publications = ['RadarBackendPublication']
-    pkg {
-        repo = project.group
-        name = rootProject.name
-        userOrg = 'radar-cns'
-        desc = description
-        licenses = ['Apache-2.0']
-        websiteUrl = website
-        issueTrackerUrl = issueUrl
-        vcsUrl = githubUrl
-        githubRepo = githubRepoName
-        githubReleaseNotesFile = 'README.md'
-        version {
-            name = project.version
-            desc = description
-            vcsTag = System.getenv('TRAVIS_TAG')
-            released = new Date()
-        }
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
-    distributionType 'all'
 }
 
 run {
@@ -404,3 +104,9 @@ run {
         args Eval.me(appArgs)
     }
 }
+
+if (!hasProperty('profile')) {
+    ext.profile = 'dev'
+}
+
+apply from: "gradle/profile.${profile}.gradle"

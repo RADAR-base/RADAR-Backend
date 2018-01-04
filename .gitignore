@@ -24,3 +24,4 @@ backend.log
 smtp.env
 
 /out/
+/libs/
