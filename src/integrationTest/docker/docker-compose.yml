@@ -6,11 +6,11 @@ services:
   # Zookeeper Cluster                                                         #
   #---------------------------------------------------------------------------#
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:3.3.0
+    image: confluentinc/cp-zookeeper:3.3.1
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_TICK_TIME: 1000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
       ZOOKEEPER_SERVERS: zookeeper-1:2888:3888
@@ -19,7 +19,7 @@ services:
   # Kafka Cluster                                                             #
   #---------------------------------------------------------------------------#
   kafka-1:
-    image: confluentinc/cp-kafka:3.3.0
+    image: confluentinc/cp-kafka:3.3.1
     depends_on:
       - zookeeper-1
     environment:
@@ -31,19 +31,45 @@ services:
       KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
       KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
+  kafka-2:
+    image: confluentinc/cp-kafka:3.3.1
+    depends_on:
+      - zookeeper-1
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  kafka-3:
+    image: confluentinc/cp-kafka:3.3.1
+    depends_on:
+      - zookeeper-1
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   #---------------------------------------------------------------------------#
   # Schema Registry                                                           #
   #---------------------------------------------------------------------------#
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:3.3.0
+    image: confluentinc/cp-schema-registry:3.3.1
     depends_on:
       - zookeeper-1
       - kafka-1
+      - kafka-2
+      - kafka-3
     restart: always
     ports:
       - "8081:8081"
@@ -57,9 +83,11 @@ services:
   # REST proxy                                                                #
   #---------------------------------------------------------------------------#
   rest-proxy-1:
-    image: confluentinc/cp-kafka-rest:3.3.0
+    image: confluentinc/cp-kafka-rest:3.3.1
     depends_on:
       - kafka-1
+      - kafka-2
+      - kafka-3
       - schema-registry-1
     ports:
       - "8082:8082"
@@ -74,7 +102,9 @@ services:
   # Integration test                                                          #
   #---------------------------------------------------------------------------#
   integration-test:
-    build: .
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
     # Right now, only direct connections to kafka are tested
     depends_on:
       - kafka-1
@@ -82,5 +112,5 @@ services:
     command:
       - integrationTest
     volumes:
-      - ./build/jacoco:/code/build/jacoco
-      - ./build/reports:/code/build/reports
+      - ../../../build/jacoco:/code/build/jacoco
+      - ../../../build/reports:/code/build/reports

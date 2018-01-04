@@ -32,7 +32,7 @@ RUN ./gradlew distTar && \
   tar xf build/distributions/*.tar && \
   rm build/distributions/*.tar
 
-FROM confluentinc/cp-base:3.3.0
+FROM confluentinc/cp-base:3.3.1
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl>
 
@@ -45,6 +45,6 @@ COPY --from=builder /code/radar-backend-*/bin/* /usr/bin/
 COPY --from=builder /code/radar-backend-*/lib/* /usr/lib/
 
 # Load topics validator
-COPY ./src/docker/radar-backend-init /usr/bin
+COPY ./src/main/docker/radar-backend-init /usr/bin
 
 CMD ["radar-backend-init"]

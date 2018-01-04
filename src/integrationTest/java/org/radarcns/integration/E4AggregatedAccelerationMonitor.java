@@ -78,7 +78,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             logger.info("Received [{}, {}, {}] E4 messages",
                     count.get(0), count.get(1), count.get(2));
 
-            if ((Double)count.get(0) > 200) {
+            if ((Double)count.get(0) > 100) {
                 shutdown();
             }
         }

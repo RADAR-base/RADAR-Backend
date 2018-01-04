@@ -9,7 +9,7 @@ configurations {
 sourceSets {
     integrationTest {
         java {
-            compileClasspath += main.output + test.output + test.compileClasspath
+            compileClasspath += main.output + main.compileClasspath + test.output + test.compileClasspath
             runtimeClasspath += main.output + test.output + test.compileClasspath
         }
         resources {
@@ -27,6 +27,7 @@ dependencies {
     // Mock mail server
     testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    integrationTestCompile group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
     testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
     testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
     integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
