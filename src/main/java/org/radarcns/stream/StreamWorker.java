@@ -220,7 +220,6 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
                         RadarSerdes.getInstance().getNumericAggregateCollector(),
                         definition.getStateStoreName())
                 .toStream()
-//                .filter((k, v) -> v != null)
                 .map(utilities::numericCollectorToAvro);
     }
 
@@ -235,7 +234,6 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
                         RadarSerdes.getInstance().getNumericAggregateCollector(),
                         definition.getStateStoreName())
                 .toStream()
-//                .filter((k, v) -> v != null)
                 .map(utilities::numericCollectorToAvro);
     }
 
@@ -250,7 +248,6 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
                         RadarSerdes.getInstance().getAggregateListCollector(),
                         definition.getStateStoreName())
                 .toStream()
-//                .filter((k, v) -> v != null)
                 .map(utilities::listCollectorToAvro);
     }
 
