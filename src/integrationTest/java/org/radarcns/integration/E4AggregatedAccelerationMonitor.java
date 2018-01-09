@@ -74,11 +74,11 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
                 return;
             }
             GenericRecord value = record.value();
-            GenericData.Array count = (GenericData.Array) value.get("count");
+            GenericData.Array fields = (GenericData.Array) value.get("fields");
             logger.info("Received [{}, {}, {}] E4 messages",
-                    count.get(0), count.get(1), count.get(2));
+                    ((GenericRecord)fields.get(0)).get("count"), ((GenericRecord)fields.get(1)).get("count"), ((GenericRecord)fields.get(2)).get("count"));
 
-            if ((Double)count.get(0) > 100) {
+            if ((Integer)((GenericRecord)fields.get(0)).get("count") > 100) {
                 shutdown();
             }
         }
