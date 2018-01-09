@@ -16,6 +16,7 @@ RUN mkdir /code
 WORKDIR /code
 
 ENV GRADLE_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.project.profile=test
+ENV TERM dumb
 
 COPY ./gradle/wrapper /code/gradle/wrapper
 COPY ./gradlew /code/
