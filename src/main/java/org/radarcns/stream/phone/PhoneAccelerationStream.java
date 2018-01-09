@@ -33,6 +33,6 @@ public class PhoneAccelerationStream extends StreamWorker<ObservationKey, PhoneA
             floatToDouble(v.getX()),
             floatToDouble(v.getY()),
             floatToDouble(v.getZ())
-        });
+        }, new String[] {"x", "y", "z"});
     }
 }

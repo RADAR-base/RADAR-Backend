@@ -16,7 +16,12 @@
 
 package org.radarcns.util;
 
+import static org.apache.kafka.streams.KeyValue.pair;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
@@ -28,11 +33,6 @@ import org.radarcns.stream.collector.DoubleArrayCollector;
 import org.radarcns.stream.collector.DoubleValueCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 import org.radarcns.stream.phone.TemporaryPackageKey;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.apache.kafka.streams.KeyValue.pair;
 
 /**
  * Implements {@link RadarUtilities}.
@@ -77,30 +77,32 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
-    public KeyValue<AggregateKey, DoubleArrayAggregation> collectorToAvro(
-            Windowed<ObservationKey> window, DoubleArrayCollector collector) {
-        List<DoubleValueCollector> subcollectors = collector.getCollectors();
-        int len = subcollectors.size();
-        List<Double> min = new ArrayList<>(len);
-        List<Double> max = new ArrayList<>(len);
-        List<Double> sum = new ArrayList<>(len);
-        List<Double> count = new ArrayList<>(len);
-        List<Double> avg = new ArrayList<>(len);
-        List<Double> iqr = new ArrayList<>(len);
-        List<List<Double>> quartile = new ArrayList<>(len);
+    public KeyValueMapper<Windowed<ObservationKey>, DoubleArrayCollector,
+                    KeyValue<AggregateKey, DoubleArrayAggregation>> collectorToAvro(String[] fieldNames) {
+        return (window, collector) -> {
+            List<DoubleValueCollector> subcollectors = collector.getCollectors();
+            int len = subcollectors.size();
+            List<Double> min = new ArrayList<>(len);
+            List<Double> max = new ArrayList<>(len);
+            List<Double> sum = new ArrayList<>(len);
+            List<Double> count = new ArrayList<>(len);
+            List<Double> avg = new ArrayList<>(len);
+            List<Double> iqr = new ArrayList<>(len);
+            List<List<Double>> quartile = new ArrayList<>(len);
 
-        for (DoubleValueCollector subcollector : subcollectors) {
-            min.add(subcollector.getMin());
-            max.add(subcollector.getMax());
-            sum.add(subcollector.getSum());
-            count.add(subcollector.getCount());
-            avg.add(subcollector.getAvg());
-            iqr.add(subcollector.getIqr());
-            quartile.add(subcollector.getQuartile());
-        }
+            for (DoubleValueCollector subcollector : subcollectors) {
+                min.add(subcollector.getMin());
+                max.add(subcollector.getMax());
+                sum.add(subcollector.getSum());
+                count.add(subcollector.getCount());
+                avg.add(subcollector.getAvg());
+                iqr.add(subcollector.getIqr());
+                quartile.add(subcollector.getQuartile());
+            }
 
-        return pair(getWindowed(window),
-                new DoubleArrayAggregation(min, max, sum, count, avg, quartile, iqr));
+            return pair(getWindowed(window),
+                    new DoubleArrayAggregation(min, max, sum, count, avg, quartile, iqr));
+        };
     }
 
     @Override

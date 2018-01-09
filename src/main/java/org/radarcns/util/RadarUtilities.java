@@ -17,6 +17,7 @@
 package org.radarcns.util;
 
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
@@ -43,8 +44,8 @@ public interface RadarUtilities {
 
     AggregateKey getWindowedTuple(Windowed<TemporaryPackageKey> window);
 
-    KeyValue<AggregateKey, DoubleArrayAggregation> collectorToAvro(
-            Windowed<ObservationKey> window, DoubleArrayCollector collector);
+    KeyValueMapper<Windowed<ObservationKey>, DoubleArrayCollector,
+                KeyValue<AggregateKey, DoubleArrayAggregation>> collectorToAvro(String[] fieldNames);
 
     KeyValue<AggregateKey, DoubleAggregation> collectorToAvro(
             Windowed<ObservationKey> window, DoubleValueCollector collector);

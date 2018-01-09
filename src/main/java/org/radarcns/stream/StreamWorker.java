@@ -16,6 +16,7 @@
 
 package org.radarcns.stream;
 
+import java.util.function.Supplier;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -232,7 +233,8 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
 
     protected final KStream<AggregateKey, DoubleArrayAggregation> aggregateDoubleArray(
             StreamDefinition definition,
-            @Nonnull KStream<ObservationKey, V> kstream, Function<V, double[]> field) {
+            @Nonnull KStream<ObservationKey, V> kstream, Function<V, double[]> field,
+            String[] fieldNames) {
         return kstream.groupByKey()
                 .aggregate(
                         DoubleArrayCollector::new,
@@ -241,7 +243,7 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
                         RadarSerdes.getInstance().getDoubleArrayCollector(),
                         definition.getStateStoreName())
                 .toStream()
-                .map(utilities::collectorToAvro);
+                .map(utilities.collectorToAvro(fieldNames));
     }
 
     @Override

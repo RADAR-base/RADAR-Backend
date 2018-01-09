@@ -51,6 +51,6 @@ public class E4AccelerationStream extends StreamWorker<ObservationKey, EmpaticaE
         return aggregateDoubleArray(definition, kstream, v -> new double[] {
                 floatToDouble(v.getX()),
                 floatToDouble(v.getY()),
-                floatToDouble(v.getZ())});
+                floatToDouble(v.getZ())}, new String[] {"x", "y", "z"});
     }
 }
