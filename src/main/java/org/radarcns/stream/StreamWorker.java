@@ -16,7 +16,18 @@
 
 package org.radarcns.stream;
 
-import java.util.function.Supplier;
+import static org.apache.kafka.streams.KeyValue.pair;
+import static org.radarcns.util.StreamUtil.first;
+import static org.radarcns.util.StreamUtil.second;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ScheduledFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -28,29 +39,16 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
-import org.radarcns.stream.aggregator.DoubleAggregation;
-import org.radarcns.stream.aggregator.DoubleArrayAggregation;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.aggregator.AggregateList;
+import org.radarcns.stream.aggregator.NumericAggregate;
+import org.radarcns.stream.collector.AggregateListCollector;
+import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.util.Monitor;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ScheduledFuture;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.apache.kafka.streams.KeyValue.pair;
-import static org.radarcns.util.Serialization.floatToDouble;
-import static org.radarcns.util.StreamUtil.first;
-import static org.radarcns.util.StreamUtil.second;
 
 /**
  * Abstraction of a Kafka Stream.
@@ -211,39 +209,46 @@ public abstract class StreamWorker<K extends SpecificRecord, V extends SpecificR
         return streamDefinitions;
     }
 
-    protected final KStream<AggregateKey, DoubleAggregation> aggregateFloat(
-            StreamDefinition definition,
-            @Nonnull KStream<ObservationKey, V> kstream, Function<V, Float> field) {
-        return aggregateDouble(definition, kstream, v -> floatToDouble(field.apply(v)));
-    }
-
-    protected final KStream<AggregateKey, DoubleAggregation> aggregateDouble(
-            StreamDefinition definition,
-            @Nonnull KStream<ObservationKey, V> kstream, Function<V, Double> field) {
+    protected final KStream<AggregateKey, NumericAggregate> aggregateNumeric(
+            @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
+            @Nonnull String fieldName, @Nonnull Schema schema) {
         return kstream.groupByKey()
                 .aggregate(
-                        DoubleValueCollector::new,
-                        (k, v, valueCollector) -> valueCollector.add(field.apply(v)),
+                        () -> new NumericAggregateCollector(fieldName, schema),
+                        (k, v, valueCollector) -> valueCollector.add(v),
                         definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getDoubleCollector(),
+                        RadarSerdes.getInstance().getNumericAggregateCollector(),
                         definition.getStateStoreName())
                 .toStream()
-                .map(utilities::collectorToAvro);
+                .map(utilities::numericCollectorToAvro);
     }
 
-    protected final KStream<AggregateKey, DoubleArrayAggregation> aggregateDoubleArray(
-            StreamDefinition definition,
-            @Nonnull KStream<ObservationKey, V> kstream, Function<V, double[]> field,
-            String[] fieldNames) {
+    protected final KStream<AggregateKey, NumericAggregate> aggregateCustomNumeric(
+            @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
+            @Nonnull Function<V, Double> calculation, @Nonnull String fieldName) {
         return kstream.groupByKey()
                 .aggregate(
-                        DoubleArrayCollector::new,
-                        (k, v, valueCollector) -> valueCollector.add(field.apply(v)),
+                        () -> new NumericAggregateCollector(fieldName),
+                        (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
                         definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getDoubleArrayCollector(),
+                        RadarSerdes.getInstance().getNumericAggregateCollector(),
                         definition.getStateStoreName())
                 .toStream()
-                .map(utilities.collectorToAvro(fieldNames));
+                .map(utilities::numericCollectorToAvro);
+    }
+
+    protected final KStream<AggregateKey, AggregateList> aggregateFields(
+            @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
+            @Nonnull String[] fieldNames, @Nonnull Schema schema) {
+        return kstream.groupByKey()
+                .aggregate(
+                        () -> new AggregateListCollector(fieldNames, schema),
+                        (k, v, valueCollector) -> valueCollector.add(v),
+                        definition.getTimeWindows(),
+                        RadarSerdes.getInstance().getAggregateListCollector(),
+                        definition.getStateStoreName())
+                .toStream()
+                .map(utilities::listCollectorToAvro);
     }
 
     @Override

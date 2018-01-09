@@ -16,6 +16,8 @@
 
 package org.radarcns.stream.empatica;
 
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
@@ -24,12 +26,9 @@ import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.aggregator.DoubleAggregation;
+import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
 
 /**
  * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
@@ -45,9 +44,9 @@ public class E4ElectroDermalActivityStream extends
     }
 
     @Override
-    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
+    protected KStream<AggregateKey, NumericAggregate> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4ElectroDermalActivity> kstream) {
-        return aggregateFloat(definition, kstream,
-                EmpaticaE4ElectroDermalActivity::getElectroDermalActivity);
+        return aggregateNumeric(definition, kstream, "electroDermalActivity",
+                EmpaticaE4ElectroDermalActivity.getClassSchema());
     }
 }

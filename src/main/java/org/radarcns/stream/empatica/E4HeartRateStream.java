@@ -16,6 +16,10 @@
 
 package org.radarcns.stream.empatica;
 
+import static org.radarcns.util.Serialization.floatToDouble;
+
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
@@ -24,12 +28,9 @@ import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.aggregator.DoubleAggregation;
+import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
 
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4.
@@ -42,10 +43,10 @@ public class E4HeartRateStream extends StreamWorker<ObservationKey, EmpaticaE4In
         super(definitions, numThread, master, properties, logger);
     }
 
-    protected KStream<AggregateKey, DoubleAggregation> implementStream(
+    protected KStream<AggregateKey, NumericAggregate> implementStream(
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4InterBeatInterval> kstream) {
-        return aggregateDouble(definition, kstream,
-                v -> utilities.ibiToHeartRate(v.getInterBeatInterval()));
+        return aggregateCustomNumeric(definition, kstream,
+                v -> 60d / floatToDouble(v.getInterBeatInterval()), "heartRate");
     }
 }
