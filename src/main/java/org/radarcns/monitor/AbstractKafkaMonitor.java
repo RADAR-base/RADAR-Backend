@@ -45,6 +45,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
@@ -57,6 +58,9 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
 
 /**
  * Monitor a list of topics for anomalous behavior.
+ * @param <K> record key type
+ * @param <V> record value type
+ * @param <S> state type
  */
 public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
@@ -78,6 +82,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      *
      * <p>Update the properties field in the subclasses. During any overriding constructor, be sure
      * to call {@link #configure(Properties)}.
+     * @param radar radar properties
      * @param topics topics to monitor
      * @param groupId Kafka group ID
      * @param clientId Kafka client ID
