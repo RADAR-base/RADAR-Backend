@@ -26,12 +26,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Properties;
 
 import org.apache.kafka.streams.kstream.KStream;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.topic.KafkaTopic;
@@ -40,11 +38,11 @@ import org.radarcns.util.RadarSingletonFactory;
 /**
  * Created by nivethika on 20-12-16.
  */
-public class StreamWorkerTest {
-    private StreamWorker aggregator;
+public class KStreamWorkerTest {
+    private KStreamWorker aggregator;
     @Before
     public void setUp() {
-        aggregator = mock(StreamWorker.class);
+        aggregator = mock(KStreamWorker.class);
     }
 
     @SuppressWarnings("unchecked")

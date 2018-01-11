@@ -35,7 +35,7 @@ public class E4StreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
+    protected void createWorkers(List<StreamWorker> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         E4Streams defs = E4Streams.getInstance();
         list.add(new E4AccelerationStream(

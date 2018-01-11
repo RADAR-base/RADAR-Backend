@@ -95,8 +95,6 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
         return window;
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

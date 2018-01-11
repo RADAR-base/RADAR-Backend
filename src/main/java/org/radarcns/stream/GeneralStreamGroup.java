@@ -109,12 +109,11 @@ public class GeneralStreamGroup implements StreamGroup {
             String outputBase) {
 
         topicNames.add(input);
-        Collection<StreamDefinition> streams = new TreeSet<>(
-                Arrays.stream(TimeWindowMetadata.values())
-                        .map(w -> new StreamDefinition(new KafkaTopic(input),
-                                new KafkaTopic(w.getTopicLabel(outputBase)),
-                                w.getIntervalInMilliSec()))
-                        .collect(Collectors.toList()));
+        Collection<StreamDefinition> streams = Arrays.stream(TimeWindowMetadata.values())
+                .map(w -> new StreamDefinition(
+                        new KafkaTopic(input), new KafkaTopic(w.getTopicLabel(outputBase)),
+                        w.getIntervalInMilliSec()))
+                .collect(Collectors.toList());
 
         topicNames.addAll(streams.stream()
                 .map(t -> t.getOutputTopic().getName())
@@ -127,6 +126,14 @@ public class GeneralStreamGroup implements StreamGroup {
         });
 
         return streams;
+    }
+
+    public void addTopicName(String topicName) {
+        this.topicNames.add(topicName);
+    }
+
+    public void addTopicNames(Collection<String> topicNames) {
+        this.topicNames.addAll(topicNames);
     }
 
     @Override

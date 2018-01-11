@@ -25,7 +25,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4.
  */
 public class E4InterBeatIntervalStream extends
-        StreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
+        KStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
     private static final Logger logger = LoggerFactory.getLogger(E4InterBeatIntervalStream.class);
 
     public E4InterBeatIntervalStream(Collection<StreamDefinition> definitions, int numThread,

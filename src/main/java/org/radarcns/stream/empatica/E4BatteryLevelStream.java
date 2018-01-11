@@ -25,7 +25,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Kafka Stream for aggregating data about Empatica E4 battery level.
  */
-public class E4BatteryLevelStream extends StreamWorker<ObservationKey, EmpaticaE4BatteryLevel> {
+public class E4BatteryLevelStream extends KStreamWorker<ObservationKey, EmpaticaE4BatteryLevel> {
     private static final Logger logger = LoggerFactory.getLogger(E4BatteryLevelStream.class);
 
     public E4BatteryLevelStream(Collection<StreamDefinition> definitions, int numThread,

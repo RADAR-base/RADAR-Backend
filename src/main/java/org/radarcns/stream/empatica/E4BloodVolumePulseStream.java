@@ -25,7 +25,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4BloodVolumePulse;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Kafka Stream for aggregating data about Blood Volume Pulse collected by Empatica E4.
  */
 public class E4BloodVolumePulseStream extends
-        StreamWorker<ObservationKey, EmpaticaE4BloodVolumePulse> {
+        KStreamWorker<ObservationKey, EmpaticaE4BloodVolumePulse> {
     private static final Logger logger = LoggerFactory.getLogger(E4BloodVolumePulseStream.class);
 
     public E4BloodVolumePulseStream(Collection<StreamDefinition> definitions, int numThread,

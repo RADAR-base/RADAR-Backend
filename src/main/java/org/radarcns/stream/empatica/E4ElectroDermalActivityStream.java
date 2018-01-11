@@ -25,7 +25,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
  */
 public class E4ElectroDermalActivityStream extends
-        StreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
+        KStreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
     private static final Logger logger = LoggerFactory.getLogger(
             E4ElectroDermalActivityStream.class);
 

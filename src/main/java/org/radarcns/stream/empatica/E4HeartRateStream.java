@@ -27,7 +27,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4.
  */
-public class E4HeartRateStream extends StreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
+public class E4HeartRateStream extends KStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
     private static final Logger logger = LoggerFactory.getLogger(E4HeartRateStream.class);
 
     public E4HeartRateStream(Collection<StreamDefinition> definitions, int numThread,

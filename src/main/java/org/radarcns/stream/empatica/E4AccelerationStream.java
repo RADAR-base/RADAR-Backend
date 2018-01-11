@@ -25,7 +25,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.AggregateList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Definition of Kafka Stream for aggregating data collected by Empatica E4 Accelerometer sensor.
  */
-public class E4AccelerationStream extends StreamWorker<ObservationKey, EmpaticaE4Acceleration> {
+public class E4AccelerationStream extends KStreamWorker<ObservationKey, EmpaticaE4Acceleration> {
     private static final Logger logger = LoggerFactory.getLogger(E4AccelerationStream.class);
 
     public E4AccelerationStream(Collection<StreamDefinition> definitions, int numThread,

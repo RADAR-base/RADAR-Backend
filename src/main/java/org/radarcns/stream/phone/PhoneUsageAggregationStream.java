@@ -9,7 +9,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.PhoneUsageAggregate;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by piotrzakrzewski on 26/07/2017.
  */
-public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
+public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
 
     public PhoneUsageAggregationStream(Collection<StreamDefinition> definitions, int numThread,

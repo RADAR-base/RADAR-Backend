@@ -9,12 +9,12 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneAcceleration;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.AggregateList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneAccelerationStream extends StreamWorker<ObservationKey, PhoneAcceleration> {
+public class PhoneAccelerationStream extends KStreamWorker<ObservationKey, PhoneAcceleration> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
 
     public PhoneAccelerationStream(Collection<StreamDefinition> definitions, int numThread,

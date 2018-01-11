@@ -9,12 +9,12 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneBatteryLevel;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneBatteryStream extends StreamWorker<ObservationKey, PhoneBatteryLevel> {
+public class PhoneBatteryStream extends KStreamWorker<ObservationKey, PhoneBatteryLevel> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneBatteryStream.class);
 
     public PhoneBatteryStream(Collection<StreamDefinition> definitions, int numThread,

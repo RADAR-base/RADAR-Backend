@@ -48,7 +48,7 @@ public class CombinedStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster streamMaster) {
+    protected void createWorkers(List<KStreamWorker<?, ?>> list, StreamMaster streamMaster) {
         for (StreamMaster master : streamMasters) {
             master.createWorkers(list, streamMaster);
         }

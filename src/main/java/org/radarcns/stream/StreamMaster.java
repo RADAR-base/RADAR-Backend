@@ -48,7 +48,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
-    private final List<StreamWorker<?, ?>> streamWorkers;
+    private final List<StreamWorker> streamWorkers;
     private final AtomicInteger currentStream;
     private final String nameSensor;
     private int lowPriorityThreads;
@@ -96,7 +96,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      *
      * @param list list to add workers to
      */
-    protected abstract void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master);
+    protected abstract void createWorkers(List<StreamWorker> list, StreamMaster master);
 
     /** Starts all workers. */
     @Override
@@ -151,7 +151,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      *
      * @param stream the worker that has started
      */
-    public void notifyStartedStream(@Nonnull StreamWorker<?, ?> stream) {
+    public void notifyStartedStream(@Nonnull StreamWorker stream) {
         int current = currentStream.incrementAndGet();
         log.info("[{}] {} is started. {}/{} streams are now running",
                 nameSensor, stream, current, streamWorkers.size());
@@ -162,7 +162,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      *
      * @param stream the worker that has closed
      */
-    public void notifyClosedStream(@Nonnull StreamWorker<?, ?> stream) {
+    public void notifyClosedStream(@Nonnull StreamWorker stream) {
         int current = currentStream.decrementAndGet();
 
         if (current == 0) {
@@ -190,7 +190,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
         }
     }
 
-    public void restartStream(final StreamWorker<?, ?> worker) {
+    public void restartStream(final StreamWorker worker) {
         log.info("Restarting stream {} for {}", worker, nameSensor);
 
         try {

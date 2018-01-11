@@ -35,7 +35,7 @@ public class PhoneStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
+    protected void createWorkers(List<StreamWorker> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         PhoneStreams defs = PhoneStreams.getInstance();
         list.add(new PhoneUsageStream(
