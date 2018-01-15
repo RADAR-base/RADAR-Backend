@@ -4,6 +4,7 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -42,6 +44,7 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     private static final Logger logger = LoggerFactory.getLogger(SourceStatisticsMonitor.class);
     private final AvroTopic<ObservationKey, AggregateKey> outputTopic;
     private final RadarPropertyHandler radar;
+    private final Map<ObservationKey, AggregateKey> nextBatch;
     private KafkaTopicSender<ObservationKey, AggregateKey> sender;
 
     /**
@@ -63,6 +66,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         props.setProperty(AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.setProperty(GROUP_ID_CONFIG, state.getGroupId());
         configure(props);
+
+        this.nextBatch = new HashMap<>();
     }
 
     @Override
@@ -139,11 +144,20 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
                     return value1;
                 });
 
-        try {
-            sender.send(newKey, newValue);
-        } catch (IOException e) {
-            logger.error("Failed to update key/value statistics {}: {}", newKey, newValue, e);
-        }
+        nextBatch.put(newKey, newValue);
+    }
+
+    @Override
+    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
+        super.evaluateRecords(records);
+        nextBatch.forEach((key, value) -> {
+            try {
+                sender.send(key, value);
+            } catch (IOException ex) {
+                logger.error("Failed to update state for observation {}", key, ex);
+            }
+        });
+        nextBatch.clear();
     }
 
     private static double getTime(GenericRecord record) {
