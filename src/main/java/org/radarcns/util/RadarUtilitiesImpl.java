@@ -21,6 +21,7 @@ import static org.apache.kafka.streams.KeyValue.pair;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Window;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
@@ -42,17 +43,18 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     @Override
     public AggregateKey getWindowed(Windowed<ObservationKey> window) {
-        return new AggregateKey(window.key().getProjectId(), window.key().getUserId(),
-                window.key().getSourceId(), window.window().start(), window.window().end());
+        ObservationKey key = window.key();
+        Window timeWindow = window.window();
+        return new AggregateKey(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                timeWindow.start() / 1000d, timeWindow.end() / 1000d);
     }
 
     @Override
     public AggregateKey getWindowedTuple(Windowed<TemporaryPackageKey> window) {
-        TemporaryPackageKey temp = window.key();
-        ObservationKey measurementKey = new ObservationKey(temp.getProjectId(), temp.getUserId(),
-                temp.getSourceId());
-        return new AggregateKey(measurementKey.getProjectId(), measurementKey.getUserId(),
-                measurementKey.getSourceId(), window.window().start(), window.window().end());
+        TemporaryPackageKey key = window.key();
+        Window timeWindow = window.window();
+        return new AggregateKey(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                timeWindow.start() / 1000d, timeWindow.end() / 1000d);
     }
 
     @Override

@@ -110,20 +110,20 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             return;
         }
 
-        long time = getTime(entry.value());
+        double time = getTime(entry.value());
 
         Schema keySchema = key.getSchema();
-        long start = getNumber(key, keySchema, "start").longValue();
-        long end = getNumber(key, keySchema, "end").longValue();
+        double start = getTime(key, keySchema, "timeStart");
+        double end = getTime(key, keySchema, "timeEnd");
 
-        if (time != 0L) {
-            if (start == 0L) {
+        if (!Double.isNaN(time)) {
+            if (Double.isNaN(start)) {
                 start = time;
             }
-            if (end == 0L) {
+            if (Double.isNaN(end)) {
                 end = time;
             }
-        } else if (start == 0L || end == 0L) {
+        } else if (Double.isNaN(start) || Double.isNaN(end)) {
             logger.error("Record in topic {} did not contain time values: {}, {}",
                     entry.topic(), entry.key(), entry.value());
             return;
@@ -134,8 +134,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
 
         newValue = state.getSources().merge(measurementKeyToString(newKey), newValue,
                 (value1, value2) -> {
-                    value1.setStart(Math.min(value1.getStart(), value2.getStart()));
-                    value1.setEnd(Math.max(value1.getEnd(), value2.getEnd()));
+                    value1.setTimeStart(Math.min(value1.getTimeStart(), value2.getTimeStart()));
+                    value1.setTimeEnd(Math.max(value1.getTimeEnd(), value2.getTimeEnd()));
                     return value1;
                 });
 
@@ -146,21 +146,21 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         }
     }
 
-    private static long getTime(GenericRecord record) {
+    private static double getTime(GenericRecord record) {
         Schema schema = record.getSchema();
-        long time = (long)(getNumber(record, schema, "timeReceived").doubleValue() * 1000d);
-        if (time == 0L) {
-            time = (long)(getNumber(record, schema, "time").doubleValue() * 1000d);
+        double time = getTime(record, schema, "timeReceived");
+        if (Double.isNaN(time)) {
+            time = getTime(record, schema, "time");
         }
         return time;
     }
 
-    private static Number getNumber(GenericRecord record, Schema schema, String fieldName) {
+    private static double getTime(GenericRecord record, Schema schema, String fieldName) {
         Schema.Field field = schema.getField(fieldName);
         if (field != null) {
-            return (Number) record.get(field.pos());
+            return ((Number) record.get(field.pos())).doubleValue() * 1000d;
         } else {
-            return 0;
+            return Double.NaN;
         }
     }
 
