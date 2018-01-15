@@ -16,26 +16,33 @@
 
 package org.radarcns.monitor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.BatteryMonitorConfig;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
+import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.util.EmailServerRule;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class KafkaMonitorFactoryTest {
     @Rule
@@ -96,10 +103,11 @@ public class KafkaMonitorFactoryTest {
         KafkaMonitor monitor = new KafkaMonitorFactory(options, properties).createMonitor();
         assertEquals(CombinedKafkaMonitor.class, monitor.getClass());
         CombinedKafkaMonitor combinedMonitor = (CombinedKafkaMonitor) monitor;
-        List<KafkaMonitor> monitors = ((CombinedKafkaMonitor) monitor).getMonitors();
+        List<KafkaMonitor> monitors = combinedMonitor.getMonitors();
         assertEquals(2, monitors.size());
-        assertEquals(BatteryLevelMonitor.class, monitors.get(0).getClass());
-        assertEquals(DisconnectMonitor.class, monitors.get(1).getClass());
+        assertThat(monitors.get(0), either(instanceOf(BatteryLevelMonitor.class)).or(instanceOf(DisconnectMonitor.class)));
+        assertThat(monitors.get(1), either(instanceOf(BatteryLevelMonitor.class)).or(instanceOf(DisconnectMonitor.class)));
+        assertThat(monitors.get(0).getClass(), not(equalTo(monitors.get(1).getClass())));
     }
 
     public static RadarPropertyHandler getRadarPropertyHandler(ConfigRadar config, TemporaryFolder folder) throws IOException {

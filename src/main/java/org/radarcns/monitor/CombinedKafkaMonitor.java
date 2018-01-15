@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +44,13 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     private InterruptedException interruptedException;
 
     public CombinedKafkaMonitor(Collection<KafkaMonitor> monitors) {
-        if (monitors == null || monitors.isEmpty()) {
+        this.monitors = Objects.requireNonNull(monitors).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (monitors.isEmpty()) {
             throw new IllegalArgumentException("Monitor collection may not be empty");
         }
-        this.monitors = new ArrayList<>(monitors);
         this.done = new AtomicBoolean(false);
         this.executor = null;
         this.ioException = null;

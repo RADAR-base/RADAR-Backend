@@ -18,13 +18,14 @@ package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.radarcns.config.RadarPropertyHandler.Priority;
+
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.radarcns.config.RadarPropertyHandler.Priority;
 
 /**
  * POJO representing the yml file
@@ -45,6 +46,8 @@ public class ConfigRadar {
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
+    @JsonProperty("statistics_monitor")
+    private SourceStatisticsMonitorConfig statisticsMonitor;
     @JsonProperty("stream_masters")
     private List<String> streamMasters;
     @JsonProperty("persistence_path")
@@ -253,5 +256,9 @@ public class ConfigRadar {
 
     public void setBuildVersion(String buildVersion) {
         this.buildVersion = buildVersion;
+    }
+
+    public SourceStatisticsMonitorConfig getStatisticsMonitor() {
+        return statisticsMonitor;
     }
 }
