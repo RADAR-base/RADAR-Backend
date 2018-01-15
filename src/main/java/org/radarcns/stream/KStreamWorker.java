@@ -62,7 +62,6 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
     private final StreamMaster master;
     private final Collection<StreamDefinition> streamDefinitions;
     private final String buildVersion;
-    private final KStreamBuilder builder;
     private Collection<ScheduledFuture<?>> monitors;
     private final KafkaProperty kafkaProperty;
 
@@ -85,7 +84,6 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
         this.streams = null;
         this.monitors = null;
         this.monitorLog = monitorLog;
-        this.builder = new KStreamBuilder();
     }
 
     /**
@@ -103,10 +101,10 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             monitor = null;
         }
 
-        KStreamBuilder localBuilder = getBuilder();
+        KStreamBuilder builder = new KStreamBuilder();
 
         implementStream(def,
-                localBuilder.<K, V>stream(def.getInputTopic().getName())
+                builder.<K, V>stream(def.getInputTopic().getName())
                         .map((k, v) -> {
                             if (monitor != null) {
                                 monitor.increment();
@@ -115,7 +113,7 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
                         })
         ).to(def.getOutputTopic().getName());
 
-        return pair(future, new KafkaStreams(localBuilder, getStreamProperties(def)));
+        return pair(future, new KafkaStreams(builder, getStreamProperties(def)));
     }
 
     /**
@@ -256,9 +254,5 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
     @Override
     public String toString() {
         return getClass().getSimpleName();
-    }
-
-    public KStreamBuilder getBuilder() {
-        return builder;
     }
 }
