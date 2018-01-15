@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.config.KafkaProperty;
@@ -51,6 +52,8 @@ public class KStreamWorkerTest {
         String topicName = "TESTTopic";
         StreamDefinition sensorTopic = new StreamDefinition(new KafkaTopic(topicName), new KafkaTopic(topicName + "_output"));
         when(aggregator.getStreamDefinitions()).thenReturn(Collections.singleton(sensorTopic));
+        KStreamBuilder builder = new KStreamBuilder();
+        when(aggregator.getBuilder()).thenReturn(builder);
 
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         propertyHandler.load("src/test/resources/config/radar.yml");

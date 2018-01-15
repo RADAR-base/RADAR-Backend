@@ -3,7 +3,6 @@ package org.radarcns.monitor;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
@@ -19,11 +18,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
@@ -59,8 +60,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
                 ObservationKey.class, AggregateKey.class);
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, state.getGroupId());
+        props.setProperty(AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.setProperty(GROUP_ID_CONFIG, state.getGroupId());
         configure(props);
     }
 
@@ -96,29 +97,22 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     }
 
     @Override
-    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
-        GenericRecord key = records.key();
-        ObservationKey obsKey;
-        try {
-            obsKey = new ObservationKey(
-                    key.get("projectId").toString(),
-                    key.get("userId").toString(),
-                    key.get("sourceId").toString());
-        } catch (NullPointerException ex) {
-            logger.error("Could not deserialize key without basic ObservationKey properties: {}",
-                    key);
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> entry) {
+        GenericRecord key = entry.key();
+
+        String projectId = Objects.toString(key.get("projectId"));
+        String userId = Objects.toString(key.get("userId"));
+        String sourceId = Objects.toString(key.get("sourceId"));
+
+        if (projectId == null || userId  == null || sourceId == null) {
+            logger.error("Could not deserialize key from topic {}"
+                            + " without projectId, userId or sourceId: {}", entry.topic(), key);
             return;
         }
 
-        GenericRecord value = records.value();
+        long time = getTime(entry.value());
 
         Schema keySchema = key.getSchema();
-        Schema valueSchema = value.getSchema();
-
-        long time = (long)(getNumber(value, valueSchema, "timeReceived").doubleValue() * 1000d);
-        if (time == 0L) {
-            time = (long)(getNumber(value, valueSchema, "time").doubleValue() * 1000d);
-        }
         long start = getNumber(key, keySchema, "start").longValue();
         long end = getNumber(key, keySchema, "end").longValue();
 
@@ -131,14 +125,14 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             }
         } else if (start == 0L || end == 0L) {
             logger.error("Record in topic {} did not contain time values: {}, {}",
-                    records.topic(), records.key(), records.value());
+                    entry.topic(), entry.key(), entry.value());
             return;
         }
 
-        AggregateKey newValue = new AggregateKey(
-                obsKey.getProjectId(), obsKey.getUserId(), obsKey.getSourceId(), start, end);
+        ObservationKey newKey = new ObservationKey(projectId, userId, sourceId);
+        AggregateKey newValue = new AggregateKey(projectId, userId, sourceId, start, end);
 
-        newValue = state.getSources().merge(measurementKeyToString(obsKey), newValue,
+        newValue = state.getSources().merge(measurementKeyToString(newKey), newValue,
                 (value1, value2) -> {
                     value1.setStart(Math.min(value1.getStart(), value2.getStart()));
                     value1.setEnd(Math.max(value1.getEnd(), value2.getEnd()));
@@ -146,10 +140,19 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
                 });
 
         try {
-            sender.send(obsKey, newValue);
+            sender.send(newKey, newValue);
         } catch (IOException e) {
-            logger.error("Failed to update key/value statistics {}: {}", obsKey, newValue, e);
+            logger.error("Failed to update key/value statistics {}: {}", newKey, newValue, e);
         }
+    }
+
+    private static long getTime(GenericRecord record) {
+        Schema schema = record.getSchema();
+        long time = (long)(getNumber(record, schema, "timeReceived").doubleValue() * 1000d);
+        if (time == 0L) {
+            time = (long)(getNumber(record, schema, "time").doubleValue() * 1000d);
+        }
+        return time;
     }
 
     private static Number getNumber(GenericRecord record, Schema schema, String fieldName) {
