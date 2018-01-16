@@ -16,18 +16,17 @@
 
 package org.radarcns.stream.empatica;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.TimeWindowMetadata;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by nivethika on 21-12-16.

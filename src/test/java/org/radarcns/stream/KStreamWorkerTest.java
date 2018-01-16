@@ -26,9 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
-
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.radarcns.config.KafkaProperty;

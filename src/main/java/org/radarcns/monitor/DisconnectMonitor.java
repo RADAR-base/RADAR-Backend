@@ -19,20 +19,6 @@ package org.radarcns.monitor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.kafka.ObservationKey;
-import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
-import org.radarcns.util.EmailSender;
-import org.radarcns.util.Monitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.mail.MessagingException;
 import java.text.DateFormat;
 import java.text.Format;
 import java.util.Collection;
@@ -46,9 +32,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
-import static org.radarcns.util.PersistentStateStore.stringToKey;
+import javax.mail.MessagingException;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
+import org.radarcns.util.EmailSender;
+import org.radarcns.util.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
@@ -146,7 +142,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         this.monitor.increment();
 
         long now = System.currentTimeMillis();
-        String keyString = measurementKeyToString(key);
+        String keyString = getStateStore().keyToString(key);
         state.lastSeen.put(keyString, now);
 
         MissingRecordsReport missingReport = state.reportedMissing.remove(keyString);
@@ -172,7 +168,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     private void reportMissing(String keyString, MissingRecordsReport report) {
-        ObservationKey key = stringToKey(keyString);
+        ObservationKey key = getStateStore().stringToKey(keyString);
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
                 timeout, report.getMessageNumber(), numRepetitions);

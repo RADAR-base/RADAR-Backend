@@ -1,31 +1,5 @@
 package org.radarcns.monitor;
 
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
-import org.radarcns.kafka.AggregateKey;
-import org.radarcns.kafka.ObservationKey;
-import org.radarcns.producer.KafkaSender;
-import org.radarcns.producer.KafkaTopicSender;
-import org.radarcns.producer.direct.DirectSender;
-import org.radarcns.topic.AvroTopic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
-
 import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
@@ -37,7 +11,30 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVA
 import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SourceStatisticsMonitorConfig;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.producer.KafkaSender;
+import org.radarcns.producer.KafkaTopicSender;
+import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.topic.AvroTopic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Monitor a set of streams and compute some basic statistics.
@@ -116,7 +113,7 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     }
 
     protected void setupSender() throws IOException {
-        producer = getSender();
+        producer = createSender();
         sender = producer.sender(outputTopic);
     }
 
@@ -152,7 +149,7 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             return;
         }
 
-        state.updateSource(newKey, start, end);
+        state.updateSource(newKey, getStateStore().keyToString(newKey), start, end);
     }
 
     @Override
@@ -163,7 +160,7 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             // send all entries and remove them from the batch only if successful.
             unsent.removeIf(key -> {
                 try {
-                    AggregateKey value = state.getSource(key);
+                    AggregateKey value = state.getSource(getStateStore().keyToString(key));
                     sender.send(key, value);
                     return true;
                 } catch (Exception ex) {
@@ -192,7 +189,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         }
     }
 
-    protected KafkaSender getSender() {
+    /** Create a Kafka sender to send data with. */
+    protected KafkaSender createSender() {
         Properties properties = new Properties();
         properties.setProperty(KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
         properties.setProperty(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
@@ -215,8 +213,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         private final Set<ObservationKey> unsent = new HashSet<>();
         private String groupId = UUID.randomUUID().toString();
 
-        public AggregateKey getSource(ObservationKey key) {
-            return this.sources.get(measurementKeyToString(key));
+        public AggregateKey getSource(String key) {
+            return this.sources.get(key);
         }
 
         public Map<String, AggregateKey> getSources() {
@@ -227,8 +225,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             this.sources.putAll(sources);
         }
 
-        public void updateSource(ObservationKey key, double start, double end) {
-            sources.compute(measurementKeyToString(key), (k, v) -> {
+        public void updateSource(ObservationKey key, String keyString, double start, double end) {
+            sources.compute(keyString, (k, v) -> {
                 if (v == null) {
                     return new AggregateKey(
                             key.getProjectId(), key.getUserId(), key.getSourceId(),

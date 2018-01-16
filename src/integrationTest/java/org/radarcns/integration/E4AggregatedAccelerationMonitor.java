@@ -16,6 +16,11 @@
 
 package org.radarcns.integration;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -26,13 +31,6 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Consumer for Aggregated Acceleration Stream

@@ -16,11 +16,10 @@
 
 package org.radarcns.stream;
 
-import org.radarcns.config.ConfigRadar;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.radarcns.config.ConfigRadar;
 
 /** Combine multiple StreamMasters into a single object. */
 public class CombinedStreamMaster extends StreamMaster {

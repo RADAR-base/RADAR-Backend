@@ -16,8 +16,6 @@
 
 package org.radarcns.stream;
 
-import org.radarcns.topic.KafkaTopic;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.radarcns.topic.KafkaTopic;
 
 /**
  * Implementation of a {@link StreamGroup}. Override to create specific streams for a given

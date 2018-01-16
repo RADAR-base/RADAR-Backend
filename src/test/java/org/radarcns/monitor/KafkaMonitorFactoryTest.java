@@ -16,6 +16,19 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -30,20 +43,6 @@ import org.radarcns.config.RadarPropertyHandlerImpl;
 import org.radarcns.config.SourceStatisticsMonitorConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.util.EmailServerRule;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class KafkaMonitorFactoryTest {
     @Rule

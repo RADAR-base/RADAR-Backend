@@ -16,6 +16,24 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -33,27 +51,7 @@ import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.producer.KafkaSender;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.stream.aggregator.NumericAggregate;
-import org.radarcns.util.PersistentStateStore;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+import org.radarcns.util.YamlPersistentStateStore;
 
 public class SourceStatisticsMonitorTest {
 
@@ -81,7 +79,7 @@ public class SourceStatisticsMonitorTest {
         KafkaSender producer = mock(KafkaSender.class);
         @SuppressWarnings("unchecked")
         KafkaTopicSender<ObservationKey, AggregateKey> sender = mock(KafkaTopicSender.class);
-        doReturn(producer).when(monitor).getSender();
+        doReturn(producer).when(monitor).createSender();
         when(producer.<ObservationKey, AggregateKey>sender(any())).thenReturn(sender);
         monitor.setupSender();
 
@@ -143,18 +141,18 @@ public class SourceStatisticsMonitorTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        PersistentStateStore stateStore = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
         SourceStatisticsMonitor.SourceStatistics state = new SourceStatisticsMonitor.SourceStatistics();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
-        state.updateSource(key1, 2000.0, 2010.0);
+        state.updateSource(key1, stateStore.keyToString(key1), 2000.0, 2010.0);
         stateStore.storeState("source_statistics_test", "1", state);
 
         SourceStatisticsMonitor.SourceStatistics tmpState = new SourceStatisticsMonitor.SourceStatistics();
         assertThat(tmpState.getGroupId(), not(equalTo(state.getGroupId())));
 
-        PersistentStateStore stateStore2 = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
         SourceStatisticsMonitor.SourceStatistics state2 = stateStore2.retrieveState("source_statistics_test", "1", tmpState);
-        assertThat(state2.getSources(), hasEntry(measurementKeyToString(key1), new AggregateKey("test", "a", "b", 2000.0, 2010.0)));
+        assertThat(state2.getSources(), hasEntry(stateStore.keyToString(key1), new AggregateKey("test", "a", "b", 2000.0, 2010.0)));
         assertThat(state2.getUnsent(), hasItem(key1));
         assertThat(state2.getGroupId(), equalTo(state.getGroupId()));
 

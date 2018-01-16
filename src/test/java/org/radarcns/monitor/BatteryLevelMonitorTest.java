@@ -23,17 +23,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import javax.mail.MessagingException;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -43,7 +39,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.util.EmailSender;
-import org.radarcns.util.PersistentStateStore;
+import org.radarcns.util.YamlPersistentStateStore;
 
 public class BatteryLevelMonitorTest {
 
@@ -106,15 +102,16 @@ public class BatteryLevelMonitorTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        PersistentStateStore stateStore = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
         BatteryLevelState state = new BatteryLevelState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
-        state.updateLevel(key1, 0.1f);
+        String keyString = stateStore.keyToString(key1);
+        state.updateLevel(keyString, 0.1f);
         stateStore.storeState("one", "two", state);
 
-        PersistentStateStore stateStore2 = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
         BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());
         Map<String, Float> values = state2.getLevels();
-        assertThat(values, hasEntry(measurementKeyToString(key1), 0.1f));
+        assertThat(values, hasEntry(keyString, 0.1f));
     }
 }

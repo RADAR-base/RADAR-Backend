@@ -23,9 +23,8 @@ import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.TimeWindow;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
-import org.radarcns.kafka.ObservationKey;
 import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class RadarUtilsTest {
 
