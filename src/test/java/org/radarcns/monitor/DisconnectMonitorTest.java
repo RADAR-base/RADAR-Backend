@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
-import javax.mail.MessagingException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericData.Record;
@@ -60,7 +59,6 @@ public class DisconnectMonitorTest {
     private Schema keySchema;
     private Schema valueSchema;
     private EmailSender sender;
-    private long timeout;
 
     @Before
     public void setUp() {
@@ -91,7 +89,7 @@ public class DisconnectMonitorTest {
         disconnectConfig.setAlertRepeatInterval(2L);
         disconnectConfig.setAlertRepetitions(2);
 
-        timeout = 1000 * disconnectConfig.getTimeout();
+        long timeout = 1000 * disconnectConfig.getTimeout();
 
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
@@ -131,8 +129,7 @@ public class DisconnectMonitorTest {
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }
 
-    private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages)
-            throws MessagingException {
+    private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages) {
         Record key = new Record(keySchema);
         key.put("projectId", "test");
         key.put("sourceId", source);
@@ -146,7 +143,6 @@ public class DisconnectMonitorTest {
 
         monitor.evaluateRecords(new ConsumerRecords<>(
                 Collections.singletonMap(partition, Collections.singletonList(record))));
-
     }
 
     @Test
