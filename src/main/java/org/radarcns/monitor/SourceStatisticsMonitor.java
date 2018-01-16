@@ -64,6 +64,11 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         super(radar, config.getTopics(), Objects.requireNonNull(config.getName(),
                 "Source statistics monitor must have a name"), "1", new SourceStatistics());
 
+        if (getStateStore() == null) {
+            throw new IllegalArgumentException("Source statistics requires persistent state."
+                    + " Specify persistence_path to enable.");
+        }
+
         this.radar = radar;
         // Group ID based on what persistent state we have.
         // If the persistent state is lost, start from scratch.
@@ -151,8 +156,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     }
 
     @Override
-    protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        super.evaluateRecords(records);
+    protected void afterEvaluate() {
+        storeState();
 
         long now = System.currentTimeMillis();
         Set<ObservationKey> unsent = state.getUnsent();

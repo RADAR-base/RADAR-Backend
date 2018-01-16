@@ -224,14 +224,24 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         for (ConsumerRecord<K, V> record : records) {
             evaluateRecord(record);
         }
-        if (stateStore != null && state != null) {
+        afterEvaluate();
+    }
+
+    /** Store the current state. */
+    protected void storeState() {
+        if (getStateStore() != null && state != null) {
             try {
-                stateStore.storeState(groupId, clientId, state);
+                getStateStore().storeState(groupId, clientId, state);
             } catch (IOException ex) {
                 logger.error("Failed to store monitor state: {}. "
                         + "When restarted, all current state will be lost.", ex.getMessage());
             }
         }
+    }
+
+    /** Called after a set of records has been evaluated. */
+    protected void afterEvaluate() {
+        storeState();
     }
 
     /**
@@ -289,5 +299,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                 projectIdValue != null ? projectIdValue.toString() : null,
                 record.get(userIdField.pos()).toString(),
                 record.get(sourceIdField.pos()).toString());
+    }
+
+    public PersistentStateStore getStateStore() {
+        return stateStore;
     }
 }
