@@ -89,6 +89,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      */
     public AbstractKafkaMonitor(RadarPropertyHandler radar, Collection<String> topics,
             String groupId, String clientId, S stateDefault) {
+        if (topics == null || topics.isEmpty()) {
+            throw new IllegalArgumentException("Cannot start monitor without topics.");
+        }
 
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
@@ -261,25 +264,30 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         if (key == null) {
             throw new IllegalArgumentException("Failed to process record without a key.");
         }
-        Schema keySchema = key.getSchema();
-        Field projectIdField = keySchema.getField("projectId");
+        return extractKey(key, key.getSchema());
+    }
+
+
+    protected ObservationKey extractKey(GenericRecord record, Schema schema) {
+        Field projectIdField = schema.getField("projectId");
         if (projectIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without project ID.");
+                    + schema + " without project ID.");
         }
-        Field userIdField = keySchema.getField("userId");
+        Field userIdField = schema.getField("userId");
         if (userIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without user ID.");
+                    + schema + " without user ID.");
         }
-        Field sourceIdField = keySchema.getField("sourceId");
+        Field sourceIdField = schema.getField("sourceId");
         if (sourceIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without source ID.");
+                    + schema + " without source ID.");
         }
+        Object projectIdValue = record.get(projectIdField.pos());
         return new ObservationKey(
-                key.get(projectIdField.pos()).toString(),
-                key.get(userIdField.pos()).toString(),
-                key.get(sourceIdField.pos()).toString());
+                projectIdValue != null ? projectIdValue.toString() : null,
+                record.get(userIdField.pos()).toString(),
+                record.get(sourceIdField.pos()).toString());
     }
 }

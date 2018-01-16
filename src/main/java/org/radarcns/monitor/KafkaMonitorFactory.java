@@ -27,11 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class KafkaMonitorFactory {
 
@@ -64,13 +66,14 @@ public class KafkaMonitorFactory {
                 monitor = createDisconnectMonitor();
                 break;
             case "statistics":
-                monitor = createStatisticsMonitor();
+                monitor = new CombinedKafkaMonitor(createStatisticsMonitors());
                 break;
             case "all":
-                monitor = new CombinedKafkaMonitor(Arrays.asList(
-                        createDisconnectMonitor(),
-                        createBatteryLevelMonitor(),
-                        createStatisticsMonitor()));
+                List<KafkaMonitor> monitors = new ArrayList<>();
+                monitors.add(createDisconnectMonitor());
+                monitors.add(createBatteryLevelMonitor());
+                monitors.addAll(createStatisticsMonitors());
+                monitor = new CombinedKafkaMonitor(monitors);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -81,21 +84,18 @@ public class KafkaMonitorFactory {
         return monitor;
     }
 
-    private KafkaMonitor createStatisticsMonitor() {
-        SourceStatisticsMonitorConfig config = properties.getRadarProperties()
-                .getStatisticsMonitor();
+    private List<KafkaMonitor> createStatisticsMonitors() {
+        List<SourceStatisticsMonitorConfig> configs = properties.getRadarProperties()
+                .getStatisticsMonitors();
 
-        if (config == null) {
+        if (configs == null) {
             logger.warn("Statistics monitor is not configured. Cannot start it.");
-            return null;
+            return Collections.emptyList();
         }
 
-        List<String> topics = config.getTopics();
-        if (topics == null || topics.isEmpty()) {
-            topics = Collections.singletonList("application_uptime");
-        }
-
-        return new SourceStatisticsMonitor(properties, topics, config.getOutputTopic());
+        return configs.stream()
+                .map(config -> new SourceStatisticsMonitor(properties, config))
+                .collect(Collectors.toList());
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {

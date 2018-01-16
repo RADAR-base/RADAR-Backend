@@ -41,6 +41,7 @@ import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
+import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.PersistentStateStore;
 
@@ -52,32 +53,15 @@ public class BatteryLevelMonitorTest {
     private long offset;
     private long timeReceived;
     private int timesSent;
-    private Schema keySchema;
-    private Schema valueSchema;
     private EmailSender sender;
 
-    @Before
-    public void setUp() {
-        Parser parser = new Parser();
-        keySchema = parser.parse("{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
-                + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
-                + "{\"name\": \"userId\", \"type\": \"string\"},"
-                + "{\"name\": \"sourceId\", \"type\": \"string\"}"
-                + "]}");
-
-        valueSchema = parser.parse("{\"name\": \"value\", \"type\": \"record\", \"fields\": ["
-                + "{\"name\": \"timeReceived\", \"type\": \"double\"},"
-                + "{\"name\": \"batteryLevel\", \"type\": \"float\"}"
-                + "]}");
-
+    @Test
+    public void evaluateRecord() throws Exception {
         offset = 1000L;
         timeReceived = 2000L;
         timesSent = 0;
         sender = mock(EmailSender.class);
-    }
 
-    @Test
-    public void evaluateRecord() throws Exception {
         ConfigRadar config = KafkaMonitorFactoryTest
                 .getBatteryMonitorConfig(25252, folder);
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
@@ -102,12 +86,13 @@ public class BatteryLevelMonitorTest {
 
     private void sendMessage(BatteryLevelMonitor monitor, float batteryLevel, boolean sentMessage)
             throws MessagingException {
-        Record key = new Record(keySchema);
+        Record key = new Record(ObservationKey.getClassSchema());
         key.put("projectId", "test");
         key.put("sourceId", "1");
         key.put("userId", "me");
 
-        Record value = new Record(valueSchema);
+        Record value = new Record(EmpaticaE4BatteryLevel.getClassSchema());
+        value.put("time", timeReceived);
         value.put("timeReceived", timeReceived++);
         value.put("batteryLevel", batteryLevel);
         monitor.evaluateRecord(new ConsumerRecord<>("mytopic", 0, offset++, key, value));

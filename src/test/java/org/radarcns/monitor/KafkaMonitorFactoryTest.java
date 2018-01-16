@@ -17,7 +17,6 @@
 package org.radarcns.monitor;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,11 +27,13 @@ import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
+import org.radarcns.config.SourceStatisticsMonitorConfig;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.util.EmailServerRule;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -156,6 +157,18 @@ public class KafkaMonitorFactoryTest {
     public static ConfigRadar getBatteryMonitorConfig(int port, TemporaryFolder folder) throws IOException {
         ConfigRadar config = createBasicConfig(folder);
         config.setBatteryMonitor(getBatteryMonitorConfig(port));
+        return config;
+    }
+
+    public static ConfigRadar getSourceStatisticsMonitorConfig(TemporaryFolder folder) throws IOException {
+        ConfigRadar config = createBasicConfig(folder);
+        SourceStatisticsMonitorConfig sourceConfig = new SourceStatisticsMonitorConfig();
+        sourceConfig.setName("source_statistics_test");
+        sourceConfig.setTopics(Arrays.asList("android_empatica_e4_battery_level",
+                "android_empatica_e4_battery_level_10sec"));
+        sourceConfig.setOutputTopic("statistics_android_empatica_e4");
+        sourceConfig.setFlushTimeout(200L);
+        config.setStatisticsMonitors(Collections.singletonList(sourceConfig));
         return config;
     }
 }

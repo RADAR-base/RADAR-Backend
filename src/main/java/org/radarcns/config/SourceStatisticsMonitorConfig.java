@@ -5,10 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class SourceStatisticsMonitorConfig {
+    private String name;
+
     private List<String> topics;
 
     @JsonProperty("output_topic")
     private String outputTopic = "monitor_statistics";
+
+    @JsonProperty("max_batch_size")
+    private int maxBatchSize = 1000;
+
+    @JsonProperty("flush_timeout")
+    private long flushTimeout = 60_000L;
 
     public List<String> getTopics() {
         return topics;
@@ -24,5 +32,29 @@ public class SourceStatisticsMonitorConfig {
 
     public void setOutputTopic(String outputTopic) {
         this.outputTopic = outputTopic;
+    }
+
+    public int getMaxBatchSize() {
+        return maxBatchSize;
+    }
+
+    public void setMaxBatchSize(int maxBatchSize) {
+        this.maxBatchSize = maxBatchSize;
+    }
+
+    public long getFlushTimeout() {
+        return flushTimeout;
+    }
+
+    public void setFlushTimeout(long flushTimeout) {
+        this.flushTimeout = flushTimeout;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
