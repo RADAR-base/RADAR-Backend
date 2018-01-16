@@ -157,8 +157,6 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
 
     @Override
     protected void afterEvaluate() {
-        storeState();
-
         long now = System.currentTimeMillis();
         Set<ObservationKey> unsent = state.getUnsent();
         if (!unsent.isEmpty() && (now >= lastEmpty + timeout || unsent.size() >= maxSize)) {
@@ -180,6 +178,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         if (unsent.isEmpty()) {
             lastEmpty = now;
         }
+
+        storeState();
     }
 
     private static double getTime(GenericRecord record, Schema schema, String fieldName,
