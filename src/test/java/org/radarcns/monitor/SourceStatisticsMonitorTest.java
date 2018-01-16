@@ -50,6 +50,8 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.producer.KafkaSender;
 import org.radarcns.producer.KafkaTopicSender;
+import org.radarcns.monitor.SourceStatisticsMonitor.SourceStatisticsState;
+import org.radarcns.stream.SourceStatistics;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.radarcns.util.YamlPersistentStateStore;
 
@@ -78,9 +80,9 @@ public class SourceStatisticsMonitorTest {
         SourceStatisticsMonitor monitor = spy(actualMonitor);
         KafkaSender producer = mock(KafkaSender.class);
         @SuppressWarnings("unchecked")
-        KafkaTopicSender<ObservationKey, AggregateKey> sender = mock(KafkaTopicSender.class);
+        KafkaTopicSender<ObservationKey, SourceStatistics> sender = mock(KafkaTopicSender.class);
         doReturn(producer).when(monitor).createSender();
-        when(producer.<ObservationKey, AggregateKey>sender(any())).thenReturn(sender);
+        when(producer.<ObservationKey, SourceStatistics>sender(any())).thenReturn(sender);
         monitor.setupSender();
 
 
@@ -95,7 +97,7 @@ public class SourceStatisticsMonitorTest {
 
         verify(sender, times(1)).send(
                 new ObservationKey("test", "me", "1"),
-                new AggregateKey("test", "me", "1", 1999.0, 2010.0));
+                new SourceStatistics(1999.0, 2010.0));
 
         monitor.cleanUpSender();
     }
@@ -142,17 +144,17 @@ public class SourceStatisticsMonitorTest {
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
         YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
-        SourceStatisticsMonitor.SourceStatistics state = new SourceStatisticsMonitor.SourceStatistics();
+        SourceStatisticsState state = new SourceStatisticsState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
         state.updateSource(key1, stateStore.keyToString(key1), 2000.0, 2010.0);
         stateStore.storeState("source_statistics_test", "1", state);
 
-        SourceStatisticsMonitor.SourceStatistics tmpState = new SourceStatisticsMonitor.SourceStatistics();
+        SourceStatisticsState tmpState = new SourceStatisticsState();
         assertThat(tmpState.getGroupId(), not(equalTo(state.getGroupId())));
 
         YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
-        SourceStatisticsMonitor.SourceStatistics state2 = stateStore2.retrieveState("source_statistics_test", "1", tmpState);
-        assertThat(state2.getSources(), hasEntry(stateStore.keyToString(key1), new AggregateKey("test", "a", "b", 2000.0, 2010.0)));
+        SourceStatisticsState state2 = stateStore2.retrieveState("source_statistics_test", "1", tmpState);
+        assertThat(state2.getSources(), hasEntry(stateStore.keyToString(key1), new SourceStatistics(2000.0, 2010.0)));
         assertThat(state2.getUnsent(), hasItem(key1));
         assertThat(state2.getGroupId(), equalTo(state.getGroupId()));
 

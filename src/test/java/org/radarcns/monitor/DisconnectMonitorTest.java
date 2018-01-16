@@ -87,8 +87,8 @@ public class DisconnectMonitorTest {
 
         DisconnectMonitorConfig disconnectConfig = config.getDisconnectMonitor();
 
-        disconnectConfig.setTimeout(2L);
-        disconnectConfig.setAlertRepeatInterval(4L);
+        disconnectConfig.setTimeout(1L);
+        disconnectConfig.setAlertRepeatInterval(2L);
         disconnectConfig.setAlertRepetitions(2);
 
         timeout = 1000 * disconnectConfig.getTimeout();
@@ -105,7 +105,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "1", 0);
         sendMessage(monitor, "1", 1);
         sendMessage(monitor, "2", 0);
-        Thread.sleep(timeout + 2_000L);
+        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 2;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -117,7 +117,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "2", 0);
         sendMessage(monitor, "0", 0);
         timesSent += 1;
-        Thread.sleep(timeout + 2_000L);
+        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 3;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -126,7 +126,7 @@ public class DisconnectMonitorTest {
     @Test
     public void evaluateRecordsWithScheduledAlerts() throws Exception {
         evaluateRecords();
-        Thread.sleep(14_000L);
+        Thread.sleep(7_000L);
         timesSent +=6; // executed twice for 3 disconnected devices
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }

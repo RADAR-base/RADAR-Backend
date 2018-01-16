@@ -27,11 +27,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SourceStatisticsMonitorConfig;
-import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.producer.KafkaSender;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
+import org.radarcns.stream.SourceStatistics;
 import org.radarcns.topic.AvroTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +40,15 @@ import org.slf4j.LoggerFactory;
  * Monitor a set of streams and compute some basic statistics.
  */
 public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord,
-        SourceStatisticsMonitor.SourceStatistics> {
+        SourceStatisticsMonitor.SourceStatisticsState> {
     private static final Logger logger = LoggerFactory.getLogger(SourceStatisticsMonitor.class);
-    private final AvroTopic<ObservationKey, AggregateKey> outputTopic;
+    private final AvroTopic<ObservationKey, SourceStatistics> outputTopic;
     private final RadarPropertyHandler radar;
     private final long timeout;
     private final int maxSize;
     private long lastEmpty;
     private KafkaSender producer;
-    private KafkaTopicSender<ObservationKey, AggregateKey> sender;
+    private KafkaTopicSender<ObservationKey, SourceStatistics> sender;
 
     /**
      * Set some basic properties.
@@ -59,7 +59,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     public SourceStatisticsMonitor(RadarPropertyHandler radar,
             SourceStatisticsMonitorConfig config) {
         super(radar, config.getTopics(), Objects.requireNonNull(config.getName(),
-                "Source statistics monitor must have a name"), "1", new SourceStatistics());
+                "Source statistics monitor must have a name"), "1",
+                new SourceStatisticsState());
 
         if (getStateStore() == null) {
             throw new IllegalArgumentException("Source statistics requires persistent state."
@@ -70,8 +71,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         // Group ID based on what persistent state we have.
         // If the persistent state is lost, start from scratch.
         this.outputTopic = new AvroTopic<>(config.getOutputTopic(),
-                ObservationKey.getClassSchema(), AggregateKey.getClassSchema(),
-                ObservationKey.class, AggregateKey.class);
+                ObservationKey.getClassSchema(), SourceStatistics.getClassSchema(),
+                ObservationKey.class, SourceStatistics.class);
 
         Properties props = new Properties();
         props.setProperty(AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -160,7 +161,7 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
             // send all entries and remove them from the batch only if successful.
             unsent.removeIf(key -> {
                 try {
-                    AggregateKey value = state.getSource(getStateStore().keyToString(key));
+                    SourceStatistics value = state.getSource(getStateStore().keyToString(key));
                     sender.send(key, value);
                     return true;
                 } catch (Exception ex) {
@@ -208,29 +209,27 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
         return new DirectSender(properties);
     }
 
-    public static class SourceStatistics {
-        private final Map<String, AggregateKey> sources = new HashMap<>();
+    public static class SourceStatisticsState {
+        private final Map<String, SourceStatistics> sources = new HashMap<>();
         private final Set<ObservationKey> unsent = new HashSet<>();
         private String groupId = UUID.randomUUID().toString();
 
-        public AggregateKey getSource(String key) {
+        public SourceStatistics getSource(String key) {
             return this.sources.get(key);
         }
 
-        public Map<String, AggregateKey> getSources() {
+        public Map<String, SourceStatistics> getSources() {
             return sources;
         }
 
-        public void setSources(Map<String, AggregateKey> sources) {
+        public void setSources(Map<String, SourceStatistics> sources) {
             this.sources.putAll(sources);
         }
 
         public void updateSource(ObservationKey key, String keyString, double start, double end) {
             sources.compute(keyString, (k, v) -> {
                 if (v == null) {
-                    return new AggregateKey(
-                            key.getProjectId(), key.getUserId(), key.getSourceId(),
-                            start, end);
+                    return new SourceStatistics(start, end);
                 } else {
                     if (v.getTimeStart() > start) {
                         v.setTimeStart(start);
