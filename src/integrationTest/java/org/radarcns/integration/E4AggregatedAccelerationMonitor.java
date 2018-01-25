@@ -16,6 +16,11 @@
 
 package org.radarcns.integration;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -26,13 +31,6 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Properties;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Consumer for Aggregated Acceleration Stream
@@ -56,7 +54,6 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
     @Override
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
-        assertTrue(records.count() > 0);
         for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
 
             GenericRecord key = record.key();
@@ -75,11 +72,11 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
                 return;
             }
             GenericRecord value = record.value();
-            GenericData.Array count = (GenericData.Array) value.get("count");
+            GenericData.Array fields = (GenericData.Array) value.get("fields");
             logger.info("Received [{}, {}, {}] E4 messages",
-                    count.get(0), count.get(1), count.get(2));
+                    ((GenericRecord)fields.get(0)).get("count"), ((GenericRecord)fields.get(1)).get("count"), ((GenericRecord)fields.get(2)).get("count"));
 
-            if ((Double)count.get(0) > 200) {
+            if ((Integer)((GenericRecord)fields.get(0)).get("count") > 100) {
                 shutdown();
             }
         }

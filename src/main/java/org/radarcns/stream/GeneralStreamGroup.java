@@ -16,8 +16,6 @@
 
 package org.radarcns.stream;
 
-import org.radarcns.topic.KafkaTopic;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.radarcns.topic.KafkaTopic;
 
 /**
  * Implementation of a {@link StreamGroup}. Override to create specific streams for a given
@@ -86,24 +85,34 @@ public class GeneralStreamGroup implements StreamGroup {
         return createStream(input, input + OUTPUT_LABEL, 0L);
     }
 
-    protected Collection<StreamDefinition> createAggregateStream(String input, long window) {
-        return createStream(input, input + OUTPUT_LABEL, window);
-    }
-
+    /**
+     * Create a set of sensor streams, for each of the RADAR standard time frames. An input topic
+     * {@code my_input} will create, e.g., {@code my_input_10sec}, {@code my_input_10min} output
+     * topics.
+     * @param input topic to stream from
+     * @return stream definitions to stream
+     */
     protected Collection<StreamDefinition> createWindowedSensorStream(String input) {
         return createWindowedSensorStream(input, input);
     }
 
+    /**
+     * Create a set of sensor streams, for each of the RADAR standard time frames. An input topic
+     * {@code my_input} with output base {@code my_output} will create, e.g.,
+     * {@code my_output_10sec}, {@code my_output_10min} output topics.
+     * @param input topic to stream from
+     * @param outputBase base topic name to stream to
+     * @return stream definitions to stream
+     */
     protected Collection<StreamDefinition> createWindowedSensorStream(String input,
             String outputBase) {
 
         topicNames.add(input);
-        Collection<StreamDefinition> streams = new TreeSet<>(
-                Arrays.stream(TimeWindowMetadata.values())
-                        .map(w -> new StreamDefinition(new KafkaTopic(input),
-                                new KafkaTopic(w.getTopicLabel(outputBase)),
-                                w.getIntervalInMilliSec()))
-                        .collect(Collectors.toList()));
+        Collection<StreamDefinition> streams = Arrays.stream(TimeWindowMetadata.values())
+                .map(w -> new StreamDefinition(
+                        new KafkaTopic(input), new KafkaTopic(w.getTopicLabel(outputBase)),
+                        w.getIntervalInMilliSec()))
+                .collect(Collectors.toList());
 
         topicNames.addAll(streams.stream()
                 .map(t -> t.getOutputTopic().getName())
@@ -116,6 +125,14 @@ public class GeneralStreamGroup implements StreamGroup {
         });
 
         return streams;
+    }
+
+    public void addTopicName(String topicName) {
+        this.topicNames.add(topicName);
+    }
+
+    public void addTopicNames(Collection<String> topicNames) {
+        this.topicNames.addAll(topicNames);
     }
 
     @Override

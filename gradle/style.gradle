@@ -1,0 +1,36 @@
+//---------------------------------------------------------------------------//
+// Style checking                                                            //
+//---------------------------------------------------------------------------//
+apply plugin: 'pmd'
+apply plugin: 'checkstyle'
+
+checkstyle {
+    // codacy version
+    toolVersion '8.4'
+    ignoreFailures false
+
+    // ignore tests
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.integrationTest]
+}
+
+tasks.withType(Checkstyle) {
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
+}
+
+pmd {
+    // pmd version
+    toolVersion = '5.8.1'
+    ignoreFailures = false
+
+    sourceSets = [sourceSets.main]
+
+    consoleOutput = true
+
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+}
+
+tasks.withType(Pmd) {
+    exclude '**/org/radarcns/config/ConfigRadar.java'
+    exclude '**/org/radarcns/stream/phone/TemporaryPackageKey.java'
+}

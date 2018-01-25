@@ -1,25 +1,24 @@
 package org.radarcns.stream.phone;
 
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.aggregator.PhoneUsageAggregation;
+import org.radarcns.stream.aggregator.PhoneUsageAggregate;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-
 /**
  * Created by piotrzakrzewski on 26/07/2017.
  */
-public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
+public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
 
     public PhoneUsageAggregationStream(Collection<StreamDefinition> definitions, int numThread,
@@ -28,7 +27,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, Ph
     }
 
     @Override
-    protected KStream<AggregateKey, PhoneUsageAggregation> implementStream(
+    protected KStream<AggregateKey, PhoneUsageAggregate> implementStream(
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream.groupBy(PhoneUsageAggregationStream::temporaryKey)
@@ -39,7 +38,7 @@ public class PhoneUsageAggregationStream extends StreamWorker<ObservationKey, Ph
                         RadarSerdes.getInstance().getPhoneUsageCollector(),
                         definition.getStateStoreName())
                 .toStream()
-                .map(utilities::collectorToAvro);
+                .map(utilities::phoneCollectorToAvro);
     }
 
     private static TemporaryPackageKey temporaryKey(ObservationKey key, PhoneUsageEvent value) {

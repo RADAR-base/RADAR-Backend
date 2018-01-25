@@ -16,13 +16,12 @@
 
 package org.radarcns.stream.phone;
 
+import java.util.List;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
-
-import java.util.List;
 
 /**
  * Singleton StreamMaster for Phone
@@ -35,7 +34,7 @@ public class PhoneStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster master) {
+    protected void createWorkers(List<StreamWorker> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         PhoneStreams defs = PhoneStreams.getInstance();
         list.add(new PhoneUsageStream(

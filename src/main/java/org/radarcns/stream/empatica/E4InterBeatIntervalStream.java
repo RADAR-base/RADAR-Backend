@@ -16,26 +16,25 @@
 
 package org.radarcns.stream.empatica;
 
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
-import org.radarcns.stream.aggregator.DoubleAggregation;
+import org.radarcns.stream.aggregator.NumericAggregate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
 
 /**
  * Definition of Kafka Stream for aggregating Inter Beat Interval values collected by Empatica E4.
  */
 public class E4InterBeatIntervalStream extends
-        StreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
+        KStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
     private static final Logger logger = LoggerFactory.getLogger(E4InterBeatIntervalStream.class);
 
     public E4InterBeatIntervalStream(Collection<StreamDefinition> definitions, int numThread,
@@ -44,9 +43,9 @@ public class E4InterBeatIntervalStream extends
     }
 
     @Override
-    protected KStream<AggregateKey, DoubleAggregation> implementStream(StreamDefinition definition,
+    protected KStream<AggregateKey, NumericAggregate> implementStream(StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4InterBeatInterval> kstream) {
-        return aggregateFloat(definition, kstream,
-                EmpaticaE4InterBeatInterval::getInterBeatInterval);
+        return aggregateNumeric(definition, kstream, "interBeatInterval",
+                EmpaticaE4InterBeatInterval.getClassSchema());
     }
 }

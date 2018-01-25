@@ -8,7 +8,6 @@ services:
 
 env:
   DOCKER_COMPOSE_VERSION: 1.16.1
-  TERM: dumb
 
 cache:
   directories:
@@ -26,8 +25,10 @@ before_install:
   - chmod +x "$HOME/bin/docker-compose";
 script:
   - ./gradlew check
+  - cd src/integrationTest/docker
   - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
   - sudo docker-compose down
+  - cd ../../..
 after_script:
   - ./gradlew sendCoverageToCodacy
 

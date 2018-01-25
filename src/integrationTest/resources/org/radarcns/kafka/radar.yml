@@ -17,10 +17,14 @@ zookeeper:
 broker:
     - host: kafka-1
       port: 9092
+    - host: kafka-2
+      port: 9092
+    - host: kafka-3
+      port: 9092
 
 #Kafka internal parameters
 stream_properties:
-  cache.max.bytes.buffering: 1000
+  cache.max.bytes.buffering: 1
 
 #============================ Kafka Streams ============================#
 #The number of threads that a stream must be run according is priority

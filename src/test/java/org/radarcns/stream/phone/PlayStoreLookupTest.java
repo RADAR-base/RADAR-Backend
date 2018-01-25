@@ -16,17 +16,16 @@
 
 package org.radarcns.stream.phone;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
-import java.util.Arrays;
-import java.util.Collection;
 import org.radarcns.stream.phone.PlayStoreLookup.AppCategory;
-
-import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class PlayStoreLookupTest {

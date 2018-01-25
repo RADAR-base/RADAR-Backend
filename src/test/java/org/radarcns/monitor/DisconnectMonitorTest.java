@@ -16,6 +16,19 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericData.Record;
@@ -34,23 +47,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.monitor.DisconnectMonitor.MissingRecordsReport;
 import org.radarcns.util.EmailSender;
-import org.radarcns.util.PersistentStateStore;
-
-import javax.mail.MessagingException;
-import java.io.File;
-import java.util.Collections;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
+import org.radarcns.util.YamlPersistentStateStore;
 
 public class DisconnectMonitorTest {
     @Rule
@@ -62,7 +59,6 @@ public class DisconnectMonitorTest {
     private Schema keySchema;
     private Schema valueSchema;
     private EmailSender sender;
-    private long timeout;
 
     @Before
     public void setUp() {
@@ -89,11 +85,11 @@ public class DisconnectMonitorTest {
 
         DisconnectMonitorConfig disconnectConfig = config.getDisconnectMonitor();
 
-        disconnectConfig.setTimeout(2L);
-        disconnectConfig.setAlertRepeatInterval(4L);
+        disconnectConfig.setTimeout(1L);
+        disconnectConfig.setAlertRepeatInterval(2L);
         disconnectConfig.setAlertRepetitions(2);
 
-        timeout = 1000 * disconnectConfig.getTimeout();
+        long timeout = 1000 * disconnectConfig.getTimeout();
 
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
@@ -107,7 +103,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "1", 0);
         sendMessage(monitor, "1", 1);
         sendMessage(monitor, "2", 0);
-        Thread.sleep(timeout + 2_000L);
+        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 2;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -119,7 +115,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "2", 0);
         sendMessage(monitor, "0", 0);
         timesSent += 1;
-        Thread.sleep(timeout + 2_000L);
+        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 3;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -128,13 +124,12 @@ public class DisconnectMonitorTest {
     @Test
     public void evaluateRecordsWithScheduledAlerts() throws Exception {
         evaluateRecords();
-        Thread.sleep(14_000L);
+        Thread.sleep(7_000L);
         timesSent +=6; // executed twice for 3 disconnected devices
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
     }
 
-    private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages)
-            throws MessagingException {
+    private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages) {
         Record key = new Record(keySchema);
         key.put("projectId", "test");
         key.put("sourceId", source);
@@ -148,33 +143,32 @@ public class DisconnectMonitorTest {
 
         monitor.evaluateRecords(new ConsumerRecords<>(
                 Collections.singletonMap(partition, Collections.singletonList(record))));
-
     }
 
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        PersistentStateStore stateStore = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
         DisconnectMonitorState state = new DisconnectMonitorState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
         ObservationKey key2 = new ObservationKey("test", "b", "c");
         ObservationKey key3 = new ObservationKey("test", "c", "d");
         long now = System.currentTimeMillis();
-        state.getLastSeen().put(measurementKeyToString(key1), now);
-        state.getLastSeen().put(measurementKeyToString(key2), now + 1L);
-        state.getReportedMissing().put(measurementKeyToString(key3), new MissingRecordsReport
+        state.getLastSeen().put(stateStore.keyToString(key1), now);
+        state.getLastSeen().put(stateStore.keyToString(key2), now + 1L);
+        state.getReportedMissing().put(stateStore.keyToString(key3), new MissingRecordsReport
                 (now -60L, now + 2L, 0));
         stateStore.storeState("one", "two", state);
 
-        PersistentStateStore stateStore2 = new PersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
         DisconnectMonitorState state2 = stateStore2.retrieveState("one", "two", new DisconnectMonitorState());
         Map<String, Long> lastSeen = state2.getLastSeen();
         assertThat(lastSeen.size(), is(2));
-        assertThat(lastSeen, hasEntry(measurementKeyToString(key1), now));
-        assertThat(lastSeen, hasEntry(measurementKeyToString(key2), now + 1L));
+        assertThat(lastSeen, hasEntry(stateStore.keyToString(key1), now));
+        assertThat(lastSeen, hasEntry(stateStore.keyToString(key2), now + 1L));
         Map<String, MissingRecordsReport> reported = state2.getReportedMissing();
         assertThat(reported.size(), is(1));
-        assertThat(reported, hasKey(measurementKeyToString(key3)));
+        assertThat(reported, hasKey(stateStore.keyToString(key3)));
 
     }
 }

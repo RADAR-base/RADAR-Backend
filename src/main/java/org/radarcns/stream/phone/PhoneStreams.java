@@ -16,11 +16,10 @@
 
 package org.radarcns.stream.phone;
 
-import org.radarcns.stream.GeneralStreamGroup;
-import org.radarcns.stream.StreamDefinition;
-
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import org.radarcns.stream.GeneralStreamGroup;
+import org.radarcns.stream.StreamDefinition;
 
 public final class PhoneStreams extends GeneralStreamGroup {
     private static final PhoneStreams INSTANCE = new PhoneStreams();

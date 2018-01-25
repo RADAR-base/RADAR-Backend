@@ -16,10 +16,7 @@
 
 package org.radarcns.config;
 
-import org.radarcns.RadarBackend;
-import org.radarcns.util.PersistentStateStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.radarcns.util.Strings.isNullOrEmpty;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +24,11 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
-
-import static org.radarcns.util.Strings.isNullOrEmpty;
+import org.radarcns.RadarBackend;
+import org.radarcns.util.PersistentStateStore;
+import org.radarcns.util.YamlPersistentStateStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Java Singleton class for handling the yml config file. Implements @link{ RadarPropertyHandler}
@@ -120,7 +120,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     public PersistentStateStore getPersistentStateStore() throws IOException {
         if (getRadarProperties().getPersistencePath() != null) {
             File persistenceDir = new File(getRadarProperties().getPersistencePath());
-            return new PersistentStateStore(persistenceDir);
+            return new YamlPersistentStateStore(persistenceDir);
         } else {
             return null;
         }

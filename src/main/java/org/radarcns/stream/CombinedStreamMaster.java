@@ -16,11 +16,10 @@
 
 package org.radarcns.stream;
 
-import org.radarcns.config.ConfigRadar;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.radarcns.config.ConfigRadar;
 
 /** Combine multiple StreamMasters into a single object. */
 public class CombinedStreamMaster extends StreamMaster {
@@ -37,7 +36,7 @@ public class CombinedStreamMaster extends StreamMaster {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
         this.streamMasters = streamMasters;
-        this.streamGroup = new CombinedStreamGroup();
+        this.streamGroup = new CombinedStreamGroup(streamMasters);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class CombinedStreamMaster extends StreamMaster {
     }
 
     @Override
-    protected void createWorkers(List<StreamWorker<?, ?>> list, StreamMaster streamMaster) {
+    protected void createWorkers(List<StreamWorker> list, StreamMaster streamMaster) {
         for (StreamMaster master : streamMasters) {
             master.createWorkers(list, streamMaster);
         }
@@ -60,7 +59,13 @@ public class CombinedStreamMaster extends StreamMaster {
     }
 
     /** A stream group that combines the stream groups of the stream masters it is managing. */
-    private class CombinedStreamGroup implements StreamGroup {
+    private static class CombinedStreamGroup implements StreamGroup {
+        private final Collection<StreamMaster> streamMasters;
+
+        private CombinedStreamGroup(Collection<StreamMaster> streamMasters) {
+            this.streamMasters = streamMasters;
+        }
+
         @Override
         public List<String> getTopicNames() {
             List<String> topics = new ArrayList<>();

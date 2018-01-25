@@ -16,23 +16,22 @@
 
 package org.radarcns.util;
 
+import static org.apache.kafka.streams.KeyValue.pair;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Window;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
-import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
-import org.radarcns.stream.aggregator.DoubleAggregation;
-import org.radarcns.stream.aggregator.DoubleArrayAggregation;
-import org.radarcns.stream.aggregator.PhoneUsageAggregation;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.aggregator.AggregateList;
+import org.radarcns.stream.aggregator.NumericAggregate;
+import org.radarcns.stream.aggregator.PhoneUsageAggregate;
+import org.radarcns.stream.collector.AggregateListCollector;
+import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 import org.radarcns.stream.phone.TemporaryPackageKey;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.apache.kafka.streams.KeyValue.pair;
 
 /**
  * Implements {@link RadarUtilities}.
@@ -44,30 +43,25 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     @Override
     public AggregateKey getWindowed(Windowed<ObservationKey> window) {
-        return new AggregateKey(window.key().getProjectId(), window.key().getUserId(),
-                window.key().getSourceId(), window.window().start(), window.window().end());
+        ObservationKey key = window.key();
+        Window timeWindow = window.window();
+        return new AggregateKey(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                timeWindow.start() / 1000d, timeWindow.end() / 1000d);
     }
 
     @Override
     public AggregateKey getWindowedTuple(Windowed<TemporaryPackageKey> window) {
-        TemporaryPackageKey temp = window.key();
-        ObservationKey measurementKey = new ObservationKey(temp.getProjectId(), temp.getUserId(),
-                temp.getSourceId());
-        return new AggregateKey(measurementKey.getProjectId(), measurementKey.getUserId(),
-                measurementKey.getSourceId(), window.window().start(), window.window().end());
+        TemporaryPackageKey key = window.key();
+        Window timeWindow = window.window();
+        return new AggregateKey(key.getProjectId(), key.getUserId(), key.getSourceId(),
+                timeWindow.start() / 1000d, timeWindow.end() / 1000d);
     }
 
     @Override
-    public double floatToDouble(float input) {
-        return Double.parseDouble(String.valueOf(input));
-    }
-
-
-    @Override
-    public KeyValue<AggregateKey, PhoneUsageAggregation> collectorToAvro(
+    public KeyValue<AggregateKey, PhoneUsageAggregate> phoneCollectorToAvro(
             Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector
     ) {
-        return pair(getWindowedTuple(window) , new PhoneUsageAggregation(
+        return pair(getWindowedTuple(window) , new PhoneUsageAggregate(
                 window.key().getPackageName(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
@@ -77,52 +71,23 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
-    public KeyValue<AggregateKey, DoubleArrayAggregation> collectorToAvro(
-            Windowed<ObservationKey> window, DoubleArrayCollector collector) {
-        List<DoubleValueCollector> subcollectors = collector.getCollectors();
-        int len = subcollectors.size();
-        List<Double> min = new ArrayList<>(len);
-        List<Double> max = new ArrayList<>(len);
-        List<Double> sum = new ArrayList<>(len);
-        List<Double> count = new ArrayList<>(len);
-        List<Double> avg = new ArrayList<>(len);
-        List<Double> iqr = new ArrayList<>(len);
-        List<List<Double>> quartile = new ArrayList<>(len);
+    public KeyValue<AggregateKey, AggregateList> listCollectorToAvro(Windowed<ObservationKey> window, AggregateListCollector collector) {
+        List<NumericAggregate> fields = collector.getCollectors().stream()
+                .map(this::numericCollectorToAggregate)
+                .collect(Collectors.toList());
 
-        for (DoubleValueCollector subcollector : subcollectors) {
-            min.add(subcollector.getMin());
-            max.add(subcollector.getMax());
-            sum.add(subcollector.getSum());
-            count.add(subcollector.getCount());
-            avg.add(subcollector.getAvg());
-            iqr.add(subcollector.getIqr());
-            quartile.add(subcollector.getQuartile());
-        }
-
-        return pair(getWindowed(window),
-                new DoubleArrayAggregation(min, max, sum, count, avg, quartile, iqr));
+        return pair(getWindowed(window), new AggregateList(fields));
     }
 
     @Override
-    public KeyValue<AggregateKey, DoubleAggregation> collectorToAvro(
-            Windowed<ObservationKey> window, DoubleValueCollector collector) {
-        return pair(getWindowed(window),
-                new DoubleAggregation(collector.getMin(), collector.getMax(), collector.getSum(),
-                        collector.getCount(), collector.getAvg(), collector.getQuartile(),
-                        collector.getIqr()));
+    public KeyValue<AggregateKey, NumericAggregate> numericCollectorToAvro(
+            Windowed<ObservationKey> window, NumericAggregateCollector collector) {
+        return pair(getWindowed(window), numericCollectorToAggregate(collector));
     }
 
-    @Override
-    public double ibiToHeartRate(float input) {
-        return 60d / floatToDouble(input);
+    private NumericAggregate numericCollectorToAggregate(NumericAggregateCollector collector) {
+        return new NumericAggregate(collector.getName(), collector.getMin(), collector.getMax(),
+                collector.getSum(), collector.getCount(), collector.getMean(),
+                collector.getQuartile());
     }
-
-    @Override
-    public double[] accelerationToArray(EmpaticaE4Acceleration value) {
-        return new double[] {
-                floatToDouble(value.getX()),
-                floatToDouble(value.getY()),
-                floatToDouble(value.getZ())};
-    }
-
 }

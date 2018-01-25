@@ -1,12 +1,11 @@
 package org.radarcns.util;
 
-import org.apache.kafka.streams.KeyValue;
-
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.apache.kafka.streams.KeyValue;
 
 public final class StreamUtil {
     private StreamUtil() {

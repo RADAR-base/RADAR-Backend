@@ -16,10 +16,10 @@
 
 package org.radarcns.stream.phone;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

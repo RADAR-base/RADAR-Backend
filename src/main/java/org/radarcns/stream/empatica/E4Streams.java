@@ -17,10 +17,9 @@
 package org.radarcns.stream.empatica;
 
 
+import java.util.Collection;
 import org.radarcns.stream.GeneralStreamGroup;
 import org.radarcns.stream.StreamDefinition;
-
-import java.util.Collection;
 
 /**
  * Singleton class representing the list of Empatica E4 topics

@@ -17,16 +17,16 @@
 package org.radarcns.util.serde;
 
 import org.apache.kafka.common.serialization.Serde;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.collector.AggregateListCollector;
+import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**
- * Set of Serde usefull for Kafka Streams
+ * Set of Serde useful for Kafka Streams
  */
 public final class RadarSerdes {
-    private final Serde<DoubleValueCollector> doubelCollector;
-    private final Serde<DoubleArrayCollector> doubelArrayCollector;
+    private final Serde<NumericAggregateCollector> numericCollector;
+    private final Serde<AggregateListCollector> aggregateListCollector;
     private final Serde<PhoneUsageCollector> phoneUsageCollector;
 
     private static RadarSerdes instance = new RadarSerdes();
@@ -36,17 +36,17 @@ public final class RadarSerdes {
     }
 
     private RadarSerdes() {
-        doubelCollector = new RadarSerde<>(DoubleValueCollector.class).getSerde();
-        doubelArrayCollector = new RadarSerde<>(DoubleArrayCollector.class).getSerde();
+        numericCollector = new RadarSerde<>(NumericAggregateCollector.class).getSerde();
+        aggregateListCollector = new RadarSerde<>(AggregateListCollector.class).getSerde();
         phoneUsageCollector = new RadarSerde<>(PhoneUsageCollector.class).getSerde();
     }
 
-    public Serde<DoubleValueCollector> getDoubleCollector() {
-        return doubelCollector;
+    public Serde<NumericAggregateCollector> getNumericAggregateCollector() {
+        return numericCollector;
     }
 
-    public Serde<DoubleArrayCollector> getDoubleArrayCollector()  {
-        return doubelArrayCollector;
+    public Serde<AggregateListCollector> getAggregateListCollector()  {
+        return aggregateListCollector;
     }
 
     public Serde<PhoneUsageCollector> getPhoneUsageCollector() {

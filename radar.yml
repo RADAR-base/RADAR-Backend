@@ -64,6 +64,27 @@ disconnect_monitor:
   timeout: 1800  # seconds after which a stream is set disconnected
   alert_repetitions: 2  # number of additional emails to send after the first
 
+#====================== Source statistics monitor ======================#
+statistics_monitors:
+  - name: Empatica E4
+    topics:
+      - android_empatica_e4_blood_volume_pulse_1min
+    output_topic: source_statistics_empatica_e4
+  - name: Biovotion VSM1
+    topics:
+      - android_biovotion_vsm1_acceleration_1min
+    output_topic: source_statistics_biovotion_vsm1
+  - name: RADAR pRMT
+    topics:
+      - android_phone_acceleration_1min
+      - android_phone_bluetooth_devices
+      - android_phone_sms
+      - android_phone_call
+      - android_phone_contacts
+      - android_phone_usage_event
+      - android_phone_relative_location
+    output_topic: source_statistics_radar_prmt
+
 #========================= Kafka stream ================================#
 stream_masters:
   - org.radarcns.stream.empatica.E4StreamMaster

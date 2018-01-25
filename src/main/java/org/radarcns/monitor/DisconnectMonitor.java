@@ -19,20 +19,6 @@ package org.radarcns.monitor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.kafka.ObservationKey;
-import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
-import org.radarcns.util.EmailSender;
-import org.radarcns.util.Monitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.mail.MessagingException;
 import java.text.DateFormat;
 import java.text.Format;
 import java.util.Collection;
@@ -46,9 +32,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
-import static org.radarcns.util.PersistentStateStore.stringToKey;
+import javax.mail.MessagingException;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.kafka.ObservationKey;
+import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
+import org.radarcns.util.EmailSender;
+import org.radarcns.util.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
@@ -146,7 +142,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         this.monitor.increment();
 
         long now = System.currentTimeMillis();
-        String keyString = measurementKeyToString(key);
+        String keyString = getStateStore().keyToString(key);
         state.lastSeen.put(keyString, now);
 
         MissingRecordsReport missingReport = state.reportedMissing.remove(keyString);
@@ -162,8 +158,8 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      * @param report missing record details
      */
     private void scheduleRepetition(final String key, final MissingRecordsReport report) {
-        if (report.messageNumber < numRepetitions) {
-            long passedInterval = System.currentTimeMillis() - report.reportedMissing;
+        if (report.getMessageNumber() < numRepetitions) {
+            long passedInterval = System.currentTimeMillis() - report.getReportedMissing();
             long nextRepetition = Math.max(minRepetitionInterval, repeatInterval - passedInterval);
 
             report.setFuture(scheduler.schedule(() -> reportMissing(key, report.newRepetition()),
@@ -172,10 +168,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     private void reportMissing(String keyString, MissingRecordsReport report) {
-        ObservationKey key = stringToKey(keyString);
+        ObservationKey key = getStateStore().stringToKey(keyString);
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
-                timeout, report.messageNumber, numRepetitions);
+                timeout, report.getMessageNumber(), numRepetitions);
         try {
             String lastSeen = dayFormat.format(report.getLastSeenDate());
             String text = "The device " + key + " seems disconnected. "
@@ -186,11 +182,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                 text += "\n\n" + message;
             }
             String subject = "[RADAR] Device has disconnected";
-            if (numRepetitions > 0 && report.messageNumber == numRepetitions) {
+            if (numRepetitions > 0 && report.getMessageNumber() == numRepetitions) {
                 text += "\n\nThis is the final warning email for this device.";
                 subject += ". Final message";
             } else if (numRepetitions > 0) {
-                text += "\n\nThis is warning number " + report.messageNumber + " of "
+                text += "\n\nThis is warning number " + report.getMessageNumber() + " of "
                         + numRepetitions;
             }
 
@@ -200,7 +196,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             logger.error("Failed to send disconnected message.", mex);
         } finally {
             // store last seen and reportedMissing timestamp
-            state.reportedMissing.put(keyString, report);
+            state.getReportedMissing().put(keyString, report);
             scheduleRepetition(keyString, report);
         }
     }

@@ -16,7 +16,23 @@
 
 package org.radarcns.monitor;
 
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
+
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -38,25 +54,11 @@ import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
-
 /**
  * Monitor a list of topics for anomalous behavior.
+ * @param <K> record key type
+ * @param <V> record value type
+ * @param <S> state type
  */
 public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private static final Logger logger = LoggerFactory.getLogger(AbstractKafkaMonitor.class);
@@ -78,6 +80,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      *
      * <p>Update the properties field in the subclasses. During any overriding constructor, be sure
      * to call {@link #configure(Properties)}.
+     * @param radar radar properties
      * @param topics topics to monitor
      * @param groupId Kafka group ID
      * @param clientId Kafka client ID
@@ -85,6 +88,9 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      */
     public AbstractKafkaMonitor(RadarPropertyHandler radar, Collection<String> topics,
             String groupId, String clientId, S stateDefault) {
+        if (topics == null || topics.isEmpty()) {
+            throw new IllegalArgumentException("Cannot start monitor without topics.");
+        }
 
         properties = new Properties();
         String deserializer = KafkaAvroDeserializer.class.getName();
@@ -217,14 +223,24 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         for (ConsumerRecord<K, V> record : records) {
             evaluateRecord(record);
         }
-        if (stateStore != null && state != null) {
+        afterEvaluate();
+    }
+
+    /** Store the current state. */
+    protected void storeState() {
+        if (getStateStore() != null && state != null) {
             try {
-                stateStore.storeState(groupId, clientId, state);
+                getStateStore().storeState(groupId, clientId, state);
             } catch (IOException ex) {
                 logger.error("Failed to store monitor state: {}. "
                         + "When restarted, all current state will be lost.", ex.getMessage());
             }
         }
+    }
+
+    /** Called after a set of records has been evaluated. */
+    protected void afterEvaluate() {
+        storeState();
     }
 
     /**
@@ -257,25 +273,34 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         if (key == null) {
             throw new IllegalArgumentException("Failed to process record without a key.");
         }
-        Schema keySchema = key.getSchema();
-        Field projectIdField = keySchema.getField("projectId");
+        return extractKey(key, key.getSchema());
+    }
+
+
+    protected ObservationKey extractKey(GenericRecord record, Schema schema) {
+        Field projectIdField = schema.getField("projectId");
         if (projectIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without project ID.");
+                    + schema + " without project ID.");
         }
-        Field userIdField = keySchema.getField("userId");
+        Field userIdField = schema.getField("userId");
         if (userIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without user ID.");
+                    + schema + " without user ID.");
         }
-        Field sourceIdField = keySchema.getField("sourceId");
+        Field sourceIdField = schema.getField("sourceId");
         if (sourceIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "
-                    + key.getSchema() + " without source ID.");
+                    + schema + " without source ID.");
         }
+        Object projectIdValue = record.get(projectIdField.pos());
         return new ObservationKey(
-                key.get(projectIdField.pos()).toString(),
-                key.get(userIdField.pos()).toString(),
-                key.get(sourceIdField.pos()).toString());
+                projectIdValue != null ? projectIdValue.toString() : null,
+                record.get(userIdField.pos()).toString(),
+                record.get(sourceIdField.pos()).toString());
+    }
+
+    public PersistentStateStore getStateStore() {
+        return stateStore;
     }
 }

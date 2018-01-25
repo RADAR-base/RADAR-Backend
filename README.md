@@ -18,10 +18,10 @@ The following are the prerequisites to run RADAR-Backend on your machine:
 ## Installation
 
 1. Install the dependencies mentioned above.
-2. Clone RADAR-Backend repository.
+2. Clone radar-backend repository.
     
     ```shell
-    git clone https://github.com/RADAR-CNS/RADAR-Backend.git
+    git clone https://github.com/RADAR-CNS/radar-backend.git
     ```
 3. Build the project from project directory
 
@@ -33,10 +33,14 @@ The following are the prerequisites to run RADAR-Backend on your machine:
     ./gradlew clean
     
     # Build
-    ./gradlew build
+    ./gradlew distTar
+    
+    # Unpack the binaries
+    sudo mkdir -p /usr/local && \
+    sudo tar --strip-components 1 -C /usr/local xzf build/distributions/*.tar.gz
     ```
-   The build process creates separate jar files for each component. Built jars are located under `build/libs` folder.
-
+   
+   Now the backend is available as the `/usr/local/bin/radar-backend` script.
 
 ## Usage
 
@@ -63,13 +67,12 @@ The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. Th
   - android_empatica_e4_temperature_output
   - android_phone_usage_event
   - android_phone_usage_event_output
-3. Run `radarbackend.jar` with configured `radar.yml` and `stream` argument    
+3. Run `radar-backend` with configured `radar.yml` and `stream` argument    
 
     ```shell
-    java -jar radarbackend-1.0.jar -c path/to/radar.yml stream
+    radar-backend -c path/to/radar.yml stream
     ```
-       
-       
+
 The phone usage event stream uses an internal cache of 1 million elements, which may take about 50 MB of memory. Adjust `org.radarcns.stream.phone.PhoneUsageStream.MAX_CACHE_SIZE` to change it. 
 
 ### RADAR-backend monitors
@@ -112,10 +115,10 @@ To get email notifications for Empatica E4 battery status, an email server witho
         - android_empatica_e4_temperature
       ```
         
-3. Run `radarbackend.jar` with configured `radar.yml` and `monitor` argument
+3. Run `radar-backend` with configured `radar.yml` and `monitor` argument
 
     ```shell
-    java -jar radarbackend-1.0.jar -c path/to/radar.yml monitor
+    radar-backend -c path/to/radar.yml monitor
     ```
 
 ### Send mock data to the backend
@@ -150,7 +153,7 @@ To get email notifications for Empatica E4 battery status, an email server witho
 3. To generate data on some `backend_mock_empatica_e4_<>` topic with a number of devices, run (substitute `<num-devices>` with the needed number of devices):
 
     ```shell
-    java -jar radarbackend-1.0.jar -c path/to/radar.yml mock --devices <num-devices>
+    radar-backend -c path/to/radar.yml mock --devices <num-devices>
     ```
 
     Press `Ctrl-C` to stop.
@@ -158,13 +161,25 @@ To get email notifications for Empatica E4 battery status, an email server witho
 4. To generate the file data configured in point 2, run
 
     ```shell
-    java -jar radarbackend-1.0.jar -c path/to/radar.yml mock --file mock_data.yml
+    radar-backend -c path/to/radar.yml mock --file mock_data.yml
     ```
 
     The data sending will automatically be stopped.
 
+### Docker image
+
+The backend is [published to Docker Hub](https://hub.docker.com/r/radarcns/radar-backend-kafka). Mount a `/etc/radar.yml` file to configure either the streams or the monitor.
+
+This image requires the following environment variable:
+
+- `KAFKA_REST_PROXY`: a valid Rest-Proxy instance
+- `KAFKA_SCHEMA_REGISTRY`: a valid Confluent Schema Registry.
+- `KAFKA_BROKERS`: number of brokers expected (default: 3).
+
+For a complete use case scenario, check the RADAR-CNS `docker-compose` file available [here](https://github.com/RADAR-CNS/RADAR-Docker/blob/backend-integration/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml)
    
 ## Contributing
+
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html).
 If you want to contribute a feature or fix browse our [issues](https://github.com/RADAR-CNS/RADAR-Backend/issues), and please make a pull request.
 

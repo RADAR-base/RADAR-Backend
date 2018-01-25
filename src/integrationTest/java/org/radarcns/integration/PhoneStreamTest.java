@@ -16,11 +16,32 @@
 
 package org.radarcns.integration;
 
+import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.isIn;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Stream;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.zookeeper.KeeperException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,42 +57,33 @@ import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
+import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
+import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
+import org.radarcns.passive.empatica.EmpaticaE4BloodVolumePulse;
+import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
+import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
+import org.radarcns.passive.empatica.EmpaticaE4Temperature;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.passive.phone.UsageEventType;
 import org.radarcns.producer.KafkaTopicSender;
 import org.radarcns.producer.direct.DirectSender;
-import org.radarcns.stream.empatica.E4StreamMaster;
-import org.radarcns.stream.phone.PhoneStreamMaster;
+import org.radarcns.schema.registration.KafkaTopics;
+import org.radarcns.schema.registration.SchemaRegistry;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.serde.KafkaAvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
-
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
     private static final Map<String, String> CATEGORIES = new HashMap<>();
+    private static final int MAX_SLEEP = 32;
+    private static final AvroTopic<ObservationKey, PhoneUsageEvent> PHONE_USAGE_TOPIC = new AvroTopic<>(
+            "android_phone_usage_event",
+            ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
+    ObservationKey.class, PhoneUsageEvent.class);
+
     static {
         CATEGORIES.put("nl.nos.app", "NEWS_AND_MAGAZINES");
         CATEGORIES.put("nl.thehyve.transmartclient", "MEDICAL");
@@ -95,15 +107,58 @@ public class PhoneStreamTest {
     private RadarBackend backend;
 
     @Before
-    public void setUp() throws IOException, ParseException, InterruptedException {
+    public void setUp() throws IOException, ParseException, InterruptedException, KeeperException {
         String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
         propHandler = RadarSingletonFactory.getRadarPropertyHandler();
         if (!propHandler.isLoaded()) {
             propHandler.load(propertiesPath);
         }
 
-        String[] args = {"-c", propertiesPath, "stream"};
+        ConfigRadar props = propHandler.getRadarProperties();
+        KafkaTopics topics = new KafkaTopics(props.getZookeeperPaths());
+        int expectedBrokers = props.getBroker().size();
+        int activeBrokers = 0;
+        int sleep = 2;
+        for (int tries = 0; tries < 10; tries++) {
+            activeBrokers = topics.getNumberOfBrokers();
+            if (activeBrokers >= expectedBrokers) {
+                logger.info("Kafka brokers available. Starting topic creation.");
+                break;
+            } else {
+                logger.warn("Only {} out of {} Kafka brokers available. Waiting {} seconds.",
+                        activeBrokers, expectedBrokers, sleep);
+                Thread.sleep(sleep * 1000L);
+                sleep = Math.min(MAX_SLEEP, sleep * 2);
+            }
+        }
+        assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
+        Stream.of("android_phone_usage_event", "android_phone_usage_event_output",
+                "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
+                "android_empatica_e4_acceleration_10sec")
+                .forEach(topic -> topics.createTopic(topic, 3, 1));
 
+        SchemaRegistry registry = new SchemaRegistry(props.getSchemaRegistryPaths());
+        registry.registerSchema(PHONE_USAGE_TOPIC);
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_acceleration",
+                ObservationKey.getClassSchema(), EmpaticaE4Acceleration.getClassSchema(),
+                ObservationKey.class, EmpaticaE4Acceleration.class));
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_battery_level",
+                ObservationKey.getClassSchema(), EmpaticaE4BatteryLevel.getClassSchema(),
+                ObservationKey.class, EmpaticaE4BatteryLevel.class));
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_blood_volume_pulse",
+                ObservationKey.getClassSchema(), EmpaticaE4BloodVolumePulse.getClassSchema(),
+                ObservationKey.class, EmpaticaE4BloodVolumePulse.class));
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_electrodermal_activity",
+                ObservationKey.getClassSchema(), EmpaticaE4ElectroDermalActivity.getClassSchema(),
+                ObservationKey.class, EmpaticaE4ElectroDermalActivity.class));
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_inter_beat_interval",
+                ObservationKey.getClassSchema(), EmpaticaE4InterBeatInterval.getClassSchema(),
+                ObservationKey.class, EmpaticaE4InterBeatInterval.class));
+        registry.registerSchema(new AvroTopic<>("android_empatica_e4_temperature",
+                ObservationKey.getClassSchema(), EmpaticaE4Temperature.getClassSchema(),
+                ObservationKey.class, EmpaticaE4Temperature.class));
+
+        String[] args = {"-c", propertiesPath, "stream"};
         RadarBackendOptions opts = RadarBackendOptions.parse(args);
         backend = new RadarBackend(opts, propHandler);
         backend.start();
@@ -114,7 +169,7 @@ public class PhoneStreamTest {
         backend.shutdown();
     }
 
-    @Test(timeout = 3000_000L)
+    @Test(timeout = 600_000L)
     public void testDirect() throws Exception {
         ConfigRadar config = propHandler.getRadarProperties();
 
@@ -124,9 +179,8 @@ public class PhoneStreamTest {
         properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
-        DirectSender<ObservationKey, SpecificRecord> sender = new DirectSender<>(properties);
+        DirectSender sender = new DirectSender(properties);
 
-        long offset = 0;
         double time = System.currentTimeMillis() / 1000d - 10d;
         ObservationKey key = new ObservationKey("test", "a", "c");
 
@@ -140,14 +194,9 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
 
-        AvroTopic<ObservationKey, PhoneUsageEvent> topic = new AvroTopic<>(
-                "android_phone_usage_event",
-                ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
-                ObservationKey.class, PhoneUsageEvent.class);
-
-        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(topic)) {
+        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(PHONE_USAGE_TOPIC)) {
             for (PhoneUsageEvent event : events) {
-                topicSender.send(offset++, key, event);
+                topicSender.send(key, event);
             }
         }
 
@@ -161,8 +210,8 @@ public class PhoneStreamTest {
         Thread.sleep(mockConfig.getDuration());
         mockProducer.shutdown();
 
-        consumePhone(offset);
-        consumeAggregated(offset / 2);
+        consumePhone();
+        consumeAggregated();
         consumeE4();
     }
 
@@ -175,17 +224,19 @@ public class PhoneStreamTest {
         monitor.start();
     }
 
-    private void consumePhone(final long numRecordsExpected) throws IOException, InterruptedException {
+    private void consumePhone() throws IOException, InterruptedException {
         String clientId = "consumePhone";
-        KafkaMonitor monitor = new PhoneOutputMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
+        KafkaMonitor monitor = new PhoneOutputMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(), clientId,8L);
 
         monitor.setPollTimeout(280_000L);
         monitor.start();
     }
 
-    private void consumeAggregated(final long numRecordsExpected) throws IOException, InterruptedException {
+    private void consumeAggregated() throws IOException, InterruptedException {
         String clientId = "consumeAggregated";
-        KafkaMonitor monitor = new PhoneAggregateMonitor(RadarSingletonFactory.getRadarPropertyHandler(), clientId, numRecordsExpected);
+        KafkaMonitor monitor = new PhoneAggregateMonitor(
+                RadarSingletonFactory.getRadarPropertyHandler(), clientId, 4L);
 
         monitor.setPollTimeout(280_000L);
         monitor.start();
@@ -209,15 +260,15 @@ public class PhoneStreamTest {
 
         @Override
         protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-            logger.info("Read phone usage output {} of {} with value {}", numRecordsRead,
+            logger.info("Read phone usage output {} of {} with value {}", ++numRecordsRead,
                     numRecordsExpected, record.value());
             GenericRecord value = record.value();
             Double fetchTime = (Double)value.get("categoryNameFetchTime");
             assertNotNull(fetchTime);
-            assertTrue(fetchTime > System.currentTimeMillis() / 1000L - 300);
+            assertThat(fetchTime, greaterThan(System.currentTimeMillis() / 1000L - 300d));
             Object category = value.get("categoryName");
             String packageName = value.get("packageName").toString();
-            assertTrue(CATEGORIES.containsKey(packageName));
+            assertThat(packageName, isIn(CATEGORIES.keySet()));
             String result = CATEGORIES.get(packageName);
             if (result == null) {
                 assertNull(category);
@@ -225,7 +276,7 @@ public class PhoneStreamTest {
                 assertEquals(result, category.toString());
             }
 
-            if (++numRecordsRead == numRecordsExpected) {
+            if (numRecordsRead == numRecordsExpected) {
                 shutdown();
             }
         }
@@ -247,12 +298,12 @@ public class PhoneStreamTest {
 
         @Override
         protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
-            logger.info("Read phone aggregate output {} of {} with value {}", numRecordsRead,
+            logger.info("Read phone aggregate output {} of {} with value {}", ++numRecordsRead,
                     numRecordsExpected, record.value());
             GenericRecord value = record.value();
             int timesOpen = (int)value.get("timesOpen");
-            assertTrue(timesOpen > 0);
-            if (++numRecordsRead == numRecordsExpected) {
+            assertThat(timesOpen, greaterThan(0));
+            if (numRecordsRead == numRecordsExpected) {
                 shutdown();
             }
         }
