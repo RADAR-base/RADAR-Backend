@@ -9,7 +9,7 @@ public class SourceStatisticsMonitorConfig {
     private List<String> topics;
 
     @JsonProperty("output_topic")
-    private String outputTopic = "monitor_statistics";
+    private String outputTopic = "source_statistics";
 
     @JsonProperty("max_batch_size")
     private int maxBatchSize = 1000;
