@@ -12,7 +12,7 @@ RADAR-Backend provides an abstract layer to monitor and analyze streams of weara
 The following are the prerequisites to run RADAR-Backend on your machine:
 
 - Java 8
-- [Confluent Platform 3.1.2](http://docs.confluent.io/3.1.2/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
+- [Confluent Platform 3.3.1](http://docs.confluent.io/3.3.1/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
 - SMTP server to send notifications from the monitors.
 
 ## Installation
@@ -114,6 +114,40 @@ To get email notifications for Empatica E4 battery status, an email server witho
       topics:
         - android_empatica_e4_temperature
       ```
+
+3. For Source Statistics monitors, configure what source topics to monitor to output some basic output statistics (like last time seen)
+    
+    ```yaml
+    statistics_monitors:
+      # Human readable monitor name
+      - name: Empatica E4
+        # topics to aggregate. This can take any number of topics that may
+	# lead to slightly different statistics
+        topics:
+          - android_empatica_e4_blood_volume_pulse_1min
+        # Topic to write results to. This should follow the convention
+	# source_statistics_[provider]_[model] with produer and model as
+	# defined in RADAR-Schemas
+        output_topic: source_statistics_empatica_e4
+	# Maximum batch size to aggregate before sending results.
+	# Defaults to 1000.
+        max_batch_size: 500
+	# Flush timeout in milliseconds. If the batch size is not larger than
+	# max_batch_size for this amount of time, the current batch is
+	# forcefully flushed to the output topic.
+	# Defaults to 60000 = 1 minute.
+	flush_timeout: 15000
+      - name: Biovotion VSM1
+        topics:
+          - android_biovotion_vsm1_acceleration_1min
+        output_topic: source_statistics_biovotion_vsm1
+      - name: RADAR pRMT
+        topics:
+          - android_phone_acceleration_1min
+          - android_phone_bluetooth_devices
+          - android_phone_sms
+        output_topic: source_statistics_radar_prmt
+    ```
         
 3. Run `radar-backend` with configured `radar.yml` and `monitor` argument
 
