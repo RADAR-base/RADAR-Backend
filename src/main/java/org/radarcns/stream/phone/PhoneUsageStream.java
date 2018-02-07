@@ -16,20 +16,19 @@
 
 package org.radarcns.stream.phone;
 
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
+import org.radarcns.stream.KStreamWorker;
 import org.radarcns.stream.StreamDefinition;
 import org.radarcns.stream.StreamMaster;
-import org.radarcns.stream.StreamWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-
-public class PhoneUsageStream extends StreamWorker<ObservationKey, PhoneUsageEvent> {
+public class PhoneUsageStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageStream.class);
 
     // 1 day until an item is refreshed

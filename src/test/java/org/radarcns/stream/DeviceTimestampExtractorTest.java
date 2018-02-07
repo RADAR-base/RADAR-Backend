@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.radarcns.stream.DeviceTimestampExtractor;
 
 /**
  * Created by nivethika on 20-12-16.

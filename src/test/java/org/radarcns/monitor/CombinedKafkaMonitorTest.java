@@ -126,7 +126,7 @@ public class CombinedKafkaMonitorTest {
         new CombinedKafkaMonitor(Collections.emptyList());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testNull() {
         ScheduledExecutorService executorService = mock(ScheduledExecutorService.class);
         new CombinedKafkaMonitor(null);

@@ -1,0 +1,28 @@
+//---------------------------------------------------------------------------//
+// Code coverage and codacy                                                  //
+//---------------------------------------------------------------------------//
+
+apply plugin: 'jacoco'
+
+configurations {
+    codacy
+}
+
+dependencies {
+    codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: '2.0.1'
+}
+
+jacocoTestReport {
+    executionData test, integrationTest
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+    }
+}
+
+task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
+    main = 'com.codacy.CodacyCoverageReporter'
+    classpath = configurations.codacy
+    args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
+}

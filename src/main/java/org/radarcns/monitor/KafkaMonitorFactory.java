@@ -16,20 +16,23 @@
 
 package org.radarcns.monitor;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SourceStatisticsMonitorConfig;
 import org.radarcns.util.EmailSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
 
 public class KafkaMonitorFactory {
 
@@ -61,24 +64,52 @@ public class KafkaMonitorFactory {
             case "disconnect":
                 monitor = createDisconnectMonitor();
                 break;
+            case "statistics":
+                monitor = new CombinedKafkaMonitor(createStatisticsMonitors());
+                break;
             case "all":
-                monitor = new CombinedKafkaMonitor(Arrays.asList(
-                        createBatteryLevelMonitor(),
-                        createDisconnectMonitor()));
+                List<KafkaMonitor> monitors = new ArrayList<>();
+                monitors.add(createDisconnectMonitor());
+                monitors.add(createBatteryLevelMonitor());
+                monitors.addAll(createStatisticsMonitors());
+                monitor = new CombinedKafkaMonitor(monitors);
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
         }
+        if (monitor == null) {
+            throw new IllegalArgumentException("Monitor " + commandType + " is not configured.");
+        }
         return monitor;
     }
 
+    private List<KafkaMonitor> createStatisticsMonitors() {
+        List<SourceStatisticsMonitorConfig> configs = properties.getRadarProperties()
+                .getStatisticsMonitors();
+
+        if (configs == null) {
+            logger.warn("Statistics monitor is not configured. Cannot start it.");
+            return Collections.emptyList();
+        }
+
+        return configs.stream()
+                .map(config -> new SourceStatisticsMonitor(properties, config))
+                .collect(Collectors.toList());
+    }
+
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {
-        BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
         BatteryMonitorConfig config = properties.getRadarProperties().getBatteryMonitor();
+
+        if (config == null) {
+            logger.warn("Battery level monitor is not configured. Cannot start it.");
+            return null;
+        }
+
+        BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
         EmailSender sender = getSender(config);
         Collection<String> topics = getTopics(config, "android_empatica_e4_battery_level");
 
-        if (config != null && config.getLevel() != null) {
+        if (config.getLevel() != null) {
             String level = config.getLevel().toUpperCase(Locale.US);
             try {
                 minLevel = BatteryLevelMonitor.Status.valueOf(level);
@@ -88,10 +119,7 @@ public class KafkaMonitorFactory {
                         level, Arrays.toString(BatteryLevelMonitor.Status.values()));
             }
         }
-        long logInterval = -1L;
-        if (config != null) {
-            logInterval = config.getLogInterval();
-        }
+        long logInterval = config.getLogInterval();
 
         return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
     }
@@ -100,8 +128,8 @@ public class KafkaMonitorFactory {
             throws IOException {
         DisconnectMonitorConfig config = properties.getRadarProperties().getDisconnectMonitor();
         if (config == null) {
-            config = new DisconnectMonitorConfig();
-            properties.getRadarProperties().setDisconnectMonitor(config);
+            logger.warn("Disconnect monitor is not configured. Cannot start it.");
+            return null;
         }
         EmailSender sender = getSender(config);
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");

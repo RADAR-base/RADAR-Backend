@@ -64,7 +64,7 @@ public final class PlayStoreLookup {
 
         // If not yet in cache, fetch category for this package
         double cacheThreshold = (System.currentTimeMillis() - cacheTimeout) / 1000d;
-        if (category == null || category.fetchTimeStamp < cacheThreshold) {
+        if (category == null || category.getFetchTimeStamp() < cacheThreshold) {
             try {
                 category = fetchCategory(packageName);
                 categoryCache.put(packageName, category);

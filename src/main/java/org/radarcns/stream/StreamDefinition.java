@@ -16,14 +16,13 @@
 
 package org.radarcns.stream;
 
-import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.topic.KafkaTopic;
+import static org.radarcns.util.Comparison.compare;
 
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
-
-import static org.radarcns.util.Comparison.compare;
+import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarcns.topic.KafkaTopic;
 
 public class StreamDefinition implements Comparable<StreamDefinition> {
     private final KafkaTopic inputTopic;
@@ -94,8 +93,6 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
     public TimeWindows getTimeWindows() {
         return window;
     }
-
-
 
     @Override
     public boolean equals(Object o) {

@@ -18,12 +18,12 @@ package org.radarcns.producer;
 
 import java.io.File;
 import java.io.IOException;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
+import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
 

@@ -22,8 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import org.apache.kafka.common.serialization.Serde;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarcns.stream.collector.DoubleArrayCollector;
-import org.radarcns.stream.collector.DoubleValueCollector;
+import org.radarcns.stream.collector.AggregateListCollector;
+import org.radarcns.stream.collector.NumericAggregateCollector;
+
 /**
  * Created by nivethika on 21-12-16.
  */
@@ -37,7 +38,7 @@ public class RadarSerdesTest {
 
     @Test
     public void getDoubleCollector() {
-        Serde<DoubleValueCollector> valueCollectorSerde = this.radarSerdes.getDoubleCollector();
+        Serde<NumericAggregateCollector> valueCollectorSerde = this.radarSerdes.getNumericAggregateCollector();
         assertNotNull(valueCollectorSerde);
         assertNotNull(valueCollectorSerde.serializer());
         assertEquals(valueCollectorSerde.serializer().getClass(), JsonSerializer.class);
@@ -47,11 +48,11 @@ public class RadarSerdesTest {
 
     @Test
     public void getDoubleArrayCollector() {
-        Serde<DoubleArrayCollector> doubelArrayCollector = this.radarSerdes.getDoubleArrayCollector();
-        assertNotNull(doubelArrayCollector);
-        assertNotNull(doubelArrayCollector.serializer());
-        assertEquals(doubelArrayCollector.serializer().getClass(), JsonSerializer.class);
-        assertNotNull(doubelArrayCollector.deserializer());
-        assertEquals(doubelArrayCollector.deserializer().getClass(), JsonDeserializer.class);
+        Serde<AggregateListCollector> doubleArrayCollector = this.radarSerdes.getAggregateListCollector();
+        assertNotNull(doubleArrayCollector);
+        assertNotNull(doubleArrayCollector.serializer());
+        assertEquals(doubleArrayCollector.serializer().getClass(), JsonSerializer.class);
+        assertNotNull(doubleArrayCollector.deserializer());
+        assertEquals(doubleArrayCollector.deserializer().getClass(), JsonDeserializer.class);
     }
 }

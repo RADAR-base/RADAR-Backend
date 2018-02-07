@@ -26,7 +26,7 @@ public interface SubCommand {
      * Start the subcommand. The command is not guaranteed to return
      * immediately.
      * @throws IOException if the command cannot be started
-     * @throws InterruptedException
+     * @throws InterruptedException if the command is interrupted
      */
     void start() throws IOException, InterruptedException;
 

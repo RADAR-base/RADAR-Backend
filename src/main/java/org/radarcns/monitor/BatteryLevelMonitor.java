@@ -16,8 +16,6 @@
 
 package org.radarcns.monitor;
 
-import static org.radarcns.util.PersistentStateStore.measurementKeyToString;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,7 +74,7 @@ public class BatteryLevelMonitor extends
         try {
             ObservationKey key = extractKey(record);
             float batteryLevel = extractBatteryLevel(record);
-            float previousLevel = state.updateLevel(key, batteryLevel);
+            float previousLevel = state.updateLevel(getStateStore().keyToString(key), batteryLevel);
 
             if (logInterval > 0 && ((int) (messageNumber % logInterval)) == 0) {
                 logger.info("Measuring battery level of record offset {} of {} with value {}",
@@ -186,8 +184,8 @@ public class BatteryLevelMonitor extends
         }
 
         /** Update a single battery level. */
-        public float updateLevel(ObservationKey key, float level) {
-            Float previousLevel = levels.put(measurementKeyToString(key), level);
+        public float updateLevel(String key, float level) {
+            Float previousLevel = levels.put(key, level);
             return previousLevel == null ? 1.0f : previousLevel;
         }
     }

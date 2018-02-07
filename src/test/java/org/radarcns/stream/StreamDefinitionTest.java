@@ -20,10 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.regex.Pattern;
 import org.junit.Test;
 import org.radarcns.topic.KafkaTopic;
-
-import java.util.regex.Pattern;
 
 public class StreamDefinitionTest {
     private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");

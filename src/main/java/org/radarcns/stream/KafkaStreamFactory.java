@@ -16,15 +16,14 @@
 
 package org.radarcns.stream;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class KafkaStreamFactory {
     private static final Logger logger = LoggerFactory.getLogger(
