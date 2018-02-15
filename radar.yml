@@ -44,7 +44,7 @@ rest_proxy:
 #======================== Battery level monitor ========================#
 battery_monitor:
   notify:
-    - project_id: test
+    - project_id: s1
       email_address:
         - test@thehyve.nl
     - project_id: s2
@@ -60,7 +60,7 @@ battery_monitor:
 #======================= Disconnection monitor==========================#
 disconnect_monitor:
   notify:
-    - project_id: test
+    - project_id: s1
       email_address:
         - test@thehyve.nl
     - project_id: s2
