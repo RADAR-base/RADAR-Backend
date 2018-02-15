@@ -23,12 +23,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.radarcns.config.*;
-import org.radarcns.util.EmailSender;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -32,7 +32,7 @@ public class NotifyConfig {
         return emailAddress;
     }
 
-    public void setEmailAddress(List<String> email_address) {
-        this.emailAddress = email_address;
+    public void setEmailAddress(List<String> emailAddress) {
+        this.emailAddress = emailAddress;
     }
 }

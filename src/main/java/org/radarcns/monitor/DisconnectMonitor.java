@@ -172,8 +172,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         ObservationKey key = getStateStore().stringToKey(keyString);
 
         EmailSender sender = senders.getEmailSender(key.getProjectId());
-        if(sender == null)
+        if(sender == null) {
             return;
+        }
 
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
@@ -209,8 +210,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
     private void reportRecovered(ObservationKey key, long reportedMissingTime) {
         EmailSender sender = senders.getEmailSender(key.getProjectId());
-        if(sender == null)
+        if(sender == null) {
             return;
+        }
+
 
         logger.info("Device {} seen again. Reporting it recovered.", key);
         try {

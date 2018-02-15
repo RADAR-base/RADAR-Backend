@@ -3,7 +3,6 @@ package org.radarcns.util;
 import org.radarcns.config.MonitorConfig;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,8 +32,9 @@ public class EmailSenders {
             }
         });
 
-        if(exception != null)
+        if(exception != null) {
             throw exception;
+        }
     }
 
 
