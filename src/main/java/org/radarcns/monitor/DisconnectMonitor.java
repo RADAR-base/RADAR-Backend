@@ -42,6 +42,7 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.EmailSenders;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
     private final ScheduledExecutorService scheduler;
     private final long timeUntilReportedMissing;
-    private final EmailSender sender;
+    private final EmailSenders senders;
     private final Format dayFormat;
     private final int numRepetitions;
     private final long repeatInterval;
@@ -65,9 +66,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private final String message;
 
     public DisconnectMonitor(RadarPropertyHandler radar, Collection<String> topics, String groupId,
-                             EmailSender sender) {
+                             EmailSenders senders) {
         super(radar, topics, groupId, "1", new DisconnectMonitorState());
-        this.sender = sender;
+        this.senders = senders;
         this.dayFormat = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM, DateFormat.SHORT, Locale.US);
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -169,6 +170,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
     private void reportMissing(String keyString, MissingRecordsReport report) {
         ObservationKey key = getStateStore().stringToKey(keyString);
+
+        EmailSender sender = senders.getEmailSender(key.getProjectId());
+        if(sender == null)
+            return;
+
         long timeout = report.getTimeout();
         logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
                 timeout, report.getMessageNumber(), numRepetitions);
@@ -202,6 +208,10 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     private void reportRecovered(ObservationKey key, long reportedMissingTime) {
+        EmailSender sender = senders.getEmailSender(key.getProjectId());
+        if(sender == null)
+            return;
+
         logger.info("Device {} seen again. Reporting it recovered.", key);
         try {
             Date reportedMissingDate = new Date(reportedMissingTime);

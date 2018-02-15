@@ -31,6 +31,7 @@ import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.EmailSenders;
 import org.radarcns.util.RadarSingletonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class BatteryLevelMonitor extends
         AbstractKafkaMonitor<GenericRecord, GenericRecord, BatteryLevelState> {
     private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
-    private final EmailSender sender;
+    private final EmailSenders senders;
     private final Status minLevel;
     private final long logInterval;
     private long messageNumber;
@@ -52,19 +53,19 @@ public class BatteryLevelMonitor extends
      * BatteryLevelMonitor constructor.
      * @param radar RADAR properties
      * @param topics topics to monitor, each of which has a "batteryLevel" value field
-     * @param sender email sender for notifications, null if no notifications should be sent.
+     * @param senders email sender for notifications, null if no notifications should be sent.
      * @param minLevel minimum battery level, below which a notification should be sent
      * @param logInterval every how many messages to log, 0 for no log messages
      */
     public BatteryLevelMonitor(RadarPropertyHandler radar, Collection<String> topics,
-            EmailSender sender, Status minLevel, long logInterval) {
+                               EmailSenders senders, Status minLevel, long logInterval) {
         super(radar, topics, "battery_monitors", "1", new BatteryLevelState());
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configure(props);
 
-        this.sender = sender;
+        this.senders = senders;
         this.minLevel = minLevel == null ? Status.CRITICAL : minLevel;
         this.logInterval = logInterval;
     }
@@ -108,6 +109,8 @@ public class BatteryLevelMonitor extends
     }
 
     private void updateStatus(ObservationKey key, Status status) {
+
+        EmailSender sender = senders.getEmailSender(key.getProjectId());
         if (sender == null) {
             return;
         }

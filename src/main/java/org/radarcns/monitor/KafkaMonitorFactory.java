@@ -23,14 +23,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.radarcns.config.BatteryMonitorConfig;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.MonitorConfig;
-import org.radarcns.config.RadarBackendOptions;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
+import java.util.stream.Stream;
+
+import org.radarcns.config.*;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +105,7 @@ public class KafkaMonitorFactory {
         }
 
         BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
-        EmailSender sender = getSender(config);
+        EmailSenders senders = getSenders(config);
         Collection<String> topics = getTopics(config, "android_empatica_e4_battery_level");
 
         if (config.getLevel() != null) {
@@ -121,7 +120,7 @@ public class KafkaMonitorFactory {
         }
         long logInterval = config.getLogInterval();
 
-        return new BatteryLevelMonitor(properties, topics, sender, minLevel, logInterval);
+        return new BatteryLevelMonitor(properties, topics, senders, minLevel, logInterval);
     }
 
     private KafkaMonitor createDisconnectMonitor()
@@ -131,16 +130,15 @@ public class KafkaMonitorFactory {
             logger.warn("Disconnect monitor is not configured. Cannot start it.");
             return null;
         }
-        EmailSender sender = getSender(config);
+        EmailSenders senders = getSenders(config);
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
-        return new DisconnectMonitor(properties, topics, "disconnect_monitor", sender);
+        return new DisconnectMonitor(properties, topics, "disconnect_monitor", senders);
     }
 
-    private EmailSender getSender(MonitorConfig config) throws IOException {
-        if (config != null && config.getEmailAddress() != null) {
-            return new EmailSender(config.getEmailHost(), config.getEmailPort(),
-                    config.getEmailUser(),
-                    config.getEmailAddress());
+
+    private EmailSenders getSenders(MonitorConfig config) throws IOException {
+        if (config != null && config.getNotifyConfig() != null) {
+            return new EmailSenders(config);
         }
         return null;
     }

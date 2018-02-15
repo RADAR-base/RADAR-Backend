@@ -23,8 +23,8 @@ import java.util.List;
  * POJO representing a monitor configuration
  */
 public class MonitorConfig {
-    @JsonProperty("email_address")
-    private List<String> emailAddress;
+    @JsonProperty("notify")
+    private List<NotifyConfig> notifyConfig;
 
     @JsonProperty("email_host")
     private String emailHost;
@@ -43,12 +43,12 @@ public class MonitorConfig {
     @JsonProperty("message")
     private String message = null;
 
-    public List<String> getEmailAddress() {
-        return emailAddress;
+    public List<NotifyConfig> getNotifyConfig() {
+        return notifyConfig;
     }
 
-    public void setEmailAddress(List<String> emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setNotifyConfig(List<NotifyConfig> notifyConfig) {
+        this.notifyConfig = notifyConfig;
     }
 
     public List<String> getTopics() {
