@@ -19,9 +19,7 @@ package org.radarcns.monitor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
 
 import java.io.File;
@@ -39,6 +37,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.EmailSenders;
 import org.radarcns.util.YamlPersistentStateStore;
 
 public class BatteryLevelMonitorTest {
@@ -49,7 +48,10 @@ public class BatteryLevelMonitorTest {
     private long offset;
     private long timeReceived;
     private int timesSent;
+    private EmailSenders senders;
     private EmailSender sender;
+
+    private static final String PROJECT_ID = "test";
 
     @Test
     public void evaluateRecord() throws Exception {
@@ -58,13 +60,16 @@ public class BatteryLevelMonitorTest {
         timesSent = 0;
         sender = mock(EmailSender.class);
 
+        senders = new EmailSenders();
+        senders.putEmailSender(PROJECT_ID, sender);
+
         ConfigRadar config = KafkaMonitorFactoryTest
                 .getBatteryMonitorConfig(25252, folder);
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
 
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(properties,
-                Collections.singletonList("mytopic"), sender, LOW, 10L);
+                Collections.singletonList("mytopic"), senders, LOW, 10L);
 
         sendMessage(monitor, 1.0f, false);
         sendMessage(monitor, 1.0f, false);
@@ -83,7 +88,7 @@ public class BatteryLevelMonitorTest {
     private void sendMessage(BatteryLevelMonitor monitor, float batteryLevel, boolean sentMessage)
             throws MessagingException {
         Record key = new Record(ObservationKey.getClassSchema());
-        key.put("projectId", "test");
+        key.put("projectId", PROJECT_ID);
         key.put("sourceId", "1");
         key.put("userId", "me");
 

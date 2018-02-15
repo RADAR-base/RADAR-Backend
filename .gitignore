@@ -25,3 +25,6 @@ smtp.env
 
 /out/
 /libs/
+
+# Distribution
+/radar-backend-*
