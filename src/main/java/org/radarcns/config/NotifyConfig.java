@@ -5,13 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+
+/**
+ * POJO to store each email Notification configuration.
+ */
 public class NotifyConfig {
     @JsonProperty("project_id")
     private String projectId;
 
     @JsonProperty("email_address")
     private List<String> emailAddress;
-
 
     @JsonCreator
     public NotifyConfig(@JsonProperty("project_id") String projectId,

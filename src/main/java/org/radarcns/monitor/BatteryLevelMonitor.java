@@ -110,6 +110,7 @@ public class BatteryLevelMonitor extends
 
     private void updateStatus(ObservationKey key, Status status) {
 
+        // Don't report if no email address for this projectId
         EmailSender sender = senders.getEmailSender(key.getProjectId());
         if (sender == null) {
             return;

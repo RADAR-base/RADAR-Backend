@@ -43,7 +43,7 @@ rest_proxy:
 
 #======================== Battery level monitor ========================#
 battery_monitor:
-  notify:
+  notify: # Each project can have a number of email addresses
     - project_id: s1
       email_address:
         - test@thehyve.nl
