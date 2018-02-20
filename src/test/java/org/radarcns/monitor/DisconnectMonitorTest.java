@@ -47,6 +47,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarcns.monitor.DisconnectMonitor.MissingRecordsReport;
 import org.radarcns.util.EmailSender;
+import org.radarcns.util.EmailSenders;
 import org.radarcns.util.YamlPersistentStateStore;
 
 public class DisconnectMonitorTest {
@@ -58,7 +59,10 @@ public class DisconnectMonitorTest {
     private int timesSent;
     private Schema keySchema;
     private Schema valueSchema;
+    private EmailSenders senders;
     private EmailSender sender;
+
+    private static final String PROJECT_ID = "test";
 
     @Before
     public void setUp() {
@@ -77,6 +81,7 @@ public class DisconnectMonitorTest {
         timeReceived = 2000L;
         timesSent = 0;
         sender = mock(EmailSender.class);
+        senders = new EmailSenders(Collections.singletonMap(PROJECT_ID, sender));
     }
 
     public void evaluateRecords() throws Exception {
@@ -95,7 +100,7 @@ public class DisconnectMonitorTest {
                 .getRadarPropertyHandler(config, folder);
 
         DisconnectMonitor monitor = new DisconnectMonitor(properties,
-                Collections.singletonList("mytopic"), "mygroup", sender);
+                Collections.singletonList("mytopic"), "mygroup", senders);
         monitor.startScheduler();
 
         assertEquals(timeout, monitor.getPollTimeout());
@@ -131,7 +136,7 @@ public class DisconnectMonitorTest {
 
     private void sendMessage(DisconnectMonitor monitor, String source, int sentMessages) {
         Record key = new Record(keySchema);
-        key.put("projectId", "test");
+        key.put("projectId", PROJECT_ID);
         key.put("sourceId", source);
         key.put("userId", "me");
 
@@ -150,9 +155,9 @@ public class DisconnectMonitorTest {
         File base = folder.newFolder();
         YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
         DisconnectMonitorState state = new DisconnectMonitorState();
-        ObservationKey key1 = new ObservationKey("test", "a", "b");
-        ObservationKey key2 = new ObservationKey("test", "b", "c");
-        ObservationKey key3 = new ObservationKey("test", "c", "d");
+        ObservationKey key1 = new ObservationKey(PROJECT_ID, "a", "b");
+        ObservationKey key2 = new ObservationKey(PROJECT_ID, "b", "c");
+        ObservationKey key3 = new ObservationKey(PROJECT_ID, "c", "d");
         long now = System.currentTimeMillis();
         state.getLastSeen().put(stateStore.keyToString(key1), now);
         state.getLastSeen().put(stateStore.keyToString(key2), now + 1L);

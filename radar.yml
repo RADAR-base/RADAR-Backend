@@ -43,9 +43,14 @@ rest_proxy:
 
 #======================== Battery level monitor ========================#
 battery_monitor:
+  notify: # Each project can have a number of email addresses
+    - project_id: s1
+      email_address:
+        - test@thehyve.nl
+    - project_id: s2
+      email_address:
+        - radar@thehyve.nl
   level: LOW
-  email_address:
-    - radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org
@@ -54,8 +59,13 @@ battery_monitor:
 
 #======================= Disconnection monitor==========================#
 disconnect_monitor:
-  email_address:
-    - test@thehyve.nl
+  notify:
+    - project_id: s1
+      email_address:
+        - test@thehyve.nl
+    - project_id: s2
+      email_address:
+        - radar@thehyve.nl
   email_host: localhost
   email_port: 25
   email_user: no-reply@radarcns.org
