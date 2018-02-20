@@ -135,7 +135,7 @@ public class KafkaMonitorFactory {
 
     private EmailSenders getSenders(MonitorConfig config) throws IOException {
         if (config != null && config.getNotifyConfig() != null) {
-            return new EmailSenders(config);
+            return EmailSenders.parseConfig(config);
         }
         return null;
     }

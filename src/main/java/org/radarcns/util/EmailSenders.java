@@ -1,6 +1,7 @@
 package org.radarcns.util;
 
 import org.radarcns.config.MonitorConfig;
+import org.radarcns.config.NotifyConfig;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,26 +13,10 @@ import java.util.Map;
  */
 public class EmailSenders {
 
-    private Map<String,EmailSender> emailSenderMap;
-    private IOException exception;
+    private final Map<String,EmailSender> emailSenderMap;
 
-    /**
-     * Default Constructor
-     */
-    public EmailSenders() {
-        emailSenderMap = new HashMap<>();
-    }
-
-    /**
-     * Initialize the {@link EmailSender} map using the configuration.
-     *
-     * @param  config  Configuration of the Monitor containing project
-     *                 and email address mapping
-     * @throws IOException
-     */
-    public EmailSenders(MonitorConfig config) throws IOException{
-        emailSenderMap = new HashMap<>();
-        addSender(config);
+    public EmailSenders(Map<String, EmailSender> map) {
+        this.emailSenderMap = map;
     }
 
     /**
@@ -45,41 +30,19 @@ public class EmailSenders {
      * @throws IOException
      */
 
-    private void addSender(MonitorConfig config) throws IOException{
-        exception = null;
-        config.getNotifyConfig().stream().forEach(s -> {
-            try {
-                emailSenderMap.put(s.getProjectId(),
-                        new EmailSender(config.getEmailHost(), config.getEmailPort(),
-                                config.getEmailUser(), s.getEmailAddress()));
-            } catch (IOException exc) {
-                exception = exc;
-            }
-        });
-
-        if(exception != null) {
-            throw exception;
+    public static EmailSenders parseConfig(MonitorConfig config) throws IOException{
+        Map<String, EmailSender> map = new HashMap<>();
+        for(NotifyConfig notifyConfig : config.getNotifyConfig()) {
+            map.put(notifyConfig.getProjectId(),
+                    new EmailSender(config.getEmailHost(), config.getEmailPort(),
+                            config.getEmailUser(), notifyConfig.getEmailAddress()));
         }
+
+        return new EmailSenders(map);
     }
 
-
-
-    public EmailSender getEmailSender(String projectId) {
+    public EmailSender getEmailSenderForProject(String projectId) {
         return emailSenderMap.get(projectId);
     }
-
-    public void putEmailSender(String projectId, EmailSender sender) {
-        emailSenderMap.put(projectId, sender);
-    }
-
-    public Map<String, EmailSender> getEmailSenderMap() {
-        return emailSenderMap;
-    }
-
-    public void setEmailSenderMap(Map<String, EmailSender> emailSenderMap) {
-        this.emailSenderMap = emailSenderMap;
-    }
-
-
 
 }

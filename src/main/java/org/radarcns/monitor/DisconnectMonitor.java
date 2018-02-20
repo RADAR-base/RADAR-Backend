@@ -172,7 +172,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         ObservationKey key = getStateStore().stringToKey(keyString);
 
         // Don't report if no email address for this projectId
-        EmailSender sender = senders.getEmailSender(key.getProjectId());
+        EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
         if(sender == null) {
             return;
         }
@@ -212,7 +212,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private void reportRecovered(ObservationKey key, long reportedMissingTime) {
 
         // Don't report if no email address for this projectId
-        EmailSender sender = senders.getEmailSender(key.getProjectId());
+        EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
         if(sender == null) {
             return;
         }

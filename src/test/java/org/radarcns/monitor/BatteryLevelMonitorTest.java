@@ -60,8 +60,7 @@ public class BatteryLevelMonitorTest {
         timesSent = 0;
         sender = mock(EmailSender.class);
 
-        senders = new EmailSenders();
-        senders.putEmailSender(PROJECT_ID, sender);
+        senders = new EmailSenders(Collections.singletonMap(PROJECT_ID, sender));
 
         ConfigRadar config = KafkaMonitorFactoryTest
                 .getBatteryMonitorConfig(25252, folder);
