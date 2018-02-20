@@ -47,4 +47,4 @@ COPY --from=builder /code/radar-backend-*/lib/* /usr/lib/
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
 
-CMD ["radar-backend-init"]
+ENTRYPOINT ["radar-backend-init"]
