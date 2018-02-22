@@ -11,7 +11,7 @@ plugins {
 //---------------------------------------------------------------------------//
 
 group = 'org.radarcns'
-version = '0.2.1-SNAPSHOT'
+version = '0.2.2-SNAPSHOT'
 ext.description = 'Kafka backend for processing device data.'
 
 mainClassName = 'org.radarcns.RadarBackend'
