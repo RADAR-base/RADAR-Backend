@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,14 +35,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.radarcns.config.BatteryMonitorConfig;
-import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.RadarBackendOptions;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.RadarPropertyHandlerImpl;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
-import org.radarcns.config.YamlConfigLoader;
+import org.radarcns.config.*;
 import org.radarcns.util.EmailServerRule;
 
 public class KafkaMonitorFactoryTest {
@@ -129,7 +123,9 @@ public class KafkaMonitorFactoryTest {
 
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
-        disconnectConfig.setEmailAddress(Collections.singletonList("test@localhost"));
+        List<NotifyConfig> notifyConfigs = new ArrayList<>();
+        notifyConfigs.add(new NotifyConfig("test",Collections.singletonList("test@localhost")));
+        disconnectConfig.setNotifyConfig(notifyConfigs);
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
         disconnectConfig.setTimeout(1L);
@@ -145,7 +141,9 @@ public class KafkaMonitorFactoryTest {
 
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
-        batteryConfig.setEmailAddress(Collections.singletonList("test@localhost"));
+        List<NotifyConfig> notifyConfigs = new ArrayList<>();
+        notifyConfigs.add(new NotifyConfig("test",Collections.singletonList("test@localhost")));
+        batteryConfig.setNotifyConfig(notifyConfigs);
         batteryConfig.setEmailHost("localhost");
         batteryConfig.setEmailPort(port);
         batteryConfig.setLevel("LOW");
