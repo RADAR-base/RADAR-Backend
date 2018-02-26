@@ -3,3 +3,7 @@ task downloadRuntimeDependencies {
     configurations.compileClasspath.files
     configurations.runtimeClasspath.files
 }
+
+processResources {
+    expand(version: version)
+}
