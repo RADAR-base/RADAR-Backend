@@ -59,7 +59,8 @@ public class SourceStatisticsMonitor extends AbstractKafkaMonitor<GenericRecord,
     public SourceStatisticsMonitor(RadarPropertyHandler radar,
             SourceStatisticsMonitorConfig config) {
         super(radar, config.getTopics(), Objects.requireNonNull(config.getName(),
-                "Source statistics monitor must have a name"), "1",
+                "Source statistics monitor must have a name"), "1-"
+                        + config.getOutputTopic(),
                 new SourceStatisticsState());
 
         if (getStateStore() == null) {
