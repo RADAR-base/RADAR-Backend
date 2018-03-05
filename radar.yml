@@ -95,9 +95,11 @@ statistics_monitors:
       - android_phone_contacts
       - android_phone_usage_event
       - android_phone_relative_location
-    output_topic: source_statistics_radar_prmt
+    output_topic: source_statistics_android_phone
 
 #========================= Kafka stream ================================#
 stream_masters:
   - org.radarcns.stream.empatica.E4StreamMaster
   - org.radarcns.stream.phone.PhoneStreamMaster
+  
+  persistence_path: /var/lib/radar/data
