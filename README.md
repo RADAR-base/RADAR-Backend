@@ -1,9 +1,9 @@
 # RADAR-CNS back-end
 
 [![Build Status](https://travis-ci.org/RADAR-base/RADAR-Backend.svg?branch=master)](https://travis-ci.org/RADAR-base/RADAR-Backend)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e21c0c25f43e4676a3c69bae444101ca)](https://www.codacy.com/app/RADAR-CNS/RADAR-Backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-Backend&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e21c0c25f43e4676a3c69bae444101ca)](https://www.codacy.com/app/RADAR-base/RADAR-Backend?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RADAR-CNS/RADAR-Backend&amp;utm_campaign=Badge_Grade)
 
-RADAR-Backend is a Java application based on Confluent Platform to standardize, analyze and persist data collected by RADAR-CNS data sources. It supports the backend requirements of RADAR-CNS project. The data is produced and consumed in Apache Avro format using the schema stored inside the RADAR-CNS [schema repository](https://github.com/RADAR-CNS/RADAR-Schemas).
+RADAR-Backend is a Java application based on Confluent Platform to standardize, analyze and persist data collected by RADAR-CNS data sources. It supports the backend requirements of RADAR-CNS project. The data is produced and consumed in Apache Avro format using the schema stored inside the RADAR-CNS [schema repository](https://github.com/RADAR-base/RADAR-Schemas).
 
 RADAR-Backend provides an abstract layer to monitor and analyze streams of wearable data and write data to Hot or Cold storage. The Application Programming Interfaces (APIs) of RADAR-Backend makes the process of to integrating additional topics, wearable devices easier. It currently provides MongoDB as the Hot-storage and HDFS data store as the Cold-storage. They can be easily tuned using property files. The stream-monitors monitor topics and notify users (e.g. via emails) under given circumstances. 
 
@@ -21,7 +21,7 @@ The following are the prerequisites to run RADAR-Backend on your machine:
 2. Clone radar-backend repository.
     
     ```shell
-    git clone https://github.com/RADAR-CNS/radar-backend.git
+    git clone https://github.com/RADAR-base/radar-backend.git
     ```
 3. Build the project from project directory
 
@@ -210,12 +210,12 @@ This image requires the following environment variable:
 - `KAFKA_SCHEMA_REGISTRY`: a valid Confluent Schema Registry.
 - `KAFKA_BROKERS`: number of brokers expected (default: 3).
 
-For a complete use case scenario, check the RADAR-CNS `docker-compose` file available [here](https://github.com/RADAR-CNS/RADAR-Docker/blob/backend-integration/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml)
+For a complete use case scenario, check the RADAR-base `docker-compose` file available [here](https://github.com/RADAR-base/RADAR-Docker/blob/backend-integration/dcompose-stack/radar-cp-hadoop-stack/docker-compose.yml)
    
 ## Contributing
 
 Code should be formatted using the [Google Java Code Style Guide](https://google.github.io/styleguide/javaguide.html).
-If you want to contribute a feature or fix browse our [issues](https://github.com/RADAR-CNS/RADAR-Backend/issues), and please make a pull request.
+If you want to contribute a feature or fix browse our [issues](https://github.com/RADAR-base/RADAR-Backend/issues), and please make a pull request.
 
 There are currently two APIs in RADAR-Backend: one for streaming data (RADAR-Stream) and one for monitoring topics (RADAR-Monitor). To contribute to those APIs, please mind the following.
 
@@ -269,19 +269,19 @@ Monitors can be used to evaluate the status of a single stream, for example whet
     ```
 - the default log path is the jar folder
 
-[1]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/MasterAggregator.java
-[2]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/AggregatorWorker.java
-[3]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/AbstractKafkaMonitor.java
-[4]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/KafkaMonitorFactory.java
-[5]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/DisconnectMonitor.java
-[8]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/GeneralStreamGroup.java
-[10]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/DeviceTimestampExtractor.java
-[11]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/E4Worker.java
-[14]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4Streams.java
-[15]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Acceleration.java
-[16]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BatteryLevel.java
-[17]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BloodVolumePulse.java
-[18]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4ElectroDermalActivity.java
-[19]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4HeartRate.java
-[20]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4InterBeatInterval.java
-[21]: https://github.com/RADAR-CNS/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Temperature.java
+[1]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/MasterAggregator.java
+[2]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/AggregatorWorker.java
+[3]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/AbstractKafkaMonitor.java
+[4]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/KafkaMonitorFactory.java
+[5]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/DisconnectMonitor.java
+[8]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/GeneralStreamGroup.java
+[10]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/DeviceTimestampExtractor.java
+[11]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/E4Worker.java
+[14]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4Streams.java
+[15]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Acceleration.java
+[16]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BatteryLevel.java
+[17]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BloodVolumePulse.java
+[18]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4ElectroDermalActivity.java
+[19]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4HeartRate.java
+[20]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4InterBeatInterval.java
+[21]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Temperature.java
