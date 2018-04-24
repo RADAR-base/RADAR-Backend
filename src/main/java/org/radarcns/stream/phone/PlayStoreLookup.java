@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public final class PlayStoreLookup {
     private static final Logger log = LoggerFactory.getLogger(PlayStoreLookup.class);
     private static final String URL_PLAY_STORE_APP_DETAILS = "https://play.google.com/store/apps/details?id=";
-    private static final String CATEGORY_ANCHOR_SELECTOR = "a.document-subtitle.category";
+    private static final String CATEGORY_ANCHOR_SELECTOR = "a[itemprop='genre']";
 
     private final long cacheTimeout;
     private final Cache<String, AppCategory> categoryCache;

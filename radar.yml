@@ -19,8 +19,10 @@ broker:
 
 #Kafka internal parameters
 stream_properties:
-  auto.commit.interval.ms: 1000
-  session.timeout.ms: 10000
+  auto_commit_interval_ms: 1000
+  max.request.size: 3500042 #Set message.max.bytes for kafka brokers higher than or equal to this value
+  retries: 15
+  session_timeout_ms: 20000
 
 #============================ Kafka Streams ============================#
 #The number of threads that a stream must be run according is priority
@@ -93,9 +95,11 @@ statistics_monitors:
       - android_phone_contacts
       - android_phone_usage_event
       - android_phone_relative_location
-    output_topic: source_statistics_radar_prmt
+    output_topic: source_statistics_android_phone
 
 #========================= Kafka stream ================================#
 stream_masters:
   - org.radarcns.stream.empatica.E4StreamMaster
   - org.radarcns.stream.phone.PhoneStreamMaster
+
+# persistence_path: /var/lib/radar/data
