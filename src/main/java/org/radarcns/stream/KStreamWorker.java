@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -129,8 +130,10 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
 
         Properties props = kafkaProperty.getStreamProperties(localClientId, numThreads,
                 DeviceTimestampExtractor.class);
+        long interval = (long)(ThreadLocalRandom.current().nextDouble(0.75, 1.25)
+                * definition.getCommitIntervalMs());
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG,
-                String.valueOf(definition.getCommitIntervalMs()));
+                String.valueOf(interval));
 
         return props;
     }
