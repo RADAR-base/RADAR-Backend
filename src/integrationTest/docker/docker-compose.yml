@@ -1,12 +1,17 @@
 ---
 version: '2'
 
+networks:
+  kafka:
+    driver: bridge
 services:
   #---------------------------------------------------------------------------#
   # Zookeeper Cluster                                                         #
   #---------------------------------------------------------------------------#
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:3.3.1
+    image: confluentinc/cp-zookeeper:4.1.0
+    networks:
+      - kafka
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -19,9 +24,11 @@ services:
   # Kafka Cluster                                                             #
   #---------------------------------------------------------------------------#
   kafka-1:
-    image: confluentinc/cp-kafka:3.3.1
+    image: confluentinc/cp-kafka:4.1.0
     depends_on:
       - zookeeper-1
+    networks:
+      - kafka
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
@@ -33,9 +40,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-2:
-    image: confluentinc/cp-kafka:3.3.1
+    image: confluentinc/cp-kafka:4.1.0
     depends_on:
       - zookeeper-1
+    networks:
+      - kafka
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
@@ -47,9 +56,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-3:
-    image: confluentinc/cp-kafka:3.3.1
+    image: confluentinc/cp-kafka:4.1.0
     depends_on:
       - zookeeper-1
+    networks:
+      - kafka
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
@@ -64,12 +75,14 @@ services:
   # Schema Registry                                                           #
   #---------------------------------------------------------------------------#
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:3.3.1
+    image: confluentinc/cp-schema-registry:4.1.0
     depends_on:
       - zookeeper-1
       - kafka-1
       - kafka-2
       - kafka-3
+    networks:
+      - kafka
     restart: always
     ports:
       - "8081:8081"
@@ -83,12 +96,14 @@ services:
   # REST proxy                                                                #
   #---------------------------------------------------------------------------#
   rest-proxy-1:
-    image: confluentinc/cp-kafka-rest:3.3.1
+    image: confluentinc/cp-kafka-rest:4.1.0
     depends_on:
       - kafka-1
       - kafka-2
       - kafka-3
       - schema-registry-1
+    networks:
+      - kafka
     ports:
       - "8082:8082"
     environment:
@@ -109,8 +124,9 @@ services:
     depends_on:
       - kafka-1
       - schema-registry-1
-    command:
-      - integrationTest
+    networks:
+      - kafka
+    command: integrationTest
     volumes:
       - ../../../build/jacoco:/code/build/jacoco
       - ../../../build/reports:/code/build/reports
