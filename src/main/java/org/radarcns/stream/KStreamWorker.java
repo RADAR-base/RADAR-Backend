@@ -31,6 +31,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -126,8 +127,12 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             localClientId += '-' + window.sizeMs + '-' + window.advanceMs;
         }
 
-        return kafkaProperty.getStreamProperties(localClientId, numThreads,
+        Properties props = kafkaProperty.getStreamProperties(localClientId, numThreads,
                 DeviceTimestampExtractor.class);
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG,
+                String.valueOf(definition.getCommitIntervalMs()));
+
+        return props;
     }
 
     /**

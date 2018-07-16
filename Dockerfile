@@ -32,9 +32,9 @@ RUN ./gradlew distTar && \
   tar xf build/distributions/*.tar && \
   rm build/distributions/*.tar
 
-FROM confluentinc/cp-base:3.3.1
+FROM confluentinc/cp-base:4.1.0
 
-MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl>
+MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl> , Yatharth Ranjan <yatharth.ranjan@kcl.ac.uk>
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 

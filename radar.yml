@@ -19,7 +19,6 @@ broker:
 
 #Kafka internal parameters
 stream_properties:
-  auto_commit_interval_ms: 1000
   max.request.size: 3500042 #Set message.max.bytes for kafka brokers higher than or equal to this value
   retries: 15
   session_timeout_ms: 20000
