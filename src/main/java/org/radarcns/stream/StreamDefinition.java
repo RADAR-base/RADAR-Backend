@@ -60,6 +60,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param input source {@link KafkaTopic}
      * @param output output {@link KafkaTopic}
      * @param window time window for aggregation.
+     * @param commitIntervalMs The commit.interval.ms config for the stream
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window,
                             long commitIntervalMs) {
@@ -73,6 +74,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param input source {@link KafkaTopic}
      * @param output output {@link KafkaTopic}
      * @param window time window for aggregation.
+     * @param commitIntervalMs The commit.interval.ms config for the stream
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output,
             @Nullable TimeWindows window, @Nonnull long commitIntervalMs) {
