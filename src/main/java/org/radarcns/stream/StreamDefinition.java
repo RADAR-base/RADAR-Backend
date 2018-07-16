@@ -16,6 +16,7 @@
 
 package org.radarcns.stream;
 
+import static org.radarcns.stream.GeneralStreamGroup.CommitInterval.COMMIT_INTERVAL_DEFAULT;
 import static org.radarcns.util.Comparison.compare;
 
 import java.util.Objects;
@@ -24,10 +25,12 @@ import javax.annotation.Nullable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.topic.KafkaTopic;
 
+
 public class StreamDefinition implements Comparable<StreamDefinition> {
     private final KafkaTopic inputTopic;
     private final KafkaTopic outputTopic;
     private final TimeWindows window;
+    private final long commitIntervalMs;
 
     /**
      * Constructor. It takes in input the topic name to be consumed and to topic name where the
@@ -36,7 +39,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param output output {@link KafkaTopic}
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output) {
-        this(input, output, 0L);
+        this(input, output, 0L, COMMIT_INTERVAL_DEFAULT.getCommitInterval());
     }
 
     /**
@@ -47,7 +50,8 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param window time window for aggregation.
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window) {
-        this(input, output, window == 0 ? null : TimeWindows.of(window));
+        this(input, output, window == 0 ? null : TimeWindows.of(window),
+                COMMIT_INTERVAL_DEFAULT.getCommitInterval());
     }
 
     /**
@@ -57,14 +61,28 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param output output {@link KafkaTopic}
      * @param window time window for aggregation.
      */
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window,
+                            long commitIntervalMs) {
+        this(input, output, window == 0 ? null : TimeWindows.of(window), commitIntervalMs);
+    }
+
+
+    /**
+     * Constructor. It takes in input the topic name to be consumed and to topic name where the
+     *      related stream will write the computed values.
+     * @param input source {@link KafkaTopic}
+     * @param output output {@link KafkaTopic}
+     * @param window time window for aggregation.
+     */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output,
-            @Nullable TimeWindows window) {
+            @Nullable TimeWindows window, @Nonnull long commitIntervalMs) {
         Objects.requireNonNull(input);
         Objects.requireNonNull(output);
 
         this.inputTopic = input;
         this.outputTopic = output;
         this.window = window;
+        this.commitIntervalMs = commitIntervalMs;
     }
 
     @Nonnull
@@ -92,6 +110,11 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
     @Nullable
     public TimeWindows getTimeWindows() {
         return window;
+    }
+
+    @Nullable
+    public long getCommitIntervalMs(){
+        return commitIntervalMs;
     }
 
     @Override
