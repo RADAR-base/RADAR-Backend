@@ -111,7 +111,7 @@ public class GeneralStreamGroup implements StreamGroup {
         Collection<StreamDefinition> streams = Arrays.stream(TimeWindowMetadata.values())
                 .map(w -> new StreamDefinition(
                         new KafkaTopic(input), new KafkaTopic(w.getTopicLabel(outputBase)),
-                        w.getIntervalInMilliSec()))
+                        w.getIntervalInMilliSec(), getCommitIntervalForTimeWindow(w)))
                 .collect(Collectors.toList());
 
         topicNames.addAll(streams.stream()
@@ -135,6 +135,25 @@ public class GeneralStreamGroup implements StreamGroup {
         this.topicNames.addAll(topicNames);
     }
 
+    public long getCommitIntervalForTimeWindow(TimeWindowMetadata metadata) {
+        switch (metadata) {
+            case ONE_DAY:
+                return CommitInterval.COMMIT_INTERVAL_FOR_ONE_DAY.getCommitInterval();
+            case ONE_MIN:
+                return CommitInterval.COMMIT_INTERVAL_FOR_ONE_MIN.getCommitInterval();
+            case TEN_MIN:
+                return CommitInterval.COMMIT_INTERVAL_FOR_TEN_MIN.getCommitInterval();
+            case ONE_HOUR:
+                return CommitInterval.COMMIT_INTERVAL_FOR_ONE_HOUR.getCommitInterval();
+            case ONE_WEEK:
+                return CommitInterval.COMMIT_INTERVAL_FOR_ONE_WEEK.getCommitInterval();
+            case TEN_SECOND:
+                return CommitInterval.COMMIT_INTERVAL_FOR_TEN_SECOND.getCommitInterval();
+            default:
+                return CommitInterval.COMMIT_INTERVAL_DEFAULT.getCommitInterval();
+        }
+    }
+
     @Override
     public Collection<StreamDefinition> getStreamDefinition(String inputTopic) {
         Collection<StreamDefinition> topic = topicMap.get(inputTopic);
@@ -149,5 +168,26 @@ public class GeneralStreamGroup implements StreamGroup {
         List<String> topicList = new ArrayList<>(topicNames);
         topicList.sort(String.CASE_INSENSITIVE_ORDER);
         return topicList;
+    }
+
+    public enum CommitInterval {
+        COMMIT_INTERVAL_FOR_TEN_SECOND(10_000L),
+        COMMIT_INTERVAL_FOR_ONE_MIN(30_000L),
+        COMMIT_INTERVAL_FOR_TEN_MIN(300_000L),
+        COMMIT_INTERVAL_FOR_ONE_HOUR(1800_000L),
+        COMMIT_INTERVAL_FOR_ONE_DAY(7200_000L),
+        COMMIT_INTERVAL_FOR_ONE_WEEK(10800_000L),
+        COMMIT_INTERVAL_DEFAULT(30_000L);
+
+        private final long commitInterval;
+
+
+        CommitInterval(long commitInterval) {
+            this.commitInterval = commitInterval;
+        }
+
+        public long getCommitInterval() {
+            return commitInterval;
+        }
     }
 }

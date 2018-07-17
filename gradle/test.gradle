@@ -34,7 +34,7 @@ dependencies {
     integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     // For Topic name validation based on Kafka classes
-    testImplementation (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
+    testCompile (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
         exclude group: 'org.apache.kafka', module: 'kafka-clients'
         exclude group: 'net.sf.jopt-simple'
         exclude group: 'com.yammer.metrics'

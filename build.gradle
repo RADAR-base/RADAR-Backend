@@ -11,7 +11,8 @@ plugins {
 //---------------------------------------------------------------------------//
 
 group = 'org.radarcns'
-version = '0.2.3'
+version = '0.3.0'
+
 ext.description = 'Kafka backend for processing device data.'
 
 mainClassName = 'org.radarcns.RadarBackend'
@@ -24,9 +25,9 @@ sourceCompatibility = '1.8'
 
 ext.boundaryVersion = '1.0.6'
 ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '3.3.1'
+ext.confluentVersion = '4.1.0'
 ext.hamcrestVersion = '1.3'
-ext.kafkaVersion = '0.11.0.2'
+ext.kafkaVersion = '1.1.0'
 ext.jacksonVersion='2.8.5'
 ext.javaMailVersion = '1.5.6'
 ext.junitVersion = '4.12'

@@ -8,17 +8,21 @@ configurations {
     codacy
 }
 
+jacoco {
+    toolVersion = "0.8.1"
+}
+
 dependencies {
-    codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: '2.0.1'
+    codacy group: 'com.github.codacy', name: 'codacy-coverage-reporter', version: '4.0.1'
 }
 
 jacocoTestReport {
-    executionData test, integrationTest
     reports {
         xml.enabled true
         csv.enabled false
         html.enabled true
     }
+    executionData test, integrationTest
 }
 
 task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
