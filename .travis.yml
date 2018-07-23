@@ -7,7 +7,7 @@ services:
   - docker
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.16.1
+  DOCKER_COMPOSE_VERSION: 1.21.2
 
 cache:
   directories:
