@@ -1,1 +1,2 @@
 rootProject.name = 'radar-backend'
+enableFeaturePreview('STABLE_PUBLISHING')
