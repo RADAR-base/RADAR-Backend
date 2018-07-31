@@ -31,11 +31,9 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -44,7 +42,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.InterruptException;
 import org.apache.kafka.common.errors.SerializationException;
@@ -75,7 +72,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private final String groupId;
     private final String clientId;
 
-    private KafkaConsumer<K, V> consumer;
+    private Consumer<K, V> consumer;
     private boolean done;
 
     /**
@@ -207,10 +204,11 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                 .filter(tp -> {
                     Properties tmpProperties = new Properties();
                     tmpProperties.putAll(properties);
-                    tmpProperties.setProperty(CLIENT_ID_CONFIG, properties.getProperty(CLIENT_ID_CONFIG)
-                            + "-tmp-" + UUID.randomUUID().toString());
+                    tmpProperties.setProperty(CLIENT_ID_CONFIG,
+                            properties.getProperty(CLIENT_ID_CONFIG)
+                                    + "-tmp-" + UUID.randomUUID().toString());
 
-                    try (Consumer<String, GenericRecord> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
+                    try (Consumer<K, V> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
                         tmpConsumer.assign(Collections.singletonList(tp));
                         tmpConsumer.seek(tp, consumer.position(tp));
                         tmpConsumer.poll(0);
