@@ -277,7 +277,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
 
-    protected ObservationKey extractKey(GenericRecord record, Schema schema) {
+    public static ObservationKey extractKey(GenericRecord record, Schema schema) {
         Field projectIdField = schema.getField("projectId");
         if (projectIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "

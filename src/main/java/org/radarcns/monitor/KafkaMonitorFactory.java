@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import java.util.stream.Stream;
 import org.radarcns.config.*;
+import org.radarcns.stream.SourceStatisticsStream;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +66,9 @@ public class KafkaMonitorFactory {
                 monitor = new CombinedKafkaMonitor(createStatisticsMonitors());
                 break;
             case "all":
-                List<KafkaMonitor> monitors = new ArrayList<>();
-                monitors.add(createDisconnectMonitor());
-                monitors.add(createBatteryLevelMonitor());
-                monitors.addAll(createStatisticsMonitors());
-                monitor = new CombinedKafkaMonitor(monitors);
+                monitor = new CombinedKafkaMonitor(Stream.concat(
+                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor()),
+                        createStatisticsMonitors()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -79,18 +79,17 @@ public class KafkaMonitorFactory {
         return monitor;
     }
 
-    private List<KafkaMonitor> createStatisticsMonitors() {
+    private Stream<KafkaMonitor> createStatisticsMonitors() {
         List<SourceStatisticsMonitorConfig> configs = properties.getRadarProperties()
                 .getStatisticsMonitors();
 
         if (configs == null) {
             logger.warn("Statistics monitor is not configured. Cannot start it.");
-            return Collections.emptyList();
+            return Stream.empty();
         }
 
         return configs.stream()
-                .map(config -> new SourceStatisticsMonitor(properties, config))
-                .collect(Collectors.toList());
+                .map(config -> new SourceStatisticsStream(properties, config));
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {

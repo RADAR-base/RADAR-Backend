@@ -30,7 +30,7 @@ public class RadarSerde<T> {
     private final JsonDeserializer<T> jsonDeserializer;
 
     public RadarSerde(Class<T> type) {
-        this.jsonSerializer = new JsonSerializer<>();
+        this.jsonSerializer = new JsonSerializer<>(type);
         this.jsonDeserializer = new JsonDeserializer<>(type);
     }
 

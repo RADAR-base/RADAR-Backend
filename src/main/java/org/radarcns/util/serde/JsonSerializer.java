@@ -27,10 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JsonSerializer<T> implements Serializer<T> {
-    
     private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
-    
-    private static final ObjectWriter WRITER = getFieldMapper().writer();
+
+    private static final ObjectMapper MAPPER = getFieldMapper();
+    private static final ObjectWriter GENERIC_WRITER = MAPPER.writer();
+    private final ObjectWriter writer;
 
     private static ObjectMapper getFieldMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -41,6 +42,14 @@ public class JsonSerializer<T> implements Serializer<T> {
         return mapper;
     }
 
+    public JsonSerializer() {
+        this.writer = GENERIC_WRITER;
+    }
+
+    public JsonSerializer(Class<T> cls) {
+        this.writer = MAPPER.writerFor(cls);
+    }
+
     @Override
     public void configure(Map<String, ?> map, boolean b) {
         // no configuration needed
@@ -49,7 +58,7 @@ public class JsonSerializer<T> implements Serializer<T> {
     @Override
     public byte[] serialize(String topic, T t) {
         try {
-            return WRITER.writeValueAsBytes(t);
+            return writer.writeValueAsBytes(t);
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize value {} in topic {}", t, topic, e);
             return null;
