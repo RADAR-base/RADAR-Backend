@@ -17,8 +17,8 @@
 package org.radarcns.monitor;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -58,12 +58,12 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     }
 
     @Override
-    public long getPollTimeout() {
+    public Duration getPollTimeout() {
         return monitors.get(0).getPollTimeout();
     }
 
     @Override
-    public void setPollTimeout(long pollTimeout) {
+    public void setPollTimeout(Duration pollTimeout) {
         for (KafkaMonitor monitor : monitors) {
             monitor.setPollTimeout(pollTimeout);
         }

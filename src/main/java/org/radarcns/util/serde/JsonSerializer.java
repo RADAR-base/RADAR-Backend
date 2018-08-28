@@ -16,10 +16,9 @@
 
 package org.radarcns.util.serde;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
+import static org.radarcns.util.serde.RadarSerde.GENERIC_WRITER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.Map;
 import org.apache.kafka.common.serialization.Serializer;
@@ -29,25 +28,14 @@ import org.slf4j.LoggerFactory;
 public class JsonSerializer<T> implements Serializer<T> {
     private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
 
-    private static final ObjectMapper MAPPER = getFieldMapper();
-    private static final ObjectWriter GENERIC_WRITER = MAPPER.writer();
     private final ObjectWriter writer;
-
-    private static ObjectMapper getFieldMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
-        return mapper;
-    }
 
     public JsonSerializer() {
         this.writer = GENERIC_WRITER;
     }
 
     public JsonSerializer(Class<T> cls) {
-        this.writer = MAPPER.writerFor(cls);
+        this.writer = GENERIC_WRITER.forType(cls);
     }
 
     @Override

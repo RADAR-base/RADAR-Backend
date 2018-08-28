@@ -18,6 +18,7 @@ package org.radarcns.producer;
 
 import java.io.File;
 import java.io.IOException;
+import org.apache.avro.SchemaValidationException;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
@@ -26,8 +27,11 @@ import org.radarcns.config.SubCommand;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.mock.MockProducer;
 import org.radarcns.mock.config.BasicMockConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockProducerCommand implements SubCommand {
+    private static final Logger logger = LoggerFactory.getLogger(MockProducerCommand.class);
     private final MockProducer producer;
 
     public MockProducerCommand(RadarBackendOptions options,
@@ -51,12 +55,16 @@ public class MockProducerCommand implements SubCommand {
     }
 
     @Override
-    public void start() throws IOException, InterruptedException {
+    public void start() throws IOException {
         producer.start();
     }
 
     @Override
     public void shutdown() throws IOException, InterruptedException {
-        producer.shutdown();
+        try {
+            producer.shutdown();
+        } catch (SchemaValidationException e) {
+            logger.error("Data did not match schema", e);
+        }
     }
 }

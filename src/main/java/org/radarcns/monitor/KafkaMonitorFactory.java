@@ -17,16 +17,18 @@
 package org.radarcns.monitor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
-
 import java.util.stream.Stream;
-import org.radarcns.config.*;
+import org.radarcns.config.BatteryMonitorConfig;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.MonitorConfig;
+import org.radarcns.config.RadarBackendOptions;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SourceStatisticsMonitorConfig;
 import org.radarcns.stream.SourceStatisticsStream;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;

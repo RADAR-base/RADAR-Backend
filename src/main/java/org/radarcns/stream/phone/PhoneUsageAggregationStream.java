@@ -31,12 +31,12 @@ public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, P
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream.groupBy(PhoneUsageAggregationStream::temporaryKey)
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getPhoneUsageCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                                RadarSerdes.getInstance().getPhoneUsageCollector()))
                 .toStream()
                 .map(utilities::phoneCollectorToAvro);
     }

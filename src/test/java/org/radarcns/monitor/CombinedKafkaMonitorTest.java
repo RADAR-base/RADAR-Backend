@@ -25,12 +25,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.junit.Test;
 
 public class CombinedKafkaMonitorTest {
@@ -42,7 +41,7 @@ public class CombinedKafkaMonitorTest {
 
         doThrow(new IOException("failed to run!")).when(kafkaMonitor2).start();
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Stream.of(kafkaMonitor1, kafkaMonitor2));
 
         try {
             km.start();
@@ -55,35 +54,13 @@ public class CombinedKafkaMonitorTest {
             throw ex;
         }
     }
-
-    @Test(expected = IOException.class)
-    public void testExceptionFlow2() throws Exception {
-        KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
-        KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
-
-        doThrow(new IOException("failed to run!")).when(kafkaMonitor1).start();
-
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
-
-        try {
-            km.start();
-        } catch (IOException ex) {
-            verify(kafkaMonitor1, times(1)).start();
-            verify(kafkaMonitor2, times(1)).start();
-            verify(kafkaMonitor1, times(1)).shutdown();
-            verify(kafkaMonitor2, times(1)).shutdown();
-            assertTrue(km.isShutdown());
-            throw ex;
-        }
-    }
-
 
     @Test
     public void testFlow() throws Exception {
         KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
         KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor( Arrays.asList(kafkaMonitor1, kafkaMonitor2));
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Stream.of(kafkaMonitor1, kafkaMonitor2));
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
@@ -110,25 +87,24 @@ public class CombinedKafkaMonitorTest {
     }
 
     @Test
-    public void testPollTimeout() throws Exception {
+    public void testPollTimeout() {
         KafkaMonitor kafkaMonitor1 = mock(KafkaMonitor.class);
         KafkaMonitor kafkaMonitor2 = mock(KafkaMonitor.class);
 
-        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Arrays.asList(kafkaMonitor1, kafkaMonitor2));
-        km.setPollTimeout(1000L);
+        CombinedKafkaMonitor km = new CombinedKafkaMonitor(Stream.of(kafkaMonitor1, kafkaMonitor2));
+        km.setPollTimeout(Duration.ofSeconds(1L));
 
-        verify(kafkaMonitor1, times(1)).setPollTimeout(1000L);
-        verify(kafkaMonitor2, times(1)).setPollTimeout(1000L);
+        verify(kafkaMonitor1, times(1)).setPollTimeout(Duration.ofSeconds(1L));
+        verify(kafkaMonitor2, times(1)).setPollTimeout(Duration.ofSeconds(1L));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmpty() {
-        new CombinedKafkaMonitor(Collections.emptyList());
+        new CombinedKafkaMonitor(Stream.empty());
     }
 
     @Test(expected = NullPointerException.class)
     public void testNull() {
-        ScheduledExecutorService executorService = mock(ScheduledExecutorService.class);
         new CombinedKafkaMonitor(null);
     }
 }

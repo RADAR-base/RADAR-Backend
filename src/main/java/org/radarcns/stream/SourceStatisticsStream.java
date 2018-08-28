@@ -7,6 +7,7 @@ import static org.radarcns.monitor.AbstractKafkaMonitor.extractKey;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -14,7 +15,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.Cancellable;
 import org.apache.kafka.streams.processor.Processor;
@@ -42,17 +42,17 @@ public class SourceStatisticsStream implements KafkaMonitor {
     private final List<String> inputTopics;
     private final String outputTopic;
     private final String name;
-    private volatile long interval;
+    private volatile Duration interval;
     private KafkaStreams stream;
-    private volatile boolean isShutdown;
+    private volatile boolean hasShutdown;
 
     public SourceStatisticsStream(RadarPropertyHandler properties, SourceStatisticsMonitorConfig config) {
         this.properties = properties;
         this.inputTopics = config.getTopics();
         this.outputTopic = config.getOutputTopic();
         this.name = config.getName();
-        this.interval = config.getFlushTimeout();
-        this.isShutdown = false;
+        this.interval = Duration.ofMillis(config.getFlushTimeout());
+        this.hasShutdown = false;
     }
 
     public void start() {
@@ -64,10 +64,11 @@ public class SourceStatisticsStream implements KafkaMonitor {
 
     @Override
     public void shutdown() {
-        isShutdown = true;
+        hasShutdown = true;
         stream.close();
     }
 
+    @SuppressWarnings("PMD.OptimizableToArrayCall")
     private Topology getTopology() {
         Topology builder = new Topology();
         GenericAvroDeserializer genericReader = new GenericAvroDeserializer();
@@ -89,26 +90,26 @@ public class SourceStatisticsStream implements KafkaMonitor {
         return builder;
     }
 
-    private StreamsConfig getStreamsConfig() {
+    private Properties getStreamsConfig() {
         Properties settings = properties.getKafkaProperties().getStreamProperties(name,
                 properties.getRadarProperties().threadsByPriority(Priority.HIGH, 3));
         settings.remove(DEFAULT_KEY_SERDE_CLASS_CONFIG);
         settings.remove(DEFAULT_VALUE_SERDE_CLASS_CONFIG);
-        return new StreamsConfig(settings);
+        return settings;
     }
 
     @Override
     public boolean isShutdown() {
-        return isShutdown;
+        return hasShutdown;
     }
 
     @Override
-    public long getPollTimeout() {
+    public Duration getPollTimeout() {
         return interval;
     }
 
     @Override
-    public void setPollTimeout(long pollTimeout) {
+    public void setPollTimeout(Duration pollTimeout) {
         this.interval = pollTimeout;
     }
 
@@ -116,7 +117,7 @@ public class SourceStatisticsStream implements KafkaMonitor {
         private KeyValueStore<ObservationKey, SourceStatisticsRecord> store;
         private ProcessorContext context;
         private Cancellable punctuateCancellor;
-        private long localInterval = -1L;
+        private Duration localInterval = Duration.ZERO;
 
         @SuppressWarnings("unchecked")
         @Override
@@ -127,17 +128,17 @@ public class SourceStatisticsStream implements KafkaMonitor {
         }
 
         private void updatePunctuate() {
-            if (localInterval != getPollTimeout()) {
+            if (!localInterval.equals(getPollTimeout())) {
                 localInterval = getPollTimeout();
                 if (punctuateCancellor != null) {
                     punctuateCancellor.cancel();
                 }
                 punctuateCancellor = this.context.schedule(
-                        localInterval, PunctuationType.WALL_CLOCK_TIME, this::sendNew);
+                        localInterval.toMillis(), PunctuationType.WALL_CLOCK_TIME, this::sendNew);
             }
         }
 
-        @SuppressWarnings("unused")
+        @SuppressWarnings({"unused", "PMD.AccessorMethodGeneration"})
         private void sendNew(long timestamp) {
             List<KeyValue<ObservationKey, SourceStatisticsRecord>> sent = new ArrayList<>();
 
@@ -157,6 +158,7 @@ public class SourceStatisticsStream implements KafkaMonitor {
             updatePunctuate();
         }
 
+        @SuppressWarnings("PMD.AccessorMethodGeneration")
         @Override
         public void process(GenericRecord genericKey, GenericRecord value) {
             if (genericKey == null || value == null) {
@@ -187,14 +189,9 @@ public class SourceStatisticsStream implements KafkaMonitor {
 
             SourceStatisticsRecord stats = store.get(key);
             SourceStatisticsRecord newStats = SourceStatisticsRecord.updateRecord(stats, timeStart, timeEnd);
-            if (newStats != stats) {
+            if (!newStats.equals(stats)) {
                 store.put(key, newStats);
             }
-        }
-
-        @Override
-        public void punctuate(long timestamp) {
-            // deprecated
         }
 
         @Override

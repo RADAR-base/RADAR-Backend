@@ -32,14 +32,11 @@ import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.state.StoreSupplier;
-import org.apache.kafka.streams.state.Stores;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
@@ -51,7 +48,6 @@ import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.util.Monitor;
 import org.radarcns.util.RadarSingletonFactory;
 import org.radarcns.util.RadarUtilities;
-import org.radarcns.util.serde.RadarSerde;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +103,7 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             monitor = null;
         }
 
-        KStreamBuilder builder = new KStreamBuilder();
+        StreamsBuilder builder = new StreamsBuilder();
 
         implementStream(def,
                 builder.<K, V>stream(def.getInputTopic().getName())
@@ -119,7 +115,7 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
                         })
         ).to(def.getOutputTopic().getName());
 
-        return pair(future, new KafkaStreams(builder, getStreamProperties(def)));
+        return pair(future, new KafkaStreams(builder.build(), getStreamProperties(def)));
     }
 
     /**
@@ -225,12 +221,12 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull String fieldName, @Nonnull Schema schema) {
         return kstream.groupByKey()
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new NumericAggregateCollector(fieldName, schema),
                         (k, v, valueCollector) -> valueCollector.add(v),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getNumericAggregateCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -239,12 +235,12 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull Function<V, Double> calculation, @Nonnull String fieldName) {
         return kstream.groupByKey()
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new NumericAggregateCollector(fieldName),
                         (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getNumericAggregateCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -253,17 +249,13 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull String[] fieldNames, @Nonnull Schema schema) {
 
-        Stores.persistentWindowStore()
-        Stores.persistentKeyValueStore(definition.getStateStoreName())
-
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new AggregateListCollector(fieldNames, schema),
                         (k, v, valueCollector) -> valueCollector.add(v),
-                        Materialized.as(definition.getStateStoreName())
-                            .withKeySerde(new RadarSerde<AggregateKey>(AggregateKey.class).getSerde())
-                            .withValueSerde(RadarSerdes.getInstance().getAggregateListCollector()))
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getAggregateListCollector()))
                 .toStream()
                 .map(utilities::listCollectorToAvro);
     }

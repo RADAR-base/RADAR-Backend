@@ -32,17 +32,6 @@ dependencies {
     testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
     integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
     integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-
-    // For Topic name validation based on Kafka classes
-    testCompile (group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion) {
-        exclude group: 'org.apache.kafka', module: 'kafka-clients'
-        exclude group: 'net.sf.jopt-simple'
-        exclude group: 'com.yammer.metrics'
-        exclude group: 'org.scala-lang.modules'
-        exclude group: 'org.slf4j'
-        exclude group: 'com.101tec'
-        exclude group: 'org.apache.zookeeper'
-    }
 }
 
 tasks.matching {it instanceof Test}.all {

@@ -29,10 +29,10 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -68,10 +68,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
     private final PersistentStateStore stateStore;
     private final Properties properties;
-    private final AtomicLong pollTimeout;
     private final String groupId;
     private final String clientId;
 
+    private Duration pollTimeout;
     private KafkaConsumer consumer;
     private boolean done;
 
@@ -110,7 +110,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
         this.consumer = null;
         this.topics = topics;
-        this.pollTimeout = new AtomicLong(Long.MAX_VALUE);
+        this.pollTimeout = Duration.ofDays(365);
         this.done = false;
         this.clientId = monitorClientId;
         this.groupId = groupId;
@@ -205,7 +205,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     partition = new TopicPartition(topic, ((PartitionInfo) partInfo).partition());
                     tmpConsumer.assign(Collections.singletonList(partition));
                     tmpConsumer.seek(partition, consumer.position(partition));
-                    tmpConsumer.poll(0);
+                    tmpConsumer.poll(Duration.ZERO);
                 }
             }
         } catch (SerializationException ex1) {
@@ -260,12 +260,14 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         this.consumer.wakeup();
     }
 
-    public long getPollTimeout() {
-        return pollTimeout.get();
+    @Override
+    public synchronized Duration getPollTimeout() {
+        return pollTimeout;
     }
 
-    public void setPollTimeout(long pollTimeout) {
-        this.pollTimeout.set(pollTimeout);
+    @Override
+    public synchronized void setPollTimeout(Duration pollTimeout) {
+        this.pollTimeout = pollTimeout;
     }
 
     protected ObservationKey extractKey(ConsumerRecord<GenericRecord, ?> record) {

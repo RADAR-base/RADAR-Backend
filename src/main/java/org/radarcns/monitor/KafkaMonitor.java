@@ -16,10 +16,11 @@
 
 package org.radarcns.monitor;
 
+import java.time.Duration;
 import org.radarcns.config.SubCommand;
 
 public interface KafkaMonitor extends SubCommand {
     boolean isShutdown();
-    long getPollTimeout();
-    void setPollTimeout(long pollTimeout);
+    Duration getPollTimeout();
+    void setPollTimeout(Duration duration);
 }
