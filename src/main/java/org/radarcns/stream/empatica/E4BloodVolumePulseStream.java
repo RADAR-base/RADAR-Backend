@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -37,9 +36,10 @@ public class E4BloodVolumePulseStream extends
         KStreamWorker<ObservationKey, EmpaticaE4BloodVolumePulse> {
     private static final Logger logger = LoggerFactory.getLogger(E4BloodVolumePulseStream.class);
 
-    public E4BloodVolumePulseStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public E4BloodVolumePulseStream(int numThread, StreamMaster master,
+            RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream("android_empatica_e4_blood_volume_pulse");
     }
 
     @Override

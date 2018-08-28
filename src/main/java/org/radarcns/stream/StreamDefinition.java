@@ -16,21 +16,21 @@
 
 package org.radarcns.stream;
 
-import static org.radarcns.stream.GeneralStreamGroup.CommitInterval.COMMIT_INTERVAL_DEFAULT;
+import static org.radarcns.stream.AbstractStreamWorker.TIME_WINDOW_COMMIT_INTERVAL_DEFAULT;
 import static org.radarcns.util.Comparison.compare;
 
+import java.time.Duration;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.radarcns.topic.KafkaTopic;
 
-
 public class StreamDefinition implements Comparable<StreamDefinition> {
     private final KafkaTopic inputTopic;
     private final KafkaTopic outputTopic;
     private final TimeWindows window;
-    private final long commitIntervalMs;
+    private final Duration commitIntervalMs;
 
     /**
      * Constructor. It takes in input the topic name to be consumed and to topic name where the
@@ -38,8 +38,8 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param input source {@link KafkaTopic}
      * @param output output {@link KafkaTopic}
      */
-    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output) {
-        this(input, output, 0L, COMMIT_INTERVAL_DEFAULT.getCommitInterval());
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output) {
+        this(input, output, (TimeWindows)null, TIME_WINDOW_COMMIT_INTERVAL_DEFAULT);
     }
 
     /**
@@ -49,9 +49,10 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param output output {@link KafkaTopic}
      * @param window time window for aggregation.
      */
-    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window) {
-        this(input, output, window == 0 ? null : TimeWindows.of(window),
-                COMMIT_INTERVAL_DEFAULT.getCommitInterval());
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output,
+            @Nullable Duration window) {
+        this(input, output, window == null ? null : TimeWindows.of(window.toMillis()),
+            TIME_WINDOW_COMMIT_INTERVAL_DEFAULT);
     }
 
     /**
@@ -62,9 +63,10 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param window time window for aggregation.
      * @param commitIntervalMs The commit.interval.ms config for the stream
      */
-    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output, long window,
-                            long commitIntervalMs) {
-        this(input, output, window == 0 ? null : TimeWindows.of(window), commitIntervalMs);
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output,
+            @Nullable Duration window, @Nonnull Duration commitIntervalMs) {
+        this(input, output, window == null ? null : TimeWindows.of(window.toMillis()),
+                commitIntervalMs);
     }
 
 
@@ -76,8 +78,8 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      * @param window time window for aggregation.
      * @param commitIntervalMs The commit.interval.ms config for the stream
      */
-    public StreamDefinition(@Nonnull KafkaTopic input, @Nonnull KafkaTopic output,
-            @Nullable TimeWindows window, @Nonnull long commitIntervalMs) {
+    public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output,
+            @Nullable TimeWindows window, @Nonnull Duration commitIntervalMs) {
         Objects.requireNonNull(input);
         Objects.requireNonNull(output);
 
@@ -92,7 +94,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
         return inputTopic;
     }
 
-    @Nonnull
+    @Nullable
     public KafkaTopic getOutputTopic() {
         return outputTopic;
     }
@@ -106,7 +108,11 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      */
     @Nonnull
     public String getStateStoreName() {
-        return "From-" + getInputTopic().getName() + "-To-" + getOutputTopic().getName();
+        String name = "From-" + getInputTopic().getName();
+        if (getOutputTopic() != null) {
+            name += "-To-" + getOutputTopic().getName();
+        }
+        return name;
     }
 
     @Nullable
@@ -114,8 +120,8 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
         return window;
     }
 
-    @Nullable
-    public long getCommitIntervalMs(){
+    @Nonnull
+    public Duration getCommitInterval(){
         return commitIntervalMs;
     }
 
@@ -141,7 +147,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
     @Override
     public int compareTo(@Nonnull StreamDefinition o) {
         return compare((StreamDefinition d) -> d.getInputTopic().getName())
-                .then(d -> d.getOutputTopic().getName())
+                .then(d -> d.getOutputTopic() == null ? "" : d.getOutputTopic().getName())
                 .then(d -> d.getTimeWindows() == null ? 0 : d.getTimeWindows().sizeMs)
                 .then(d -> d.getTimeWindows() == null ? 0 : d.getTimeWindows().advanceMs)
                 .apply(this, o);

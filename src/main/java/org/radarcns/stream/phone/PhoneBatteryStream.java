@@ -1,6 +1,5 @@
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -17,9 +16,9 @@ import org.slf4j.LoggerFactory;
 public class PhoneBatteryStream extends KStreamWorker<ObservationKey, PhoneBatteryLevel> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneBatteryStream.class);
 
-    public PhoneBatteryStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public PhoneBatteryStream(int numThread, StreamMaster master, RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream("android_phone_battery_level");
     }
 
     @Override

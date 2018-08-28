@@ -19,6 +19,7 @@ package org.radarcns.stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.radarcns.stream.AbstractStreamWorker.OUTPUT_LABEL;
 
 import java.util.regex.Pattern;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class StreamDefinitionTest {
     private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
 
     private static final String INPUT = "android_empatica_e4_blood_volume_pulse";
-    private static final String OUTPUT = INPUT + GeneralStreamGroup.OUTPUT_LABEL;
+    private static final String OUTPUT = INPUT + OUTPUT_LABEL;
 
     @Test
     public void nameValidation() {

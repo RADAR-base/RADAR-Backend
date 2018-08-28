@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -38,9 +37,10 @@ public class E4ElectroDermalActivityStream extends
     private static final Logger logger = LoggerFactory.getLogger(
             E4ElectroDermalActivityStream.class);
 
-    public E4ElectroDermalActivityStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public E4ElectroDermalActivityStream(int numThread, StreamMaster master,
+            RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream("android_empatica_e4_electrodermal_activity");
     }
 
     @Override

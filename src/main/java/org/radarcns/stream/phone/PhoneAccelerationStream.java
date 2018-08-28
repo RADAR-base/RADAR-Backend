@@ -1,6 +1,5 @@
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -17,9 +16,10 @@ import org.slf4j.LoggerFactory;
 public class PhoneAccelerationStream extends KStreamWorker<ObservationKey, PhoneAcceleration> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
 
-    public PhoneAccelerationStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public PhoneAccelerationStream(int numThread, StreamMaster master,
+            RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream("android_phone_acceleration");
     }
 
     @Override

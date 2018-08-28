@@ -56,13 +56,12 @@ import org.slf4j.LoggerFactory;
  * Abstraction of a Kafka Stream.
  */
 public abstract class KStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
-        implements StreamWorker, Thread.UncaughtExceptionHandler {
+        extends AbstractStreamWorker implements Thread.UncaughtExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(KStreamWorker.class);
 
     private final Logger monitorLog;
     private final int numThreads;
     private final StreamMaster master;
-    private final Collection<StreamDefinition> streamDefinitions;
     private final String buildVersion;
     private Collection<ScheduledFuture<?>> monitors;
     private final KafkaProperty kafkaProperty;
@@ -71,15 +70,13 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
 
     private List<KafkaStreams> streams;
 
-    public KStreamWorker(@Nonnull Collection<StreamDefinition> streamDefinitions,
-            int numThreads, @Nonnull StreamMaster master, RadarPropertyHandler properties,
-            Logger monitorLog) {
+    public KStreamWorker(int numThreads, @Nonnull StreamMaster master,
+            RadarPropertyHandler properties, Logger monitorLog) {
         if (numThreads < 1) {
             throw new IllegalStateException(
                     "The number of concurrent threads must be at least 1");
         }
         this.master = master;
-        this.streamDefinitions = streamDefinitions;
         this.numThreads = numThreads;
         this.buildVersion = properties.getRadarProperties().getBuildVersion();
         this.kafkaProperty = properties.getKafkaProperties();
@@ -131,7 +128,7 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
         Properties props = kafkaProperty.getStreamProperties(localClientId, numThreads,
                 DeviceTimestampExtractor.class);
         long interval = (long)(ThreadLocalRandom.current().nextDouble(0.75, 1.25)
-                * definition.getCommitIntervalMs());
+                * definition.getCommitInterval().toMillis());
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG,
                 String.valueOf(interval));
 
@@ -153,7 +150,6 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
         }
 
         List<KeyValue<ScheduledFuture<?>, KafkaStreams>> streamBuilders = getStreamDefinitions()
-                .stream()
                 .map(this::createBuilder)
                 .collect(Collectors.toList());
 
@@ -211,10 +207,6 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             monitors.forEach(f -> f.cancel(false));
             monitors = null;
         }
-    }
-
-    protected Collection<StreamDefinition> getStreamDefinitions() {
-        return streamDefinitions;
     }
 
     protected final KStream<AggregateKey, NumericAggregate> aggregateNumeric(

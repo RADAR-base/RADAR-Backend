@@ -16,7 +16,6 @@
 
 package org.radarcns.stream;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.radarcns.config.ConfigRadar;
@@ -25,7 +24,6 @@ import org.radarcns.config.ConfigRadar;
 public class CombinedStreamMaster extends StreamMaster {
 
     private final Collection<StreamMaster> streamMasters;
-    private final StreamGroup streamGroup;
 
     /**
      * Create a stream master that will act as a master over given stream masters.
@@ -36,7 +34,6 @@ public class CombinedStreamMaster extends StreamMaster {
             throw new IllegalArgumentException("Stream workers collection may not be empty");
         }
         this.streamMasters = streamMasters;
-        this.streamGroup = new CombinedStreamGroup(streamMasters);
     }
 
     @Override
@@ -50,41 +47,6 @@ public class CombinedStreamMaster extends StreamMaster {
     protected void createWorkers(List<StreamWorker> list, StreamMaster streamMaster) {
         for (StreamMaster master : streamMasters) {
             master.createWorkers(list, streamMaster);
-        }
-    }
-
-    @Override
-    protected StreamGroup getStreamGroup() {
-        return this.streamGroup;
-    }
-
-    /** A stream group that combines the stream groups of the stream masters it is managing. */
-    private static class CombinedStreamGroup implements StreamGroup {
-        private final Collection<StreamMaster> streamMasters;
-
-        private CombinedStreamGroup(Collection<StreamMaster> streamMasters) {
-            this.streamMasters = streamMasters;
-        }
-
-        @Override
-        public List<String> getTopicNames() {
-            List<String> topics = new ArrayList<>();
-            for (StreamMaster master : streamMasters) {
-                topics.addAll(master.getStreamGroup().getTopicNames());
-            }
-            topics.sort(String.CASE_INSENSITIVE_ORDER);
-            return topics;
-        }
-
-        @Override
-        public Collection<StreamDefinition> getStreamDefinition(String inputTopic) {
-            for (StreamMaster master : streamMasters) {
-                if (master.getStreamGroup().getTopicNames().contains(inputTopic)) {
-                    return master.getStreamGroup().getStreamDefinition(inputTopic);
-                }
-            }
-            throw new IllegalArgumentException("Stream definition for input topic " + inputTopic
-                    + " not found");
         }
     }
 }

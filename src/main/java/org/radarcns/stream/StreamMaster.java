@@ -33,9 +33,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.SubCommand;
+import org.radarcns.topic.KafkaTopic;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,11 +207,15 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      */
     protected void announceTopics() {
         log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
-                        + "before starting: \n  - {}",
-                String.join("\n  - ", getStreamGroup().getTopicNames()));
+                + "before starting: \n  - {}",
+                streamWorkers.stream()
+                        .flatMap(StreamWorker::getStreamDefinitions)
+                        .flatMap(d -> Stream.of(d.getInputTopic(), d.getOutputTopic()))
+                        .filter(Objects::nonNull)
+                        .map(KafkaTopic::getName)
+                        .sorted()
+                        .collect(Collectors.joining("\n - ")));
     }
-
-    protected abstract StreamGroup getStreamGroup();
 
     /** Add a monitor to the master. It will run every 30 seconds. */
     ScheduledFuture<?> addMonitor(Monitor monitor) {

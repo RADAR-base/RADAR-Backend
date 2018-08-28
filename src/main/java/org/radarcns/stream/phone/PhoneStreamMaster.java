@@ -18,7 +18,6 @@ package org.radarcns.stream.phone;
 
 import java.util.List;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
@@ -29,21 +28,11 @@ import org.radarcns.util.RadarSingletonFactory;
  */
 public class PhoneStreamMaster extends StreamMaster {
     @Override
-    protected StreamGroup getStreamGroup() {
-        return PhoneStreams.getInstance();
-    }
-
-    @Override
     protected void createWorkers(List<StreamWorker> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        PhoneStreams defs = PhoneStreams.getInstance();
-        list.add(new PhoneUsageStream(
-                defs.getUsageStream(), lowPriority(), master, propertyHandler));
-        list.add(new PhoneUsageAggregationStream(
-                defs.getUsageEventAggregationStream(), lowPriority(), master, propertyHandler));
-        list.add(new PhoneBatteryStream(
-                defs.getBatteryStream(), lowPriority(), master, propertyHandler));
-        list.add(new PhoneAccelerationStream(
-                defs.getAccelerationStream(), normalPriority(), master, propertyHandler));
+        list.add(new PhoneUsageStream(lowPriority(), master, propertyHandler));
+        list.add(new PhoneUsageAggregationStream(lowPriority(), master, propertyHandler));
+        list.add(new PhoneBatteryStream(lowPriority(), master, propertyHandler));
+        list.add(new PhoneAccelerationStream(normalPriority(), master, propertyHandler));
     }
 }

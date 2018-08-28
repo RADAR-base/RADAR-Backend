@@ -18,7 +18,6 @@ package org.radarcns.stream.empatica;
 
 import static org.radarcns.util.Serialization.floatToDouble;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -38,9 +37,12 @@ import org.slf4j.LoggerFactory;
 public class E4HeartRateStream extends KStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
     private static final Logger logger = LoggerFactory.getLogger(E4HeartRateStream.class);
 
-    public E4HeartRateStream(Collection<StreamDefinition> definitions, int numThread,
+    public E4HeartRateStream(int numThread,
             StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream(
+                "android_empatica_e4_inter_beat_interval",
+                "android_empatica_e4_heart_rate");
     }
 
     protected KStream<AggregateKey, NumericAggregate> implementStream(

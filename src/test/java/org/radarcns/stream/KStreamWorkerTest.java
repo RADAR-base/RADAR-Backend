@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.stream.Stream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class KStreamWorkerTest {
     public void getBuilder() throws IOException {
         String topicName = "TESTTopic";
         StreamDefinition sensorTopic = new StreamDefinition(new KafkaTopic(topicName), new KafkaTopic(topicName + "_output"));
-        when(aggregator.getStreamDefinitions()).thenReturn(Collections.singleton(sensorTopic));
+        when(aggregator.getStreamDefinitions()).thenReturn(Stream.of(sensorTopic));
 
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
         propertyHandler.load("src/test/resources/config/radar.yml");

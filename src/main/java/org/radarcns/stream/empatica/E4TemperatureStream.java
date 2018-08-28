@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -36,9 +35,11 @@ import org.slf4j.LoggerFactory;
 public class E4TemperatureStream extends KStreamWorker<ObservationKey, EmpaticaE4Temperature> {
     private static final Logger logger = LoggerFactory.getLogger(E4TemperatureStream.class);
 
-    public E4TemperatureStream(Collection<StreamDefinition> definitions, int numThread,
+    public E4TemperatureStream(int numThread,
             StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream(
+                "android_empatica_e4_temperature");
     }
 
     @Override

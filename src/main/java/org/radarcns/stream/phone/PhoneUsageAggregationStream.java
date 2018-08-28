@@ -1,6 +1,6 @@
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
+import java.time.Duration;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -21,9 +21,13 @@ import org.slf4j.LoggerFactory;
 public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
 
-    public PhoneUsageAggregationStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public PhoneUsageAggregationStream(int numThread, StreamMaster master,
+            RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createStream(
+            "android_phone_usage_event_output",
+            "android_phone_usage_event_aggregated",
+            Duration.ofDays(1));
     }
 
     @Override

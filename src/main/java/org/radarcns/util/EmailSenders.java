@@ -1,11 +1,10 @@
 package org.radarcns.util;
 
-import org.radarcns.config.MonitorConfig;
-import org.radarcns.config.NotifyConfig;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.radarcns.config.MonitorConfig;
+import org.radarcns.config.NotifyConfig;
 
 
 /**

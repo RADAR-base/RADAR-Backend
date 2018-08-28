@@ -16,7 +16,6 @@
 
 package org.radarcns.stream.empatica;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
 import org.radarcns.config.RadarPropertyHandler;
@@ -36,9 +35,10 @@ import org.slf4j.LoggerFactory;
 public class E4BatteryLevelStream extends KStreamWorker<ObservationKey, EmpaticaE4BatteryLevel> {
     private static final Logger logger = LoggerFactory.getLogger(E4BatteryLevelStream.class);
 
-    public E4BatteryLevelStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public E4BatteryLevelStream(int numThread, StreamMaster master,
+            RadarPropertyHandler properties) {
+        super(numThread, master, properties, logger);
+        createWindowedSensorStream("android_empatica_e4_battery_level");
     }
 
     @Override

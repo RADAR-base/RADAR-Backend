@@ -18,7 +18,6 @@ package org.radarcns.stream.empatica;
 
 import java.util.List;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.stream.StreamGroup;
 import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.StreamWorker;
 import org.radarcns.util.RadarSingletonFactory;
@@ -28,28 +27,15 @@ import org.radarcns.util.RadarSingletonFactory;
  * @see StreamMaster
  */
 public class E4StreamMaster extends StreamMaster {
-
-    protected StreamGroup getStreamGroup() {
-        return  E4Streams.getInstance();
-    }
-
     @Override
     protected void createWorkers(List<StreamWorker> list, StreamMaster master) {
         RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        E4Streams defs = E4Streams.getInstance();
-        list.add(new E4AccelerationStream(
-                defs.getAccelerationStream(), highPriority(), master, propertyHandler));
-        list.add(new E4BatteryLevelStream(
-                defs.getBatteryLevelStream(), lowPriority(), master, propertyHandler));
-        list.add(new E4BloodVolumePulseStream(
-                defs.getBloodVolumePulseStream(), highPriority(), master, propertyHandler));
-        list.add(new E4ElectroDermalActivityStream(
-                defs.getElectroDermalActivityStream(), normalPriority(), master, propertyHandler));
-        list.add(new E4HeartRateStream(
-                defs.getHeartRateStream(), lowPriority(), master, propertyHandler));
-        list.add(new E4InterBeatIntervalStream(
-                defs.getInterBeatIntervalStream(), lowPriority(), master, propertyHandler));
-        list.add(new E4TemperatureStream(
-                defs.getTemperatureStream(), lowPriority(), master, propertyHandler));
+        list.add(new E4AccelerationStream(highPriority(), master, propertyHandler));
+        list.add(new E4BatteryLevelStream(lowPriority(), master, propertyHandler));
+        list.add(new E4BloodVolumePulseStream(highPriority(), master, propertyHandler));
+        list.add(new E4ElectroDermalActivityStream(normalPriority(), master, propertyHandler));
+        list.add(new E4HeartRateStream(lowPriority(), master, propertyHandler));
+        list.add(new E4InterBeatIntervalStream(lowPriority(), master, propertyHandler));
+        list.add(new E4TemperatureStream(lowPriority(), master, propertyHandler));
     }
 }
