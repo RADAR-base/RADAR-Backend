@@ -57,6 +57,7 @@
     <exclude name="PositionLiteralsFirstInComparisons"/>
     <exclude name="ConfusingTernary"/>
     <exclude name="UseVarargs"/>
+    <exclude name="OptimizableToArrayCall"/>
   </rule>
 
   <rule ref="rulesets/java/codesize.xml">

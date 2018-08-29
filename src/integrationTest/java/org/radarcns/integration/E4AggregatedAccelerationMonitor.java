@@ -43,7 +43,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.putAll(radar.getRadarProperties().getStreamProperties());
+        props.putAll(radar.getRadarProperties().getStream().getProperties());
         configure(props);
     }
 

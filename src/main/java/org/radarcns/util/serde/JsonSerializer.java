@@ -16,10 +16,9 @@
 
 package org.radarcns.util.serde;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
+import static org.radarcns.util.serde.RadarSerde.GENERIC_WRITER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.Map;
 import org.apache.kafka.common.serialization.Serializer;
@@ -27,18 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JsonSerializer<T> implements Serializer<T> {
-    
     private static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
-    
-    private static final ObjectWriter WRITER = getFieldMapper().writer();
 
-    private static ObjectMapper getFieldMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+    private final ObjectWriter writer;
 
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    public JsonSerializer() {
+        this.writer = GENERIC_WRITER;
+    }
 
-        return mapper;
+    public JsonSerializer(Class<T> cls) {
+        this.writer = GENERIC_WRITER.forType(cls);
     }
 
     @Override
@@ -49,7 +46,7 @@ public class JsonSerializer<T> implements Serializer<T> {
     @Override
     public byte[] serialize(String topic, T t) {
         try {
-            return WRITER.writeValueAsBytes(t);
+            return writer.writeValueAsBytes(t);
         } catch (JsonProcessingException e) {
             logger.error("Cannot serialize value {} in topic {}", t, topic, e);
             return null;

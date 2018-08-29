@@ -16,19 +16,17 @@
 
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneUsageStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
+public class PhoneUsageStream extends SensorStreamWorker<ObservationKey, PhoneUsageEvent> {
     private static final Logger logger = LoggerFactory.getLogger(PhoneUsageStream.class);
 
     // 1 day until an item is refreshed
@@ -39,10 +37,14 @@ public class PhoneUsageStream extends KStreamWorker<ObservationKey, PhoneUsageEv
 
     private final PlayStoreLookup playStoreLookup;
 
-    public PhoneUsageStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+    public PhoneUsageStream() {
         playStoreLookup = new PlayStoreLookup(CACHE_TIMEOUT, MAX_CACHE_SIZE);
+    }
+
+    @Override
+    protected void initialize() {
+        defineSensorStream("android_phone_usage_event");
+        config.setDefaultPriority(Priority.LOW);
     }
 
     @Override

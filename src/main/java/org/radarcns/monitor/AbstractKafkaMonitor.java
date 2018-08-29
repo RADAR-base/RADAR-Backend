@@ -29,11 +29,11 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -68,10 +68,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
     private final PersistentStateStore stateStore;
     private final Properties properties;
-    private final AtomicLong pollTimeout;
     private final String groupId;
     private final String clientId;
 
+    private Duration pollTimeout;
     private Consumer<K, V> consumer;
     private boolean done;
 
@@ -110,7 +110,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
 
         this.consumer = null;
         this.topics = topics;
-        this.pollTimeout = new AtomicLong(Long.MAX_VALUE);
+        this.pollTimeout = Duration.ofDays(365);
         this.done = false;
         this.clientId = monitorClientId;
         this.groupId = groupId;
@@ -197,7 +197,6 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     // TODO: submit the message to another topic to indicate that it could not be deserialized.
     protected void handleSerializationException() {
         logger.error("Failed to deserialize message. Skipping message.");
-
         topics.parallelStream()
                 .flatMap(t -> consumer.partitionsFor(t).stream())
                 .map(tp -> new TopicPartition(tp.topic(), tp.partition()))
@@ -211,7 +210,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     try (Consumer<K, V> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
                         tmpConsumer.assign(Collections.singletonList(tp));
                         tmpConsumer.seek(tp, consumer.position(tp));
-                        tmpConsumer.poll(0);
+                        tmpConsumer.poll(Duration.ZERO);
                         return false;
                     } catch (SerializationException ex) {
                         logger.error("Serialization error, skipping message", ex);
@@ -266,12 +265,14 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
         this.consumer.wakeup();
     }
 
-    public long getPollTimeout() {
-        return pollTimeout.get();
+    @Override
+    public synchronized Duration getPollTimeout() {
+        return pollTimeout;
     }
 
-    public void setPollTimeout(long pollTimeout) {
-        this.pollTimeout.set(pollTimeout);
+    @Override
+    public synchronized void setPollTimeout(Duration pollTimeout) {
+        this.pollTimeout = pollTimeout;
     }
 
     protected ObservationKey extractKey(ConsumerRecord<GenericRecord, ?> record) {
@@ -283,7 +284,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
 
-    protected ObservationKey extractKey(GenericRecord record, Schema schema) {
+    public static ObservationKey extractKey(GenericRecord record, Schema schema) {
         Field projectIdField = schema.getField("projectId");
         if (projectIdField == null) {
             throw new IllegalArgumentException("Failed to process record with key type "

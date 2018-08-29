@@ -17,8 +17,8 @@
 package org.radarcns.monitor;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +43,12 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     private IOException ioException;
     private InterruptedException interruptedException;
 
-    public CombinedKafkaMonitor(Collection<KafkaMonitor> monitors) {
-        this.monitors = Objects.requireNonNull(monitors).stream()
+    public CombinedKafkaMonitor(Stream<KafkaMonitor> monitors) {
+        this.monitors = Objects.requireNonNull(monitors)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (monitors.isEmpty()) {
+        if (this.monitors.isEmpty()) {
             throw new IllegalArgumentException("Monitor collection may not be empty");
         }
         this.done = new AtomicBoolean(false);
@@ -57,12 +58,12 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     }
 
     @Override
-    public long getPollTimeout() {
+    public Duration getPollTimeout() {
         return monitors.get(0).getPollTimeout();
     }
 
     @Override
-    public void setPollTimeout(long pollTimeout) {
+    public void setPollTimeout(Duration pollTimeout) {
         for (KafkaMonitor monitor : monitors) {
             monitor.setPollTimeout(pollTimeout);
         }

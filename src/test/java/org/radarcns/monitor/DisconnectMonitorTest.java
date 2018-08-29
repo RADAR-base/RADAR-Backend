@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.avro.Schema;
@@ -94,7 +95,7 @@ public class DisconnectMonitorTest {
         disconnectConfig.setAlertRepeatInterval(2L);
         disconnectConfig.setAlertRepetitions(2);
 
-        long timeout = 1000 * disconnectConfig.getTimeout();
+        Duration timeout = Duration.ofSeconds(disconnectConfig.getTimeout());
 
         RadarPropertyHandler properties = KafkaMonitorFactoryTest
                 .getRadarPropertyHandler(config, folder);
@@ -108,7 +109,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "1", 0);
         sendMessage(monitor, "1", 1);
         sendMessage(monitor, "2", 0);
-        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
+        Thread.sleep(timeout.toMillis() + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 2;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());
@@ -120,7 +121,7 @@ public class DisconnectMonitorTest {
         sendMessage(monitor, "2", 0);
         sendMessage(monitor, "0", 0);
         timesSent += 1;
-        Thread.sleep(timeout + disconnectConfig.getTimeout() * 1000);
+        Thread.sleep(timeout.toMillis() + disconnectConfig.getTimeout() * 1000);
         monitor.evaluateRecords(new ConsumerRecords<>(Collections.emptyMap()));
         timesSent += 3;
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString());

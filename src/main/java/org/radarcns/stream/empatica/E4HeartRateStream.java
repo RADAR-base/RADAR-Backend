@@ -18,29 +18,28 @@ package org.radarcns.stream.empatica;
 
 import static org.radarcns.util.Serialization.floatToDouble;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.aggregator.NumericAggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4.
+ * It is used by converting inter beat interval (input) to heart rate.
  */
-public class E4HeartRateStream extends KStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
-    private static final Logger logger = LoggerFactory.getLogger(E4HeartRateStream.class);
-
-    public E4HeartRateStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+public class E4HeartRateStream extends
+        SensorStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {
+    @Override
+    protected void initialize() {
+        defineWindowedSensorStream(
+                "android_empatica_e4_inter_beat_interval",
+                "android_empatica_e4_heart_rate");
+        config.setDefaultPriority(Priority.LOW);
     }
 
     protected KStream<AggregateKey, NumericAggregate> implementStream(

@@ -1,25 +1,20 @@
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneAcceleration;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.aggregator.AggregateList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class PhoneAccelerationStream extends KStreamWorker<ObservationKey, PhoneAcceleration> {
-    private static final Logger logger = LoggerFactory.getLogger(PhoneAccelerationStream.class);
-
-    public PhoneAccelerationStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+public class PhoneAccelerationStream extends SensorStreamWorker<ObservationKey, PhoneAcceleration> {
+    @Override
+    protected void initialize() {
+        defineWindowedSensorStream("android_phone_acceleration");
+        config.setDefaultPriority(Priority.HIGH);
     }
 
     @Override

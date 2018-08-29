@@ -17,6 +17,9 @@
 package org.radarcns.util.serde;
 
 import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.state.WindowStore;
 import org.radarcns.stream.collector.AggregateListCollector;
 import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
@@ -51,5 +54,10 @@ public final class RadarSerdes {
 
     public Serde<PhoneUsageCollector> getPhoneUsageCollector() {
         return phoneUsageCollector;
+    }
+
+    public static <K, V> Materialized<K, V, WindowStore<Bytes, byte[]>> materialized(String name, Serde<V> valueSerde) {
+        Materialized<K, V, WindowStore<Bytes, byte[]>> store = Materialized.as(name);
+        return store.withValueSerde(valueSerde);
     }
 }

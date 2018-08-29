@@ -22,9 +22,9 @@ import java.util.Properties;
 import javax.annotation.Nonnull;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.processor.TimestampExtractor;
 
-// TODO this class should substitute org.radarcns.util.RadarConfig
 public class KafkaProperty {
 
     private final ConfigRadar configRadar;
@@ -35,11 +35,14 @@ public class KafkaProperty {
 
     /**
      * @param clientId useful for debugging
-     * @param numThread number of threads to execute stream processing
+     * @param singleStreamConfig stream configuration
      * @return Properties for a Kafka Stream
      */
-    public Properties getStreamProperties(@Nonnull String clientId, int numThread) {
+    public Properties getStreamProperties(@Nonnull String clientId,
+            SingleStreamConfig singleStreamConfig) {
         Properties props = new Properties();
+
+        StreamConfig streamConfig = configRadar.getStream();
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, configRadar.getBrokerPaths());
@@ -47,8 +50,12 @@ public class KafkaProperty {
                 configRadar.getSchemaRegistryPaths());
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
-        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, numThread);
-        props.putAll(configRadar.getStreamProperties());
+        props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG,
+                streamConfig.threadsByPriority(singleStreamConfig.getPriority()));
+        props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
+                LogAndContinueExceptionHandler.class.getName());
+        props.putAll(configRadar.getStream().getProperties());
+        props.putAll(singleStreamConfig.getProperties());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return props;
@@ -56,13 +63,14 @@ public class KafkaProperty {
 
     /**
      * @param clientId useful for debugging
-     * @param numThread number of threads to execute stream processing
+     * @param singleStreamConfig stream configuration
      * @param timestampExtractor custom timestamp extract that overrides the out-of-the-box
      * @return Properties for a Kafka Stream
      */
-    public Properties getStreamProperties(@Nonnull String clientId, int numThread,
-                                @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
-        Properties props = getStreamProperties(clientId, numThread);
+    public Properties getStreamProperties(@Nonnull String clientId,
+            SingleStreamConfig singleStreamConfig,
+            @Nonnull Class<? extends TimestampExtractor> timestampExtractor) {
+        Properties props = getStreamProperties(clientId, singleStreamConfig);
 
         props.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG,
                 timestampExtractor.getName());

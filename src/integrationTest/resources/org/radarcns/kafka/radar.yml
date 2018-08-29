@@ -2,10 +2,6 @@ version: 1.0
 released: 2016-11-27
 
 
-#============================= Application =============================#
-#Possible value are standalone or high_performance
-mode: standalone
-
 #============================== Zookeeper ==============================#
 #List of Zookeeper instances
 zookeeper:
@@ -21,17 +17,6 @@ broker:
       port: 9092
     - host: kafka-3
       port: 9092
-
-#Kafka internal parameters
-stream_properties:
-  cache.max.bytes.buffering: 1
-
-#============================ Kafka Streams ============================#
-#The number of threads that a stream must be run according is priority
-stream_priority:
-  low: 1
-  normal: 2
-  high: 4
 
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
@@ -66,6 +51,27 @@ disconnect_monitor:
 extras:
   streaming_timeout_ms: 1000
 
-stream_masters:
-  - org.radarcns.stream.empatica.E4StreamMaster
-  - org.radarcns.stream.phone.PhoneStreamMaster
+stream:
+  threads_per_priority:
+    low: 1
+    normal: 2
+    high: 4
+
+  properties:
+    max.request.size: 3500042 #Set message.max.bytes for kafka brokers higher than or equal to this value
+    retries: 15
+    session.timeout.ms: 20000
+    cache.max.bytes.buffering: 1
+
+  streams:
+    - class: org.radarcns.stream.empatica.E4AccelerationStream
+    - class: org.radarcns.stream.empatica.E4BatteryLevelStream
+    - class: org.radarcns.stream.empatica.E4BloodVolumePulseStream
+    - class: org.radarcns.stream.empatica.E4ElectroDermalActivityStream
+    - class: org.radarcns.stream.empatica.E4HeartRateStream
+    - class: org.radarcns.stream.empatica.E4InterBeatIntervalStream
+    - class: org.radarcns.stream.empatica.E4TemperatureStream
+    - class: org.radarcns.stream.phone.PhoneAccelerationStream
+    - class: org.radarcns.stream.phone.PhoneBatteryStream
+    - class: org.radarcns.stream.phone.PhoneUsageStream
+    - class: org.radarcns.stream.phone.PhoneUsageAggregationStream
