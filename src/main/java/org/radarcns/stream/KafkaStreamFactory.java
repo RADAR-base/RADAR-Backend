@@ -16,12 +16,18 @@
 
 package org.radarcns.stream;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import org.radarcns.config.ConfigRadar;
+import java.util.Locale;
+import java.util.stream.Stream;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SingleStreamConfig;
+import org.radarcns.config.SourceStatisticsMonitorConfig;
+import org.radarcns.config.SubCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,49 +35,44 @@ public class KafkaStreamFactory {
     private static final Logger logger = LoggerFactory.getLogger(
             KafkaStreamFactory.class.getName());
 
-    private final ConfigRadar config;
+    private final RadarPropertyHandler config;
     private final RadarBackendOptions options;
 
     public KafkaStreamFactory(RadarBackendOptions options,
                               RadarPropertyHandler properties) {
         this.options = options;
-        this.config = properties.getRadarProperties();
+        this.config = properties;
     }
 
-    public StreamMaster createStreamMaster() {
-        List<String> streamTypes;
+    public StreamMaster createSensorStreams() {
+        Collection<String> streamTypes;
 
-        // Try to get the stream type from the commandline arguments
         String[] args = options.getSubCommandArgs();
         if (args != null && args.length > 0) {
-            streamTypes = Arrays.asList(args);
+            streamTypes = new HashSet<>(Arrays.asList(args));
         } else {
-            streamTypes = config.getStreamMasters();
+            streamTypes = Collections.emptySet();
         }
 
-        List<StreamMaster> masters = new ArrayList<>(streamTypes.size());
+        return master(config.getRadarProperties().getStream().getStreamConfigs().stream()
+                .filter(s -> streamTypes.isEmpty() || streamTypes.stream().anyMatch(n ->
+                        s.getStreamClass().getName().toLowerCase(Locale.US)
+                                .endsWith(n.toLowerCase(Locale.US)))));
+    }
 
-        for (String streamType : streamTypes) {
-            try {
-                masters.add((StreamMaster) Class.forName(streamType).newInstance());
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                logger.error("Cannot instantiate StreamMaster class {}", streamType, e);
-            } catch (ClassCastException e) {
-                logger.error("Given type {} is not a StreamMaster", streamType);
-            }
+    private StreamMaster master(Stream<? extends SingleStreamConfig> configs) {
+        return new StreamMaster(config, configs);
+    }
+
+    public SubCommand createStreamStatistics() {
+        List<SourceStatisticsMonitorConfig> configs = config.getRadarProperties()
+                .getStream().getSourceStatistics();
+
+        if (configs == null) {
+            logger.warn("Statistics monitor is not configured. Cannot start it.");
+            return master(Stream.empty());
         }
 
-        StreamMaster master;
-
-        if (masters.isEmpty()) {
-            throw new IllegalArgumentException("No StreamMasters specified");
-        } else if (masters.size() == 1) {
-            master = masters.get(0);
-        } else {
-            master = new CombinedStreamMaster(masters);
-        }
-
-        master.setNumberOfThreads(config);
-        return master;
+        return master(configs.stream());
     }
 }

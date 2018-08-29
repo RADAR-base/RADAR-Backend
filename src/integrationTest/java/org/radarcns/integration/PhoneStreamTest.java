@@ -255,7 +255,7 @@ public class PhoneStreamTest {
 
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.putAll(radar.getRadarProperties().getStreamProperties());
+            props.putAll(radar.getRadarProperties().getStream().getProperties());
             configure(props);
             numRecordsRead = 0;
         }
@@ -293,7 +293,7 @@ public class PhoneStreamTest {
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.putAll(radar.getRadarProperties().getStreamProperties());
+            props.putAll(radar.getRadarProperties().getStream().getProperties());
             configure(props);
             numRecordsRead = 0;
         }

@@ -16,13 +16,8 @@
 
 package org.radarcns.stream;
 
-import static org.radarcns.config.RadarPropertyHandler.Priority.HIGH;
-import static org.radarcns.config.RadarPropertyHandler.Priority.LOW;
-import static org.radarcns.config.RadarPropertyHandler.Priority.NORMAL;
-
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -35,7 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.SingleStreamConfig;
 import org.radarcns.config.SubCommand;
 import org.radarcns.topic.KafkaTopic;
 import org.radarcns.util.Monitor;
@@ -45,60 +41,43 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages a set of {@link StreamWorker} objects.
  */
-public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(StreamMaster.class);
+public class StreamMaster implements SubCommand, UncaughtExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(StreamMaster.class);
 
     public static final int RETRY_TIMEOUT = 300_000; // 5 minutes
 
     private final List<StreamWorker> streamWorkers;
     private final AtomicInteger currentStream;
-    private final String nameSensor;
-    private int lowPriorityThreads;
-    private int normalPriorityThreads;
-    private int highPriorityThreads;
 
     private ScheduledExecutorService executor;
 
     /**
      * A stream master for given sensor type.
      */
-    protected StreamMaster() {
+    protected StreamMaster(@Nonnull RadarPropertyHandler propertyHandler,
+            @Nonnull Stream<? extends SingleStreamConfig> streams) {
         currentStream = new AtomicInteger(0);
-
-        lowPriorityThreads = 1;
-        normalPriorityThreads = 1;
-        highPriorityThreads = 1;
-
-        streamWorkers = new ArrayList<>();
-        nameSensor = toString();
-
-        log.info("Creating StreamMaster instance for {}", nameSensor);
+        streamWorkers = streams
+                .map(c -> createWorker(propertyHandler, c))
+                .collect(Collectors.toList());
+        logger.info("Configured streams: \n{}", streamWorkers.stream()
+                .map(s -> " - " + s.getClass().getName())
+                .collect(Collectors.joining("\n")));
     }
 
-    /**
-     * Set the number of threads to use for different priorities.
-     * @param config configuration for threads
-     */
-    public synchronized void setNumberOfThreads(ConfigRadar config) {
-        if (config.isStandalone()) {
-            log.info("[{}] STANDALONE MODE", nameSensor);
-            lowPriorityThreads = 1;
-            normalPriorityThreads = 1;
-            highPriorityThreads = 1;
-        } else {
-            log.info("[{}] GROUP MODE: {}", nameSensor, config.infoThread());
-            lowPriorityThreads = config.threadsByPriority(LOW, 1);
-            normalPriorityThreads = config.threadsByPriority(NORMAL, 2);
-            highPriorityThreads = config.threadsByPriority(HIGH, 4);
+    private StreamWorker createWorker(RadarPropertyHandler config, SingleStreamConfig c) {
+        try {
+            StreamWorker worker = (StreamWorker) c.getStreamClass().newInstance();
+            worker.configure(this, config, c);
+            return worker;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException(
+                    "Cannot instantiate class " + c.getStreamClass(), e);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(
+                    "Given class " + c.getStreamClass() + " does not implement StreamWorker.", e);
         }
     }
-
-    /**
-     * Populates a list with workers.
-     *
-     * @param list list to add workers to
-     */
-    protected abstract void createWorkers(List<StreamWorker> list, StreamMaster master);
 
     /** Starts all workers. */
     @Override
@@ -108,9 +87,8 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
 
         announceTopics();
 
-        log.info("Starting all streams for {}", nameSensor);
+        logger.info("Starting all streams");
 
-        createWorkers(streamWorkers, this);
         List<Exception> exs = streamWorkers.stream()
                 .map(worker -> executor.submit(worker::start))
                 .map(future -> {
@@ -126,7 +104,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
 
         if (!exs.isEmpty()) {
             for (Exception ex : exs) {
-                log.error("Failed to start stream", ex);
+                logger.error("Failed to start stream", ex);
             }
             throw new IOException("Failed to start streams", exs.get(0));
         }
@@ -138,10 +116,10 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
     @Override
     public void shutdown() throws InterruptedException {
         if (executor.isShutdown()) {
-            log.warn("Streams already shut down, will not shut down again.");
+            logger.warn("Streams already shut down, will not shut down again.");
             return;
         }
-        log.info("Shutting down all streams for {}", nameSensor);
+        logger.info("Shutting down all streams");
 
         streamWorkers.forEach(worker -> executor.execute(worker::shutdown));
         executor.shutdown();
@@ -155,8 +133,8 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      */
     public void notifyStartedStream(@Nonnull StreamWorker stream) {
         int current = currentStream.incrementAndGet();
-        log.info("[{}] {} is started. {}/{} streams are now running",
-                nameSensor, stream, current, streamWorkers.size());
+        logger.info("[{}] {} is started. {}/{} streams are now running",
+                stream, current, streamWorkers.size());
     }
 
     /**
@@ -168,10 +146,10 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
         int current = currentStream.decrementAndGet();
 
         if (current == 0) {
-            log.info("[{}] {} is closed. All streams have been terminated", nameSensor, stream);
+            logger.info("{} is closed. All streams have been terminated", stream);
         } else {
-            log.info("[{}] {} is closed. {}/{} streams are still running",
-                    nameSensor, stream, current, streamWorkers.size());
+            logger.info("{} is closed. {}/{} streams are still running",
+                    stream, current, streamWorkers.size());
         }
     }
 
@@ -181,24 +159,24 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
     public void notifyCrashedStream(@Nonnull String stream) {
-        log.error("[{}] {} is crashed", nameSensor, stream);
+        logger.error("{} is crashed", stream);
 
-        log.info("Forcing shutdown of {}", nameSensor);
+        logger.info("Forcing shutdown of {}");
 
         try {
             shutdown();
         } catch (InterruptedException ex) {
-            log.warn("Shutdown interrupted");
+            logger.warn("Shutdown interrupted");
         }
     }
 
     public void restartStream(final StreamWorker worker) {
-        log.info("Restarting stream {} for {}", worker, nameSensor);
+        logger.info("Restarting stream {}", worker);
 
         try {
             executor.schedule(worker::start, RETRY_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (RejectedExecutionException ex) {
-            log.info("Failed to schedule");
+            logger.info("Failed to schedule");
         }
     }
 
@@ -206,7 +184,7 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
      * Log the topic list that the application is going to use.
      */
     protected void announceTopics() {
-        log.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
+        logger.info("If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics "
                 + "before starting: \n  - {}",
                 streamWorkers.stream()
                         .flatMap(StreamWorker::getStreamDefinitions)
@@ -222,21 +200,9 @@ public abstract class StreamMaster implements SubCommand, UncaughtExceptionHandl
         return executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS);
     }
 
-    protected synchronized int lowPriority() {
-        return lowPriorityThreads;
-    }
-
-    protected synchronized int normalPriority() {
-        return normalPriorityThreads;
-    }
-
-    protected synchronized int highPriority() {
-        return highPriorityThreads;
-    }
-
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        log.error("StreamMaster error in Thread {}", t.getName(), e);
+        logger.error("StreamMaster error in Thread {}", t.getName(), e);
         try {
             shutdown();
         } catch (InterruptedException e1) {

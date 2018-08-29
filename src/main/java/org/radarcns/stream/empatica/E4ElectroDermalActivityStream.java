@@ -18,29 +18,24 @@ package org.radarcns.stream.empatica;
 
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4ElectroDermalActivity;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.aggregator.NumericAggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Kafka Stream for aggregating data about electrodermal activity collected by Empatica E4.
  */
 public class E4ElectroDermalActivityStream extends
-        KStreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
-    private static final Logger logger = LoggerFactory.getLogger(
-            E4ElectroDermalActivityStream.class);
+        SensorStreamWorker<ObservationKey, EmpaticaE4ElectroDermalActivity> {
 
-    public E4ElectroDermalActivityStream(int numThread, StreamMaster master,
-            RadarPropertyHandler properties) {
-        super(numThread, master, properties, logger);
-        createWindowedSensorStream("android_empatica_e4_electrodermal_activity");
+    @Override
+    protected void initialize() {
+        defineWindowedSensorStream("android_empatica_e4_electrodermal_activity");
+        config.setDefaultPriority(Priority.HIGH);
     }
 
     @Override

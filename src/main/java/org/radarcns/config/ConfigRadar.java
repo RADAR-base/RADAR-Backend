@@ -16,15 +16,10 @@
 
 package org.radarcns.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import org.radarcns.config.RadarPropertyHandler.Priority;
 
 /**
  * POJO representing the yml file
@@ -32,28 +27,23 @@ import org.radarcns.config.RadarPropertyHandler.Priority;
 public class ConfigRadar {
     private Date released;
     private String version;
-    private String mode;
     private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
     @JsonProperty("schema_registry")
     private List<ServerConfig> schemaRegistry;
     @JsonProperty("rest_proxy")
     private ServerConfig restProxy;
-    @JsonIgnore
-    private Map<Priority, Integer> streamPriority;
     @JsonProperty("battery_monitor")
     private BatteryMonitorConfig batteryMonitor;
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("statistics_monitors")
     private List<SourceStatisticsMonitorConfig> statisticsMonitors;
-    @JsonProperty("stream_masters")
-    private List<String> streamMasters;
+    @JsonProperty("stream")
+    private StreamConfig stream;
     @JsonProperty("persistence_path")
     private String persistencePath;
     private Map<String, Object> extras;
-    @JsonProperty("stream_properties")
-    private Map<String, String> streamProperties = new HashMap<>();
 
     @JsonProperty("build_version")
     private String buildVersion;
@@ -74,18 +64,6 @@ public class ConfigRadar {
         this.version = version;
     }
 
-    public boolean isStandalone() {
-        return mode.equals("standalone");
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
     public List<ServerConfig> getZookeeper() {
         return zookeeper;
     }
@@ -102,44 +80,6 @@ public class ConfigRadar {
         this.broker = broker;
     }
 
-    public Map<String, String> getStreamProperties() {
-        return streamProperties;
-    }
-
-    public void setStreamProperties(Map<String, String> streamProperties) {
-        this.streamProperties = streamProperties;
-    }
-
-    @JsonProperty("stream_priority")
-    public Map<String, Integer> getStreamPriority() {
-        if (streamPriority == null) {
-            return null;
-        }
-        Map<String, Integer> stringStreamPriority = new HashMap<>();
-        for (Map.Entry<Priority, Integer> entry : streamPriority.entrySet()) {
-            stringStreamPriority.put(entry.getKey().getParam(), entry.getValue());
-        }
-        return stringStreamPriority;
-    }
-
-    @JsonProperty("stream_priority")
-    public void setStreamPriority(Map<String, Integer> streamPriority) {
-        if (streamPriority == null) {
-            this.streamPriority = null;
-            return;
-        }
-
-        this.streamPriority = new EnumMap<>(Priority.class);
-
-        for (Map.Entry<String, Integer> entry : streamPriority.entrySet()) {
-            if (entry.getValue() < 1) {
-                throw new IllegalArgumentException("Stream priorities cannot be smaller than 1");
-            }
-            Priority priority = Priority.valueOf(entry.getKey().toUpperCase(Locale.US));
-            this.streamPriority.put(priority, entry.getValue());
-        }
-    }
-
     public List<ServerConfig> getSchemaRegistry() {
         return schemaRegistry;
     }
@@ -154,20 +94,6 @@ public class ConfigRadar {
 
     public void setRestProxy(ServerConfig restProxy) {
         this.restProxy = restProxy;
-    }
-
-    public int threadsByPriority(Priority level, int defaultValue) {
-        if (defaultValue <= 0) {
-            throw new IllegalArgumentException("Default number of threads must be larger than 0");
-        }
-        if (streamPriority == null) {
-            return defaultValue;
-        }
-        Integer mapValue = streamPriority.get(level);
-        if (mapValue == null) {
-            return defaultValue;
-        }
-        return mapValue;
     }
 
     public String getZookeeperPaths() {
@@ -200,10 +126,6 @@ public class ConfigRadar {
         return restProxy.getPath();
     }
 
-    public String infoThread() {
-        return streamPriority.toString();
-    }
-
     public BatteryMonitorConfig getBatteryMonitor() {
         return batteryMonitor;
     }
@@ -218,14 +140,6 @@ public class ConfigRadar {
 
     public void setDisconnectMonitor(DisconnectMonitorConfig disconnectMonitor) {
         this.disconnectMonitor = disconnectMonitor;
-    }
-
-    public List<String> getStreamMasters() {
-        return streamMasters;
-    }
-
-    public void setStreamMasters(List<String> streamWorker) {
-        this.streamMasters = streamWorker;
     }
 
     public String getPersistencePath() {
@@ -263,5 +177,9 @@ public class ConfigRadar {
 
     public void setStatisticsMonitors(List<SourceStatisticsMonitorConfig> statisticsMonitors) {
         this.statisticsMonitors = statisticsMonitors;
+    }
+
+    public StreamConfig getStream() {
+        return stream;
     }
 }

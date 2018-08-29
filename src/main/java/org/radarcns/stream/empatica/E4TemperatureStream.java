@@ -18,28 +18,22 @@ package org.radarcns.stream.empatica;
 
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.empatica.EmpaticaE4Temperature;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.aggregator.NumericAggregate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Definition of Kafka Stream for aggregating temperature values collected by Empatica E4.
  */
-public class E4TemperatureStream extends KStreamWorker<ObservationKey, EmpaticaE4Temperature> {
-    private static final Logger logger = LoggerFactory.getLogger(E4TemperatureStream.class);
-
-    public E4TemperatureStream(int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(numThread, master, properties, logger);
-        createWindowedSensorStream(
-                "android_empatica_e4_temperature");
+public class E4TemperatureStream extends SensorStreamWorker<ObservationKey, EmpaticaE4Temperature> {
+    @Override
+    protected void initialize() {
+        defineWindowedSensorStream("android_empatica_e4_temperature");
+        config.setDefaultPriority(Priority.NORMAL);
     }
 
     @Override

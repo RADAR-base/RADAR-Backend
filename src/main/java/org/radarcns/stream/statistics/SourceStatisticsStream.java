@@ -1,4 +1,4 @@
-package org.radarcns.stream;
+package org.radarcns.stream.statistics;
 
 import static org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG;
@@ -9,7 +9,9 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -26,46 +28,50 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.config.SourceStatisticsMonitorConfig;
 import org.radarcns.kafka.ObservationKey;
-import org.radarcns.monitor.KafkaMonitor;
+import org.radarcns.stream.AbstractStreamWorker;
+import org.radarcns.stream.SourceStatistics;
+import org.radarcns.stream.StreamDefinition;
 import org.radarcns.util.serde.RadarSerde;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SourceStatisticsStream implements KafkaMonitor {
+public class SourceStatisticsStream extends AbstractStreamWorker {
     private static final Logger logger = LoggerFactory.getLogger(SourceStatisticsStream.class);
+    private String name;
+    private Duration interval;
 
-    private final RadarPropertyHandler properties;
-    private final List<String> inputTopics;
-    private final String outputTopic;
-    private final String name;
-    private volatile Duration interval;
-    private KafkaStreams stream;
-    private volatile boolean hasShutdown;
-
-    public SourceStatisticsStream(RadarPropertyHandler properties, SourceStatisticsMonitorConfig config) {
-        this.properties = properties;
-        this.inputTopics = config.getTopics();
-        this.outputTopic = config.getOutputTopic();
-        this.name = config.getName();
-        this.interval = Duration.ofMillis(config.getFlushTimeout());
-        this.hasShutdown = false;
-    }
-
-    public void start() {
-        stream = new KafkaStreams(getTopology(), getStreamsConfig());
-        stream.setUncaughtExceptionHandler((thread, ex) -> shutdown());
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown-Streams"));
-        stream.start();
+    @Override
+    protected List<KafkaStreams> createStreams() {
+        return Collections.singletonList(new KafkaStreams(getTopology(), getStreamsConfig()));
     }
 
     @Override
-    public void shutdown() {
-        hasShutdown = true;
-        stream.close();
+    protected void doCleanup() {
+        // do nothing
+    }
+
+    @Override
+    protected void initialize() {
+        SourceStatisticsMonitorConfig config = (SourceStatisticsMonitorConfig) this.config;
+
+        this.name = config.getName();
+
+        List<String> inputTopics = config.getTopics();
+        if (inputTopics == null || inputTopics.isEmpty()) {
+            throw new IllegalArgumentException("Input topics for stream " + name + " is empty");
+        }
+        if (config.getOutputTopic() == null) {
+            throw new IllegalArgumentException("Output topic for stream " + name + " is missing");
+        }
+        inputTopics.forEach(t -> defineStream(t, config.getOutputTopic()));
+
+        this.interval = Duration.ofMillis(config.getFlushTimeout());
+    }
+
+    protected Duration getInterval() {
+        return interval;
     }
 
     @SuppressWarnings("PMD.OptimizableToArrayCall")
@@ -79,9 +85,16 @@ public class SourceStatisticsStream implements KafkaMonitor {
                         new SpecificAvroSerde<>(),
                         new RadarSerde<>(SourceStatisticsRecord.class).getSerde());
 
-        builder.addSource("source", genericReader, genericReader, inputTopics.toArray(new String[0]));
+        builder.addSource("source", genericReader, genericReader, getStreamDefinitions()
+                .map(StreamDefinition::getInputTopic)
+                .toArray(String[]::new));
         builder.addProcessor("process", SourceStatisticsProcessor::new, "source");
-        builder.addSink("sink", outputTopic,
+        builder.addSink("sink", getStreamDefinitions()
+                        .map(StreamDefinition::getOutputTopic)
+                        .filter(Objects::nonNull)
+                        .findAny().orElseThrow(() ->
+                                new IllegalStateException("Output topic for SourceStatisticsStream "
+                                        + name + " is undefined.")).getName(),
                 new SpecificAvroSerializer<ObservationKey>(),
                 new SpecificAvroSerializer<SourceStatistics>(),
                 "process");
@@ -91,26 +104,10 @@ public class SourceStatisticsStream implements KafkaMonitor {
     }
 
     private Properties getStreamsConfig() {
-        Properties settings = properties.getKafkaProperties().getStreamProperties(name,
-                properties.getRadarProperties().threadsByPriority(Priority.HIGH, 3));
+        Properties settings = kafkaProperty.getStreamProperties(name, config);
         settings.remove(DEFAULT_KEY_SERDE_CLASS_CONFIG);
         settings.remove(DEFAULT_VALUE_SERDE_CLASS_CONFIG);
         return settings;
-    }
-
-    @Override
-    public boolean isShutdown() {
-        return hasShutdown;
-    }
-
-    @Override
-    public Duration getPollTimeout() {
-        return interval;
-    }
-
-    @Override
-    public void setPollTimeout(Duration pollTimeout) {
-        this.interval = pollTimeout;
     }
 
     private class SourceStatisticsProcessor implements Processor<GenericRecord, GenericRecord> {
@@ -128,8 +125,8 @@ public class SourceStatisticsStream implements KafkaMonitor {
         }
 
         private void updatePunctuate() {
-            if (!localInterval.equals(getPollTimeout())) {
-                localInterval = getPollTimeout();
+            if (!localInterval.equals(getInterval())) {
+                localInterval = getInterval();
                 if (punctuateCancellor != null) {
                     punctuateCancellor.cancel();
                 }

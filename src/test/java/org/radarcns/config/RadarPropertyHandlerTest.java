@@ -18,7 +18,6 @@ package org.radarcns.config;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -38,7 +37,7 @@ public class RadarPropertyHandlerTest {
     private RadarPropertyHandler propertyHandler ;
 
     @Before
-    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    public void setUp() {
 
         this.propertyHandler = new RadarPropertyHandlerImpl();
 
@@ -76,7 +75,6 @@ public class RadarPropertyHandlerTest {
         propertyHandler.load("src/test/resources/config/radar.yml");
 
         ConfigRadar properties = propertyHandler.getRadarProperties();
-        assertEquals("standalone", properties.getMode());
         assertNotNull(properties.getBroker());
         assertNotNull(properties.getBrokerPaths());
         assertNotNull(properties.getReleased());

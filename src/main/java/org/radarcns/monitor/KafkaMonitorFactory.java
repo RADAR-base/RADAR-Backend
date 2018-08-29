@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 import org.radarcns.config.BatteryMonitorConfig;
@@ -28,8 +27,6 @@ import org.radarcns.config.DisconnectMonitorConfig;
 import org.radarcns.config.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
-import org.radarcns.stream.SourceStatisticsStream;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,13 +61,9 @@ public class KafkaMonitorFactory {
             case "disconnect":
                 monitor = createDisconnectMonitor();
                 break;
-            case "statistics":
-                monitor = new CombinedKafkaMonitor(createStatisticsMonitors());
-                break;
             case "all":
-                monitor = new CombinedKafkaMonitor(Stream.concat(
-                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor()),
-                        createStatisticsMonitors()));
+                monitor = new CombinedKafkaMonitor(
+                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -79,19 +72,6 @@ public class KafkaMonitorFactory {
             throw new IllegalArgumentException("Monitor " + commandType + " is not configured.");
         }
         return monitor;
-    }
-
-    private Stream<KafkaMonitor> createStatisticsMonitors() {
-        List<SourceStatisticsMonitorConfig> configs = properties.getRadarProperties()
-                .getStatisticsMonitors();
-
-        if (configs == null) {
-            logger.warn("Statistics monitor is not configured. Cannot start it.");
-            return Stream.empty();
-        }
-
-        return configs.stream()
-                .map(config -> new SourceStatisticsStream(properties, config));
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {
