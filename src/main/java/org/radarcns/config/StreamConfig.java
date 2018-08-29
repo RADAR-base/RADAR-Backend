@@ -36,7 +36,7 @@ public class StreamConfig {
     private List<SingleStreamConfig> streamConfigs;
 
     @JsonProperty("source_statistics")
-    private List<SourceStatisticsMonitorConfig> sourceStatistics;
+    private List<SourceStatisticsStreamConfig> sourceStatistics;
 
 
     public StreamConfig() {
@@ -105,7 +105,7 @@ public class StreamConfig {
         return priorityThreads.get(level);
     }
 
-    public List<SourceStatisticsMonitorConfig> getSourceStatistics() {
+    public List<SourceStatisticsStreamConfig> getSourceStatistics() {
         return sourceStatistics;
     }
 }

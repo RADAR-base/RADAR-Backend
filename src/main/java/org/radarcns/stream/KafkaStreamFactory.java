@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SingleStreamConfig;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
+import org.radarcns.config.SourceStatisticsStreamConfig;
 import org.radarcns.config.SubCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +35,13 @@ public class KafkaStreamFactory {
     private static final Logger logger = LoggerFactory.getLogger(
             KafkaStreamFactory.class.getName());
 
-    private final RadarPropertyHandler config;
+    private final RadarPropertyHandler radarProperties;
     private final RadarBackendOptions options;
 
     public KafkaStreamFactory(RadarBackendOptions options,
                               RadarPropertyHandler properties) {
         this.options = options;
-        this.config = properties;
+        this.radarProperties = properties;
     }
 
     public StreamMaster createSensorStreams() {
@@ -54,18 +54,18 @@ public class KafkaStreamFactory {
             streamTypes = Collections.emptySet();
         }
 
-        return master(config.getRadarProperties().getStream().getStreamConfigs().stream()
+        return master(radarProperties.getRadarProperties().getStream().getStreamConfigs().stream()
                 .filter(s -> streamTypes.isEmpty() || streamTypes.stream().anyMatch(n ->
                         s.getStreamClass().getName().toLowerCase(Locale.US)
                                 .endsWith(n.toLowerCase(Locale.US)))));
     }
 
     private StreamMaster master(Stream<? extends SingleStreamConfig> configs) {
-        return new StreamMaster(config, configs);
+        return new StreamMaster(radarProperties, configs);
     }
 
     public SubCommand createStreamStatistics() {
-        List<SourceStatisticsMonitorConfig> configs = config.getRadarProperties()
+        List<SourceStatisticsStreamConfig> configs = radarProperties.getRadarProperties()
                 .getStream().getSourceStatistics();
 
         if (configs == null) {

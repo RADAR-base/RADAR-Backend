@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.radarcns.stream.statistics.SourceStatisticsStream;
 
-public class SourceStatisticsMonitorConfig extends SingleStreamConfig {
+public class SourceStatisticsStreamConfig extends SingleStreamConfig {
     private String name;
 
     private List<String> topics;
@@ -18,7 +18,7 @@ public class SourceStatisticsMonitorConfig extends SingleStreamConfig {
     @JsonProperty("flush_timeout")
     private long flushTimeout = 60_000L;
 
-    public SourceStatisticsMonitorConfig() {
+    public SourceStatisticsStreamConfig() {
         setStreamClass(SourceStatisticsStream.class);
     }
 

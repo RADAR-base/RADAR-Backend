@@ -28,7 +28,7 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.radarcns.config.SourceStatisticsMonitorConfig;
+import org.radarcns.config.SourceStatisticsStreamConfig;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.AbstractStreamWorker;
 import org.radarcns.stream.SourceStatistics;
@@ -54,7 +54,7 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
 
     @Override
     protected void initialize() {
-        SourceStatisticsMonitorConfig config = (SourceStatisticsMonitorConfig) this.config;
+        SourceStatisticsStreamConfig config = (SourceStatisticsStreamConfig) this.config;
 
         this.name = config.getName();
 

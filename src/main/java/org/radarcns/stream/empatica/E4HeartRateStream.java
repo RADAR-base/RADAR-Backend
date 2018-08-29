@@ -30,6 +30,7 @@ import org.radarcns.stream.aggregator.NumericAggregate;
 
 /**
  * Kafka Stream for computing and aggregating Heart Rate values collected by Empatica E4.
+ * It is used by converting inter beat interval (input) to heart rate.
  */
 public class E4HeartRateStream extends
         SensorStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval> {

@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstraction of a Kafka Stream.
+ * @param <K> input key type.
+ * @param <V> input value type.
  */
 public abstract class SensorStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         extends AbstractStreamWorker implements Thread.UncaughtExceptionHandler {

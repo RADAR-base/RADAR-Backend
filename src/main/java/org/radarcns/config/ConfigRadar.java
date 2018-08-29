@@ -38,7 +38,7 @@ public class ConfigRadar {
     @JsonProperty("disconnect_monitor")
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("statistics_monitors")
-    private List<SourceStatisticsMonitorConfig> statisticsMonitors;
+    private List<SourceStatisticsStreamConfig> statisticsMonitors;
     @JsonProperty("stream")
     private StreamConfig stream;
     @JsonProperty("persistence_path")
@@ -171,11 +171,11 @@ public class ConfigRadar {
         this.buildVersion = buildVersion;
     }
 
-    public List<SourceStatisticsMonitorConfig> getStatisticsMonitors() {
+    public List<SourceStatisticsStreamConfig> getStatisticsMonitors() {
         return statisticsMonitors;
     }
 
-    public void setStatisticsMonitors(List<SourceStatisticsMonitorConfig> statisticsMonitors) {
+    public void setStatisticsMonitors(List<SourceStatisticsStreamConfig> statisticsMonitors) {
         this.statisticsMonitors = statisticsMonitors;
     }
 

@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.annotation.Nonnull;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.processor.TimestampExtractor;
 
 public class KafkaProperty {
@@ -51,6 +52,8 @@ public class KafkaProperty {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG,
                 streamConfig.threadsByPriority(singleStreamConfig.getPriority()));
+        props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
+                LogAndContinueExceptionHandler.class.getName());
         props.putAll(configRadar.getStream().getProperties());
         props.putAll(singleStreamConfig.getProperties());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
