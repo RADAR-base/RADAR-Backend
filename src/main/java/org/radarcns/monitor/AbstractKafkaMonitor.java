@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -41,7 +42,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.InterruptException;
 import org.apache.kafka.common.errors.SerializationException;
@@ -72,7 +72,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     private final String clientId;
 
     private Duration pollTimeout;
-    private KafkaConsumer consumer;
+    private Consumer<K, V> consumer;
     private boolean done;
 
     /**
@@ -197,22 +197,27 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     // TODO: submit the message to another topic to indicate that it could not be deserialized.
     protected void handleSerializationException() {
         logger.error("Failed to deserialize message. Skipping message.");
-        TopicPartition partition = null;
-        try {
-            Consumer<String, GenericRecord> tmpConsumer = new KafkaConsumer<>(properties);
-            for (String topic : topics) {
-                for (Object partInfo : consumer.partitionsFor(topic)) {
-                    partition = new TopicPartition(topic, ((PartitionInfo) partInfo).partition());
-                    tmpConsumer.assign(Collections.singletonList(partition));
-                    tmpConsumer.seek(partition, consumer.position(partition));
-                    tmpConsumer.poll(Duration.ZERO);
-                }
-            }
-        } catch (SerializationException ex1) {
-            consumer.seek(partition, consumer.position(partition) + 1);
-            return;
-        }
-        logger.error("Failed to find faulty message.");
+        topics.parallelStream()
+                .flatMap(t -> consumer.partitionsFor(t).stream())
+                .map(tp -> new TopicPartition(tp.topic(), tp.partition()))
+                .filter(tp -> {
+                    Properties tmpProperties = new Properties();
+                    tmpProperties.putAll(properties);
+                    tmpProperties.setProperty(CLIENT_ID_CONFIG,
+                            properties.getProperty(CLIENT_ID_CONFIG)
+                                    + "-tmp-" + UUID.randomUUID().toString());
+
+                    try (Consumer<K, V> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
+                        tmpConsumer.assign(Collections.singletonList(tp));
+                        tmpConsumer.seek(tp, consumer.position(tp));
+                        tmpConsumer.poll(Duration.ZERO);
+                        return false;
+                    } catch (SerializationException ex) {
+                        logger.error("Serialization error, skipping message", ex);
+                        return true;
+                    }
+                })
+                .forEach(tp -> consumer.seek(tp, consumer.position(tp) + 1));
     }
 
     /** Evaluate a single record that the monitor receives by overriding this function */

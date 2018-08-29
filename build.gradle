@@ -54,7 +54,7 @@ ext {
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    jcenter()
+    mavenCentral()
     // Non-jcenter radar releases
     maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
     // Kafka/confluent releases
