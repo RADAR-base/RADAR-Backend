@@ -66,7 +66,11 @@ public final class RadarBackend {
         }
         switch (subCommand) {
             case "stream":
-                return new KafkaStreamFactory(options, radarPropertyHandler).createStreamMaster();
+                return new KafkaStreamFactory(options, radarPropertyHandler)
+                        .createSensorStreams();
+            case "statistics":
+                return new KafkaStreamFactory(options, radarPropertyHandler)
+                        .createStreamStatistics();
             case "monitor":
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":

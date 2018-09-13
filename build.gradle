@@ -2,7 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
-    id 'com.jfrog.bintray' version '1.7.3' apply false
+    id 'com.jfrog.bintray' version '1.8.1' apply false
 
 }
 
@@ -11,41 +11,42 @@ plugins {
 //---------------------------------------------------------------------------//
 
 group = 'org.radarcns'
-version = '0.3.0'
-
-ext.description = 'Kafka backend for processing device data.'
+version = '0.4.0'
 
 mainClassName = 'org.radarcns.RadarBackend'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
 
-ext.githubRepoName = 'RADAR-CNS/RADAR-Backend'
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
 
-ext.boundaryVersion = '1.0.6'
-ext.codacyVersion = '1.0.10'
-ext.confluentVersion = '4.1.0'
-ext.hamcrestVersion = '1.3'
-ext.kafkaVersion = '1.1.0'
-ext.jacksonVersion='2.8.5'
-ext.javaMailVersion = '1.5.6'
-ext.junitVersion = '4.12'
-ext.mathVersion = '3.0'
-ext.findbugVersion = '3.0.1'
-ext.commonsCliVersion = '1.2'
-ext.mockitoVersion = '2.2.29'
-ext.radarCommonsVersion = '0.8.2'
-ext.radarSchemasVersion = '0.3.2'
-ext.subethamailVersion = '3.1.7'
-ext.jsoupVersion = '1.10.2'
-ext.slf4jVersion = '1.7.25'
-ext.log4jVersion = '1.2.17'
-ext.avroVersion = '1.8.2'
+ext {
+    moduleDescription = 'Kafka backend for processing device data.'
+    githubRepoName = 'RADAR-Base/RADAR-Backend'
 
-ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
-ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
-ext.website = 'http://radar-cns.org'
+
+    githubUrl = 'https://github.com/' + githubRepoName + '.git'
+    issueUrl = 'https://github.com/' + githubRepoName + '/issues'
+    website = 'http://radar-base.org'
+
+    codacyVersion = '4.0.2'
+    confluentVersion = '5.0.0'
+    hamcrestVersion = '1.3'
+    kafkaVersion = '2.0.0-cp1'
+    jacksonVersion = '2.9.6'
+    javaMailVersion = '1.6.1'
+    junitVersion = '4.12'
+    findbugVersion = '3.0.2'
+    commonsCliVersion = '1.4'
+    mockitoVersion = '2.19.1'
+    radarCommonsVersion = '0.10.0'
+    radarSchemasVersion = '0.4.0'
+    subethamailVersion = '3.1.7'
+    jsoupVersion = '1.11.3'
+    slf4jVersion = '1.7.25'
+    log4jVersion = '1.2.17'
+    avroVersion = '1.8.2'
+}
 
 //---------------------------------------------------------------------------//
 // Sources and classpath configurations                                        //
@@ -53,7 +54,7 @@ ext.website = 'http://radar-cns.org'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-    jcenter()
+    mavenCentral()
     // Non-jcenter radar releases
     maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
     // Kafka/confluent releases
@@ -98,12 +99,6 @@ dependencies {
 
     runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
     runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-}
-
-run {
-    if ( project.hasProperty("appArgs") ) {
-        args Eval.me(appArgs)
-    }
 }
 
 if (!hasProperty('profile')) {

@@ -30,6 +30,7 @@ import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CON
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -132,10 +133,11 @@ public class PhoneStreamTest {
             }
         }
         assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
-        Stream.of("android_phone_usage_event", "android_phone_usage_event_output",
-                "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
-                "android_empatica_e4_acceleration_10sec")
-                .forEach(topic -> topics.createTopic(topic, 3, 1));
+
+        topics.createTopics(
+                Stream.of("android_phone_usage_event", "android_phone_usage_event_output",
+                        "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
+                        "android_empatica_e4_acceleration_10sec"), 3, (short)1);
 
         SchemaRegistry registry = new SchemaRegistry(props.getSchemaRegistryPaths());
         registry.registerSchema(PHONE_USAGE_TOPIC);
@@ -220,7 +222,7 @@ public class PhoneStreamTest {
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(),
                 "android_empatica_e4_acceleration_10sec", clientId);
-        monitor.setPollTimeout(280_000L);
+        monitor.setPollTimeout(Duration.ofMinutes(5).minus(Duration.ofSeconds(20)));
         monitor.start();
     }
 
@@ -229,7 +231,7 @@ public class PhoneStreamTest {
         KafkaMonitor monitor = new PhoneOutputMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(), clientId,8L);
 
-        monitor.setPollTimeout(280_000L);
+        monitor.setPollTimeout(Duration.ofMinutes(5).minusSeconds(20));
         monitor.start();
     }
 
@@ -238,7 +240,7 @@ public class PhoneStreamTest {
         KafkaMonitor monitor = new PhoneAggregateMonitor(
                 RadarSingletonFactory.getRadarPropertyHandler(), clientId, 4L);
 
-        monitor.setPollTimeout(280_000L);
+        monitor.setPollTimeout(Duration.ofMinutes(5).minusSeconds(20));
         monitor.start();
     }
 
@@ -253,7 +255,7 @@ public class PhoneStreamTest {
 
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.putAll(radar.getRadarProperties().getStreamProperties());
+            props.putAll(radar.getRadarProperties().getStream().getProperties());
             configure(props);
             numRecordsRead = 0;
         }
@@ -291,7 +293,7 @@ public class PhoneStreamTest {
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.putAll(radar.getRadarProperties().getStreamProperties());
+            props.putAll(radar.getRadarProperties().getStream().getProperties());
             configure(props);
             numRecordsRead = 0;
         }

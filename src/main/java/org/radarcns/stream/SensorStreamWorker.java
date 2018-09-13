@@ -32,13 +32,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.config.KafkaProperty;
-import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.aggregator.AggregateList;
@@ -54,38 +51,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstraction of a Kafka Stream.
+ * @param <K> input key type.
+ * @param <V> input value type.
  */
-public abstract class KStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
-        implements StreamWorker, Thread.UncaughtExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(KStreamWorker.class);
-
+public abstract class SensorStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
+        extends AbstractStreamWorker implements Thread.UncaughtExceptionHandler {
     private final Logger monitorLog;
-    private final int numThreads;
-    private final StreamMaster master;
-    private final Collection<StreamDefinition> streamDefinitions;
-    private final String buildVersion;
     private Collection<ScheduledFuture<?>> monitors;
-    private final KafkaProperty kafkaProperty;
 
     protected final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
 
-    private List<KafkaStreams> streams;
-
-    public KStreamWorker(@Nonnull Collection<StreamDefinition> streamDefinitions,
-            int numThreads, @Nonnull StreamMaster master, RadarPropertyHandler properties,
-            Logger monitorLog) {
-        if (numThreads < 1) {
-            throw new IllegalStateException(
-                    "The number of concurrent threads must be at least 1");
-        }
-        this.master = master;
-        this.streamDefinitions = streamDefinitions;
-        this.numThreads = numThreads;
-        this.buildVersion = properties.getRadarProperties().getBuildVersion();
-        this.kafkaProperty = properties.getKafkaProperties();
+    public SensorStreamWorker() {
         this.streams = null;
         this.monitors = null;
-        this.monitorLog = monitorLog;
+        this.monitorLog = LoggerFactory.getLogger(getClass());
     }
 
     /**
@@ -103,35 +82,37 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             monitor = null;
         }
 
-        KStreamBuilder builder = new KStreamBuilder();
+        StreamsBuilder builder = new StreamsBuilder();
 
-        implementStream(def,
+        KStream<?, ?> stream = implementStream(def,
                 builder.<K, V>stream(def.getInputTopic().getName())
                         .map((k, v) -> {
                             if (monitor != null) {
                                 monitor.increment();
                             }
                             return pair(k, v);
-                        })
-        ).to(def.getOutputTopic().getName());
+                        }));
+        if (def.getOutputTopic() != null) {
+            stream.to(def.getOutputTopic().getName());
+        }
 
-        return pair(future, new KafkaStreams(builder, getStreamProperties(def)));
+        return pair(future, new KafkaStreams(builder.build(), getStreamProperties(def)));
     }
 
     /**
      * @return Properties for a Kafka Stream
      */
     protected Properties getStreamProperties(@Nonnull StreamDefinition definition) {
-        String localClientId = getClass().getName() + "-" + buildVersion;
+        String localClientId = getClass().getName() + "-" + allConfig.getBuildVersion();
         TimeWindows window = definition.getTimeWindows();
         if (window != null) {
             localClientId += '-' + window.sizeMs + '-' + window.advanceMs;
         }
 
-        Properties props = kafkaProperty.getStreamProperties(localClientId, numThreads,
+        Properties props = kafkaProperty.getStreamProperties(localClientId, config,
                 DeviceTimestampExtractor.class);
         long interval = (long)(ThreadLocalRandom.current().nextDouble(0.75, 1.25)
-                * definition.getCommitIntervalMs());
+                * definition.getCommitInterval().toMillis());
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG,
                 String.valueOf(interval));
 
@@ -147,13 +128,8 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
     /**
      * Starts the stream and notify the StreamMaster.
      */
-    public void start() {
-        if (streams != null) {
-            throw new IllegalStateException("Streams already started. Cannot start them again.");
-        }
-
+    public List<KafkaStreams> createStreams() {
         List<KeyValue<ScheduledFuture<?>, KafkaStreams>> streamBuilders = getStreamDefinitions()
-                .stream()
                 .map(this::createBuilder)
                 .collect(Collectors.toList());
 
@@ -161,72 +137,28 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
                 .map(first())
                 .collect(Collectors.toList());
 
-        streams = streamBuilders.stream()
+        return streamBuilders.stream()
                 .map(second())
                 .collect(Collectors.toList());
-
-        streams.forEach(stream -> {
-            stream.setUncaughtExceptionHandler(this);
-            stream.start();
-        });
-
-        master.notifyStartedStream(this);
     }
 
-    /**
-     * Close the stream and notify the StreamMaster.
-     */
-    public void shutdown() {
-        log.info("Shutting down {} stream", getClass().getSimpleName());
-
-        closeStreams();
-
-        master.notifyClosedStream(this);
-    }
-
-    /**
-     * Handles exceptions that have been uncaught. It is called when a StreamThread is
-     * terminating due to an exception.
-     */
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        log.error("Thread {} has been terminated due to {}", t.getName(), e.getMessage(), e);
-
-        closeStreams();
-
-        if (e instanceof StreamsException) {
-            master.restartStream(this);
-        } else {
-            master.notifyCrashedStream(getClass().getSimpleName());
-        }
-    }
-
-    private void closeStreams() {
-        if (streams != null) {
-            streams.forEach(KafkaStreams::close);
-            streams = null;
-        }
-
+    protected void doCleanup() {
         if (monitors != null) {
             monitors.forEach(f -> f.cancel(false));
             monitors = null;
         }
     }
 
-    protected Collection<StreamDefinition> getStreamDefinitions() {
-        return streamDefinitions;
-    }
-
     protected final KStream<AggregateKey, NumericAggregate> aggregateNumeric(
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull String fieldName, @Nonnull Schema schema) {
         return kstream.groupByKey()
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new NumericAggregateCollector(fieldName, schema),
                         (k, v, valueCollector) -> valueCollector.add(v),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getNumericAggregateCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -235,12 +167,12 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull Function<V, Double> calculation, @Nonnull String fieldName) {
         return kstream.groupByKey()
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new NumericAggregateCollector(fieldName),
                         (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getNumericAggregateCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -248,13 +180,14 @@ public abstract class KStreamWorker<K extends SpecificRecord, V extends Specific
     protected final KStream<AggregateKey, AggregateList> aggregateFields(
             @Nonnull StreamDefinition definition, @Nonnull KStream<ObservationKey, V> kstream,
             @Nonnull String[] fieldNames, @Nonnull Schema schema) {
+
         return kstream.groupByKey()
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         () -> new AggregateListCollector(fieldNames, schema),
                         (k, v, valueCollector) -> valueCollector.add(v),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getAggregateListCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                            RadarSerdes.getInstance().getAggregateListCollector()))
                 .toStream()
                 .map(utilities::listCollectorToAvro);
     }

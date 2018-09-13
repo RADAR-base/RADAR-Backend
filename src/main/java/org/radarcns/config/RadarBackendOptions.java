@@ -19,9 +19,9 @@ package org.radarcns.config;
 import java.io.File;
 import javax.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class RadarBackendOptions {
     }
 
     public static RadarBackendOptions parse(@Nonnull String[] args) throws ParseException {
-        CommandLine cli = new PosixParser().parse(OPTIONS, args);
+        CommandLine cli = new DefaultParser().parse(OPTIONS, args);
         return new RadarBackendOptions(cli);
     }
 

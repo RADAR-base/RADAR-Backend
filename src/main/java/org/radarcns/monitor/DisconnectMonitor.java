@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.text.DateFormat;
 import java.text.Format;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -56,12 +58,12 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private static final Logger logger = LoggerFactory.getLogger(DisconnectMonitor.class);
 
     private final ScheduledExecutorService scheduler;
-    private final long timeUntilReportedMissing;
+    private final Duration timeUntilReportedMissing;
     private final EmailSenders senders;
     private final Format dayFormat;
     private final int numRepetitions;
-    private final long repeatInterval;
-    private final long minRepetitionInterval;
+    private final Duration repeatInterval;
+    private final Duration minRepetitionInterval;
     private final Monitor monitor;
     private final String message;
 
@@ -75,11 +77,11 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
         this.monitor = new Monitor(logger, " records monitored for Disconnect");
 
         DisconnectMonitorConfig config = radar.getRadarProperties().getDisconnectMonitor();
-        this.timeUntilReportedMissing = config.getTimeout() * 1000L;
+        this.timeUntilReportedMissing = Duration.ofSeconds(config.getTimeout());
         this.numRepetitions = config.getAlertRepetitions();
-        this.repeatInterval = config.getAlertRepeatInterval() * 1000L;
+        this.repeatInterval = Duration.ofSeconds(config.getAlertRepeatInterval());
         this.message = config.getMessage();
-        this.minRepetitionInterval = repeatInterval / 10;
+        this.minRepetitionInterval = repeatInterval.dividedBy(10);
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -119,7 +121,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     protected void evaluateRecords(ConsumerRecords<GenericRecord, GenericRecord> records) {
         super.evaluateRecords(records);
 
-        long now = System.currentTimeMillis();
+        Instant reportThreshold = Instant.now().minus(timeUntilReportedMissing);
 
         Iterator<Map.Entry<String, Long>> iterator = state.lastSeen.entrySet().iterator();
 
@@ -127,7 +129,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
             Map.Entry<String, Long> entry = iterator.next();
             // calculate timeout from current timestamp per device
             long lastSeen = entry.getValue();
-            if (now - lastSeen > timeUntilReportedMissing) {
+            if (reportThreshold.isAfter(Instant.ofEpochMilli(lastSeen))) {
                 String missingKey = entry.getKey();
                 // remove processed records to prevent adding alerts multiple times
                 iterator.remove();
@@ -160,11 +162,19 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
      */
     private void scheduleRepetition(final String key, final MissingRecordsReport report) {
         if (report.getMessageNumber() < numRepetitions) {
-            long passedInterval = System.currentTimeMillis() - report.getReportedMissing();
-            long nextRepetition = Math.max(minRepetitionInterval, repeatInterval - passedInterval);
+            long reportedMissing = report.getReportedMissing();
+            Instant now = Instant.now();
+            Duration passedInterval = Duration.between(Instant.ofEpochMilli(reportedMissing), now);
+
+            Duration nextRepetition;
+            if (minRepetitionInterval.compareTo(repeatInterval.minus(passedInterval)) >= 0) {
+                nextRepetition = minRepetitionInterval;
+            } else {
+                nextRepetition = repeatInterval.minus(passedInterval);
+            }
 
             report.setFuture(scheduler.schedule(() -> reportMissing(key, report.newRepetition()),
-                    nextRepetition, TimeUnit.MILLISECONDS));
+                    nextRepetition.toMillis(), TimeUnit.MILLISECONDS));
         }
     }
 

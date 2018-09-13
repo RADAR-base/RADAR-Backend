@@ -1,29 +1,29 @@
 package org.radarcns.stream.phone;
 
-import java.util.Collection;
+import java.time.Duration;
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;
-import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.passive.phone.PhoneUsageEvent;
-import org.radarcns.stream.KStreamWorker;
+import org.radarcns.stream.SensorStreamWorker;
 import org.radarcns.stream.StreamDefinition;
-import org.radarcns.stream.StreamMaster;
 import org.radarcns.stream.aggregator.PhoneUsageAggregate;
 import org.radarcns.util.serde.RadarSerdes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by piotrzakrzewski on 26/07/2017.
  */
-public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, PhoneUsageEvent> {
-    private static final Logger logger = LoggerFactory.getLogger(PhoneUsageAggregationStream.class);
-
-    public PhoneUsageAggregationStream(Collection<StreamDefinition> definitions, int numThread,
-            StreamMaster master, RadarPropertyHandler properties) {
-        super(definitions, numThread, master, properties, logger);
+public class PhoneUsageAggregationStream extends
+        SensorStreamWorker<ObservationKey, PhoneUsageEvent> {
+    @Override
+    protected void initialize() {
+        defineStream(
+                "android_phone_usage_event_output",
+                "android_phone_usage_event_aggregated",
+                Duration.ofDays(1));
+        config.setDefaultPriority(Priority.LOW);
     }
 
     @Override
@@ -31,12 +31,12 @@ public class PhoneUsageAggregationStream extends KStreamWorker<ObservationKey, P
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, PhoneUsageEvent> kstream) {
         return kstream.groupBy(PhoneUsageAggregationStream::temporaryKey)
+                .windowedBy(definition.getTimeWindows())
                 .aggregate(
                         PhoneUsageCollector::new,
                         (k, v, valueCollector) -> valueCollector.update(v),
-                        definition.getTimeWindows(),
-                        RadarSerdes.getInstance().getPhoneUsageCollector(),
-                        definition.getStateStoreName())
+                        RadarSerdes.materialized(definition.getStateStoreName(),
+                                RadarSerdes.getInstance().getPhoneUsageCollector()))
                 .toStream()
                 .map(utilities::phoneCollectorToAvro);
     }

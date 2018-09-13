@@ -16,11 +16,8 @@
 
 package org.radarcns.util.serde;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.radarcns.util.serde.RadarSerde.GENERIC_READER;
+
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.util.Map;
@@ -30,32 +27,17 @@ import org.slf4j.LoggerFactory;
 
 public class JsonDeserializer<T> implements Deserializer<T> {
     private static final Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
-    private static final ObjectReader READER = getFieldMapper().reader();
-    private static final JsonFactory JSON_FACTORY = new JsonFactory();
 
-    private Class<T> deserializedClass;
-
-    private static ObjectMapper getFieldMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
-        return mapper;
-    }
-
+    private final ObjectReader reader;
 
     public JsonDeserializer(Class<T> deserializedClass) {
-        this.deserializedClass = deserializedClass;
+        reader = GENERIC_READER.forType(deserializedClass);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> map, boolean b) {
-        if (deserializedClass == null) {
-            deserializedClass = (Class<T>) map.get("serializedClass");
-        }
+        // no configuration
     }
 
     @Override
@@ -65,7 +47,7 @@ public class JsonDeserializer<T> implements Deserializer<T> {
         }
 
         try {
-            return READER.readValue(JSON_FACTORY.createParser(bytes), deserializedClass);
+            return reader.readValue(bytes);
         } catch (IOException e) {
             logger.error("Failed to deserialize value for topic {}", topic, e);
             return null;

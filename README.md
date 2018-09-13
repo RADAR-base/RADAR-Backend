@@ -12,7 +12,7 @@ RADAR-Backend provides an abstract layer to monitor and analyze streams of weara
 The following are the prerequisites to run RADAR-Backend on your machine:
 
 - Java 8
-- [Confluent Platform 3.3.1](http://docs.confluent.io/3.3.1/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
+- [Confluent Platform 5.0.0](http://docs.confluent.io/5.0.0/installation.html) ( Running instances of Zookeeper, Kafka-broker(s), Schema-Registry and Kafka-REST-Proxy services ).
 - SMTP server to send notifications from the monitors.
 
 ## Installation
@@ -49,24 +49,7 @@ The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. Th
 ### RADAR-Backend streams
 
 1. In `radar.yml`, Specify in which `mode` you want to run the application. There are two alternatives: `standalone` and `high_performance`. The `standalone` starts one thread for each streams without checking the priority, whereas the `high_performance` starts as many thread as the related priority value
-2. If `auto.create.topics.enable` is `false` in your Kafka `server.properties`, before starting you must create the topics manually. Create the following topics for Empatica E4 Streams
-  - android_empatica_e4_acceleration
-  - android_empatica_e4_acceleration_output
-  - android_empatica_e4_battery_level
-  - android_empatica_e4_battery_level_output
-  - android_empatica_e4_blood_volume_pulse
-  - android_empatica_e4_blood_volume_pulse_output
-  - android_empatica_e4_electrodermal_activity
-  - android_empatica_e4_electrodermal_activity_output
-  - android_empatica_e4_heartrate_output
-  - android_empatica_e4_inter_beat_interval
-  - android_empatica_e4_inter_beat_interval_output
-  - android_empatica_e4_sensor_status
-  - android_empatica_e4_sensor_status_output
-  - android_empatica_e4_temperature
-  - android_empatica_e4_temperature_output
-  - android_phone_usage_event
-  - android_phone_usage_event_output
+2. If `auto.create.topics.enable` is `false` in your Kafka `server.properties`, before starting you must create the topics manually. The stream server will print what topics to create.
 3. Run `radar-backend` with configured `radar.yml` and `stream` argument    
 
     ```shell
@@ -86,8 +69,13 @@ To get email notifications for Empatica E4 battery status, an email server witho
       # level of battery you want to monitor
       level: CRITICAL 
       # list of email addresses to be notified   
-      email_address:
-        - notify-me@example.com
+      notify:
+        - project_id: s1
+          email_address:
+            - test@thehyve.nl
+        - project_id: s2
+          email_address:
+            - radar@thehyve.nl
       # host name of your email server     
       email_host: localhost
       # port of email server   
@@ -104,11 +92,16 @@ To get email notifications for Empatica E4 battery status, an email server witho
     disconnect_monitor:
       # timeout in milliseconds -> 5 minutes
       timeout: 300000
-      email_address: 
-        - notify-me@example.com
       email_host: localhost
-      email_port: 25  
-      email_user: noreply@example.com
+      email_port: 25
+      email_user: no-reply@example.com
+      notify:
+        - project_id: s1
+          email_address:
+            - test@thehyve.nl
+        - project_id: s2
+          email_address:
+            - radar@thehyve.nl
       # temperature readings are sent very regularly, but
       # not too often.
       topics:
@@ -118,35 +111,36 @@ To get email notifications for Empatica E4 battery status, an email server witho
 3. For Source Statistics monitors, configure what source topics to monitor to output some basic output statistics (like last time seen)
     
     ```yaml
-    statistics_monitors:
-      # Human readable monitor name
-      - name: Empatica E4
-        # topics to aggregate. This can take any number of topics that may
-	# lead to slightly different statistics
-        topics:
-          - android_empatica_e4_blood_volume_pulse_1min
-        # Topic to write results to. This should follow the convention
-	# source_statistics_[provider]_[model] with produer and model as
-	# defined in RADAR-Schemas
-        output_topic: source_statistics_empatica_e4
-	# Maximum batch size to aggregate before sending results.
-	# Defaults to 1000.
-        max_batch_size: 500
-	# Flush timeout in milliseconds. If the batch size is not larger than
-	# max_batch_size for this amount of time, the current batch is
-	# forcefully flushed to the output topic.
-	# Defaults to 60000 = 1 minute.
-	flush_timeout: 15000
-      - name: Biovotion VSM1
-        topics:
-          - android_biovotion_vsm1_acceleration_1min
-        output_topic: source_statistics_biovotion_vsm1
-      - name: RADAR pRMT
-        topics:
-          - android_phone_acceleration_1min
-          - android_phone_bluetooth_devices
-          - android_phone_sms
-        output_topic: source_statistics_radar_prmt
+    stream:
+      statistics_monitors:
+        # Human readable monitor name
+        - name: Empatica E4
+          # topics to aggregate. This can take any number of topics that may
+          # lead to slightly different statistics
+          topics:
+            - android_empatica_e4_blood_volume_pulse_1min
+          # Topic to write results to. This should follow the convention
+          # source_statistics_[provider]_[model] with produer and model as
+          # defined in RADAR-Schemas
+          output_topic: source_statistics_empatica_e4
+          # Maximum batch size to aggregate before sending results.
+          # Defaults to 1000.
+          max_batch_size: 500
+          # Flush timeout in milliseconds. If the batch size is not larger than
+          # max_batch_size for this amount of time, the current batch is
+          # forcefully flushed to the output topic.
+          # Defaults to 60000 = 1 minute.
+          flush_timeout: 15000
+        - name: Biovotion VSM1
+          topics:
+            - android_biovotion_vsm1_acceleration_1min
+          output_topic: source_statistics_biovotion_vsm1
+        - name: RADAR pRMT
+          topics:
+            - android_phone_acceleration_1min
+            - android_phone_bluetooth_devices
+            - android_phone_sms
+          output_topic: source_statistics_radar_prmt
     ```
         
 3. Run `radar-backend` with configured `radar.yml` and `monitor` argument
@@ -223,32 +217,30 @@ There are currently two APIs in RADAR-Backend: one for streaming data (RADAR-Str
 
 RADAR-Stream is a layer on top of Kafka streams. Topics are processed by streams in two phases. First, a group of sensor streams aggregates data of sensors into predefined time windows (e.g., 10 seconds). Next, internal topics aggregate and transforms data that has already been processed by an earlier stream.
 
-KafkaStreams currently communicates using master-slave model. The [MasterAggregator][1] defines the stream-master, while [AggregatorWorker][2] represents the stream-slave. The master-stream creates, starts and stops a list of stream-slaves registered with the corresponding master. 
-While the classical Kafka Consumer requires two implementations to support standalone and group executions, the AggregatorWorker provides both behaviors with one implementation.
+KafkaStreams currently communicates using master-slave model. The [StreamMaster][1] defines the stream-master, while [StreamWorker][2] represents the stream-slave. The master-stream creates, starts and stops a list of stream-slaves registered with the corresponding master. While the classical Kafka Consumer requires two implementations to support standalone and group executions, the StreamWorker provides both behaviors with one implementation.
 
 To extend the RADAR-Stream API, follow these steps (see the `org.radarcns.passive.empatica` package as an example):
 
-- Create a stream group by overriding [GeneralStreamGroup][8]. Use its `createSensorStream` and `createStream` methods to create the stream definitions.
-- For each topic, create a [AggregatorWorker][2].
-- Define the [MasterAggregator][1]
+- For each topic, create a [StreamWorker][2] or more conveniently extend [SensorStreamWorker][6].
+- Add the stream topic to the `stream: streams: [{class: MyClass}]` configuration
+
 
 #### Empatica E4
 
-Currently, RADAR-Backend provides implementation to stream, monitor, store Empatica E4 topics data produced by RADAR-AndroidApplication. 
-[E4Worker][11] is the [MasterAggregator][1]. The stream group [E4Streams][14] defines the following sensor topics:
+Currently, RADAR-Backend provides implementation to stream, monitor, store Empatica E4 topics data produced by RADAR-AndroidApplication. It defines the following streams:
 
-- [E4Acceleration][15]: it aggregates data coming from accelerometer
-- [E4BatteryLevel][16]: it aggregates battery level information
-- [E4BloodVolumePulse][17]: it aggregates blood volume pulse data
-- [E4ElectroDermalActivity][18]: it aggregates electrodermal activity informations
-- [E4InterBeatInterval][20]: it aggregates inter-beat-interval data
-- [E4Temperature][21]: it aggregates data coming form temperature sensor
+- [E4Acceleration][15] aggregates data coming from accelerometer
+- [E4BatteryLevel][16] aggregates battery level information
+- [E4BloodVolumePulse][17] aggregates blood volume pulse data
+- [E4ElectroDermalActivity][18] aggregates electrodermal activity informations
+- [E4InterBeatInterval][20] aggregates inter-beat-interval data
+- [E4Temperature][21] aggregates data coming form temperature sensor
 
 And one internal topic:
 
 - [E4HeartRate][19]: starting from the inter-beat-interval, this aggregator computes the heart rate
 
-[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/3.1.2/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
+[DeviceTimestampExtractor][10] implements a [TimestampExtractor](http://docs.confluent.io/5.0.0/streams/javadocs/index.html) such that: given in input a generic Apache Avro object, it extracts a field named `timeReceived`. [DeviceTimestampExtractor][10] works with the entire set of sensor schemas currently available.
 
 #### Android Phone
 
@@ -269,19 +261,17 @@ Monitors can be used to evaluate the status of a single stream, for example whet
     ```
 - the default log path is the jar folder
 
-[1]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/MasterAggregator.java
-[2]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/AggregatorWorker.java
+[1]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/StreamMaster.java
+[2]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/StreamWorker.java
 [3]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/AbstractKafkaMonitor.java
 [4]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/KafkaMonitorFactory.java
 [5]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/monitor/DisconnectMonitor.java
-[8]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/topic/GeneralStreamGroup.java
-[10]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/aggregator/DeviceTimestampExtractor.java
-[11]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/E4Worker.java
-[14]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/topic/E4Streams.java
-[15]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Acceleration.java
-[16]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BatteryLevel.java
-[17]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4BloodVolumePulse.java
-[18]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4ElectroDermalActivity.java
-[19]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4HeartRate.java
-[20]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4InterBeatInterval.java
-[21]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/empatica/streams/E4Temperature.java
+[6]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/SensorStreamWorker.java
+[10]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/DeviceTimestampExtractor.java
+[15]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4Acceleration.java
+[16]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4BatteryLevel.java
+[17]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4BloodVolumePulse.java
+[18]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4ElectroDermalActivity.java
+[19]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4HeartRate.java
+[20]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4InterBeatInterval.java
+[21]: https://github.com/RADAR-base/RADAR-Backend/blob/master/src/main/java/org/radarcns/stream/empatica/E4Temperature.java

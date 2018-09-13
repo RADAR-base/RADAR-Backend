@@ -159,7 +159,7 @@ public class KafkaMonitorFactoryTest {
 
     public static ConfigRadar getSourceStatisticsMonitorConfig(TemporaryFolder folder) throws IOException {
         ConfigRadar config = createBasicConfig(folder);
-        SourceStatisticsMonitorConfig sourceConfig = new SourceStatisticsMonitorConfig();
+        SourceStatisticsStreamConfig sourceConfig = new SourceStatisticsStreamConfig();
         sourceConfig.setName("source_statistics_test");
         sourceConfig.setTopics(Arrays.asList("android_empatica_e4_battery_level",
                 "android_empatica_e4_battery_level_10sec"));

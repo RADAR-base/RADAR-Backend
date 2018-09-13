@@ -28,5 +28,5 @@ jacocoTestReport {
 task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
     main = 'com.codacy.CodacyCoverageReporter'
     classpath = configurations.codacy
-    args = ['-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
+    args = ['report', '-l', 'Java', '-r', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"]
 }

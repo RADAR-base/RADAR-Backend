@@ -16,31 +16,35 @@
 
 package org.radarcns.util.serde;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.WindowedDeserializer;
-import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 
 /**
  * It generates the jsonSerializer and jsonDeserializer for the given input class
  */
 public class RadarSerde<T> {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    static {
+        MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    }
+    static final ObjectWriter GENERIC_WRITER = MAPPER.writer();
+    static final ObjectReader GENERIC_READER = MAPPER.reader();
+
     private final JsonSerializer<T> jsonSerializer;
     private final JsonDeserializer<T> jsonDeserializer;
 
     public RadarSerde(Class<T> type) {
-        this.jsonSerializer = new JsonSerializer<>();
+        this.jsonSerializer = new JsonSerializer<>(type);
         this.jsonDeserializer = new JsonDeserializer<>(type);
     }
 
     public Serde<T> getSerde() {
         return Serdes.serdeFrom(jsonSerializer, jsonDeserializer);
-    }
-
-    public Serde<Windowed<T>> getWindowed() {
-        WindowedSerializer<T> windowedSerializer = new WindowedSerializer<>(jsonSerializer);
-        WindowedDeserializer<T> windowedDeserializer = new WindowedDeserializer<>(jsonDeserializer);
-        return Serdes.serdeFrom(windowedSerializer, windowedDeserializer);
     }
 }
