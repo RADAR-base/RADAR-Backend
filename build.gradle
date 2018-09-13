@@ -11,7 +11,7 @@ plugins {
 //---------------------------------------------------------------------------//
 
 group = 'org.radarcns'
-version = '0.3.1-SNAPSHOT'
+version = '0.4.1-SNAPSHOT'
 
 mainClassName = 'org.radarcns.RadarBackend'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
@@ -40,7 +40,7 @@ ext {
     commonsCliVersion = '1.4'
     mockitoVersion = '2.19.1'
     radarCommonsVersion = '0.10.0'
-    radarSchemasVersion = '0.3.7-SNAPSHOT'
+    radarSchemasVersion = '0.4.0'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.11.3'
     slf4jVersion = '1.7.25'
