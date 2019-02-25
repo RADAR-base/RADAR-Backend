@@ -15,6 +15,8 @@ public class SingleStreamConfig {
     private Map<String, String> properties;
     @JsonProperty
     private Priority priority = null;
+    @JsonProperty
+    private boolean useReservoirSampling = false;
 
     public void setStreamClass(Class<?> streamClass) {
         this.streamClass = streamClass;
@@ -38,6 +40,10 @@ public class SingleStreamConfig {
         if (this.priority == null) {
             this.priority = priority;
         }
+    }
+
+    public boolean isUseReservoirSampling() {
+        return useReservoirSampling;
     }
 
     public Priority getPriority() {

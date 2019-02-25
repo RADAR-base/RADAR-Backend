@@ -86,8 +86,13 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     private NumericAggregate numericCollectorToAggregate(NumericAggregateCollector collector) {
-        return new NumericAggregate(collector.getName(), collector.getMin(), collector.getMax(),
-                collector.getSum(), collector.getCount(), collector.getMean(),
-                collector.getQuartile());
+        return new NumericAggregate(
+                collector.getName(),
+                collector.getMin(),
+                collector.getMax(),
+                collector.getSum(),
+                (int)Math.min(Integer.MAX_VALUE, collector.getCount()),
+                collector.getMean(),
+                collector.hasReservoir() ? collector.getQuartile() : null);
     }
 }

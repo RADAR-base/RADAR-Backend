@@ -155,7 +155,7 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new NumericAggregateCollector(fieldName, schema),
+                        () -> new NumericAggregateCollector(fieldName, schema, config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance().getNumericAggregateCollector()))
@@ -169,7 +169,7 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new NumericAggregateCollector(fieldName),
+                        () -> new NumericAggregateCollector(fieldName, config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance().getNumericAggregateCollector()))
@@ -184,7 +184,7 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new AggregateListCollector(fieldNames, schema),
+                        () -> new AggregateListCollector(fieldNames, schema, config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance().getAggregateListCollector()))

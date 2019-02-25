@@ -9,8 +9,8 @@ configurations {
 sourceSets {
     integrationTest {
         java {
-            compileClasspath += main.output + main.compileClasspath + test.output + test.compileClasspath
-            runtimeClasspath += main.output + test.output + test.compileClasspath
+            compileClasspath += main.output + main.compileClasspath
+            runtimeClasspath += main.output
         }
         resources {
             srcDir 'src/integrationTest/resources'
@@ -20,12 +20,12 @@ sourceSets {
 
 dependencies {
     // Testing
-    testCompile group: 'junit', name: 'junit', version: junitVersion
-    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+    testImplementation group: 'junit', name: 'junit', version: junitVersion
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
 
     // Mock mail server
-    testCompile group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
+    testImplementation group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
     integrationTestCompile group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
     testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
@@ -45,6 +45,7 @@ tasks.matching {it instanceof Test}.all {
 }
 
 task integrationTest(type: Test) {
+    useJUnit()
     description = "Run integration tests (located in src/integrationTest/...)."
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -56,4 +57,3 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTestClasses
 
 test.testLogging.events "skipped", "failed"
-

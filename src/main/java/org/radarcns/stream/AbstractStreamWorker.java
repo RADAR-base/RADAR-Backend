@@ -95,7 +95,8 @@ public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExce
                         new KafkaTopic(input),
                         new KafkaTopic(w.getTopicLabel(outputBase)),
                         Duration.ofMillis(w.getIntervalInMilliSec()),
-                        allConfig.getStream().getCommitIntervalForTimeWindow(w)))
+                        allConfig.getStream().getCommitIntervalForTimeWindow(w)
+                ))
                 .collect(Collectors.toList()));
     }
 
