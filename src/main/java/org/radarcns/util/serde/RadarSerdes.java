@@ -16,6 +16,8 @@
 
 package org.radarcns.util.serde;
 
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -28,19 +30,25 @@ import org.radarcns.stream.phone.PhoneUsageCollector;
  * Set of Serde useful for Kafka Streams
  */
 public final class RadarSerdes {
+
     private final Serde<NumericAggregateCollector> numericCollector;
     private final Serde<AggregateListCollector> aggregateListCollector;
     private final Serde<PhoneUsageCollector> phoneUsageCollector;
 
-    private static RadarSerdes instance = new RadarSerdes();
+    private static RadarSerdes instance;
 
-    public static RadarSerdes getInstance() {
+    public synchronized static RadarSerdes getInstance(String schemaRegistryUrls) {
+        if (instance == null) {
+            SchemaRegistryClient client = new CachedSchemaRegistryClient(schemaRegistryUrls,
+                    100);
+            instance = new RadarSerdes(client);
+        }
         return instance;
     }
 
-    private RadarSerdes() {
-        numericCollector = new RadarSerde<>(NumericAggregateCollector.class).getSerde();
-        aggregateListCollector = new RadarSerde<>(AggregateListCollector.class).getSerde();
+    private RadarSerdes(SchemaRegistryClient client) {
+        numericCollector = new AvroConvertibleSerde<>(NumericAggregateCollector::new, client);
+        aggregateListCollector = new AvroConvertibleSerde<>(AggregateListCollector::new, client);
         phoneUsageCollector = new RadarSerde<>(PhoneUsageCollector.class).getSerde();
     }
 

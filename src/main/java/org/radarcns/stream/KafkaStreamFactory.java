@@ -16,12 +16,10 @@
 
 package org.radarcns.stream;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
@@ -45,19 +43,23 @@ public class KafkaStreamFactory {
     }
 
     public StreamMaster createSensorStreams() {
-        Collection<String> streamTypes;
-
         String[] args = options.getSubCommandArgs();
+
+        Stream<SingleStreamConfig> configStream = radarProperties.getRadarProperties()
+                .getStream().getStreamConfigs();
+
         if (args != null && args.length > 0) {
-            streamTypes = new HashSet<>(Arrays.asList(args));
-        } else {
-            streamTypes = Collections.emptySet();
+            Set<String> streamTypes = Stream.of(args)
+                    .map(s -> s.toLowerCase(Locale.US))
+                    .collect(Collectors.toSet());
+
+            configStream = configStream.filter(s -> {
+                String clsName = s.getStreamClass().getName().toLowerCase(Locale.US);
+                return streamTypes.stream().anyMatch(clsName::endsWith);
+            });
         }
 
-        return master(radarProperties.getRadarProperties().getStream().getStreamConfigs().stream()
-                .filter(s -> streamTypes.isEmpty() || streamTypes.stream().anyMatch(n ->
-                        s.getStreamClass().getName().toLowerCase(Locale.US)
-                                .endsWith(n.toLowerCase(Locale.US)))));
+        return master(configStream);
     }
 
     private StreamMaster master(Stream<? extends SingleStreamConfig> configs) {

@@ -40,7 +40,7 @@ ext {
     commonsCliVersion = '1.4'
     mockitoVersion = '2.24.5'
     radarCommonsVersion = '0.12.0-SNAPSHOT'
-    radarSchemasVersion = '0.4.3'
+    radarSchemasVersion = '0.4.4-SNAPSHOT'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.11.3'
     slf4jVersion = '1.7.25'
@@ -66,7 +66,7 @@ repositories {
 }
 
 configurations {
-    compile {
+    implementation {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
         exclude group: 'log4j', module: 'log4j'
         exclude group: 'jline', module: 'jline'
@@ -76,30 +76,30 @@ configurations {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
-    compile group: 'org.apache.avro', name: 'avro', version: avroVersion
-    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
-    compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
+    implementation group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
+    implementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
+    implementation group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
-    compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    compile group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion
+    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
+    implementation group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion
 
     // Nonnull annotation
-    compile group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
+    implementation group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
 
     // Command-line interface
-    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    implementation group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
 
     // Configuration @JsonProperty
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
 
     // Monitor mail sending
-    compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
-    compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
+    implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
     // JSoup html parser
-    compile group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
+    implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
 
     runtimeOnly group: 'org.radarcns', name: 'radar-commons-unsafe', version: radarCommonsVersion
 

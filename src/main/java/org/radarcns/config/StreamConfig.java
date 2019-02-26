@@ -35,6 +35,9 @@ public class StreamConfig {
     @JsonProperty("streams")
     private List<SingleStreamConfig> streamConfigs;
 
+    @JsonProperty
+    private boolean useReservoirSampling = false;
+
     @JsonProperty("source_statistics")
     private List<SourceStatisticsStreamConfig> sourceStatistics;
 
@@ -62,8 +65,9 @@ public class StreamConfig {
         return properties != null ? properties : Collections.emptyMap();
     }
 
-    public List<SingleStreamConfig> getStreamConfigs() {
-        return streamConfigs;
+    public Stream<SingleStreamConfig> getStreamConfigs() {
+        return streamConfigs.stream()
+                .peek(s -> s.setDefaultUseReservoirSampling(useReservoirSampling));
     }
 
     @JsonGetter("threads_per_priority")
@@ -107,5 +111,13 @@ public class StreamConfig {
 
     public List<SourceStatisticsStreamConfig> getSourceStatistics() {
         return sourceStatistics;
+    }
+
+    public boolean isUseReservoirSampling() {
+        return useReservoirSampling;
+    }
+
+    public void setUseReservoirSampling(boolean useReservoirSampling) {
+        this.useReservoirSampling = useReservoirSampling;
     }
 }

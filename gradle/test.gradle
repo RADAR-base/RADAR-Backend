@@ -1,16 +1,19 @@
 configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
+    integrationTestImplementation {
+        extendsFrom testImplementation
+    }
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 //---------------------------------------------------------------------------//
 // Source Set                                                                //
-//---------------------------------------------------------------------------//
+//----------
+// -----------------------------------------------------------------//
 sourceSets {
     integrationTest {
         java {
-            compileClasspath += main.output + main.compileClasspath
-            runtimeClasspath += main.output
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
         }
         resources {
             srcDir 'src/integrationTest/resources'
@@ -27,9 +30,14 @@ dependencies {
     // Mock mail server
     testImplementation group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
-    integrationTestCompile group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
+    integrationTestImplementation group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
     testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
     testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+
+    integrationTestImplementation group: 'junit', name: 'junit', version: junitVersion
+    integrationTestImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    integrationTestImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+
     integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
     integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 }
@@ -44,8 +52,11 @@ tasks.matching {it instanceof Test}.all {
     }
 }
 
-task integrationTest(type: Test) {
+test {
     useJUnit()
+}
+
+task integrationTest(type: Test) {
     description = "Run integration tests (located in src/integrationTest/...)."
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -53,7 +64,9 @@ task integrationTest(type: Test) {
     testLogging.events "skipped", "failed", "passed"
 }
 
-// Do not do integration test yet, but check if integration tests compile
 check.dependsOn integrationTestClasses
+
+// Do not do integration test yet, but check if integration tests compile
+//check.dependsOn integrationTestClasses
 
 test.testLogging.events "skipped", "failed"

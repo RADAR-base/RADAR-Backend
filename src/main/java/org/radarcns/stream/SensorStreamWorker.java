@@ -155,10 +155,12 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new NumericAggregateCollector(fieldName, schema, config.isUseReservoirSampling()),
+                        () -> new NumericAggregateCollector(fieldName, schema,
+                                config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
-                            RadarSerdes.getInstance().getNumericAggregateCollector()))
+                            RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
+                                    .getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -169,10 +171,12 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new NumericAggregateCollector(fieldName, config.isUseReservoirSampling()),
+                        () -> new NumericAggregateCollector(fieldName,
+                                config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
                         RadarSerdes.materialized(definition.getStateStoreName(),
-                            RadarSerdes.getInstance().getNumericAggregateCollector()))
+                            RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
+                                    .getNumericAggregateCollector()))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -184,10 +188,12 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         return kstream.groupByKey()
                 .windowedBy(definition.getTimeWindows())
                 .aggregate(
-                        () -> new AggregateListCollector(fieldNames, schema, config.isUseReservoirSampling()),
+                        () -> new AggregateListCollector(fieldNames, schema,
+                                config.isUseReservoirSampling()),
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
-                            RadarSerdes.getInstance().getAggregateListCollector()))
+                            RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
+                                    .getAggregateListCollector()))
                 .toStream()
                 .map(utilities::listCollectorToAvro);
     }
