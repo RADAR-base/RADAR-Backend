@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:8-alpine AS builder
+FROM openjdk:11-jdk-slim AS builder
 
 RUN mkdir /code
 WORKDIR /code
@@ -32,7 +32,7 @@ RUN ./gradlew distTar && \
   tar xf build/distributions/*.tar && \
   rm build/distributions/*.tar
 
-FROM confluentinc/cp-base:5.0.0
+FROM openjdk:11-jre-slim
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl> , Yatharth Ranjan <yatharth.ranjan@kcl.ac.uk>
 

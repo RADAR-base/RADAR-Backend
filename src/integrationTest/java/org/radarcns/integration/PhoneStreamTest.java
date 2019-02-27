@@ -16,6 +16,7 @@
 
 package org.radarcns.integration;
 
+import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
@@ -26,7 +27,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.radarcns.util.serde.AbstractKafkaAvroSerde.SCHEMA_REGISTRY_CONFIG;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
+
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -72,7 +74,6 @@ import org.radarcns.schema.registration.KafkaTopics;
 import org.radarcns.schema.registration.SchemaRegistry;
 import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingletonFactory;
-import org.radarcns.util.serde.KafkaAvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,9 +177,9 @@ public class PhoneStreamTest {
         ConfigRadar config = propHandler.getRadarProperties();
 
         Properties properties = new Properties();
-        properties.put(KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        properties.put(VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        properties.put(SCHEMA_REGISTRY_CONFIG, config.getSchemaRegistry().get(0));
+        properties.put(KEY_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class);
+        properties.put(VALUE_SERIALIZER_CLASS_CONFIG, SpecificAvroSerializer.class);
+        properties.put(SCHEMA_REGISTRY_URL_CONFIG, config.getSchemaRegistryPaths());
         properties.put(BOOTSTRAP_SERVERS_CONFIG, config.getBrokerPaths());
 
         DirectSender sender = new DirectSender(properties);

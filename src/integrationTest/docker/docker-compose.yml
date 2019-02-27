@@ -1,15 +1,16 @@
 ---
-version: '2'
+version: '2.4'
 
 networks:
   kafka:
     driver: bridge
+
 services:
   #---------------------------------------------------------------------------#
   # Zookeeper Cluster                                                         #
   #---------------------------------------------------------------------------#
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:4.1.0
+    image: confluentinc/cp-zookeeper:5.1.2
     networks:
       - kafka
     environment:
@@ -24,7 +25,7 @@ services:
   # Kafka Cluster                                                             #
   #---------------------------------------------------------------------------#
   kafka-1:
-    image: confluentinc/cp-kafka:4.1.0
+    image: confluentinc/cp-kafka:5.1.2
     depends_on:
       - zookeeper-1
     networks:
@@ -35,12 +36,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-2:
-    image: confluentinc/cp-kafka:4.1.0
+    image: confluentinc/cp-kafka:5.1.2
     depends_on:
       - zookeeper-1
     networks:
@@ -51,12 +52,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-3:
-    image: confluentinc/cp-kafka:4.1.0
+    image: confluentinc/cp-kafka:5.1.2
     depends_on:
       - zookeeper-1
     networks:
@@ -67,15 +68,15 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 0.11.0
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 0.11.0
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   #---------------------------------------------------------------------------#
   # Schema Registry                                                           #
   #---------------------------------------------------------------------------#
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:4.1.0
+    image: confluentinc/cp-schema-registry:5.1.2
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -96,7 +97,7 @@ services:
   # REST proxy                                                                #
   #---------------------------------------------------------------------------#
   rest-proxy-1:
-    image: confluentinc/cp-kafka-rest:4.1.0
+    image: confluentinc/cp-kafka-rest:5.1.2
     depends_on:
       - kafka-1
       - kafka-2
