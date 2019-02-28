@@ -23,7 +23,6 @@ public class EmailSenders {
     }
 
     /**
-     *
      * Parses the {@link MonitorConfig} to map the corresponding
      * {@link EmailSender} to each project. A project can have a list of
      * associated email addresses.

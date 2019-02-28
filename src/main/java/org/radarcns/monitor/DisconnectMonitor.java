@@ -91,7 +91,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     /**
-     * Schedules the repetitive alert task
+     * Schedules the repetitive alert task.
      */
     @Override
     public void start() {
@@ -183,7 +183,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
         // Don't report if no email address for this projectId
         EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
-        if(sender == null) {
+        if (sender == null) {
             return;
         }
 
@@ -229,10 +229,9 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private void reportRecovered(ObservationKey key, long reportedMissingTime) {
         // Don't report if no email address for this projectId
         EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
-        if(sender == null) {
+        if (sender == null) {
             return;
         }
-
 
         logger.info("Device {} seen again. Reporting it recovered.", key);
         try {
@@ -249,7 +248,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     /**
-     * State of disconnect monitor
+     * State of disconnect monitor.
      */
     public static class DisconnectMonitorState {
         private final Map<String, Long> lastSeen = new ConcurrentHashMap<>();
@@ -274,7 +273,7 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
 
     /**
      * Stores data of data from missing records alert
-     * such as lastSeen and reportedTime
+     * such as lastSeen and reportedTime.
      */
     public static class MissingRecordsReport {
         private final long lastSeen;

@@ -37,7 +37,7 @@ public final class RadarSerdes {
 
     private static RadarSerdes instance;
 
-    public synchronized static RadarSerdes getInstance(String schemaRegistryUrls) {
+    public static synchronized RadarSerdes getInstance(String schemaRegistryUrls) {
         if (instance == null) {
             SchemaRegistryClient client = new CachedSchemaRegistryClient(schemaRegistryUrls,
                     100);

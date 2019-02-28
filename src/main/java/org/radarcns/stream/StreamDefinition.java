@@ -123,7 +123,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
     }
 
     @Nonnull
-    public Duration getCommitInterval(){
+    public Duration getCommitInterval() {
         return commitIntervalMs;
     }
 

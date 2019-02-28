@@ -21,7 +21,7 @@ import org.radarcns.config.RadarPropertyHandlerImpl;
 
 /**
  * SingletonFactory of RadarBackend project. This factory composites all singleton objects that need
- * to be maintained in this project and provides a gateway to get singleton objects
+ * to be maintained in this project and provides a gateway to get singleton objects.
  */
 public class RadarSingleton {
     private static final RadarSingleton INSTANCE = new RadarSingleton();
@@ -40,7 +40,7 @@ public class RadarSingleton {
     }
 
     /**
-     * Returns the singleton object of RadarUtilities
+     * Returns the singleton object of RadarUtilities.
      *
      * @return a RadarUtilities object
      */
@@ -49,7 +49,7 @@ public class RadarSingleton {
     }
 
     /**
-     * Returns the singleton object of RadarPropertyHandler
+     * Returns the singleton object of RadarPropertyHandler.
      *
      * @return a RadarPropertyHandler object
      */

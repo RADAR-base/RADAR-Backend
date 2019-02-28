@@ -33,13 +33,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Consumer for Aggregated Acceleration Stream
+ * Consumer for Aggregated Acceleration Stream.
  */
-public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
-    private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
+public class E4AggregatedAccelerationMonitor
+        extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
+    private static final Logger logger = LoggerFactory.getLogger(
+            E4AggregatedAccelerationMonitor.class);
 
-    public E4AggregatedAccelerationMonitor(RadarPropertyHandler radar, String topic, String clientID) throws IOException {
-        super(radar, List.of(topic), "new", clientID, null);
+    /** Constructor. */
+    public E4AggregatedAccelerationMonitor(RadarPropertyHandler radar, String topic,
+            String clientId) {
+        super(radar, List.of(topic), "new", clientId, null);
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -74,7 +78,9 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             GenericRecord value = record.value();
             GenericData.Array fields = (GenericData.Array) value.get("fields");
             logger.info("Received [{}, {}, {}] E4 messages",
-                    ((GenericRecord)fields.get(0)).get("count"), ((GenericRecord)fields.get(1)).get("count"), ((GenericRecord)fields.get(2)).get("count"));
+                    ((GenericRecord)fields.get(0)).get("count"),
+                    ((GenericRecord)fields.get(1)).get("count"),
+                    ((GenericRecord)fields.get(2)).get("count"));
 
             if ((Integer)((GenericRecord)fields.get(0)).get("count") > 100) {
                 shutdown();

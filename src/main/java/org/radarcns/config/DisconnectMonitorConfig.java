@@ -19,7 +19,7 @@ package org.radarcns.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * POJO representing a disconnection status monitor configuration
+ * POJO representing a disconnection status monitor configuration.
  */
 public class DisconnectMonitorConfig extends MonitorConfig {
     private long timeout = 1800L; // 30 minutes

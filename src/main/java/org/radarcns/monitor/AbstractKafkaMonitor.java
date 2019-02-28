@@ -220,10 +220,10 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                 .forEach(tp -> consumer.seek(tp, consumer.position(tp) + 1));
     }
 
-    /** Evaluate a single record that the monitor receives by overriding this function */
+    /** Evaluate a single record that the monitor receives by overriding this function. */
     protected abstract void evaluateRecord(ConsumerRecord<K, V> records);
 
-    /** Evaluates the records that the monitor receives */
+    /** Evaluates the records that the monitor receives. */
     protected void evaluateRecords(ConsumerRecords<K, V> records) {
         for (ConsumerRecord<K, V> record : records) {
             evaluateRecord(record);

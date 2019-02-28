@@ -79,22 +79,29 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         Topology builder = new Topology();
         GenericAvroDeserializer genericReader = new GenericAvroDeserializer();
 
-        StoreBuilder<KeyValueStore<ObservationKey, SourceStatisticsRecord>> statisticsStore = Stores
-                .keyValueStoreBuilder(
+        StoreBuilder<KeyValueStore<ObservationKey, SourceStatisticsRecord>> statisticsStore =
+                Stores.keyValueStoreBuilder(
                         Stores.persistentKeyValueStore("statistics"),
                         new SpecificAvroSerde<>(),
                         new RadarSerde<>(SourceStatisticsRecord.class).getSerde());
 
-        builder.addSource("source", genericReader, genericReader, getStreamDefinitions()
+        String[] inputTopics = getStreamDefinitions()
                 .map(StreamDefinition::getInputTopic)
-                .toArray(String[]::new));
+                .toArray(String[]::new);
+
+        builder.addSource("source", genericReader, genericReader, inputTopics);
         builder.addProcessor("process", SourceStatisticsProcessor::new, "source");
-        builder.addSink("sink", getStreamDefinitions()
-                        .map(StreamDefinition::getOutputTopic)
-                        .filter(Objects::nonNull)
-                        .findAny().orElseThrow(() ->
-                                new IllegalStateException("Output topic for SourceStatisticsStream "
-                                        + name + " is undefined.")).getName(),
+
+        String outputTopic = getStreamDefinitions()
+                .map(StreamDefinition::getOutputTopic)
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Output topic for SourceStatisticsStream " + name
+                                + " is undefined."))
+                .getName();
+
+        builder.addSink("sink", outputTopic,
                 new SpecificAvroSerializer<ObservationKey>(),
                 new SpecificAvroSerializer<SourceStatistics>(),
                 "process");
@@ -119,7 +126,8 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         @SuppressWarnings("unchecked")
         @Override
         public void init(ProcessorContext context) {
-            store = (KeyValueStore<ObservationKey, SourceStatisticsRecord>) context.getStateStore("statistics");
+            store = (KeyValueStore<ObservationKey, SourceStatisticsRecord>) context
+                    .getStateStore("statistics");
             this.context = context;
             updatePunctuate();
         }
@@ -185,7 +193,8 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
             }
 
             SourceStatisticsRecord stats = store.get(key);
-            SourceStatisticsRecord newStats = SourceStatisticsRecord.updateRecord(stats, timeStart, timeEnd);
+            SourceStatisticsRecord newStats = SourceStatisticsRecord
+                    .updateRecord(stats, timeStart, timeEnd);
             if (!newStats.equals(stats)) {
                 store.put(key, newStats);
             }

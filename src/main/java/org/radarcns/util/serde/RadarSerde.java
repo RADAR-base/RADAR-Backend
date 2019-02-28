@@ -25,14 +25,16 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
 /**
- * It generates the jsonSerializer and jsonDeserializer for the given input class
+ * It generates the jsonSerializer and jsonDeserializer for the given input class.
  */
 public class RadarSerde<T> {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
     static {
         MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
+
     static final ObjectWriter GENERIC_WRITER = MAPPER.writer();
     static final ObjectReader GENERIC_READER = MAPPER.reader();
 

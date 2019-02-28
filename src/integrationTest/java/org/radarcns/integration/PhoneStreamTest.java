@@ -32,8 +32,6 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,7 +40,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.zookeeper.KeeperException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -77,37 +74,34 @@ import org.slf4j.LoggerFactory;
 
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
-    private static final Map<String, String> CATEGORIES = new HashMap<>();
     private static final int MAX_SLEEP = 32;
-    private static final AvroTopic<ObservationKey, PhoneUsageEvent> PHONE_USAGE_TOPIC = new AvroTopic<>(
-            "android_phone_usage_event",
-            ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
-    ObservationKey.class, PhoneUsageEvent.class);
+    private static final AvroTopic<ObservationKey, PhoneUsageEvent> PHONE_USAGE_TOPIC =
+            new AvroTopic<>("android_phone_usage_event",
+                    ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
+                    ObservationKey.class, PhoneUsageEvent.class);
 
-    static {
-        CATEGORIES.put("nl.nos.app", "NEWS_AND_MAGAZINES");
-        CATEGORIES.put("nl.thehyve.transmartclient", "MEDICAL");
-        CATEGORIES.put("com.twitter.android", "NEWS_AND_MAGAZINES");
-        CATEGORIES.put("com.facebook.katana", "SOCIAL");
-        CATEGORIES.put("com.nintendo.zara", "GAME_ACTION");
-        CATEGORIES.put("com.duolingo", "EDUCATION");
-        CATEGORIES.put("com.whatsapp", "COMMUNICATION");
-        CATEGORIES.put("com.alibaba.aliexpresshd", "SHOPPING");
-        CATEGORIES.put("com.google.android.wearable.app", "COMMUNICATION");
-        CATEGORIES.put("com.strava", "HEALTH_AND_FITNESS");
-        CATEGORIES.put("com.android.chrome", "COMMUNICATION");
-        CATEGORIES.put("com.google.android.youtube", "VIDEO_PLAYERS");
-        CATEGORIES.put("com.android.systemui", null);
-        CATEGORIES.put("abc.abc", null);
-    }
+    private static final Map<String, String> CATEGORIES = Map.ofEntries(
+            Map.entry("nl.nos.app", "NEWS_AND_MAGAZINES"),
+            Map.entry("nl.thehyve.transmartclient", "MEDICAL"),
+            Map.entry("com.twitter.android", "NEWS_AND_MAGAZINES"),
+            Map.entry("com.facebook.katana", "SOCIAL"),
+            Map.entry("com.nintendo.zara", "GAME_ACTION"),
+            Map.entry("com.duolingo", "EDUCATION"),
+            Map.entry("com.whatsapp", "COMMUNICATION"),
+            Map.entry("com.alibaba.aliexpresshd", "SHOPPING"),
+            Map.entry("com.google.android.wearable.app", "COMMUNICATION"),
+            Map.entry("com.strava", "HEALTH_AND_FITNESS"),
+            Map.entry("com.android.chrome", "COMMUNICATION"),
+            Map.entry("com.google.android.youtube", "VIDEO_PLAYERS"));
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
     private RadarPropertyHandler propHandler;
     private RadarBackend backend;
 
+    /** Set up tests by sending first data. */
     @Before
-    public void setUp() throws IOException, ParseException, InterruptedException, KeeperException {
+    public void setUp() throws IOException, ParseException, InterruptedException {
         String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
         propHandler = RadarSingleton.getInstance().getRadarPropertyHandler();
         if (!propHandler.isLoaded()) {
@@ -133,10 +127,11 @@ public class PhoneStreamTest {
         }
         assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
 
-        topics.createTopics(
-                Stream.of("android_phone_usage_event", "android_phone_usage_event_output",
-                        "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
-                        "android_empatica_e4_acceleration_10sec"), 3, (short)1);
+        topics.createTopics(Stream.of(
+                "android_phone_usage_event", "android_phone_usage_event_output",
+                "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
+                "android_empatica_e4_acceleration_10sec"),
+                3, (short)1);
 
         SchemaRegistry registry = new SchemaRegistry(props.getSchemaRegistryPaths());
         registry.registerSchema(PHONE_USAGE_TOPIC);
@@ -185,17 +180,26 @@ public class PhoneStreamTest {
         double time = System.currentTimeMillis() / 1000d - 10d;
         ObservationKey key = new ObservationKey("test", "a", "c");
 
-        List<PhoneUsageEvent> events = Arrays.asList(
-                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time++, "com.whatsapp", null, null, UsageEventType.BACKGROUND),
-                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time++, "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
-                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time++, "com.strava", null, null, UsageEventType.BACKGROUND),
-                new PhoneUsageEvent(time, time++, "com.android.systemui", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time, "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+        List<PhoneUsageEvent> events = List.of(
+                new PhoneUsageEvent(time, time++,
+                        "com.whatsapp", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.whatsapp", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.strava", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.strava", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time,
+                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
 
-        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender = sender.sender(PHONE_USAGE_TOPIC)) {
+        try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender =
+                sender.sender(PHONE_USAGE_TOPIC)) {
             for (PhoneUsageEvent event : events) {
                 topicSender.send(key, event);
             }
@@ -216,7 +220,7 @@ public class PhoneStreamTest {
         consumeE4();
     }
 
-    private void consumeE4() throws IOException {
+    private void consumeE4() {
         String clientId = "consumeE4";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
                 RadarSingleton.getInstance().getRadarPropertyHandler(),
@@ -244,11 +248,13 @@ public class PhoneStreamTest {
     }
 
 
-    private static class PhoneOutputMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
+    private static class PhoneOutputMonitor
+            extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
         private final long numRecordsExpected;
         int numRecordsRead;
 
-        public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
+        public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId,
+                long numRecordsExpected) {
             super(radar, List.of("android_phone_usage_event_output"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
 
@@ -283,11 +289,13 @@ public class PhoneStreamTest {
         }
     }
 
-    private static class PhoneAggregateMonitor extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
+    private static class PhoneAggregateMonitor
+            extends AbstractKafkaMonitor<GenericRecord, GenericRecord, Object> {
         private final long numRecordsExpected;
         int numRecordsRead;
 
-        public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
+        public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId,
+                long numRecordsExpected) {
             super(radar, List.of("android_phone_usage_event_aggregated"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();

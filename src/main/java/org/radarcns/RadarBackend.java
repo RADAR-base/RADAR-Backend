@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Core class that initialises configurations and then start all needed Kafka streams
+ * Core class that initialises configurations and then start all needed Kafka streams.
  */
 @SuppressWarnings("PMD.DoNotCallSystemExit")
 public final class RadarBackend {

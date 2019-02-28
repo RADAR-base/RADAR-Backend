@@ -17,7 +17,7 @@
 package org.radarcns.config;
 
 /**
- * POJO representing a battery status monitor configuration
+ * POJO representing a battery status monitor configuration.
  */
 public class BatteryMonitorConfig extends MonitorConfig {
     private String level;

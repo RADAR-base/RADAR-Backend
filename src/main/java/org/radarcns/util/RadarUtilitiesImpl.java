@@ -59,9 +59,8 @@ public class RadarUtilitiesImpl implements RadarUtilities {
 
     @Override
     public KeyValue<AggregateKey, PhoneUsageAggregate> phoneCollectorToAvro(
-            Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector
-    ) {
-        return pair(getWindowedTuple(window) , new PhoneUsageAggregate(
+            Windowed<TemporaryPackageKey> window, PhoneUsageCollector collector) {
+        return pair(getWindowedTuple(window), new PhoneUsageAggregate(
                 window.key().getPackageName(),
                 collector.getTotalForegroundTime(),
                 collector.getTimesTurnedOn(),
@@ -71,7 +70,8 @@ public class RadarUtilitiesImpl implements RadarUtilities {
     }
 
     @Override
-    public KeyValue<AggregateKey, AggregateList> listCollectorToAvro(Windowed<ObservationKey> window, AggregateListCollector collector) {
+    public KeyValue<AggregateKey, AggregateList> listCollectorToAvro(
+            Windowed<ObservationKey> window, AggregateListCollector collector) {
         List<NumericAggregate> fields = collector.getCollectors().stream()
                 .map(this::numericCollectorToAggregate)
                 .collect(Collectors.toList());

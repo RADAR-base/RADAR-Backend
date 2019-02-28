@@ -20,7 +20,7 @@ import java.io.IOException;
 import org.radarcns.util.PersistentStateStore;
 
 /**
- * Interface that handles YAML configuration file loading
+ * Interface that handles YAML configuration file loading.
  */
 public interface RadarPropertyHandler {
 

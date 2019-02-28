@@ -19,8 +19,14 @@ package org.radarcns.monitor;
 import java.time.Duration;
 import org.radarcns.config.SubCommand;
 
+/** Monitors Kafka topics. */
 public interface KafkaMonitor extends SubCommand {
+    /** Whether the monitor has been shut down. */
     boolean isShutdown();
+
+    /** Timeout to poll for new messages. */
     Duration getPollTimeout();
+
+    /** Set the timeout to poll for new messages. */
     void setPollTimeout(Duration duration);
 }
