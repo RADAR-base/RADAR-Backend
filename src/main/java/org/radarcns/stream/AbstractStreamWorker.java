@@ -3,7 +3,6 @@ package org.radarcns.stream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,9 +87,8 @@ public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExce
      * @param input topic to stream from
      * @param outputBase base topic name to stream to
      */
-    protected void defineWindowedSensorStream(String input,
-            String outputBase) {
-        streamDefinitions.addAll(Arrays.stream(TimeWindowMetadata.values())
+    protected void defineWindowedSensorStream(String input, String outputBase) {
+        streamDefinitions.addAll(allConfig.getStream().getTimeWindows(config).stream()
                 .map(w -> new StreamDefinition(
                         new KafkaTopic(input),
                         new KafkaTopic(w.getTopicLabel(outputBase)),

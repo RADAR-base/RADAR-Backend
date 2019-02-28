@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import org.radarcns.config.RadarPropertyHandler.Priority;
+import org.radarcns.stream.TimeWindowMetadata;
 
 public class SingleStreamConfig {
     @JsonProperty("class")
@@ -15,7 +17,11 @@ public class SingleStreamConfig {
     private Map<String, String> properties;
     @JsonProperty
     private Priority priority = null;
-    @JsonProperty
+
+    @JsonProperty("time_windows")
+    private Set<TimeWindowMetadata> timeWindows = null;
+
+    @JsonProperty("use_reservoir_sampling")
     private Boolean useReservoirSampling = null;
 
     public void setStreamClass(Class<?> streamClass) {
@@ -60,5 +66,13 @@ public class SingleStreamConfig {
 
     public Priority getPriority() {
         return priority != null ? priority : Priority.NORMAL;
+    }
+
+    public Set<TimeWindowMetadata> getTimeWindows() {
+        return timeWindows;
+    }
+
+    public void setTimeWindows(Set<TimeWindowMetadata> timeWindows) {
+        this.timeWindows = timeWindows;
     }
 }

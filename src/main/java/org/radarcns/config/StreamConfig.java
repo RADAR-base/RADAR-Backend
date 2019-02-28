@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,12 +37,14 @@ public class StreamConfig {
     @JsonProperty("streams")
     private List<SingleStreamConfig> streamConfigs;
 
-    @JsonProperty
+    @JsonProperty("time_windows")
+    private Set<TimeWindowMetadata> timeWindows = Set.of(TimeWindowMetadata.values());
+
+    @JsonProperty("use_reservoir_sampling")
     private boolean useReservoirSampling = false;
 
     @JsonProperty("source_statistics")
     private List<SourceStatisticsStreamConfig> sourceStatistics;
-
 
     public StreamConfig() {
         priorityThreads = new EnumMap<>(Priority.class);
@@ -113,11 +117,24 @@ public class StreamConfig {
         return sourceStatistics;
     }
 
+    public Set<TimeWindowMetadata> getTimeWindows() {
+        return timeWindows;
+    }
+
+    public void setTimeWindows(Set<TimeWindowMetadata> timeWindows) {
+        this.timeWindows = timeWindows;
+    }
+
+
     public boolean isUseReservoirSampling() {
         return useReservoirSampling;
     }
 
     public void setUseReservoirSampling(boolean useReservoirSampling) {
         this.useReservoirSampling = useReservoirSampling;
+    }
+
+    public Collection<TimeWindowMetadata> getTimeWindows(SingleStreamConfig stream) {
+        return stream.getTimeWindows() != null ? stream.getTimeWindows() : getTimeWindows();
     }
 }
