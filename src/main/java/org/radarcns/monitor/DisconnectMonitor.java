@@ -192,23 +192,30 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
                 timeout, report.getMessageNumber(), numRepetitions);
         try {
             String lastSeen = dayFormat.format(report.getLastSeenDate());
-            String text = "The device " + key + " seems disconnected. "
-                    + "It was last seen on " + lastSeen + " (" + timeout / 1000L
-                    + " seconds ago). If this is not intended, please ensure that it gets "
-                    + "reconnected.";
+            StringBuilder textBuilder = new StringBuilder(400);
+            StringBuilder subjectBuilder = new StringBuilder(100);
+            textBuilder.append("The device ")
+                    .append(key)
+                    .append(" seems disconnected. It was last seen on ")
+                    .append(lastSeen)
+                    .append(" (")
+                    .append(String.valueOf(timeout / 1000L))
+                    .append(" seconds ago). If this is not intended, please ensure that it gets reconnected.");
             if (message != null) {
-                text += "\n\n" + message;
+                textBuilder.append("\n\n").append(message);
             }
-            String subject = "[RADAR] Device has disconnected";
+            subjectBuilder.append("[RADAR] Device has disconnected");
             if (numRepetitions > 0 && report.getMessageNumber() == numRepetitions) {
-                text += "\n\nThis is the final warning email for this device.";
-                subject += ". Final message";
+                textBuilder.append("\n\nThis is the final warning email for this device.");
+                subjectBuilder.append(". Final message");
             } else if (numRepetitions > 0) {
-                text += "\n\nThis is warning number " + report.getMessageNumber() + " of "
-                        + numRepetitions;
+                textBuilder.append("\n\nThis is warning number ")
+                        .append(String.valueOf(report.getMessageNumber()))
+                        .append(" of ")
+                        .append(String.valueOf(numRepetitions));
             }
 
-            sender.sendEmail(subject, text);
+            sender.sendEmail(subjectBuilder.toString(), textBuilder.toString());
             logger.debug("Sent disconnected message successfully");
         } catch (MessagingException mex) {
             logger.error("Failed to send disconnected message.", mex);
@@ -220,7 +227,6 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     }
 
     private void reportRecovered(ObservationKey key, long reportedMissingTime) {
-
         // Don't report if no email address for this projectId
         EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
         if(sender == null) {

@@ -119,6 +119,7 @@ public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExce
     /**
      * Starts the stream and notify the StreamMaster.
      */
+    @Override
     public void start() {
         if (streams != null) {
             throw new IllegalStateException("Streams already started. Cannot start them again.");
@@ -141,6 +142,7 @@ public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExce
     /**
      * Close the stream and notify the StreamMaster.
      */
+    @Override
     public void shutdown() {
         logger.info("Shutting down {} stream", getClass().getSimpleName());
 

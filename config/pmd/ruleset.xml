@@ -8,83 +8,74 @@
   This ruleset was parsed from the Codacy default codestyle.
   </description>
 
-  <rule ref="rulesets/java/strings.xml">
-    <exclude name="ConsecutiveAppendsShouldReuse"/>
-  </rule>
-
-  <rule ref="rulesets/java/unusedcode.xml">
-    <exclude name="UnusedFormalParameter"/>
-  </rule>
-
-  <rule ref="rulesets/java/unnecessary.xml"/>
-  <rule ref="rulesets/java/basic.xml"/>
-
-  <rule ref="rulesets/java/logging-java.xml/SystemPrintln"/>
-  <rule ref="rulesets/java/logging-java.xml/AvoidPrintStackTrace"/>
-
-  <rule ref="rulesets/java/naming.xml">
+  <rule ref="category/java/codestyle.xml">
     <exclude name="LongVariable"/>
     <exclude name="ShortVariable"/>
     <exclude name="BooleanGetMethodName"/>
     <exclude name="AbstractNaming"/>
+    <exclude name="TooManyStaticImports"/>
+    <exclude name="MethodArgumentCouldBeFinal"/>
+    <exclude name="LocalVariableCouldBeFinal"/>
+    <exclude name="OnlyOneReturn"/>
+    <exclude name="AtLeastOneConstructor"/>
+    <exclude name="DefaultPackage"/>
+    <exclude name="CommentDefaultAccessModifier"/>
+    <exclude name="CallSuperInConstructor"/>
+    <exclude name="ConfusingTernary"/>
+    <exclude name="UseUnderscoresInNumericLiterals"/>
   </rule>
-  <rule ref="rulesets/java/naming.xml/ShortMethodName">
+  <rule ref="category/java/codestyle.xml/ShortMethodName">
     <properties>
       <property name="minimum" value="2"/>
     </properties>
   </rule>
-  <rule ref="rulesets/java/naming.xml/VariableNamingConventions">
+  <rule ref="category/java/codestyle.xml/FieldNamingConventions">
     <properties>
-      <property name="violationSuppressRegex" value=".*, 'log(ger)?' is not all capitals\."/>
+      <property name="exclusions" value="logger|log|serialVersionUID"/>
     </properties>
   </rule>
 
-  <rule ref="rulesets/java/imports.xml">
-    <exclude name="TooManyStaticImports"/>
-  </rule>
-
-  <rule ref="rulesets/java/strictexception.xml">
+  <rule ref="category/java/design.xml">
     <exclude name="AvoidCatchingGenericException"/>
-  </rule>
-
-  <rule ref="rulesets/java/design.xml">
     <exclude name="AvoidDeeplyNestedIfStmts"/>
     <exclude name="SwitchDensity"/>
-    <exclude name="AccessorClassGeneration"/>
-    <exclude name="ConstructorCallsOverridableMethod"/>
-    <exclude name="AvoidSynchronizedAtMethodLevel"/>
-    <exclude name="TooFewBranchesForASwitchStatement"/>
-    <exclude name="PositionLiteralsFirstInComparisons"/>
-    <exclude name="ConfusingTernary"/>
-    <exclude name="UseVarargs"/>
-    <exclude name="OptimizableToArrayCall"/>
-  </rule>
-
-  <rule ref="rulesets/java/codesize.xml">
     <exclude name="CyclomaticComplexity"/>
     <exclude name="ExcessiveClassLength"/>
     <exclude name="ExcessivePublicCount"/>
     <exclude name="TooManyFields"/>
     <exclude name="TooManyMethods"/>
+    <exclude name="LawOfDemeter"/>
+    <exclude name="LoosePackageCoupling"/>
+    <exclude name="ExcessiveImports"/>
+    <exclude name="DataClass"/>
   </rule>
 
-  <rule ref="rulesets/java/empty.xml">
+  <rule ref="category/java/bestpractices.xml">
+    <exclude name="GuardLogStatement"/>
+    <exclude name="PositionLiteralsFirstInComparisons"/>
+  </rule>
+
+  <rule ref="category/java/errorprone.xml">
     <exclude name="EmptyCatchBlock"/>
+    <exclude name="DataflowAnomalyAnalysis"/>
+    <exclude name="AvoidLiteralsInIfCondition"/>
+    <exclude name="BeanMembersShouldSerialize"/>
+    <exclude name="NullAssignment"/>
   </rule>
 
-  <rule ref="rulesets/java/finalizers.xml"/>
-  <rule ref="rulesets/java/braces.xml"/>
-  <rule ref="rulesets/java/clone.xml"/>
-
-  <rule ref="rulesets/java/controversial.xml/AssignmentInOperand"/>
-  <rule ref="rulesets/java/controversial.xml/OneDeclarationPerLine"/>
-  <rule ref="rulesets/java/controversial.xml/SuspiciousOctalEscape"/>
-  <rule ref="rulesets/java/controversial.xml/UnnecessaryParentheses"/>
-
-  <rule ref="rulesets/java/optimizations.xml/UseArrayListInsteadOfVector"/>
-  <rule ref="rulesets/java/optimizations.xml/UseArraysAsList"/>
-  <rule ref="rulesets/java/optimizations.xml/AvoidArrayLoops"/>
-  <rule ref="rulesets/java/optimizations.xml/UnnecessaryWrapperObjectCreation"/>
-  <rule ref="rulesets/java/optimizations.xml/AddEmptyString"/>
-  <rule ref="rulesets/java/optimizations.xml/PrematureDeclaration"/>
+  <rule ref="category/java/multithreading.xml">
+    <exclude name="AvoidSynchronizedAtMethodLevel"/>
+    <exclude name="UseConcurrentHashMap"/>
+    <exclude name="DoNotUseThreads"/>
+  </rule>
+  <rule ref="category/java/performance.xml">
+    <exclude name="AvoidUsingShortType"/>
+    <exclude name="RedundantFieldInitializer"/>
+    <exclude name="AvoidInstantiatingObjectsInLoops"/>
+  </rule>
+  <rule ref="category/java/security.xml"/>
+  <rule ref="category/java/documentation.xml">
+    <exclude name="CommentRequired"/>
+    <exclude name="CommentSize"/>
+  </rule>
 </ruleset>

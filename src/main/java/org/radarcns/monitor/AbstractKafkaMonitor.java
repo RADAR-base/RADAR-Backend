@@ -31,7 +31,7 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import org.apache.avro.Schema;
@@ -208,7 +208,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                                     + "-tmp-" + UUID.randomUUID().toString());
 
                     try (Consumer<K, V> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
-                        tmpConsumer.assign(Collections.singletonList(tp));
+                        tmpConsumer.assign(List.of(tp));
                         tmpConsumer.seek(tp, consumer.position(tp));
                         tmpConsumer.poll(Duration.ZERO);
                         return false;

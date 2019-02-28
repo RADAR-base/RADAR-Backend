@@ -16,9 +16,10 @@
 
 package org.radarcns.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.kafka.ObservationKey;
 
@@ -28,7 +29,7 @@ import org.radarcns.kafka.ObservationKey;
  * deserializable with this mechanism.
  */
 public class YamlPersistentStateStore implements PersistentStateStore {
-    private final File basePath;
+    private final Path basePath;
     private final YamlConfigLoader loader;
     private static final char SEPARATOR = '#';
 
@@ -38,7 +39,7 @@ public class YamlPersistentStateStore implements PersistentStateStore {
      * @param basePath path to a directory.
      * @throws IOException if the given directory is not writable for states.
      */
-    public YamlPersistentStateStore(File basePath) throws IOException {
+    public YamlPersistentStateStore(Path basePath) throws IOException {
         checkBasePath(basePath);
 
         this.basePath = basePath;
@@ -51,47 +52,47 @@ public class YamlPersistentStateStore implements PersistentStateStore {
      * @param basePath base path for the persistence store.
      * @throws IOException if the base path is not writable for states.
      */
-    private static void checkBasePath(File basePath) throws IOException {
-        if (basePath.exists()) {
-            if (!basePath.isDirectory()) {
-                throw new IOException("State path " + basePath.getAbsolutePath()
+    private static void checkBasePath(Path basePath) throws IOException {
+        if (Files.exists(basePath)) {
+            if (!Files.isDirectory(basePath)) {
+                throw new IOException("State path " + basePath.toAbsolutePath()
                         + " is not a directory");
             }
-        } else if (!basePath.mkdirs()) {
-            throw new IOException("Failed to set up persistent state store for the Kafka Monitor.");
+        } else {
+            Files.createDirectories(basePath);
         }
 
-        File testFile = new File(basePath, ".check_base_path");
+        Path testFile = Files.createTempFile(basePath, ".check_base_path", "");
         // can write
-        try (FileOutputStream fout = new FileOutputStream(testFile)) {
+        try (OutputStream fout = Files.newOutputStream(testFile)) {
             fout.write(1);
         } catch (IOException ex) {
             throw new IOException("Cannot write files in directory " + basePath, ex);
+        } finally {
+            Files.delete(testFile);
         }
-        //noinspection ResultOfMethodCallIgnored
-        testFile.delete();
     }
 
     @Override
     public <T> T retrieveState(String groupId, String clientId, T stateDefault)
             throws IOException {
-        File consumerFile = getFile(groupId, clientId);
-        if (!consumerFile.exists()) {
+        Path consumerFile = getFile(groupId, clientId);
+        if (!Files.exists(consumerFile)) {
             return stateDefault;
         }
         @SuppressWarnings("unchecked")
         Class<? extends T> stateClass = (Class<? extends T>) stateDefault.getClass();
-        return loader.load(consumerFile, stateClass);
+        return loader.load(consumerFile.toFile(), stateClass);
     }
 
     @Override
     public void storeState(String groupId, String clientId, Object value) throws IOException {
-        loader.store(getFile(groupId, clientId), value);
+        loader.store(getFile(groupId, clientId).toFile(), value);
     }
 
     /** File for given consumer. */
-    private File getFile(String groupId, String clientId) {
-        return new File(basePath, groupId + "_" + clientId + ".yml");
+    private Path getFile(String groupId, String clientId) {
+        return basePath.resolve(groupId + "_" + clientId + ".yml");
     }
 
     @Override

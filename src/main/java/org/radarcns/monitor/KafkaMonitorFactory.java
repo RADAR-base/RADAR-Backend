@@ -19,7 +19,7 @@ package org.radarcns.monitor;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 import org.radarcns.config.BatteryMonitorConfig;
@@ -46,12 +46,12 @@ public class KafkaMonitorFactory {
 
     public KafkaMonitor createMonitor() throws IOException {
         KafkaMonitor monitor;
-        String[] args = options.getSubCommandArgs();
+        List<String> args = options.getSubCommandArgs();
         String commandType;
-        if (args == null || args.length == 0) {
+        if (args.isEmpty()) {
             commandType = "all";
         } else {
-            commandType = args[0];
+            commandType = args.get(0);
         }
 
         switch (commandType) {
@@ -125,7 +125,7 @@ public class KafkaMonitorFactory {
         if (config != null && config.getTopics() != null) {
             return config.getTopics();
         } else {
-            return Collections.singleton(defaultTopic);
+            return List.of(defaultTopic);
         }
     }
 }

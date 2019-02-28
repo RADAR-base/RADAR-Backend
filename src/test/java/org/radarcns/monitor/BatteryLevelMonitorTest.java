@@ -19,7 +19,9 @@ package org.radarcns.monitor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
 
 import java.io.File;
@@ -106,14 +108,14 @@ public class BatteryLevelMonitorTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base.toPath());
         BatteryLevelState state = new BatteryLevelState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
         String keyString = stateStore.keyToString(key1);
         state.updateLevel(keyString, 0.1f);
         stateStore.storeState("one", "two", state);
 
-        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base.toPath());
         BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());
         Map<String, Float> values = state2.getLevels();
         assertThat(values, hasEntry(keyString, 0.1f));

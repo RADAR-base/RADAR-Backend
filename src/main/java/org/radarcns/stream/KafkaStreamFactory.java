@@ -43,13 +43,13 @@ public class KafkaStreamFactory {
     }
 
     public StreamMaster createSensorStreams() {
-        String[] args = options.getSubCommandArgs();
+        List<String> args = options.getSubCommandArgs();
 
         Stream<SingleStreamConfig> configStream = radarProperties.getRadarProperties()
                 .getStream().getStreamConfigs();
 
-        if (args != null && args.length > 0) {
-            Set<String> streamTypes = Stream.of(args)
+        if (!args.isEmpty()) {
+            Set<String> streamTypes = args.stream()
                     .map(s -> s.toLowerCase(Locale.US))
                     .collect(Collectors.toSet());
 

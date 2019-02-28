@@ -37,7 +37,7 @@ public class PersistentStateStoreTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base.toPath());
         BatteryLevelState state = new BatteryLevelState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
         state.updateLevel(stateStore.keyToString(key1), 0.1f);
@@ -48,7 +48,7 @@ public class PersistentStateStoreTest {
         String rawFile = new String(Files.readAllBytes(outputFile.toPath()));
         assertThat(rawFile, equalTo("---\nlevels:\n  test#a#b: 0.1\n"));
 
-        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base.toPath());
         BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());
         Map<String, Float> values = state2.getLevels();
         assertThat(values, hasEntry(stateStore.keyToString(key1), 0.1f));

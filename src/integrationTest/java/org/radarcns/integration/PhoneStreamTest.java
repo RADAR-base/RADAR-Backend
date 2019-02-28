@@ -28,18 +28,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
-
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -73,7 +71,7 @@ import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.schema.registration.KafkaTopics;
 import org.radarcns.schema.registration.SchemaRegistry;
 import org.radarcns.topic.AvroTopic;
-import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +109,7 @@ public class PhoneStreamTest {
     @Before
     public void setUp() throws IOException, ParseException, InterruptedException, KeeperException {
         String propertiesPath = "src/integrationTest/resources/org/radarcns/kafka/radar.yml";
-        propHandler = RadarSingletonFactory.getRadarPropertyHandler();
+        propHandler = RadarSingleton.getInstance().getRadarPropertyHandler();
         if (!propHandler.isLoaded()) {
             propHandler.load(propertiesPath);
         }
@@ -221,7 +219,7 @@ public class PhoneStreamTest {
     private void consumeE4() throws IOException {
         String clientId = "consumeE4";
         E4AggregatedAccelerationMonitor monitor = new E4AggregatedAccelerationMonitor(
-                RadarSingletonFactory.getRadarPropertyHandler(),
+                RadarSingleton.getInstance().getRadarPropertyHandler(),
                 "android_empatica_e4_acceleration_10sec", clientId);
         monitor.setPollTimeout(Duration.ofMinutes(5).minus(Duration.ofSeconds(20)));
         monitor.start();
@@ -230,7 +228,7 @@ public class PhoneStreamTest {
     private void consumePhone() throws IOException, InterruptedException {
         String clientId = "consumePhone";
         KafkaMonitor monitor = new PhoneOutputMonitor(
-                RadarSingletonFactory.getRadarPropertyHandler(), clientId,8L);
+                RadarSingleton.getInstance().getRadarPropertyHandler(), clientId,8L);
 
         monitor.setPollTimeout(Duration.ofMinutes(5).minusSeconds(20));
         monitor.start();
@@ -239,7 +237,7 @@ public class PhoneStreamTest {
     private void consumeAggregated() throws IOException, InterruptedException {
         String clientId = "consumeAggregated";
         KafkaMonitor monitor = new PhoneAggregateMonitor(
-                RadarSingletonFactory.getRadarPropertyHandler(), clientId, 4L);
+                RadarSingleton.getInstance().getRadarPropertyHandler(), clientId, 4L);
 
         monitor.setPollTimeout(Duration.ofMinutes(5).minusSeconds(20));
         monitor.start();
@@ -251,7 +249,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneOutputMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_output"), clientId, clientId, null);
+            super(radar, List.of("android_phone_usage_event_output"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
 
             Properties props = new Properties();
@@ -290,7 +288,7 @@ public class PhoneStreamTest {
         int numRecordsRead;
 
         public PhoneAggregateMonitor(RadarPropertyHandler radar, String clientId, long numRecordsExpected) {
-            super(radar, Collections.singletonList("android_phone_usage_event_aggregated"), clientId, clientId, null);
+            super(radar, List.of("android_phone_usage_event_aggregated"), clientId, clientId, null);
             this.numRecordsExpected = numRecordsExpected;
             Properties props = new Properties();
             props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

@@ -42,6 +42,7 @@ public class E4HeartRateStream extends
         config.setDefaultPriority(Priority.LOW);
     }
 
+    @Override
     protected KStream<AggregateKey, NumericAggregate> implementStream(
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4InterBeatInterval> kstream) {

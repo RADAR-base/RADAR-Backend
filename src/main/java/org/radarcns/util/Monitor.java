@@ -24,6 +24,7 @@ import org.slf4j.Logger;
  */
 public class Monitor implements Runnable {
     private final AtomicInteger count;
+    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private final Logger log;
     private final String message;
 

@@ -26,13 +26,14 @@ import org.radarcns.config.SubCommand;
 import org.radarcns.monitor.KafkaMonitorFactory;
 import org.radarcns.producer.MockProducerCommand;
 import org.radarcns.stream.KafkaStreamFactory;
-import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Core class that initialises configurations and then start all needed Kafka streams
  */
+@SuppressWarnings("PMD.DoNotCallSystemExit")
 public final class RadarBackend {
     private static final Logger log = LoggerFactory.getLogger(RadarBackend.class);
     private final RadarBackendOptions options;
@@ -54,7 +55,7 @@ public final class RadarBackend {
 
     private static RadarPropertyHandler createPropertyHandler(@Nonnull RadarBackendOptions options)
             throws IOException {
-        RadarPropertyHandler properties = RadarSingletonFactory.getRadarPropertyHandler();
+        RadarPropertyHandler properties = RadarSingleton.getInstance().getRadarPropertyHandler();
         properties.load(options.getPropertyPath());
         return properties;
     }
@@ -132,7 +133,7 @@ public final class RadarBackend {
         log.info("FINISHED");
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
         try {
             RadarBackendOptions options = RadarBackendOptions.parse(args);
             RadarBackend backend = new RadarBackend(options);

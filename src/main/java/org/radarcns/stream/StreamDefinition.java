@@ -108,11 +108,13 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      */
     @Nonnull
     public String getStateStoreName() {
-        String name = "From-" + getInputTopic().getName();
+        StringBuilder nameBuilder = new StringBuilder(100);
+
+        nameBuilder.append("From-").append(getInputTopic().getName());
         if (getOutputTopic() != null) {
-            name += "-To-" + getOutputTopic().getName();
+            nameBuilder.append("-To-").append(getOutputTopic().getName());
         }
-        return name;
+        return nameBuilder.toString();
     }
 
     @Nullable

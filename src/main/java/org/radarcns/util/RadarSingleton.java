@@ -23,16 +23,20 @@ import org.radarcns.config.RadarPropertyHandlerImpl;
  * SingletonFactory of RadarBackend project. This factory composites all singleton objects that need
  * to be maintained in this project and provides a gateway to get singleton objects
  */
-public final class RadarSingletonFactory {
+public class RadarSingleton {
+    private static final RadarSingleton INSTANCE = new RadarSingleton();
 
-    private static RadarUtilities utilities;
+    private final RadarUtilities utilities;
+    private final RadarPropertyHandler propertyHandler;
 
-    private static RadarPropertyHandler propertyHandler;
+    @SuppressWarnings("WeakerAccess")
+    protected RadarSingleton() {
+        utilities = new RadarUtilitiesImpl();
+        propertyHandler = new RadarPropertyHandlerImpl();
+    }
 
-    private static final Object SYNC_OBJECT = new Object();
-
-    private RadarSingletonFactory() {
-        // utility class
+    public static RadarSingleton getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -40,13 +44,8 @@ public final class RadarSingletonFactory {
      *
      * @return a RadarUtilities object
      */
-    public static RadarUtilities getRadarUtilities() {
-        synchronized (SYNC_OBJECT) {
-            if (utilities == null) {
-                utilities = new RadarUtilitiesImpl();
-            }
-            return utilities;
-        }
+    public RadarUtilities getRadarUtilities() {
+        return utilities;
     }
 
     /**
@@ -54,13 +53,7 @@ public final class RadarSingletonFactory {
      *
      * @return a RadarPropertyHandler object
      */
-    public static RadarPropertyHandler getRadarPropertyHandler() {
-        synchronized (SYNC_OBJECT) {
-            if (propertyHandler == null) {
-                propertyHandler = new RadarPropertyHandlerImpl();
-            }
-            return propertyHandler;
-        }
+    public RadarPropertyHandler getRadarPropertyHandler() {
+        return propertyHandler;
     }
-
 }

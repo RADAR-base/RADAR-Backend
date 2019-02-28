@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
@@ -82,7 +83,7 @@ public class DisconnectMonitorTest {
         timeReceived = 2000L;
         timesSent = 0;
         sender = mock(EmailSender.class);
-        senders = new EmailSenders(Collections.singletonMap(PROJECT_ID, sender));
+        senders = new EmailSenders(Map.of(PROJECT_ID, sender));
     }
 
     public void evaluateRecords() throws Exception {
@@ -101,7 +102,7 @@ public class DisconnectMonitorTest {
                 .getRadarPropertyHandler(config, folder);
 
         DisconnectMonitor monitor = new DisconnectMonitor(properties,
-                Collections.singletonList("mytopic"), "mygroup", senders);
+                List.of("mytopic"), "mygroup", senders);
         monitor.startScheduler();
 
         assertEquals(timeout, monitor.getPollTimeout());
@@ -147,14 +148,13 @@ public class DisconnectMonitorTest {
             "mytopic", 0, offset++, key, value);
         TopicPartition partition = new TopicPartition(record.topic(), record.partition());
 
-        monitor.evaluateRecords(new ConsumerRecords<>(
-                Collections.singletonMap(partition, Collections.singletonList(record))));
+        monitor.evaluateRecords(new ConsumerRecords<>(Map.of(partition, List.of(record))));
     }
 
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base.toPath());
         DisconnectMonitorState state = new DisconnectMonitorState();
         ObservationKey key1 = new ObservationKey(PROJECT_ID, "a", "b");
         ObservationKey key2 = new ObservationKey(PROJECT_ID, "b", "c");
@@ -166,7 +166,7 @@ public class DisconnectMonitorTest {
                 (now -60L, now + 2L, 0));
         stateStore.storeState("one", "two", state);
 
-        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base);
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base.toPath());
         DisconnectMonitorState state2 = stateStore2.retrieveState("one", "two", new DisconnectMonitorState());
         Map<String, Long> lastSeen = state2.getLastSeen();
         assertThat(lastSeen.size(), is(2));

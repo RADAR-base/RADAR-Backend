@@ -131,7 +131,7 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                     punctuateCancellor.cancel();
                 }
                 punctuateCancellor = this.context.schedule(
-                        localInterval.toMillis(), PunctuationType.WALL_CLOCK_TIME, this::sendNew);
+                        localInterval, PunctuationType.WALL_CLOCK_TIME, this::sendNew);
             }
         }
 
@@ -149,7 +149,7 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                 }
             }
 
-            sent.forEach(e -> store.put(e.key, e.value));
+            store.putAll(sent);
             context.commit();
 
             updatePunctuate();

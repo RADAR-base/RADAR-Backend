@@ -33,7 +33,7 @@ import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SingleStreamConfig;
 import org.radarcns.topic.KafkaTopic;
-import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarSingleton;
 
 /**
  * Created by nivethika on 20-12-16.
@@ -52,9 +52,9 @@ public class SensorStreamWorkerTest {
         StreamDefinition sensorTopic = new StreamDefinition(new KafkaTopic(topicName), new KafkaTopic(topicName + "_output"));
         when(aggregator.getStreamDefinitions()).thenReturn(Stream.of(sensorTopic));
 
-        RadarPropertyHandler propertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
-        propertyHandler.load("src/test/resources/config/radar.yml");
-        KafkaProperty kafkaProperty = propertyHandler.getKafkaProperties();
+        RadarPropertyHandler properties = RadarSingleton.getInstance().getRadarPropertyHandler();
+        properties.load("src/test/resources/config/radar.yml");
+        KafkaProperty kafkaProperty = properties.getKafkaProperties();
         when(aggregator.getStreamProperties(eq(sensorTopic))).thenReturn(
                 kafkaProperty.getStreamProperties(
                         "test", new SingleStreamConfig(), DeviceTimestampExtractor.class));

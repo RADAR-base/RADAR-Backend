@@ -19,7 +19,7 @@ package org.radarcns.integration;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -39,7 +39,7 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
     private static final Logger logger = LoggerFactory.getLogger(E4AggregatedAccelerationMonitor.class);
 
     public E4AggregatedAccelerationMonitor(RadarPropertyHandler radar, String topic, String clientID) throws IOException {
-        super(radar, Collections.singletonList(topic), "new", clientID, null);
+        super(radar, List.of(topic), "new", clientID, null);
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

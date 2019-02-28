@@ -19,7 +19,7 @@ tasks.withType(Checkstyle) {
 
 pmd {
     // pmd version
-    toolVersion = '5.8.1'
+    toolVersion = '6.12.0'
     ignoreFailures = false
 
     sourceSets = [sourceSets.main]

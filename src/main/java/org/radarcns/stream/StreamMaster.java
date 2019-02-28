@@ -133,7 +133,7 @@ public class StreamMaster implements SubCommand, UncaughtExceptionHandler {
      */
     public void notifyStartedStream(@Nonnull StreamWorker stream) {
         int current = currentStream.incrementAndGet();
-        logger.info("[{}] {} is started. {}/{} streams are now running",
+        logger.info("{} is started. {}/{} streams are now running",
                 stream, current, streamWorkers.size());
     }
 
@@ -159,9 +159,7 @@ public class StreamMaster implements SubCommand, UncaughtExceptionHandler {
      * @param stream the name of the stream that is crashed. Useful for debug purpose
      */
     public void notifyCrashedStream(@Nonnull String stream) {
-        logger.error("{} is crashed", stream);
-
-        logger.info("Forcing shutdown of {}");
+        logger.error("{} is crashed, forcing shutdown", stream);
 
         try {
             shutdown();

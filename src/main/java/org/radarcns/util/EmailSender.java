@@ -19,10 +19,12 @@ package org.radarcns.util;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import javax.annotation.Nonnull;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -30,8 +32,8 @@ import javax.mail.internet.MimeMessage;
  * Sends emails.
  */
 public class EmailSender {
-    private final String from;
-    private final List<String> to;
+    private final InternetAddress from;
+    private final InternetAddress[] recipients;
     private final Session session;
 
     /**
@@ -42,9 +44,20 @@ public class EmailSender {
      * @param to list of recipients in the MIME To header
      * @throws IOException if a connection cannot be established with the email provider.
      */
-    public EmailSender(String host, int port, String from, List<String> to) throws IOException {
-        this.from = from;
-        this.to = to;
+    public EmailSender(String host, int port, @Nonnull String from, List<String> to)
+            throws IOException, AddressException {
+        this.from = new InternetAddress(from);
+        if (to == null || to.isEmpty()) {
+            throw new AddressException("Cannot create email sender without recipients.");
+        }
+        this.recipients = new InternetAddress[to.size()];
+        for (int i = 0; i < to.size(); i++) {
+            String addr = to.get(i);
+            if (addr == null) {
+                throw new AddressException("Recipient email address is null");
+            }
+            recipients[i] = new InternetAddress(addr);
+        }
 
         Properties properties = new Properties();
         // Get system properties
@@ -81,12 +94,9 @@ public class EmailSender {
         MimeMessage message = new MimeMessage(session);
 
         // Set From: header field of the header.
-        message.setFrom(new InternetAddress(from));
+        message.setFrom(from);
 
-        for (String recipient : to) {
-            // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-        }
+        message.addRecipients(Message.RecipientType.TO, recipients);
 
         // Set Subject: header field
         message.setSubject(subject);

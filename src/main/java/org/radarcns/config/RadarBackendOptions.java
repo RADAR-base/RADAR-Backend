@@ -17,6 +17,8 @@
 package org.radarcns.config;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -29,7 +31,7 @@ public class RadarBackendOptions {
     private static final Logger log = LoggerFactory.getLogger(RadarBackendOptions.class);
     private final CommandLine cli;
     private final String subCommand;
-    private final String[] subCommandArgs;
+    private final List<String> subCommandArgs;
     public static final Options OPTIONS = new Options()
             .addOption("c", "config", true, "Configuration YAML file")
             .addOption("d", "devices", true, "Number of devices to use with the mock command.")
@@ -45,19 +47,19 @@ public class RadarBackendOptions {
         log.info("Loading configuration");
         this.cli = cli;
 
-        String[] additionalArgs = this.cli.getArgs();
+        List<String> additionalArgs = this.cli.getArgList();
 
-        if (additionalArgs.length > 0) {
-            subCommand = additionalArgs[0];
-            subCommandArgs = new String[additionalArgs.length - 1];
-            System.arraycopy(additionalArgs, 1, subCommandArgs, 0, subCommandArgs.length);
-        } else {
+        if (additionalArgs.isEmpty()) {
             subCommand = null;
-            subCommandArgs = null;
+            subCommandArgs = List.of();
+        } else {
+            subCommand = additionalArgs.get(0);
+            subCommandArgs = Collections.unmodifiableList(
+                    additionalArgs.subList(1, additionalArgs.size()));
         }
     }
 
-    public static RadarBackendOptions parse(@Nonnull String[] args) throws ParseException {
+    public static RadarBackendOptions parse(@Nonnull String... args) throws ParseException {
         CommandLine cli = new DefaultParser().parse(OPTIONS, args);
         return new RadarBackendOptions(cli);
     }
@@ -87,7 +89,8 @@ public class RadarBackendOptions {
         return subCommand;
     }
 
-    public String[] getSubCommandArgs() {
+    @Nonnull
+    public List<String> getSubCommandArgs() {
         return subCommandArgs;
     }
 }

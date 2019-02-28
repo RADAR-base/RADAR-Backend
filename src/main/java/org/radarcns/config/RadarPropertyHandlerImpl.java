@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 import org.radarcns.RadarBackend;
 import org.radarcns.util.PersistentStateStore;
@@ -49,6 +51,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         return properties;
     }
 
+    @Override
     public boolean isLoaded() {
         return properties != null;
     }
@@ -119,7 +122,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     @Override
     public PersistentStateStore getPersistentStateStore() throws IOException {
         if (getRadarProperties().getPersistencePath() != null) {
-            File persistenceDir = new File(getRadarProperties().getPersistencePath());
+            Path persistenceDir = Paths.get(getRadarProperties().getPersistencePath());
             return new YamlPersistentStateStore(persistenceDir);
         } else {
             return null;

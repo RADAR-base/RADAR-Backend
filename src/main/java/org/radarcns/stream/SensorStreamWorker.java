@@ -43,7 +43,7 @@ import org.radarcns.stream.aggregator.NumericAggregate;
 import org.radarcns.stream.collector.AggregateListCollector;
 import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.util.Monitor;
-import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarSingleton;
 import org.radarcns.util.RadarUtilities;
 import org.radarcns.util.serde.RadarSerdes;
 import org.slf4j.Logger;
@@ -56,10 +56,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class SensorStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
         extends AbstractStreamWorker implements Thread.UncaughtExceptionHandler {
+    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private final Logger monitorLog;
     private Collection<ScheduledFuture<?>> monitors;
 
-    protected final RadarUtilities utilities = RadarSingletonFactory.getRadarUtilities();
+    protected final RadarUtilities utilities = RadarSingleton.getInstance().getRadarUtilities();
 
     public SensorStreamWorker() {
         this.streams = null;
@@ -103,13 +104,19 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
      * @return Properties for a Kafka Stream
      */
     protected Properties getStreamProperties(@Nonnull StreamDefinition definition) {
-        String localClientId = getClass().getName() + "-" + allConfig.getBuildVersion();
+        StringBuilder clientIdBuilder = new StringBuilder(100);
+        clientIdBuilder.append(getClass().getName())
+                .append('-')
+                .append(allConfig.getBuildVersion());
         TimeWindows window = definition.getTimeWindows();
         if (window != null) {
-            localClientId += '-' + window.sizeMs + '-' + window.advanceMs;
+            clientIdBuilder.append('-')
+                    .append(String.valueOf(window.sizeMs))
+                    .append('-')
+                    .append(String.valueOf(window.advanceMs));
         }
 
-        Properties props = kafkaProperty.getStreamProperties(localClientId, config,
+        Properties props = kafkaProperty.getStreamProperties(clientIdBuilder.toString(), config,
                 DeviceTimestampExtractor.class);
         long interval = (long)(ThreadLocalRandom.current().nextDouble(0.75, 1.25)
                 * definition.getCommitInterval().toMillis());
@@ -128,6 +135,7 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
     /**
      * Starts the stream and notify the StreamMaster.
      */
+    @Override
     public List<KafkaStreams> createStreams() {
         List<KeyValue<ScheduledFuture<?>, KafkaStreams>> streamBuilders = getStreamDefinitions()
                 .map(this::createBuilder)
@@ -142,6 +150,7 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
                 .collect(Collectors.toList());
     }
 
+    @Override
     protected void doCleanup() {
         if (monitors != null) {
             monitors.forEach(f -> f.cancel(false));

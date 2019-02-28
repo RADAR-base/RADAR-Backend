@@ -18,8 +18,8 @@ package org.radarcns.monitor;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.mail.MessagingException;
@@ -32,7 +32,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.EmailSenders;
-import org.radarcns.util.RadarSingletonFactory;
+import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,6 @@ public class BatteryLevelMonitor extends
     }
 
     private void updateStatus(ObservationKey key, Status status) {
-
         // Don't report if no email address for this projectId
         EmailSender sender = senders.getEmailSenderForProject(key.getProjectId());
         if (sender == null) {
@@ -149,12 +148,13 @@ public class BatteryLevelMonitor extends
         return batteryLevel.floatValue();
     }
 
-    public static void main(String[] args) throws IOException {
-        RadarPropertyHandler radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler();
+    public static void main(String... args) throws IOException {
+        RadarPropertyHandler radarPropertyHandler = RadarSingleton.getInstance()
+                .getRadarPropertyHandler();
         radarPropertyHandler.load(null);
 
         BatteryLevelMonitor monitor = new BatteryLevelMonitor(radarPropertyHandler,
-                Collections.singletonList("android_empatica_e4_battery_level"), null, null, -1);
+                List.of("android_empatica_e4_battery_level"), null, null, -1);
         monitor.start();
     }
 

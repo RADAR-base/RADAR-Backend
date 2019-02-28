@@ -33,7 +33,7 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
      * Return the timeReceived value converted in long. timeReceived is the timestamp at which the
      * device has collected the sample.
      *
-     * @throws RuntimeException if timeReceived is not present inside the analysed record
+     * @throws IllegalArgumentException if timeReceived is not present inside the analysed record
      */
     @Override
     public long extract(ConsumerRecord<Object, Object> record, long previousTimestamp) {
@@ -52,6 +52,6 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
             log.error("Cannot extract timeReceived form {}", record, e);
         }
 
-        throw new RuntimeException("Impossible to extract timeReceived from " + record);
+        throw new IllegalArgumentException("Impossible to extract timeReceived from " + record);
     }
 }

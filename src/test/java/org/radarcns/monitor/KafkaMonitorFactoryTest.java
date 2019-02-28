@@ -27,7 +27,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -35,7 +34,15 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.radarcns.config.*;
+import org.radarcns.config.BatteryMonitorConfig;
+import org.radarcns.config.ConfigRadar;
+import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.NotifyConfig;
+import org.radarcns.config.RadarBackendOptions;
+import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.config.RadarPropertyHandlerImpl;
+import org.radarcns.config.SourceStatisticsStreamConfig;
+import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.util.EmailServerRule;
 
 public class KafkaMonitorFactoryTest {
@@ -124,8 +131,9 @@ public class KafkaMonitorFactoryTest {
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
         List<NotifyConfig> notifyConfigs = new ArrayList<>();
-        notifyConfigs.add(new NotifyConfig("test",Collections.singletonList("test@localhost")));
+        notifyConfigs.add(new NotifyConfig("test", List.of("test@localhost")));
         disconnectConfig.setNotifyConfig(notifyConfigs);
+        disconnectConfig.setEmailUser("test@localhost");
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
         disconnectConfig.setTimeout(1L);
@@ -142,8 +150,9 @@ public class KafkaMonitorFactoryTest {
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
         List<NotifyConfig> notifyConfigs = new ArrayList<>();
-        notifyConfigs.add(new NotifyConfig("test",Collections.singletonList("test@localhost")));
+        notifyConfigs.add(new NotifyConfig("test", List.of("test@localhost")));
         batteryConfig.setNotifyConfig(notifyConfigs);
+        batteryConfig.setEmailUser("test@localhost");
         batteryConfig.setEmailHost("localhost");
         batteryConfig.setEmailPort(port);
         batteryConfig.setLevel("LOW");
@@ -161,7 +170,7 @@ public class KafkaMonitorFactoryTest {
         ConfigRadar config = createBasicConfig(folder);
         SourceStatisticsStreamConfig sourceConfig = new SourceStatisticsStreamConfig();
         sourceConfig.setName("source_statistics_test");
-        sourceConfig.setTopics(Arrays.asList("android_empatica_e4_battery_level",
+        sourceConfig.setTopics(List.of("android_empatica_e4_battery_level",
                 "android_empatica_e4_battery_level_10sec"));
         sourceConfig.setOutputTopic("statistics_android_empatica_e4");
         sourceConfig.setFlushTimeout(200L);

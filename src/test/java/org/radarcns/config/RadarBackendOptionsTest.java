@@ -16,43 +16,42 @@
 
 package org.radarcns.config;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.List;
 import org.apache.commons.cli.ParseException;
 import org.junit.Test;
 
 public class RadarBackendOptionsTest {
     @Test
     public void empty() throws ParseException {
-        RadarBackendOptions opts = RadarBackendOptions.parse(new String[] {});
+        RadarBackendOptions opts = RadarBackendOptions.parse();
         assertNull(opts.getSubCommand());
-        assertNull(opts.getSubCommandArgs());
+        assertEquals(List.of(), opts.getSubCommandArgs());
         assertNull(opts.getPropertyPath());
     }
 
     @Test
     public void withConfig() throws ParseException {
-        RadarBackendOptions opts = RadarBackendOptions.parse(new String[] {"-c", "cfg"});
+        RadarBackendOptions opts = RadarBackendOptions.parse("-c", "cfg");
         assertNull(opts.getSubCommand());
-        assertNull(opts.getSubCommandArgs());
+        assertEquals(List.of(), opts.getSubCommandArgs());
         assertEquals("cfg", opts.getPropertyPath());
     }
 
     @Test
     public void withSubcommand() throws ParseException {
-        RadarBackendOptions opts = RadarBackendOptions.parse(new String[] {"-c", "cfg", "stream"});
+        RadarBackendOptions opts = RadarBackendOptions.parse("-c", "cfg", "stream");
         assertEquals("stream", opts.getSubCommand());
-        assertArrayEquals(new String[0], opts.getSubCommandArgs());
+        assertEquals(List.of(), opts.getSubCommandArgs());
         assertEquals("cfg", opts.getPropertyPath());
     }
 
     @Test
     public void withSubcommandArgs() throws ParseException {
-        RadarBackendOptions opts = RadarBackendOptions.parse(
-                new String[] {"monitor", "battery"});
+        RadarBackendOptions opts = RadarBackendOptions.parse("monitor", "battery");
         assertEquals("monitor", opts.getSubCommand());
-        assertArrayEquals(new String[] {"battery"}, opts.getSubCommandArgs());
+        assertEquals(List.of("battery"), opts.getSubCommandArgs());
     }
 }
