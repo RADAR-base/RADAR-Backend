@@ -113,7 +113,7 @@ public class KafkaMonitorFactoryTest {
 
     public static RadarPropertyHandler getRadarPropertyHandler(ConfigRadar config, TemporaryFolder folder) throws IOException {
         File tmpConfig = folder.newFile("radar.yml");
-        new YamlConfigLoader().store(tmpConfig, config);
+        new YamlConfigLoader().store(tmpConfig.toPath(), config);
 
         RadarPropertyHandler properties = new RadarPropertyHandlerImpl();
         properties.load(tmpConfig.getAbsolutePath());
@@ -130,9 +130,8 @@ public class KafkaMonitorFactoryTest {
 
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
-        List<NotifyConfig> notifyConfigs = new ArrayList<>();
-        notifyConfigs.add(new NotifyConfig("test", List.of("test@localhost")));
-        disconnectConfig.setNotifyConfig(notifyConfigs);
+        disconnectConfig.setNotifyConfig(List.of(
+                new NotifyConfig("test", List.of("test@localhost"))));
         disconnectConfig.setEmailUser("test@localhost");
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
@@ -149,9 +148,8 @@ public class KafkaMonitorFactoryTest {
 
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
-        List<NotifyConfig> notifyConfigs = new ArrayList<>();
-        notifyConfigs.add(new NotifyConfig("test", List.of("test@localhost")));
-        batteryConfig.setNotifyConfig(notifyConfigs);
+        batteryConfig.setNotifyConfig(List.of(
+                new NotifyConfig("test", List.of("test@localhost"))));
         batteryConfig.setEmailUser("test@localhost");
         batteryConfig.setEmailHost("localhost");
         batteryConfig.setEmailPort(port);

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,8 +62,7 @@ public class RadarPropertyHandlerTest {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
         properties.set(this.propertyHandler, null);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Config file /usr is invalid");
+        exception.expect(IOException.class);
         String invalidPath = "/usr/";
         propertyHandler.load(invalidPath);
     }

@@ -16,8 +16,8 @@
 
 package org.radarcns.producer;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.apache.avro.SchemaValidationException;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.MockConfig;
@@ -40,7 +40,7 @@ public class MockProducerCommand implements SubCommand {
 
         BasicMockConfig producerConfig = new BasicMockConfig();
 
-        File mockFile = options.getMockFile();
+        Path mockFile = options.getMockFile();
 
         if (mockFile != null) {
             MockConfig mockConfig = new YamlConfigLoader().load(mockFile, MockConfig.class);

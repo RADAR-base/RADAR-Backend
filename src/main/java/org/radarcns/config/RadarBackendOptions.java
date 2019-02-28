@@ -16,7 +16,8 @@
 
 package org.radarcns.config;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -76,12 +77,12 @@ public class RadarBackendOptions {
         return this.cli.hasOption("direct");
     }
 
-    public File getMockFile() {
+    public Path getMockFile() {
         String file = this.cli.getOptionValue("file", null);
         if (file == null) {
             return null;
         } else {
-            return new File(file);
+            return Paths.get(file);
         }
     }
 

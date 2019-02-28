@@ -29,8 +29,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -207,7 +208,7 @@ public class PhoneStreamTest {
 
         sender.close();
 
-        File file = new File(getClass().getResource("/mock_devices.yml").getFile());
+        Path file = Paths.get(getClass().getResource("/mock_devices.yml").getFile());
         BasicMockConfig mockConfig = new YamlConfigLoader().load(file, BasicMockConfig.class);
 
         MockProducer mockProducer = new MockProducer(mockConfig);

@@ -67,10 +67,10 @@ public class StreamMaster implements SubCommand, UncaughtExceptionHandler {
 
     private StreamWorker createWorker(RadarPropertyHandler config, SingleStreamConfig c) {
         try {
-            StreamWorker worker = (StreamWorker) c.getStreamClass().newInstance();
+            StreamWorker worker = (StreamWorker) c.getStreamClass().getConstructor().newInstance();
             worker.configure(this, config, c);
             return worker;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(
                     "Cannot instantiate class " + c.getStreamClass(), e);
         } catch (ClassCastException e) {

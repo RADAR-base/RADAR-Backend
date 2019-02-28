@@ -82,12 +82,12 @@ public class YamlPersistentStateStore implements PersistentStateStore {
         }
         @SuppressWarnings("unchecked")
         Class<? extends T> stateClass = (Class<? extends T>) stateDefault.getClass();
-        return loader.load(consumerFile.toFile(), stateClass);
+        return loader.load(consumerFile, stateClass);
     }
 
     @Override
     public void storeState(String groupId, String clientId, Object value) throws IOException {
-        loader.store(getFile(groupId, clientId).toFile(), value);
+        loader.store(getFile(groupId, clientId), value);
     }
 
     /** File for given consumer. */

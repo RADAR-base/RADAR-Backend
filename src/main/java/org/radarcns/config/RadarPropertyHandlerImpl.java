@@ -18,11 +18,11 @@ package org.radarcns.config;
 
 import static org.radarcns.util.Strings.isNullOrEmpty;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -62,7 +62,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             throw new IllegalStateException("Properties class has been already loaded");
         }
 
-        File file;
+        Path file;
 
         //If pathFile is null
         if (isNullOrEmpty(pathFile)) {
@@ -70,16 +70,12 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
             log.info("DEFAULT CONFIGURATION: loading config file at {}", file);
         } else {
             log.info("USER CONFIGURATION: loading config file at {}", pathFile);
-            file = new File(pathFile);
+            file = Paths.get(pathFile);
         }
 
-        if (!file.exists()) {
+        if (!Files.exists(file)) {
             throw new IllegalArgumentException("Config file " + file + " does not exist");
         }
-        if (!file.isFile()) {
-            throw new IllegalArgumentException("Config file " + file + " is invalid");
-        }
-
         properties = new YamlConfigLoader().load(file, ConfigRadar.class);
 
         Properties buildProperties = new Properties();
@@ -94,15 +90,15 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         }
     }
 
-    private File getDefaultFile() throws IOException {
-        File localFile = new File(CONFIG_FILE_NAME);
-        if (!localFile.exists()) {
+    private Path getDefaultFile() throws IOException {
+        Path localFile = Paths.get(CONFIG_FILE_NAME);
+        if (!Files.exists(localFile)) {
             try {
                 URL codePathUrl = RadarBackend.class.getProtectionDomain().getCodeSource()
                         .getLocation();
                 String codePath = codePathUrl.toURI().getPath();
                 String codeDir = codePath.substring(0, codePath.lastIndexOf('/') + 1);
-                localFile = new File(codeDir, CONFIG_FILE_NAME);
+                localFile = Paths.get(codeDir, CONFIG_FILE_NAME);
             } catch (URISyntaxException ex) {
                 throw new IOException("Cannot get path of executable", ex);
             }
