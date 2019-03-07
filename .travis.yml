@@ -6,6 +6,12 @@ sudo: required
 services:
   - docker
 
+# Use latest docker version
+addons:
+  apt:
+    packages:
+      - docker-ce
+
 env:
   DOCKER_COMPOSE_VERSION: 1.23.2
 
