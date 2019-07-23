@@ -32,7 +32,7 @@ RUN ./gradlew distTar && \
   tar xf build/distributions/*.tar && \
   rm build/distributions/*.tar
 
-FROM confluentinc/cp-base:5.0.0
+FROM confluentinc/cp-base:5.3.0
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl> , Yatharth Ranjan <yatharth.ranjan@kcl.ac.uk>
 
