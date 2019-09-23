@@ -32,7 +32,7 @@ before_install:
 script:
   - ./gradlew check
   - cd src/integrationTest/docker
-  - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
+  - sudo docker-compose up -d zookeeper-1 kafka-1 kafka-2 kafka-3 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
   - sudo docker-compose down
   - cd ../../..
 after_script:
