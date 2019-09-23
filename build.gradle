@@ -33,7 +33,7 @@ ext {
     confluentVersion = '5.1.2'
     hamcrestVersion = '1.3'
     kafkaVersion = '2.1.1'
-    jacksonVersion = '2.9.8'
+    jacksonVersion = '2.9.9'
     javaMailVersion = '1.6.1'
     junitVersion = '4.12'
     findbugVersion = '3.0.2'
@@ -45,7 +45,7 @@ ext {
     jsoupVersion = '1.11.3'
     slf4jVersion = '1.7.25'
     log4jVersion = '1.2.17'
-    avroVersion = '1.8.2'
+    avroVersion = '1.9.0'
 }
 
 //---------------------------------------------------------------------------//
@@ -78,7 +78,7 @@ configurations {
 dependencies {
     implementation group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
-    implementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
+//    implementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
     implementation group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
@@ -93,6 +93,7 @@ dependencies {
 
     // Configuration @JsonProperty
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9.2'
 
     // Monitor mail sending
     implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
