@@ -39,8 +39,8 @@ ext {
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
     mockitoVersion = '2.24.5'
-    radarCommonsVersion = '0.12.0-SNAPSHOT'
-    radarSchemasVersion = '0.5.0-SNAPSHOT'
+    radarCommonsVersion = '0.12.2'
+    radarSchemasVersion = '0.5.2'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.11.3'
     slf4jVersion = '1.7.25'
@@ -57,6 +57,7 @@ repositories {
     mavenCentral()
     // Non-jcenter radar releases
     maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
+    maven { url  'http://dl.bintray.com/radar-base/org.radarbase' }
     // Kafka/confluent releases
     maven { url 'http://packages.confluent.io/maven/' }
     // For working with dev-branches
@@ -76,7 +77,7 @@ configurations {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    implementation group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
+    implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
 //    implementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
     implementation group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
@@ -102,7 +103,7 @@ dependencies {
     // JSoup html parser
     implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
 
-    runtimeOnly group: 'org.radarcns', name: 'radar-commons-unsafe', version: radarCommonsVersion
+    runtimeOnly group: 'org.radarbase', name: 'radar-commons-unsafe', version: radarCommonsVersion
 
     runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
     runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
