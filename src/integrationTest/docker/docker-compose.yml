@@ -120,7 +120,7 @@ services:
   integration-test:
     build:
       context: ../../..
-      dockerfile: ../docker/Dockerfile
+      dockerfile: src/integrationTest/docker/Dockerfile
     # Right now, only direct connections to kafka are tested
     depends_on:
       - kafka-1
