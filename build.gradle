@@ -79,7 +79,7 @@ configurations {
 dependencies {
     implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
-//    implementation group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
+    implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
     implementation group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
 
     // Kafka streaming API
