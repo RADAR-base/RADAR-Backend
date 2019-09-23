@@ -17,7 +17,8 @@
 package org.radarcns.config;
 
 import java.util.List;
-import org.radarcns.mock.config.MockDataConfig;
+
+import org.radarbase.mock.config.MockDataConfig;
 
 public class MockConfig {
     private List<MockDataConfig> data;

@@ -8,7 +8,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
-import org.radarcns.util.SpecificAvroConvertible;
+import org.radarbase.util.SpecificAvroConvertible;
 
 public class AvroConvertibleSerde<T extends SpecificAvroConvertible> implements Serde<T> {
     private final Supplier<T> supplier;

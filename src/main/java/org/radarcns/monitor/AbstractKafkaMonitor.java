@@ -46,11 +46,11 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.InterruptException;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.errors.WakeupException;
+import org.radarbase.util.RollingTimeAverage;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.util.PersistentStateStore;
-import org.radarcns.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

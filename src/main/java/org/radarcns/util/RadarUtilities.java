@@ -18,13 +18,13 @@ package org.radarcns.util;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.aggregator.AggregateList;
 import org.radarcns.stream.aggregator.NumericAggregate;
 import org.radarcns.stream.aggregator.PhoneUsageAggregate;
-import org.radarcns.stream.collector.AggregateListCollector;
-import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 import org.radarcns.stream.phone.TemporaryPackageKey;
 

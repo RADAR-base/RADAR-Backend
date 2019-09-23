@@ -29,10 +29,10 @@ import java.util.stream.Stream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.junit.Before;
 import org.junit.Test;
+import org.radarbase.topic.KafkaTopic;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SingleStreamConfig;
-import org.radarcns.topic.KafkaTopic;
 import org.radarcns.util.RadarSingleton;
 
 /**

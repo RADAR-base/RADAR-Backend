@@ -16,7 +16,8 @@
 
 package org.radarcns.stream.empatica;
 
-import static org.radarcns.util.Serialization.floatToDouble;
+
+import static org.radarbase.util.Serialization.floatToDouble;
 
 import javax.annotation.Nonnull;
 import org.apache.kafka.streams.kstream.KStream;

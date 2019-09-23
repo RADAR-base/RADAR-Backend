@@ -24,7 +24,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.radarcns.topic.KafkaTopic;
+import org.radarbase.topic.KafkaTopic;
 
 public class StreamDefinition implements Comparable<StreamDefinition> {
     private final KafkaTopic inputTopic;

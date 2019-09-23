@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.radarcns.config.YamlConfigLoader;
+
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.kafka.ObservationKey;
 
 /**

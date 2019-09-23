@@ -30,10 +30,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+
+import org.radarbase.topic.KafkaTopic;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SingleStreamConfig;
 import org.radarcns.config.SubCommand;
-import org.radarcns.topic.KafkaTopic;
 import org.radarcns.util.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

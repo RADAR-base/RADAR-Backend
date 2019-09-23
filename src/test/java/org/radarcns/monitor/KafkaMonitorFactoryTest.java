@@ -34,6 +34,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.config.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.DisconnectMonitorConfig;
@@ -42,7 +43,6 @@ import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
 import org.radarcns.config.SourceStatisticsStreamConfig;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.util.EmailServerRule;
 
 public class KafkaMonitorFactoryTest {
