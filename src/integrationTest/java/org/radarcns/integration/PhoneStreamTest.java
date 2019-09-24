@@ -195,11 +195,11 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "com.strava", null, null, UsageEventType.BACKGROUND),
-                new PhoneUsageEvent(time, time++,
-                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time,
-                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+                        "com.strava", null, null, UsageEventType.BACKGROUND));
+//                new PhoneUsageEvent(time, time++,
+//                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+//                new PhoneUsageEvent(time, time,
+//                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
 
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender =
                 sender.sender(PHONE_USAGE_TOPIC)) {
