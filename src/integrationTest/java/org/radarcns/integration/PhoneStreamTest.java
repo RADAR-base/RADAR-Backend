@@ -282,7 +282,7 @@ public class PhoneStreamTest {
             String result = CATEGORIES.get(packageName);
             if (result == null) {
                 assertNull(category);
-            } else if (category != null) {
+            } else {
                 assertEquals(result, category.toString());
             }
 
