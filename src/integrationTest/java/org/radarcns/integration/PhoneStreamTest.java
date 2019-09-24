@@ -21,14 +21,12 @@ import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
+
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -83,7 +83,6 @@ public class PhoneStreamTest {
 
     private static final Map<String, String> CATEGORIES = Map.ofEntries(
             Map.entry("nl.nos.app", "NEWS_AND_MAGAZINES"),
-            Map.entry("nl.thehyve.transmartclient", "MEDICAL"),
             Map.entry("com.twitter.android", "NEWS_AND_MAGAZINES"),
             Map.entry("com.facebook.katana", "SOCIAL"),
             Map.entry("com.nintendo.zara", "GAME_ACTION"),
@@ -112,21 +111,6 @@ public class PhoneStreamTest {
         ConfigRadar props = propHandler.getRadarProperties();
         KafkaTopics topics = new KafkaTopics(props.getZookeeperPaths());
         int expectedBrokers = props.getBroker().size();
-//        int activeBrokers = 0;
-//        int sleep = 2;
-//        for (int tries = 0; tries < 10; tries++) {
-//            activeBrokers = topics.getNumberOfBrokers();
-//            if (activeBrokers >= expectedBrokers) {
-//                logger.info("Kafka brokers available. Starting topic creation.");
-//                break;
-//            } else {
-//                logger.warn("Only {} out of {} Kafka brokers available. Waiting {} seconds.",
-//                        activeBrokers, expectedBrokers, sleep);
-//                Thread.sleep(sleep * 1000L);
-//                sleep = Math.min(MAX_SLEEP, sleep * 2);
-//            }
-//        }
-//        assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
         topics.initialize(expectedBrokers);
         topics.createTopics(Stream.of(
                 "android_phone_usage_event", "android_phone_usage_event_output",
@@ -163,9 +147,7 @@ public class PhoneStreamTest {
 
     @After
     public void tearDown() throws IOException, InterruptedException {
-        if (backend != null) {
-            backend.shutdown();
-        }
+        backend.shutdown();
     }
 
     @Test(timeout = 600_000L)
@@ -189,17 +171,18 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.whatsapp", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
-                new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
-                new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "com.strava", null, null, UsageEventType.BACKGROUND));
-//                new PhoneUsageEvent(time, time++,
-//                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
-//                new PhoneUsageEvent(time, time,
-//                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+                        "com.strava", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "nl.nos.app", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time,
+                        "nl.nos.app", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.twitter.android", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time,
+                        "com.twitter.android", null, null, UsageEventType.BACKGROUND));
+
 
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender =
                 sender.sender(PHONE_USAGE_TOPIC)) {
