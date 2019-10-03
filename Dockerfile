@@ -38,6 +38,11 @@ MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.n
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		curl \
+		wget \
+	&& rm -rf /var/lib/apt/lists/*
+
 ENV KAFKA_REST_PROXY http://rest-proxy:8082
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 

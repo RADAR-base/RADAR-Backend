@@ -86,7 +86,7 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                         new RadarSerde<>(SourceStatisticsRecord.class).getSerde());
 
         String[] inputTopics = getStreamDefinitions()
-                .map(StreamDefinition::getInputTopic)
+                .map(s -> s.getInputTopic().getName())
                 .toArray(String[]::new);
 
         builder.addSource("source", genericReader, genericReader, inputTopics);
