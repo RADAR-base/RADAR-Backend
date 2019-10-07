@@ -128,6 +128,8 @@ public class PhoneStreamTest {
         }
         assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
 
+        topics.initialize(activeBrokers);
+
         topics.createTopics(Stream.of(
                 "android_phone_usage_event", "android_phone_usage_event_output",
                 "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
@@ -187,17 +189,17 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.whatsapp", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
+                        "com.android.chrome", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
+                        "com.android.chrome", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+                        "com.google.android.youtube", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time,
-                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+                        "com.google.android.youtube", null, null, UsageEventType.BACKGROUND));
 
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender =
                 sender.sender(PHONE_USAGE_TOPIC)) {
@@ -273,7 +275,7 @@ public class PhoneStreamTest {
             GenericRecord value = record.value();
             Double fetchTime = (Double)value.get("categoryNameFetchTime");
             assertNotNull(fetchTime);
-            assertThat(fetchTime, greaterThan(System.currentTimeMillis() / 1000L - 300d));
+            assertThat(fetchTime, greaterThan(System.currentTimeMillis() / 1000L - 120000d));
             Object category = value.get("categoryName");
             String packageName = value.get("packageName").toString();
             assertThat(packageName, isIn(CATEGORIES.keySet()));
