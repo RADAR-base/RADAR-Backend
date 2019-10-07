@@ -275,7 +275,7 @@ public class PhoneStreamTest {
             GenericRecord value = record.value();
             Double fetchTime = (Double)value.get("categoryNameFetchTime");
             assertNotNull(fetchTime);
-            assertThat(fetchTime, greaterThan(System.currentTimeMillis() / 1000L - 120000d));
+            assertThat(fetchTime, greaterThan(System.currentTimeMillis() / 1000L - 300d));
             Object category = value.get("categoryName");
             String packageName = value.get("packageName").toString();
             assertThat(packageName, isIn(CATEGORIES.keySet()));
