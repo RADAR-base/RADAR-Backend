@@ -50,10 +50,10 @@ public class DeviceTimestampExtractorTest {
     public void extract() {
         String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", "
                 +"\"name\": \"TestTimeExtract\","
-                +"\"fields\": [{\"name\": \"timeReceived\", \"type\": \"double\"}]}";
+                +"\"fields\": [{\"name\": \"time\", \"type\": \"double\"}]}";
         GenericRecord record = buildIndexedRecord(userSchema);
         double timeValue = 40880.051388;
-        record.put("timeReceived", timeValue);
+        record.put("time", timeValue);
         ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord<>(topic, 3, 30, null, record);
         long extracted = this.timestampExtractor.extract(consumerRecord, -1L);
         assertEquals((long) (1000d * timeValue), extracted);
@@ -63,9 +63,9 @@ public class DeviceTimestampExtractorTest {
     public void extractWithNotDoubleTimeReceived() {
         String userSchema = "{\"namespace\": \"test.radar.backend\", \"type\": \"record\", "
                 +"\"name\": \"TestTimeExtract\","
-                +"\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}";
+                +"\"fields\": [{\"name\": \"time\", \"type\": \"string\"}]}";
         GenericRecord record = buildIndexedRecord(userSchema);
-        record.put("timeReceived", "timeValue");
+        record.put("time", "timeValue");
         ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord<>(topic, 3, 30, null, record);
 
         exception.expect(RuntimeException.class);

@@ -7,6 +7,7 @@ import static org.radarcns.monitor.AbstractKafkaMonitor.extractKey;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -78,41 +79,60 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         return interval;
     }
 
-    @SuppressWarnings("PMD.OptimizableToArrayCall")
     private Topology getTopology() {
-        Topology builder = new Topology();
+        Topology topology = new Topology();
 
-        final Map<String, ?> schemaRegistryUrlConfigMap = Map.of(
-              AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-              getStreamsConfig().get(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG));
+        final Map<String, ?> serdeConfig = Map.of(
+                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                getStreamsConfig().get(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG),
+                AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS,
+                true);
 
+        addSource("source", topology, serdeConfig);
+
+        topology.addProcessor("process", SourceStatisticsProcessor::new, "source");
+
+        addSink(topology, serdeConfig, "process");
+        addStateStore(topology, serdeConfig, "process");
+
+        return topology;
+    }
+
+    private void addSource(String name, Topology topology, Map<String, ?> serdeConfig) {
         GenericAvroDeserializer genericReaderKey = new GenericAvroDeserializer();
         GenericAvroDeserializer genericReaderValue = new GenericAvroDeserializer();
 
-        genericReaderKey.configure(schemaRegistryUrlConfigMap, true);
-        genericReaderValue.configure(schemaRegistryUrlConfigMap, false);
+        genericReaderKey.configure(serdeConfig, true);
+        genericReaderValue.configure(serdeConfig, false);
 
         String[] inputTopics = getStreamDefinitions()
-              .map(s -> s.getInputTopic().getName())
-              .toArray(String[]::new);
+                .map(s -> s.getInputTopic().getName())
+                .toArray(String[]::new);
 
-        builder.addSource("source", genericReaderKey, genericReaderValue, inputTopics);
+        topology.addSource(name, genericReaderKey, genericReaderValue, inputTopics);
+    }
 
+    private void addStateStore(
+            Topology topology,
+            Map<String, ?> serdeConfig,
+            String... processorNames) {
         Serde<ObservationKey> keySerde = new SpecificAvroSerde<>();
         Serde<SourceStatisticsRecord> valueSerde =
-              new RadarSerde<>(SourceStatisticsRecord.class).getSerde();
+                new RadarSerde<>(SourceStatisticsRecord.class).getSerde();
 
-        keySerde.configure(schemaRegistryUrlConfigMap, true);
-        valueSerde.configure(schemaRegistryUrlConfigMap, false);
+        keySerde.configure(serdeConfig, true);
+        valueSerde.configure(serdeConfig, false);
 
         StoreBuilder<KeyValueStore<ObservationKey, SourceStatisticsRecord>> statisticsStore =
-                  Stores.keyValueStoreBuilder(
-                          Stores.persistentKeyValueStore("statistics"),
-                          keySerde,
-                          valueSerde);
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore("statistics"),
+                        keySerde,
+                        valueSerde);
 
-        builder.addProcessor("process", SourceStatisticsProcessor::new, "source");
+        topology.addStateStore(statisticsStore, processorNames);
+    }
 
+    private void addSink(Topology topology, Map<String, ?> serdeConfig, String... parentNames) {
         String outputTopic = getStreamDefinitions()
                 .map(StreamDefinition::getOutputTopic)
                 .filter(Objects::nonNull)
@@ -123,20 +143,18 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                 .getName();
 
         SpecificAvroSerializer<ObservationKey> keySerializer =
-              new SpecificAvroSerializer<>();
+                new SpecificAvroSerializer<>();
         SpecificAvroSerializer<SourceStatistics> valueSerializer =
-              new SpecificAvroSerializer<>();
+                new SpecificAvroSerializer<>();
 
-        keySerializer.configure(schemaRegistryUrlConfigMap, true);
-        valueSerializer.configure(schemaRegistryUrlConfigMap, false);
+        keySerializer.configure(serdeConfig, true);
+        valueSerializer.configure(serdeConfig, false);
 
-        builder.addSink("sink", outputTopic,
+        topology.addSink("sink",
+                outputTopic,
                 keySerializer,
                 valueSerializer,
-                "process");
-
-        builder.addStateStore(statisticsStore, "process");
-        return builder;
+                parentNames);
     }
 
     private Properties getStreamsConfig() {

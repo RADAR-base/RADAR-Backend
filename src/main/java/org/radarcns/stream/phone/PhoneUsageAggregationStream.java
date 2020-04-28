@@ -37,7 +37,8 @@ public class PhoneUsageAggregationStream extends
                         (k, v, valueCollector) -> valueCollector.update(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                                 RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
-                                        .getPhoneUsageCollector()))
+                                        .getPhoneUsageCollector(
+                                                getStreamPropertiesMap(definition), false)))
                 .toStream()
                 .map(utilities::phoneCollectorToAvro);
     }

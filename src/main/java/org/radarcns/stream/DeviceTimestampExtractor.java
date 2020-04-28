@@ -30,10 +30,10 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
     private static final Logger log = LoggerFactory.getLogger(DeviceTimestampExtractor.class);
 
     /**
-     * Return the timeReceived value converted in long. timeReceived is the timestamp at which the
+     * Return the time value converted in long. time is the timestamp at which the
      * device has collected the sample.
      *
-     * @throws IllegalArgumentException if timeReceived is not present inside the analysed record
+     * @throws IllegalArgumentException if time is not present inside the analysed record
      */
     @Override
     public long extract(ConsumerRecord<Object, Object> record, long previousTimestamp) {
@@ -41,13 +41,12 @@ public class DeviceTimestampExtractor implements TimestampExtractor {
         Schema recordSchema = value.getSchema();
 
         try {
-            Schema.Field field = recordSchema.getField("timeReceived");
+            Schema.Field field = recordSchema.getField("time");
             if (value.get(field.pos()) instanceof Double) {
                 return (long) (1000d * (Double) value.get(field.pos()));
             } else {
                 log.error("timeReceived id not a Double in {}", record);
             }
-
         } catch (AvroRuntimeException e) {
             log.error("Cannot extract timeReceived form {}", record, e);
         }
