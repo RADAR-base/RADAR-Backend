@@ -54,7 +54,7 @@ public class PhoneUsageStream extends SensorStreamWorker<ObservationKey, PhoneUs
             .mapValues(value -> {
                 String packageName = value.getPackageName();
                 PlayStoreLookup.AppCategory category = playStoreLookup.lookupCategory(packageName);
-                logger.info("Looked up {}: {}", packageName, category.getCategoryName());
+                logger.debug("Looked up {}: {}", packageName, category.getCategoryName());
                 value.setCategoryName(category.getCategoryName());
                 value.setCategoryNameFetchTime(category.getFetchTimeStamp());
                 return value;

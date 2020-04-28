@@ -21,7 +21,9 @@ import static org.radarcns.util.StreamUtil.first;
 import static org.radarcns.util.StreamUtil.second;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -111,9 +113,9 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
         TimeWindows window = definition.getTimeWindows();
         if (window != null) {
             clientIdBuilder.append('-')
-                    .append(String.valueOf(window.sizeMs))
+                    .append(window.sizeMs)
                     .append('-')
-                    .append(String.valueOf(window.advanceMs));
+                    .append(window.advanceMs);
         }
 
         Properties props = kafkaProperty.getStreamProperties(clientIdBuilder.toString(), config,
@@ -124,6 +126,13 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
                 String.valueOf(interval));
 
         return props;
+    }
+
+    protected Map<String, ?> getStreamPropertiesMap(@Nonnull StreamDefinition definition) {
+        Map<String, Object> map = new HashMap<>();
+        Properties properties = getStreamProperties(definition);
+        properties.forEach((k, v) -> map.put(k.toString(), v));
+        return map;
     }
 
     /**
@@ -169,7 +178,8 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
-                                    .getNumericAggregateCollector()))
+                                    .getNumericAggregateCollector(
+                                            getStreamPropertiesMap(definition), false)))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -185,7 +195,8 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
                         (k, v, valueCollector) -> valueCollector.add(calculation.apply(v)),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
-                                    .getNumericAggregateCollector()))
+                                    .getNumericAggregateCollector(
+                                            getStreamPropertiesMap(definition), false)))
                 .toStream()
                 .map(utilities::numericCollectorToAvro);
     }
@@ -202,7 +213,8 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
                         (k, v, valueCollector) -> valueCollector.add(v),
                         RadarSerdes.materialized(definition.getStateStoreName(),
                             RadarSerdes.getInstance(allConfig.getSchemaRegistryPaths())
-                                    .getAggregateListCollector()))
+                                    .getAggregateListCollector(
+                                            getStreamPropertiesMap(definition), false)))
                 .toStream()
                 .map(utilities::listCollectorToAvro);
     }

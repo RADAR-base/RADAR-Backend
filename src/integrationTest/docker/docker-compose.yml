@@ -127,6 +127,7 @@ services:
       - schema-registry-1
     networks:
       - kafka
+      - default
     command: integrationTest
     volumes:
       - ../../../build/jacoco:/code/build/jacoco

@@ -18,6 +18,7 @@ package org.radarcns.util.serde;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import java.util.Map;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -30,12 +31,8 @@ import org.radarcns.stream.phone.PhoneUsageCollector;
  * Set of Serde useful for Kafka Streams
  */
 public final class RadarSerdes {
-
-    private final Serde<NumericAggregateCollector> numericCollector;
-    private final Serde<AggregateListCollector> aggregateListCollector;
-    private final Serde<PhoneUsageCollector> phoneUsageCollector;
-
     private static RadarSerdes instance;
+    private final SchemaRegistryClient client;
 
     public static synchronized RadarSerdes getInstance(String schemaRegistryUrls) {
         if (instance == null) {
@@ -47,21 +44,27 @@ public final class RadarSerdes {
     }
 
     private RadarSerdes(SchemaRegistryClient client) {
-        numericCollector = new AvroConvertibleSerde<>(NumericAggregateCollector::new, client);
-        aggregateListCollector = new AvroConvertibleSerde<>(AggregateListCollector::new, client);
-        phoneUsageCollector = new RadarSerde<>(PhoneUsageCollector.class).getSerde();
+        this.client = client;
     }
 
-    public Serde<NumericAggregateCollector> getNumericAggregateCollector() {
-        return numericCollector;
+    public Serde<NumericAggregateCollector> getNumericAggregateCollector(Map<String, ?> config, boolean asKey) {
+        AvroConvertibleSerde<NumericAggregateCollector> serde = new AvroConvertibleSerde<>(
+                NumericAggregateCollector::new, client);
+        serde.configure(config, asKey);
+        return serde;
     }
 
-    public Serde<AggregateListCollector> getAggregateListCollector()  {
-        return aggregateListCollector;
+    public Serde<AggregateListCollector> getAggregateListCollector(Map<String, ?> config, boolean asKey)  {
+        AvroConvertibleSerde<AggregateListCollector> serde = new AvroConvertibleSerde<>(
+                AggregateListCollector::new, client);
+        serde.configure(config, asKey);
+        return serde;
     }
 
-    public Serde<PhoneUsageCollector> getPhoneUsageCollector() {
-        return phoneUsageCollector;
+    public Serde<PhoneUsageCollector> getPhoneUsageCollector(Map<String, ?> config, boolean asKey) {
+        Serde<PhoneUsageCollector> serde = new RadarSerde<>(PhoneUsageCollector.class).getSerde();
+        serde.configure(config, asKey);
+        return serde;
     }
 
     public static <K, V> Materialized<K, V, WindowStore<Bytes, byte[]>> materialized(String name, Serde<V> valueSerde) {
