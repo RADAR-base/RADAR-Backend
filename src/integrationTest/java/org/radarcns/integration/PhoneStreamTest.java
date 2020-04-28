@@ -274,6 +274,8 @@ public class PhoneStreamTest {
             if (result == null) {
                 assertNull(category);
             } else {
+                assertNotNull("Category for " + packageName + " expected to be "
+                        + result + ", not null", category);
                 assertEquals(result, category.toString());
             }
 
