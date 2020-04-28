@@ -7,7 +7,6 @@ import static org.radarcns.monitor.AbstractKafkaMonitor.extractKey;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
