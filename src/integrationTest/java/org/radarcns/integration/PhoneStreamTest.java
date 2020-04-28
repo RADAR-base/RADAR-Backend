@@ -112,21 +112,8 @@ public class PhoneStreamTest {
         ConfigRadar props = propHandler.getRadarProperties();
         KafkaTopics topics = new KafkaTopics(props.getZookeeperPaths());
         int expectedBrokers = props.getBroker().size();
-        int activeBrokers = 0;
-        int sleep = 2;
-        for (int tries = 0; tries < 10; tries++) {
-            activeBrokers = topics.getNumberOfBrokers();
-            if (activeBrokers >= expectedBrokers) {
-                logger.info("Kafka brokers available. Starting topic creation.");
-                break;
-            } else {
-                logger.warn("Only {} out of {} Kafka brokers available. Waiting {} seconds.",
-                        activeBrokers, expectedBrokers, sleep);
-                Thread.sleep(sleep * 1000L);
-                sleep = Math.min(MAX_SLEEP, sleep * 2);
-            }
-        }
-        assertThat(activeBrokers, greaterThanOrEqualTo(expectedBrokers));
+
+        topics.initialize(expectedBrokers);
 
         topics.createTopics(Stream.of(
                 "android_phone_usage_event", "android_phone_usage_event_output",
@@ -187,17 +174,17 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.whatsapp", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.FOREGROUND),
+                        "com.android.chrome", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "nl.thehyve.transmartclient", null, null, UsageEventType.BACKGROUND),
+                        "com.android.chrome", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
-                        "com.android.systemui", null, null, UsageEventType.FOREGROUND),
+                        "com.google.android.youtube", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time,
-                        "com.android.systemui", null, null, UsageEventType.BACKGROUND));
+                        "com.google.android.youtube", null, null, UsageEventType.BACKGROUND));
 
         try (KafkaTopicSender<ObservationKey, PhoneUsageEvent> topicSender =
                 sender.sender(PHONE_USAGE_TOPIC)) {

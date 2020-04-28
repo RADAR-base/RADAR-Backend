@@ -4,6 +4,10 @@ import static org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CON
 import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG;
 import static org.radarcns.monitor.AbstractKafkaMonitor.extractKey;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
@@ -11,10 +15,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.Topology;
@@ -26,8 +32,6 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.radarcns.config.SourceStatisticsStreamConfig;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.AbstractStreamWorker;
@@ -74,24 +78,60 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         return interval;
     }
 
-    @SuppressWarnings("PMD.OptimizableToArrayCall")
     private Topology getTopology() {
-        Topology builder = new Topology();
-        GenericAvroDeserializer genericReader = new GenericAvroDeserializer();
+        Topology topology = new Topology();
+
+        final Map<String, ?> serdeConfig = Map.of(
+                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                getStreamsConfig().get(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG),
+                AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS,
+                true);
+
+        addSource("source", topology, serdeConfig);
+
+        topology.addProcessor("process", SourceStatisticsProcessor::new, "source");
+
+        addSink(topology, serdeConfig, "process");
+        addStateStore(topology, serdeConfig, "process");
+
+        return topology;
+    }
+
+    private void addSource(String name, Topology topology, Map<String, ?> serdeConfig) {
+        GenericAvroDeserializer genericReaderKey = new GenericAvroDeserializer();
+        GenericAvroDeserializer genericReaderValue = new GenericAvroDeserializer();
+
+        genericReaderKey.configure(serdeConfig, true);
+        genericReaderValue.configure(serdeConfig, false);
+
+        String[] inputTopics = getStreamDefinitions()
+                .map(s -> s.getInputTopic().getName())
+                .toArray(String[]::new);
+
+        topology.addSource(name, genericReaderKey, genericReaderValue, inputTopics);
+    }
+
+    private void addStateStore(
+            Topology topology,
+            Map<String, ?> serdeConfig,
+            String... processorNames) {
+        Serde<ObservationKey> keySerde = new SpecificAvroSerde<>();
+        Serde<SourceStatisticsRecord> valueSerde =
+                new RadarSerde<>(SourceStatisticsRecord.class).getSerde();
+
+        keySerde.configure(serdeConfig, true);
+        valueSerde.configure(serdeConfig, false);
 
         StoreBuilder<KeyValueStore<ObservationKey, SourceStatisticsRecord>> statisticsStore =
                 Stores.keyValueStoreBuilder(
                         Stores.persistentKeyValueStore("statistics"),
-                        new SpecificAvroSerde<>(),
-                        new RadarSerde<>(SourceStatisticsRecord.class).getSerde());
+                        keySerde,
+                        valueSerde);
 
-        String[] inputTopics = getStreamDefinitions()
-                .map(StreamDefinition::getInputTopic)
-                .toArray(String[]::new);
+        topology.addStateStore(statisticsStore, processorNames);
+    }
 
-        builder.addSource("source", genericReader, genericReader, inputTopics);
-        builder.addProcessor("process", SourceStatisticsProcessor::new, "source");
-
+    private void addSink(Topology topology, Map<String, ?> serdeConfig, String... parentNames) {
         String outputTopic = getStreamDefinitions()
                 .map(StreamDefinition::getOutputTopic)
                 .filter(Objects::nonNull)
@@ -101,13 +141,19 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                                 + " is undefined."))
                 .getName();
 
-        builder.addSink("sink", outputTopic,
-                new SpecificAvroSerializer<ObservationKey>(),
-                new SpecificAvroSerializer<SourceStatistics>(),
-                "process");
+        SpecificAvroSerializer<ObservationKey> keySerializer =
+                new SpecificAvroSerializer<>();
+        SpecificAvroSerializer<SourceStatistics> valueSerializer =
+                new SpecificAvroSerializer<>();
 
-        builder.addStateStore(statisticsStore, "process");
-        return builder;
+        keySerializer.configure(serdeConfig, true);
+        valueSerializer.configure(serdeConfig, false);
+
+        topology.addSink("sink",
+                outputTopic,
+                keySerializer,
+                valueSerializer,
+                parentNames);
     }
 
     private Properties getStreamsConfig() {
@@ -206,12 +252,13 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         }
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SourceStatisticsRecord {
         private final double timeStart;
         private final double timeEnd;
         private final boolean isSent;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public SourceStatisticsRecord(
                 @JsonProperty("timeStart") double timeStart,
                 @JsonProperty("timeEnd") double timeEnd,
@@ -243,6 +290,8 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
             return new SourceStatisticsRecord(timeStart, timeEnd, true);
         }
     }
+
+
 
     private static double getTime(GenericRecord record, Schema schema, String fieldName,
             double defaultValue) {

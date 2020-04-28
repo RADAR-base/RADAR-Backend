@@ -119,14 +119,15 @@ services:
   #---------------------------------------------------------------------------#
   integration-test:
     build:
-      context: ../../..
-      dockerfile: ../docker/Dockerfile
+      context: ../../../
+      dockerfile: ./src/integrationTest/docker/Dockerfile
     # Right now, only direct connections to kafka are tested
     depends_on:
       - kafka-1
       - schema-registry-1
     networks:
       - kafka
+      - default
     command: integrationTest
     volumes:
       - ../../../build/jacoco:/code/build/jacoco
