@@ -186,7 +186,7 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.twitter.android", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time,
-                        "com.twitter.android", null, null, UsageEventType.BACKGROUND));
+                        "com.twitter.android", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time,
                         "com.google.android.youtube", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time,
