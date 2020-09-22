@@ -42,8 +42,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV KAFKA_REST_PROXY http://rest-proxy:8082
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
+ENV RADAR_BACKEND_CONFIG /etc/radar.yml
 
 COPY --from=builder /code/radar-backend-*/bin/* /usr/bin/
 COPY --from=builder /code/radar-backend-*/lib/* /usr/lib/
 
-CMD ["radar-backend", "-c", "/etc/radar.yml"]
+# Load topics validator
+COPY ./src/main/docker/radar-backend-init /usr/bin
+
+ENTRYPOINT ["radar-backend-init"]
