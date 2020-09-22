@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.errors.StreamsException;
+import org.radarbase.topic.KafkaTopic;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.KafkaProperty;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SingleStreamConfig;
-import org.radarcns.topic.KafkaTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

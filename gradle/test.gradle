@@ -30,20 +30,15 @@ dependencies {
     // Mock mail server
     testImplementation group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
+    testRuntimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
+    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+
     integrationTestImplementation group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
-    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-
-    integrationTestImplementation group: 'junit', name: 'junit', version: junitVersion
-    integrationTestImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    integrationTestImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-
-    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 }
 
 tasks.matching {it instanceof Test}.all {
     testLogging {
+        events "skipped", "failed"
         showStandardStreams = true
         showExceptions = true
         showCauses = true
@@ -65,8 +60,3 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTestClasses
-
-// Do not do integration test yet, but check if integration tests compile
-//check.dependsOn integrationTestClasses
-
-test.testLogging.events "skipped", "failed"

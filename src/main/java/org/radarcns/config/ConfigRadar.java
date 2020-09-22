@@ -20,8 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import org.radarcns.stream.TimeWindowMetadata;
+
+import org.radarbase.config.ServerConfig;
+import org.radarbase.config.YamlConfigLoader;
 
 /**
  * POJO representing the yml file

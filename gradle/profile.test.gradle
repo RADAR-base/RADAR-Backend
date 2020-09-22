@@ -1,12 +1,5 @@
 apply from: 'gradle/test.gradle'
-
-task downloadTestDependencies {
-    description "Pre-downloads *most* dependencies"
-    configurations.compileClasspath.files
-    configurations.testCompileClasspath.files
-    configurations.integrationTestCompileClasspath.files
-    configurations.integrationTestRuntimeClasspath.files
-}
+apply from: 'gradle/utilities.gradle'
 
 processResources {
     expand(version: version)

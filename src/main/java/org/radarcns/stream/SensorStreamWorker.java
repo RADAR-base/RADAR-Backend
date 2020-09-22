@@ -38,12 +38,12 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
 import org.radarcns.kafka.AggregateKey;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.stream.aggregator.AggregateList;
 import org.radarcns.stream.aggregator.NumericAggregate;
-import org.radarcns.stream.collector.AggregateListCollector;
-import org.radarcns.stream.collector.NumericAggregateCollector;
 import org.radarcns.util.Monitor;
 import org.radarcns.util.RadarSingleton;
 import org.radarcns.util.RadarUtilities;
@@ -75,26 +75,19 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
      * input topic to given output topic. It monitors the amount of messages that are read.
      */
     protected KeyValue<ScheduledFuture<?>, KafkaStreams> createBuilder(StreamDefinition def) {
-        Monitor monitor;
-        ScheduledFuture<?> future = null;
-        if (monitorLog != null) {
-            monitor = new Monitor(monitorLog, "records have been read from "
-                    + def.getInputTopic() + " to " + def.getOutputTopic());
-            future = master.addMonitor(monitor);
-        } else {
-            monitor = null;
-        }
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        KStream<?, ?> stream = implementStream(def,
-                builder.<K, V>stream(def.getInputTopic().getName())
-                        .map((k, v) -> {
-                            if (monitor != null) {
-                                monitor.increment();
-                            }
-                            return pair(k, v);
-                        }));
+        KStream<?, ?> stream = implementStream(def, builder.stream(def.getInputTopic().getName()));
+
+        ScheduledFuture<?> future = null;
+        if (monitorLog != null) {
+            Monitor monitor = new Monitor(monitorLog, "records have been read from "
+                    + def.getInputTopic() + " to " + def.getOutputTopic());
+            stream = stream.peek((k, v) -> monitor.increment());
+            future = master.addMonitor(monitor);
+        }
+
         if (def.getOutputTopic() != null) {
             stream.to(def.getOutputTopic().getName());
         }

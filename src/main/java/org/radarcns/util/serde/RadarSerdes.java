@@ -23,8 +23,8 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.WindowStore;
-import org.radarcns.stream.collector.AggregateListCollector;
-import org.radarcns.stream.collector.NumericAggregateCollector;
+import org.radarbase.stream.collector.AggregateListCollector;
+import org.radarbase.stream.collector.NumericAggregateCollector;
 import org.radarcns.stream.phone.PhoneUsageCollector;
 
 /**

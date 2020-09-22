@@ -10,7 +10,7 @@ services:
   # Zookeeper Cluster                                                         #
   #---------------------------------------------------------------------------#
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:5.1.2
+    image: confluentinc/cp-zookeeper:5.5.1
     networks:
       - kafka
     environment:
@@ -25,7 +25,7 @@ services:
   # Kafka Cluster                                                             #
   #---------------------------------------------------------------------------#
   kafka-1:
-    image: confluentinc/cp-kafka:5.1.2
+    image: confluentinc/cp-kafka:5.5.1
     depends_on:
       - zookeeper-1
     networks:
@@ -36,12 +36,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: "2.5"
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: "2.5"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-2:
-    image: confluentinc/cp-kafka:5.1.2
+    image: confluentinc/cp-kafka:5.5.1
     depends_on:
       - zookeeper-1
     networks:
@@ -52,12 +52,12 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: "2.5"
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: "2.5"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafka-3:
-    image: confluentinc/cp-kafka:5.1.2
+    image: confluentinc/cp-kafka:5.5.1
     depends_on:
       - zookeeper-1
     networks:
@@ -68,15 +68,15 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
-      KAFKA_INTER_BROKER_PROTOCOL_VERSION: 2.1
-      KAFKA_LOG_MESSAGE_FORMAT_VERSION: 2.1
+      KAFKA_INTER_BROKER_PROTOCOL_VERSION: "2.5"
+      KAFKA_LOG_MESSAGE_FORMAT_VERSION: "2.5"
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   #---------------------------------------------------------------------------#
   # Schema Registry                                                           #
   #---------------------------------------------------------------------------#
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:5.1.2
+    image: confluentinc/cp-schema-registry:5.5.1
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -88,7 +88,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper-1:2181
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:9092,PLAINTEXT://kafka-2:9092,PLAINTEXT://kafka-3:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
@@ -97,7 +97,7 @@ services:
   # REST proxy                                                                #
   #---------------------------------------------------------------------------#
   rest-proxy-1:
-    image: confluentinc/cp-kafka-rest:5.1.2
+    image: confluentinc/cp-kafka-rest:5.5.1
     depends_on:
       - kafka-1
       - kafka-2
@@ -108,7 +108,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:9092,PLAINTEXT://kafka-2:9092,PLAINTEXT://kafka-3:9092
       KAFKA_REST_LISTENERS: http://rest-proxy-1:8082
       KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KAFKA_REST_HOST_NAME: rest-proxy-1
@@ -119,8 +119,8 @@ services:
   #---------------------------------------------------------------------------#
   integration-test:
     build:
-      context: ../../../
-      dockerfile: ./src/integrationTest/docker/Dockerfile
+      context: ../../..
+      dockerfile: src/integrationTest/docker/Dockerfile
     # Right now, only direct connections to kafka are tested
     depends_on:
       - kafka-1
@@ -128,7 +128,9 @@ services:
     networks:
       - kafka
       - default
-    command: integrationTest
+    command:
+      - gradle
+      - integrationTest
     volumes:
       - ../../../build/jacoco:/code/build/jacoco
       - ../../../build/reports:/code/build/reports

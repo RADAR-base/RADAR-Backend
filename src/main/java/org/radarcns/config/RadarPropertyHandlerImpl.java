@@ -16,7 +16,8 @@
 
 package org.radarcns.config;
 
-import static org.radarcns.util.Strings.isNullOrEmpty;
+
+import static org.radarbase.util.Strings.isNullOrEmpty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.RadarBackend;
 import org.radarcns.util.PersistentStateStore;
 import org.radarcns.util.YamlPersistentStateStore;

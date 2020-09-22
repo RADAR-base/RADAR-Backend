@@ -1,7 +1,9 @@
 task downloadRuntimeDependencies {
     description "Pre-downloads dependencies"
-    configurations.compileClasspath.files
-    configurations.runtimeClasspath.files
+    doLast {
+        configurations.compileClasspath.files
+        configurations.runtimeClasspath.files
+    }
 }
 
 processResources {

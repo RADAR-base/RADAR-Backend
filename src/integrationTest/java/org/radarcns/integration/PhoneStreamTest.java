@@ -21,14 +21,12 @@ import static org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS
 import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.isIn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +34,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Stream;
+import java.util.Set;
+
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.cli.ParseException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -46,14 +46,17 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.radarbase.config.YamlConfigLoader;
+import org.radarbase.mock.MockProducer;
+import org.radarbase.mock.config.BasicMockConfig;
+import org.radarbase.producer.KafkaTopicSender;
+import org.radarbase.producer.direct.DirectSender;
+import org.radarbase.topic.AvroTopic;
 import org.radarcns.RadarBackend;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
-import org.radarcns.config.YamlConfigLoader;
 import org.radarcns.kafka.ObservationKey;
-import org.radarcns.mock.MockProducer;
-import org.radarcns.mock.config.BasicMockConfig;
 import org.radarcns.monitor.AbstractKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
 import org.radarcns.passive.empatica.EmpaticaE4Acceleration;
@@ -64,18 +67,14 @@ import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.passive.empatica.EmpaticaE4Temperature;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.passive.phone.UsageEventType;
-import org.radarcns.producer.KafkaTopicSender;
-import org.radarcns.producer.direct.DirectSender;
 import org.radarcns.schema.registration.KafkaTopics;
 import org.radarcns.schema.registration.SchemaRegistry;
-import org.radarcns.topic.AvroTopic;
 import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
-    private static final int MAX_SLEEP = 32;
     private static final AvroTopic<ObservationKey, PhoneUsageEvent> PHONE_USAGE_TOPIC =
             new AvroTopic<>("android_phone_usage_event",
                     ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
@@ -83,7 +82,6 @@ public class PhoneStreamTest {
 
     private static final Map<String, String> CATEGORIES = Map.ofEntries(
             Map.entry("nl.nos.app", "NEWS_AND_MAGAZINES"),
-            Map.entry("nl.thehyve.transmartclient", "MEDICAL"),
             Map.entry("com.twitter.android", "NEWS_AND_MAGAZINES"),
             Map.entry("com.facebook.katana", "SOCIAL"),
             Map.entry("com.nintendo.zara", "GAME_ACTION"),
@@ -112,14 +110,19 @@ public class PhoneStreamTest {
         ConfigRadar props = propHandler.getRadarProperties();
         KafkaTopics topics = new KafkaTopics(props.getZookeeperPaths());
         int expectedBrokers = props.getBroker().size();
-
         topics.initialize(expectedBrokers);
 
-        topics.createTopics(Stream.of(
-                "android_phone_usage_event", "android_phone_usage_event_output",
+        Set<String> requiredTopics = Set.of("android_phone_usage_event", "android_phone_usage_event_output",
                 "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
-                "android_empatica_e4_acceleration_10sec"),
-                3, (short)1);
+                "android_empatica_e4_battery_level", "android_empatica_e4_blood_volume_pulse",
+                "android_empatica_e4_electrodermal_activity",
+                "android_empatica_e4_inter_beat_interval",
+                "android_empatica_e4_temperature",
+                "android_empatica_e4_acceleration_10sec");
+
+        while (!topics.getTopics().containsAll(requiredTopics)) {
+            topics.createTopics(requiredTopics.stream(), 3, (short) 1);
+        }
 
         SchemaRegistry registry = new SchemaRegistry(props.getSchemaRegistryPaths());
         registry.registerSchema(PHONE_USAGE_TOPIC);
@@ -182,6 +185,14 @@ public class PhoneStreamTest {
                 new PhoneUsageEvent(time, time++,
                         "com.strava", null, null, UsageEventType.BACKGROUND),
                 new PhoneUsageEvent(time, time++,
+                        "nl.nos.app", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time,
+                        "nl.nos.app", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time++,
+                        "com.twitter.android", null, null, UsageEventType.FOREGROUND),
+                new PhoneUsageEvent(time, time,
+                        "com.twitter.android", null, null, UsageEventType.BACKGROUND),
+                new PhoneUsageEvent(time, time,
                         "com.google.android.youtube", null, null, UsageEventType.FOREGROUND),
                 new PhoneUsageEvent(time, time,
                         "com.google.android.youtube", null, null, UsageEventType.BACKGROUND));
@@ -268,6 +279,8 @@ public class PhoneStreamTest {
             if (result == null) {
                 assertNull(category);
             } else {
+                assertNotNull("Category for " + packageName + " expected to be "
+                        + result + ", not null", category);
                 assertEquals(result, category.toString());
             }
 

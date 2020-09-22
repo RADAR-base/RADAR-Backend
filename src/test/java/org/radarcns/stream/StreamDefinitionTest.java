@@ -23,7 +23,7 @@ import static org.radarcns.stream.AbstractStreamWorker.OUTPUT_LABEL;
 
 import java.util.regex.Pattern;
 import org.junit.Test;
-import org.radarcns.topic.KafkaTopic;
+import org.radarbase.topic.KafkaTopic;
 
 public class StreamDefinitionTest {
     private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Za-z0-9_-]+$");
