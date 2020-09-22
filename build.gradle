@@ -83,7 +83,7 @@ dependencies {
 
     // Configuration @JsonProperty
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
 
     // Monitor mail sending
     implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
