@@ -34,12 +34,6 @@ dependencies {
     testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 
     integrationTestImplementation group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
-    integrationTestImplementation group: 'junit', name: 'junit', version: junitVersion
-    integrationTestImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    integrationTestImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-
-    testRuntimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
 }
 
 tasks.matching {it instanceof Test}.all {
