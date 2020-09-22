@@ -10,25 +10,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11-jdk-slim AS builder
+FROM gradle:6.6.1-jdk11 as builder
 
 RUN mkdir /code
 WORKDIR /code
 
-ENV GRADLE_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.project.profile=prod
-
-COPY ./gradle/wrapper /code/gradle/wrapper
-COPY ./gradlew /code/
-RUN ./gradlew --version
+ENV GRADLE_OPTS=-Dorg.gradle.project.profile=prod \
+  GRADLE_USER_HOME=/code/.gradlecache
 
 COPY ./gradle/profile.prod.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
-RUN ./gradlew downloadRuntimeDependencies
+RUN gradle downloadRuntimeDependencies
 
 COPY ./src/ /code/src
 
-RUN ./gradlew distTar && \
+RUN gradle distTar && \
   tar xf build/distributions/*.tar && \
   rm build/distributions/*.tar
 
@@ -49,7 +46,4 @@ ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 COPY --from=builder /code/radar-backend-*/bin/* /usr/bin/
 COPY --from=builder /code/radar-backend-*/lib/* /usr/lib/
 
-# Load topics validator
-COPY ./src/main/docker/radar-backend-init /usr/bin
-
-ENTRYPOINT ["radar-backend-init"]
+CMD ["radar-backend", "-c", "/etc/radar.yml"]
