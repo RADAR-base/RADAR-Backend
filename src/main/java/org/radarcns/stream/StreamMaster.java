@@ -191,6 +191,7 @@ public class StreamMaster implements SubCommand, UncaughtExceptionHandler {
                         .filter(Objects::nonNull)
                         .map(KafkaTopic::getName)
                         .sorted()
+                        .distinct()
                         .collect(Collectors.joining("\n - ")));
     }
 

@@ -65,13 +65,5 @@ stream:
 
   streams:
     - class: org.radarcns.stream.empatica.E4AccelerationStream
-    - class: org.radarcns.stream.empatica.E4BatteryLevelStream
-    - class: org.radarcns.stream.empatica.E4BloodVolumePulseStream
-    - class: org.radarcns.stream.empatica.E4ElectroDermalActivityStream
-    - class: org.radarcns.stream.empatica.E4HeartRateStream
-    - class: org.radarcns.stream.empatica.E4InterBeatIntervalStream
-    - class: org.radarcns.stream.empatica.E4TemperatureStream
-    - class: org.radarcns.stream.phone.PhoneAccelerationStream
-    - class: org.radarcns.stream.phone.PhoneBatteryStream
     - class: org.radarcns.stream.phone.PhoneUsageStream
     - class: org.radarcns.stream.phone.PhoneUsageAggregationStream

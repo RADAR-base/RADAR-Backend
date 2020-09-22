@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
@@ -75,7 +76,6 @@ import org.slf4j.LoggerFactory;
 
 public class PhoneStreamTest {
     private static final Logger logger = LoggerFactory.getLogger(PhoneStreamTest.class);
-    private static final int MAX_SLEEP = 32;
     private static final AvroTopic<ObservationKey, PhoneUsageEvent> PHONE_USAGE_TOPIC =
             new AvroTopic<>("android_phone_usage_event",
                     ObservationKey.getClassSchema(), PhoneUsageEvent.getClassSchema(),
@@ -113,11 +113,17 @@ public class PhoneStreamTest {
         int expectedBrokers = props.getBroker().size();
         topics.initialize(expectedBrokers);
 
-        topics.createTopics(Stream.of(
-                "android_phone_usage_event", "android_phone_usage_event_output",
+        Set<String> requiredTopics = Set.of("android_phone_usage_event", "android_phone_usage_event_output",
                 "android_phone_usage_event_aggregated", "android_empatica_e4_acceleration",
-                "android_empatica_e4_acceleration_10sec"),
-                3, (short)1);
+                "android_empatica_e4_battery_level", "android_empatica_e4_blood_volume_pulse",
+                "android_empatica_e4_electrodermal_activity",
+                "android_empatica_e4_inter_beat_interval",
+                "android_empatica_e4_temperature",
+                "android_empatica_e4_acceleration_10sec");
+
+        while (!topics.getTopics().containsAll(requiredTopics)) {
+            topics.createTopics(requiredTopics.stream(), 3, (short) 1);
+        }
 
         SchemaRegistry registry = new SchemaRegistry(props.getSchemaRegistryPaths());
         registry.registerSchema(PHONE_USAGE_TOPIC);

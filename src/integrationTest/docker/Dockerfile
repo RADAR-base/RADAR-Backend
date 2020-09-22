@@ -10,25 +10,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11-jdk-slim
+FROM gradle:6.6.1-jdk11
 
 RUN mkdir /code
 WORKDIR /code
 
-ENV GRADLE_OPTS -Dorg.gradle.daemon=false -Dorg.gradle.project.profile=test
-ENV TERM dumb
+ENV GRADLE_OPTS=-Dorg.gradle.project.profile=test \
+  GRADLE_USER_HOME=/code/.gradlecache
 
-COPY ./gradle/wrapper /code/gradle/wrapper
-COPY ./gradlew /code/
-RUN ./gradlew --version
-
-COPY ./gradle/*test.gradle /code/gradle/
+COPY ./gradle/*test.gradle ./gradle/utilities.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
-RUN ./gradlew downloadTestDependencies
+RUN gradle downloadDependencies
 
 COPY ./src/ /code/src
 
-RUN ./gradlew integrationTestClasses
-
-ENTRYPOINT ["./gradlew"]
+RUN gradle integrationTestClasses

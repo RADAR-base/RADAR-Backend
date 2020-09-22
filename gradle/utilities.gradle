@@ -2,7 +2,7 @@ apply plugin: 'idea'
 
 task downloadDependencies {
     description "Pre-downloads *most* dependencies"
-    doLast {
+    doFirst {
         configurations.getAsMap().each { name, config ->
             println "Retrieving dependencies for $name"
             try {
@@ -21,6 +21,5 @@ idea {
 }
 
 wrapper {
-    gradleVersion '5.6.2'
+    gradleVersion '6.6.1'
 }
-

@@ -75,26 +75,19 @@ public abstract class SensorStreamWorker<K extends SpecificRecord, V extends Spe
      * input topic to given output topic. It monitors the amount of messages that are read.
      */
     protected KeyValue<ScheduledFuture<?>, KafkaStreams> createBuilder(StreamDefinition def) {
-        Monitor monitor;
-        ScheduledFuture<?> future = null;
-        if (monitorLog != null) {
-            monitor = new Monitor(monitorLog, "records have been read from "
-                    + def.getInputTopic() + " to " + def.getOutputTopic());
-            future = master.addMonitor(monitor);
-        } else {
-            monitor = null;
-        }
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        KStream<?, ?> stream = implementStream(def,
-                builder.<K, V>stream(def.getInputTopic().getName())
-                        .map((k, v) -> {
-                            if (monitor != null) {
-                                monitor.increment();
-                            }
-                            return pair(k, v);
-                        }));
+        KStream<?, ?> stream = implementStream(def, builder.stream(def.getInputTopic().getName()));
+
+        ScheduledFuture<?> future = null;
+        if (monitorLog != null) {
+            Monitor monitor = new Monitor(monitorLog, "records have been read from "
+                    + def.getInputTopic() + " to " + def.getOutputTopic());
+            stream = stream.peek((k, v) -> monitor.increment());
+            future = master.addMonitor(monitor);
+        }
+
         if (def.getOutputTopic() != null) {
             stream.to(def.getOutputTopic().getName());
         }

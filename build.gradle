@@ -2,8 +2,6 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
-    id 'com.jfrog.bintray' version '1.8.1' apply false
-
 }
 
 //---------------------------------------------------------------------------//
@@ -30,22 +28,22 @@ ext {
     website = 'http://radar-base.org'
 
     codacyVersion = '4.0.2'
-    confluentVersion = '5.1.2'
+    confluentVersion = '5.5.1'
     hamcrestVersion = '1.3'
-    kafkaVersion = '2.1.1'
-    jacksonVersion = '2.9.9'
-    javaMailVersion = '1.6.1'
+    kafkaVersion = '2.5.0'
+    jacksonVersion = '2.11.2'
+    javaMailVersion = '1.6.2'
     junitVersion = '4.12'
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
-    mockitoVersion = '2.24.5'
-    radarCommonsVersion = '0.12.2'
-    radarSchemasVersion = '0.5.2'
+    mockitoVersion = '3.5.11'
+    radarCommonsVersion = '0.13.0'
+    radarSchemasVersion = '0.5.14'
     subethamailVersion = '3.1.7'
-    jsoupVersion = '1.11.3'
-    slf4jVersion = '1.7.25'
+    jsoupVersion = '1.13.1'
+    slf4jVersion = '1.7.30'
     log4jVersion = '1.2.17'
-    avroVersion = '1.9.1'
+    avroVersion = '1.9.2'
 }
 
 //---------------------------------------------------------------------------//
@@ -64,15 +62,6 @@ repositories {
     maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     // Github code
     maven { url 'https://jitpack.io' }
-}
-
-configurations {
-    implementation {
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
-        exclude group: 'jline', module: 'jline'
-        exclude group: 'io.netty', module: 'netty'
-    }
 }
 
 // In this section you declare the dependencies for your production and test code
