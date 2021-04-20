@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.radarbase.config.ServerConfig;
 import org.radarbase.config.YamlConfigLoader;
+import org.radarcns.config.realtime.RealtimeConsumerConfig;
 
 /**
  * POJO representing the yml file
@@ -42,6 +43,8 @@ public class ConfigRadar {
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("statistics_monitors")
     private List<SourceStatisticsStreamConfig> statisticsMonitors;
+    @JsonProperty("realtime_consumers")
+    private List<RealtimeConsumerConfig> consumerConfigs;
     @JsonProperty("stream")
     private StreamConfig stream;
     @JsonProperty("persistence_path")
@@ -180,6 +183,14 @@ public class ConfigRadar {
 
     public void setStatisticsMonitors(List<SourceStatisticsStreamConfig> statisticsMonitors) {
         this.statisticsMonitors = statisticsMonitors;
+    }
+
+    public List<RealtimeConsumerConfig> getConsumerConfigs() {
+        return consumerConfigs;
+    }
+
+    public void setConsumerConfigs(List<RealtimeConsumerConfig> consumerConfigs) {
+        this.consumerConfigs = consumerConfigs;
     }
 
     public StreamConfig getStream() {

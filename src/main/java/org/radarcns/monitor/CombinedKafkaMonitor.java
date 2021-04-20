@@ -43,7 +43,7 @@ public class CombinedKafkaMonitor implements KafkaMonitor {
     private IOException ioException;
     private InterruptedException interruptedException;
 
-    public CombinedKafkaMonitor(Stream<KafkaMonitor> monitors) {
+    public CombinedKafkaMonitor(Stream<? extends KafkaMonitor> monitors) {
         this.monitors = Objects.requireNonNull(monitors)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
