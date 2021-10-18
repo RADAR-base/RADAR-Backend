@@ -9,7 +9,7 @@ import org.radarcns.config.realtime.ActionConfig;
 
 public class ActiveAppNotificationAction implements Action {
 
-  public static final String NAME = "aRMTNotification";
+  public static final String NAME = "ActiveAppNotificationAction";
   private final String questionnaireName;
   private final String appServerBaseUrl;
 
@@ -43,9 +43,9 @@ public class ActiveAppNotificationAction implements Action {
 
     if (!(key.get("subjectId") instanceof String)) {
       throw new IllegalArgumentException(
-          "Cannot execute Action " + NAME + ". The subjectId is not valid.");
+          "Cannot execute Action " + NAME + ". The userId is not valid.");
     }
-    String user = (String) key.get("subjectId");
+    String user = (String) key.get("userId");
 
     Instant scheduledTime = Instant.now().plus(Duration.ofMinutes(5));
 

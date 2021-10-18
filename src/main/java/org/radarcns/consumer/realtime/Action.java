@@ -7,5 +7,4 @@ public interface Action {
     String getName();
 
     Boolean executeFor(ConsumerRecord<?,?> record) throws IllegalArgumentException, IOException;
-
 }

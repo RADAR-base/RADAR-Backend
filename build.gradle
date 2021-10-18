@@ -37,13 +37,14 @@ ext {
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
     mockitoVersion = '3.5.11'
-    radarCommonsVersion = '0.13.0'
-    radarSchemasVersion = '0.5.14'
+    radarCommonsVersion = '0.13.2'
+    radarSchemasVersion = '0.7.4'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.13.1'
     slf4jVersion = '1.7.30'
     log4jVersion = '1.2.17'
     avroVersion = '1.9.2'
+    jsonPathVersion = '2.6.0'
 }
 
 //---------------------------------------------------------------------------//
@@ -53,9 +54,6 @@ ext {
 // In this section you declare where to find the dependencies of your project
 repositories {
     mavenCentral()
-    // Non-jcenter radar releases
-    maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
-    maven { url  'http://dl.bintray.com/radar-base/org.radarbase' }
     // Kafka/confluent releases
     maven { url 'http://packages.confluent.io/maven/' }
     // For working with dev-branches
@@ -69,7 +67,8 @@ dependencies {
     implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
     implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
-    implementation group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
+    implementation group: 'org.radarbase', name: 'radar-schemas-commons', version:
+            radarSchemasVersion
 
     // Kafka streaming API
     implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
@@ -91,6 +90,9 @@ dependencies {
 
     // JSoup html parser
     implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
+
+    // JsonPath for evaluating json conditions dynamically.
+    implementation group: 'com.jayway.jsonpath', name: 'json-path', version: jsonPathVersion
 
     runtimeOnly group: 'org.radarbase', name: 'radar-commons-unsafe', version: radarCommonsVersion
 

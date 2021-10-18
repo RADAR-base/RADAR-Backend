@@ -6,8 +6,8 @@ public class ConditionFactory {
 
   public static Condition getConditionFor(ConditionConfig conditionConfig) {
     switch (conditionConfig.getName()) {
-      case NumberIsGreaterThan.NAME:
-        return new NumberIsGreaterThan(conditionConfig);
+      case LocalJsonPathCondition.NAME:
+        return new LocalJsonPathCondition(conditionConfig);
       default:
         throw new IllegalArgumentException(
             "The specified condition with name " + conditionConfig.getName() + " is not correct.");
