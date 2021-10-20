@@ -15,6 +15,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.radarbase.exception.TokenException;
 import org.radarbase.oauth.OAuth2Client;
+import org.radarcns.consumer.realtime.action.ActiveAppNotificationAction.MessagingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +60,16 @@ public class AppserverClient {
   }
 
   public Map<String, Object> createMessage(
-      String projectId, String userId, String type, String body) throws IOException {
+      String projectId, String userId, MessagingType type, String body) throws IOException {
     URI uri =
         URI.create(baseUrl)
-            .resolve("/projects/" + projectId + "/users/" + userId + "/messaging/" + type);
+            .resolve(
+                "/projects/"
+                    + projectId
+                    + "/users/"
+                    + userId
+                    + "/messaging/"
+                    + type.toString().toLowerCase());
 
     RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json"));
 

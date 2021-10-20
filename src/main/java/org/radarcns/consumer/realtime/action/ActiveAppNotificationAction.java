@@ -20,7 +20,7 @@ public class ActiveAppNotificationAction implements Action {
   private final String questionnaireName;
   private final String timeOfDay;
   private final AppserverClient appserverClient;
-  private final String type;
+  private final MessagingType type;
 
   public ActiveAppNotificationAction(ActionConfig actionConfig) throws MalformedURLException {
     questionnaireName =
@@ -44,10 +44,12 @@ public class ActiveAppNotificationAction implements Action {
                     "management_portal_token_url",
                     "https://radar-cns-platform.rosalind.kcl.ac.uk/managementportal/api/ouath/token");
     type =
-        (String)
-            actionConfig
-                .getProperties()
-                .getOrDefault("type", MessagingType.NOTIFICATIONS.toString().toLowerCase());
+        MessagingType.valueOf(
+            ((String)
+                    actionConfig
+                        .getProperties()
+                        .getOrDefault("type", MessagingType.NOTIFICATIONS.toString().toLowerCase()))
+                .toUpperCase());
 
     String clientId =
         (String) actionConfig.getProperties().getOrDefault("client_id", "realtime_consumer");
@@ -102,13 +104,16 @@ public class ActiveAppNotificationAction implements Action {
             .build();
 
     String body;
-    if (type.equals(MessagingType.NOTIFICATIONS.toString().toLowerCase())) {
-      body = contentProvider.getNotificationMessage();
-    } else if (type.equals(MessagingType.DATA.toString().toLowerCase())) {
-      body = contentProvider.getDataMessage();
-    } else {
-      throw new IllegalArgumentException(
-          "The type must be in " + Arrays.toString(MessagingType.namesLowerCase));
+    switch (type) {
+      case NOTIFICATIONS:
+        body = contentProvider.getNotificationMessage();
+        break;
+      case DATA:
+        body = contentProvider.getDataMessage();
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "The type must be in " + Arrays.toString(MessagingType.namesLowerCase));
     }
 
     appserverClient.createMessage(project, user, type, body);
