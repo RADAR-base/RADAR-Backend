@@ -30,6 +30,10 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.radarbase.util.RollingTimeAverage;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.realtime.RealtimeConsumerConfig;
+import org.radarcns.consumer.realtime.action.Action;
+import org.radarcns.consumer.realtime.action.ActionFactory;
+import org.radarcns.consumer.realtime.condition.Condition;
+import org.radarcns.consumer.realtime.condition.ConditionFactory;
 import org.radarcns.monitor.KafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +113,19 @@ public class RealtimeInferenceConsumer implements KafkaMonitor {
           ops.add(records.count());
 
           for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
-            if (conditions.stream().allMatch(c -> c.isTrueFor(record))) {
+            if (conditions.stream()
+                .allMatch(
+                    c -> {
+                      try {
+                        return c.isTrueFor(record);
+                      } catch (IOException exc) {
+                        logger.warn(
+                            "Error evaluating one of the conditions: {}. Will not continue.",
+                            c.getName(),
+                            exc);
+                        return false;
+                      }
+                    })) {
               // Only execute the actions if all the conditions are true
               actions.forEach(
                   a -> {

@@ -1,4 +1,4 @@
-package org.radarcns.consumer.realtime;
+package org.radarcns.consumer.realtime.condition;
 
 import org.radarcns.config.realtime.ConditionConfig;
 

@@ -1,4 +1,4 @@
-package org.radarcns.consumer.realtime;
+package org.radarcns.consumer.realtime.action;
 
 import java.io.IOException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

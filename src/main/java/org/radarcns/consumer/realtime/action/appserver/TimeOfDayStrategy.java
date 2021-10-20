@@ -1,0 +1,45 @@
+package org.radarcns.consumer.realtime.action.appserver;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+
+public class TimeOfDayStrategy implements ScheduleTimeStrategy {
+
+  private final String timeOfDay;
+  private final String timezone;
+
+  public TimeOfDayStrategy(String timeOfDay, String timezone) {
+    if (timeOfDay == null || timeOfDay.isEmpty()) {
+      throw new IllegalArgumentException(
+          "The time of day is not provided. Cannot use this strategy.");
+    }
+
+    this.timeOfDay = timeOfDay;
+    if (timezone == null) {
+      timezone = "GMT";
+    }
+    this.timezone = timezone;
+  }
+
+  @Override
+  public Instant getScheduledTime() {
+
+    Instant now = Instant.now();
+
+    LocalDate localDate = now.atZone(ZoneId.of(timezone)).toLocalDate();
+    LocalDateTime ldt =
+        localDate.atTime(LocalTime.parse(timeOfDay, DateTimeFormatter.ISO_LOCAL_TIME));
+
+    // If time has already passed, schedule the next day
+    if (ldt.isBefore(LocalDateTime.from(now))) {
+      ldt = ldt.plusDays(1);
+    }
+
+    return ldt.toInstant(ZoneOffset.of(timezone));
+  }
+}
