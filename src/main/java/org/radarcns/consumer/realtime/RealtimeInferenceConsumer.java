@@ -38,6 +38,14 @@ import org.radarcns.monitor.KafkaMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The main Kafka Consumer class that runs a single consumer on any topic. The consumer evaluates
+ * each incoming record based on the {@link Condition}s provided in the config. If and only If all
+ * the conditions evaluate to true, only then all the configured {@link Action}s are fired.
+ *
+ * <p>To be used with the model-invocation-endpoint and KSQL API_INFERENCE function to evaluate and
+ * take action on incoming results from realtime inference on data.
+ */
 public class RealtimeInferenceConsumer implements KafkaMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(RealtimeInferenceConsumer.class);

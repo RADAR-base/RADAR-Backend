@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * The content provides a questionnaire's protocol block in the message for the aRMT app to parse
+ * and schedule the specified questionnaire. Supports both FCM Notification and Data Messages.
+ */
 public class ProtocolNotificationProvider implements NotificationContentProvider {
 
   static final String PROTOCOL_TEMPLATE =

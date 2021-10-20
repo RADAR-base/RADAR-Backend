@@ -14,6 +14,11 @@ import org.radarcns.consumer.realtime.action.appserver.ScheduleTimeStrategy;
 import org.radarcns.consumer.realtime.action.appserver.SimpleTimeStrategy;
 import org.radarcns.consumer.realtime.action.appserver.TimeOfDayStrategy;
 
+/**
+ * This action can be used to trigger a notification for the aRMT app and schedule a corresponding
+ * questionnaire for the user to fill out. This can also work as an intervention mechanism in some
+ * use-cases.
+ */
 public class ActiveAppNotificationAction implements Action {
 
   public static final String NAME = "ActiveAppNotificationAction";
@@ -46,10 +51,9 @@ public class ActiveAppNotificationAction implements Action {
     type =
         MessagingType.valueOf(
             ((String)
-                    actionConfig
-                        .getProperties()
-                        .getOrDefault("type", MessagingType.NOTIFICATIONS.toString().toLowerCase()))
-                .toUpperCase());
+                actionConfig
+                    .getProperties()
+                    .getOrDefault("message_type", MessagingType.notifications.toString())));
 
     String clientId =
         (String) actionConfig.getProperties().getOrDefault("client_id", "realtime_consumer");
@@ -105,15 +109,15 @@ public class ActiveAppNotificationAction implements Action {
 
     String body;
     switch (type) {
-      case NOTIFICATIONS:
+      case notifications:
         body = contentProvider.getNotificationMessage();
         break;
-      case DATA:
+      case data:
         body = contentProvider.getDataMessage();
         break;
       default:
         throw new IllegalArgumentException(
-            "The type must be in " + Arrays.toString(MessagingType.namesLowerCase));
+            "The type must be in " + Arrays.toString(MessagingType.values()));
     }
 
     appserverClient.createMessage(project, user, type, body);
@@ -125,10 +129,7 @@ public class ActiveAppNotificationAction implements Action {
   }
 
   public enum MessagingType {
-    NOTIFICATIONS,
-    DATA;
-
-    public static final String[] namesLowerCase =
-        Arrays.stream(values()).map(t -> t.toString().toLowerCase()).toArray(String[]::new);
+    notifications,
+    data
   }
 }

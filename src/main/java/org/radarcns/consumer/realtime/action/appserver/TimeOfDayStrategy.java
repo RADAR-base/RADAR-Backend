@@ -8,6 +8,11 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Schedules the time based on the next Time Of Day (eg- 09:00:00 means 9 am on the day) as
+ * configured in the configuration file. If the time of day specified has passed for the current
+ * day, it will schedule at the time of day the next day.
+ */
 public class TimeOfDayStrategy implements ScheduleTimeStrategy {
 
   private final String timeOfDay;

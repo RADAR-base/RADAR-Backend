@@ -19,6 +19,10 @@ import org.radarcns.consumer.realtime.action.ActiveAppNotificationAction.Messagi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Client to provide interface to the AppServer REST API. It uses the OAuth client library from
+ * management portal to authenticate requests.
+ */
 public class AppserverClient {
 
   private static final Logger logger = LoggerFactory.getLogger(AppserverClient.class);
@@ -64,12 +68,7 @@ public class AppserverClient {
     URI uri =
         URI.create(baseUrl)
             .resolve(
-                "/projects/"
-                    + projectId
-                    + "/users/"
-                    + userId
-                    + "/messaging/"
-                    + type.toString().toLowerCase());
+                "/projects/" + projectId + "/users/" + userId + "/messaging/" + type.toString());
 
     RequestBody requestBody = RequestBody.create(body, MediaType.parse("application/json"));
 

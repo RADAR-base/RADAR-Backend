@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+/** Schedules the time based on current time with an optional added delay. */
 public class SimpleTimeStrategy implements ScheduleTimeStrategy {
 
   private final Duration delay;

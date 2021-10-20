@@ -4,18 +4,13 @@ import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Uses https://github.com/json-path/JsonPath to evaluate json expressions directly in the record
- * making this condition a generic one for simple use cases such as predicates and comparisons
- * for a field in the json record.
+ * making this condition a generic one for simple use cases such as predicates and comparisons for a
+ * field in the json record.
  */
 public abstract class JsonPathCondition implements Condition {
-
-  private static final Logger logger = LoggerFactory.getLogger(JsonPathCondition.class);
 
   protected Boolean evaluateJsonPath(ConsumerRecord<?, ?> record, String jsonPath)
       throws IOException {

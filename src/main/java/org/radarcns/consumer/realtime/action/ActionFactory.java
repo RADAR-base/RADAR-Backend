@@ -5,6 +5,10 @@ import java.net.MalformedURLException;
 import javax.mail.internet.AddressException;
 import org.radarcns.config.realtime.ActionConfig;
 
+/**
+ * Factory class for {@link Action}s. It instantiates actions based on the configuration provided
+ * for the given consumer.
+ */
 public class ActionFactory {
 
   public static Action getActionFor(ActionConfig actionConfig) {

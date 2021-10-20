@@ -6,6 +6,11 @@ import org.radarcns.config.realtime.RealtimeConsumerConfig;
 import org.radarcns.monitor.CombinedKafkaMonitor;
 import org.radarcns.monitor.KafkaMonitor;
 
+/**
+ * Factory class for {@link RealtimeInferenceConsumer}. There can be multiple consumers, each with
+ * its own set of {@link org.radarcns.consumer.realtime.condition.Condition}s and {@link
+ * org.radarcns.consumer.realtime.action.Action}s.
+ */
 public class RealtimeInferenceConsumerFactory {
 
   public static KafkaMonitor createConsumersFor(RadarPropertyHandler handler) {

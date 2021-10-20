@@ -4,6 +4,10 @@ import java.io.IOException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.realtime.ConditionConfig;
 
+/**
+ * Reads the JsonPath specification from the configuration file, provided to this class in {@link
+ * ConditionConfig}.
+ */
 public class LocalJsonPathCondition extends JsonPathCondition {
 
   public static final String NAME = "LocalJsonPathCondition";

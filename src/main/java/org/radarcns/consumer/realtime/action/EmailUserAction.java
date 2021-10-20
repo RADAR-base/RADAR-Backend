@@ -13,6 +13,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.realtime.ActionConfig;
 import org.radarcns.util.EmailSender;
 
+/**
+ * This action can be used to trigger an email to the user. Currently, it just notifies that the
+ * conditions evaluated to true and provides some context. This is useful for project admins but can
+ * be modified to also work as an intervention mechanism in some use-cases.
+ */
 public class EmailUserAction implements Action {
 
   public static final String NAME = "EmailUserAction";
