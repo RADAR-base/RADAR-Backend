@@ -9,8 +9,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * The content provides a questionnaire's protocol block in the message for the aRMT app to parse
- * and schedule the specified questionnaire. Supports both FCM Notification and Data Messages.
+ * The content provides a questionnaire's protocol block in the message to be added to the appserver
+ * and for the aRMT app to parse and schedule the specified questionnaire. Supports both FCM
+ * Notification and Data Messages.
  */
 public class ProtocolNotificationProvider implements NotificationContentProvider {
 
@@ -146,23 +147,8 @@ public class ProtocolNotificationProvider implements NotificationContentProvider
   }
 
   public enum AllowedTypes {
-    QUESTIONNAIRE("questionnaire"),
-    NOTIFICATION("notification");
-
-    private final String type;
-
-    AllowedTypes(String type) {
-      this.type = type;
-    }
-
-    public String getType() {
-      return type;
-    }
-
-    @Override
-    public String toString() {
-      return type;
-    }
+    questionnaire,
+    notification
   }
 
   public static class Builder {
@@ -175,19 +161,19 @@ public class ProtocolNotificationProvider implements NotificationContentProvider
     private String repo;
     private int order;
     private String name;
-    private AllowedTypes avsc;
-    private Long repeatProtocolMinutes;
-    private Long[] repeatQuestionnaireMinutes;
-    private Long completionWindowMinutes;
-    private Map<String, String> metadata;
+    private AllowedTypes avsc = AllowedTypes.questionnaire;
+    private Long repeatProtocolMinutes = 9999999999L; // a lot of years, it will not repeat.
+    private Long[] repeatQuestionnaireMinutes = new Long[] {0L}; // Immediately scheduled once.
+    private Long completionWindowMinutes = 24 * 60L; // 1day
+    private Map<String, String> metadata = new HashMap<>();
 
     // For the notification message
-    private String notificationTitle;
-    private String notificationBody;
+    private String notificationTitle = "Questionnaire Time";
+    private String notificationBody = "Urgent Questionnaire Pending. Please complete now.";
     private int ttlSeconds;
     private Instant scheduledTime;
     private String sourceId;
-    private String appPackage;
+    private String appPackage = "org.phidatalab.radar_armt";
 
     public Builder() {
       repo = REPO;
@@ -267,47 +253,19 @@ public class ProtocolNotificationProvider implements NotificationContentProvider
       return this;
     }
 
-    public void setReferenceTimestamp(Instant referenceTimestamp) {
+    public Builder setReferenceTimestamp(Instant referenceTimestamp) {
       this.referenceTimestamp = referenceTimestamp;
+      return this;
     }
 
     public ProtocolNotificationProvider build() throws IllegalArgumentException {
-      if (repeatProtocolMinutes == null) {
-        repeatProtocolMinutes = 9999999999L; // a lot of years, it will not repeat.
-      }
-      if (repeatQuestionnaireMinutes == null || repeatQuestionnaireMinutes.length == 0) {
-        repeatQuestionnaireMinutes = new Long[] {0L}; // Immediately scheduled once.
-      }
-      if (completionWindowMinutes == null) {
-        completionWindowMinutes = 24 * 60L; // 1day
-      }
 
-      if (avsc == null) {
-        avsc = AllowedTypes.QUESTIONNAIRE;
-      }
-
-      if (name == null) {
+      if (name == null || name.isEmpty()) {
         throw new IllegalArgumentException("Name is a required parameter");
-      }
-
-      if (metadata == null) {
-        metadata = new HashMap<>();
-      }
-
-      if (notificationTitle == null || notificationTitle.isEmpty()) {
-        notificationTitle = "Questionnaire Time";
-      }
-
-      if (notificationBody == null || notificationBody.isEmpty()) {
-        notificationBody = "Urgent Questionnaire Pending. Please complete now.";
       }
 
       if (scheduledTime == null) {
         throw new IllegalArgumentException("Scheduled Time cannot be null.");
-      }
-
-      if (appPackage == null || appPackage.isEmpty()) {
-        appPackage = "org.phidatalab.radar_armt";
       }
 
       if (sourceId == null || sourceId.isEmpty()) {
