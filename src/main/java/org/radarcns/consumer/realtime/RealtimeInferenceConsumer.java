@@ -125,7 +125,7 @@ public class RealtimeInferenceConsumer implements KafkaMonitor {
                 .allMatch(
                     c -> {
                       try {
-                        return c.isTrueFor(record);
+                        return c.evaluate(record);
                       } catch (IOException exc) {
                         logger.warn(
                             "Error evaluating one of the conditions: {}. Will not continue.",
@@ -138,7 +138,7 @@ public class RealtimeInferenceConsumer implements KafkaMonitor {
               actions.forEach(
                   a -> {
                     try {
-                      a.executeFor(record);
+                      a.run(record);
                     } catch (IllegalArgumentException | IOException ex) {
                       logger.warn("Error executing action", ex);
                     }

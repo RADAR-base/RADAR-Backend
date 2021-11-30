@@ -18,7 +18,7 @@ import org.radarcns.util.EmailSender;
  * conditions evaluated to true and provides some context. This is useful for project admins but can
  * be modified to also work as an intervention mechanism in some use-cases.
  */
-public class EmailUserAction implements Action {
+public class EmailUserAction extends ActionBase {
 
   public static final String NAME = "EmailUserAction";
   private final EmailSender emailSender;
@@ -26,6 +26,7 @@ public class EmailUserAction implements Action {
   private final String customBody;
 
   public EmailUserAction(ActionConfig actionConfig) throws AddressException, IOException {
+    super(actionConfig);
     Map<String, Object> props = actionConfig.getProperties();
     this.emailSender =
         new EmailSender(

@@ -4,13 +4,18 @@ import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
 import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarcns.config.realtime.ConditionConfig;
 
 /**
  * Uses https://github.com/json-path/JsonPath to evaluate json expressions directly in the record
  * making this condition a generic one for simple use cases such as predicates and comparisons for a
  * field in the json record.
  */
-public abstract class JsonPathCondition implements Condition {
+public abstract class JsonPathCondition extends ConditionBase {
+
+  public JsonPathCondition(ConditionConfig config) {
+    super(config);
+  }
 
   protected Boolean evaluateJsonPath(ConsumerRecord<?, ?> record, String jsonPath)
       throws IOException {

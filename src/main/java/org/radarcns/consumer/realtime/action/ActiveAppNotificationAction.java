@@ -19,7 +19,7 @@ import org.radarcns.consumer.realtime.action.appserver.TimeOfDayStrategy;
  * questionnaire for the user to fill out. This can also work as an intervention mechanism in some
  * use-cases.
  */
-public class ActiveAppNotificationAction implements Action {
+public class ActiveAppNotificationAction extends ActionBase {
 
   public static final String NAME = "ActiveAppNotificationAction";
   private final String questionnaireName;
@@ -28,6 +28,7 @@ public class ActiveAppNotificationAction implements Action {
   private final MessagingType type;
 
   public ActiveAppNotificationAction(ActionConfig actionConfig) throws MalformedURLException {
+    super(actionConfig);
     questionnaireName =
         (String) actionConfig.getProperties().getOrDefault("questionnaire_name", "ers");
 
@@ -92,10 +93,10 @@ public class ActiveAppNotificationAction implements Action {
 
     ScheduleTimeStrategy timeStrategy;
     if (timeOfDay != null && !timeOfDay.isEmpty()) {
-      // no time of the day provided, schedule now.
+      // get timezone for the user and create the correct local time of the day
       timeStrategy = new TimeOfDayStrategy(timeOfDay, getUserTimezone(project, user));
     } else {
-      // get timezone for the user and create the correct local time of the day
+      // no time of the day provided, schedule now.
       timeStrategy = new SimpleTimeStrategy(5, ChronoUnit.MINUTES);
     }
 

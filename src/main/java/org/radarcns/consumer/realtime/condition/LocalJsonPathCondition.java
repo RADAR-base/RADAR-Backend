@@ -15,6 +15,7 @@ public class LocalJsonPathCondition extends JsonPathCondition {
   private final String jsonPath;
 
   public LocalJsonPathCondition(ConditionConfig conditionConfig) {
+    super(conditionConfig);
     this.jsonPath = (String) conditionConfig.getProperties().get("jsonpath");
     if (jsonPath == null) {
       throw new IllegalArgumentException(
@@ -30,6 +31,6 @@ public class LocalJsonPathCondition extends JsonPathCondition {
 
   @Override
   public Boolean isTrueFor(ConsumerRecord<?, ?> record) throws IOException {
-    return evaluateJsonPath(record, jsonPath);
+    return evaluateProject(record) && evaluateJsonPath(record, jsonPath);
   }
 }
