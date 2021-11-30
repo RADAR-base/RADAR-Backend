@@ -31,6 +31,6 @@ public class LocalJsonPathCondition extends JsonPathCondition {
 
   @Override
   public Boolean isTrueFor(ConsumerRecord<?, ?> record) throws IOException {
-    return evaluateProject(record) && evaluateJsonPath(record, jsonPath);
+    return evaluateJsonPath(record, jsonPath);
   }
 }
