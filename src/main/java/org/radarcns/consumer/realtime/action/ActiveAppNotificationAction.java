@@ -51,10 +51,10 @@ public class ActiveAppNotificationAction extends ActionBase {
                     "https://radar-cns-platform.rosalind.kcl.ac.uk/managementportal/api/ouath/token");
     type =
         MessagingType.valueOf(
-            ((String)
+            (String)
                 actionConfig
                     .getProperties()
-                    .getOrDefault("message_type", MessagingType.notifications.toString())));
+                    .getOrDefault("message_type", MessagingType.notifications.toString()));
 
     String clientId =
         (String) actionConfig.getProperties().getOrDefault("client_id", "realtime_consumer");
@@ -77,18 +77,18 @@ public class ActiveAppNotificationAction extends ActionBase {
       throw new IllegalArgumentException(
           "Cannot execute Action " + NAME + ". The projectId is not valid.");
     }
-    String project = (String) key.get("projectId");
 
     if (!(key.get("userId") instanceof String)) {
       throw new IllegalArgumentException(
           "Cannot execute Action " + NAME + ". The userId is not valid.");
     }
-    String user = (String) key.get("userId");
 
     if (!(key.get("sourceId") instanceof String)) {
       throw new IllegalArgumentException(
           "Cannot execute Action " + NAME + ". The sourceId is not valid.");
     }
+    String project = (String) key.get("projectId");
+    String user = (String) key.get("userId");
     String source = (String) key.get("sourceId");
 
     ScheduleTimeStrategy timeStrategy;
@@ -129,6 +129,7 @@ public class ActiveAppNotificationAction extends ActionBase {
     return (String) appserverClient.getUserDetails(project, user).getOrDefault("timezone", "gmt");
   }
 
+  @SuppressWarnings({"PMD.ClassNamingConventions", "PMD.FieldNamingConventions"})
   public enum MessagingType {
     notifications,
     data

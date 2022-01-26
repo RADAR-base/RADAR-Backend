@@ -11,7 +11,9 @@ import org.radarcns.monitor.KafkaMonitor;
  * its own set of {@link org.radarcns.consumer.realtime.condition.Condition}s and {@link
  * org.radarcns.consumer.realtime.action.Action}s.
  */
-public class RealtimeInferenceConsumerFactory {
+public final class RealtimeInferenceConsumerFactory {
+
+  private RealtimeInferenceConsumerFactory() {}
 
   public static KafkaMonitor createConsumersFor(RadarPropertyHandler handler) {
     return new CombinedKafkaMonitor(

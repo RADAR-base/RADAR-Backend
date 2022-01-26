@@ -13,6 +13,7 @@ import java.util.Map;
  * and for the aRMT app to parse and schedule the specified questionnaire. Supports both FCM
  * Notification and Data Messages.
  */
+@SuppressWarnings("PMD")
 public class ProtocolNotificationProvider implements NotificationContentProvider {
 
   static final String PROTOCOL_TEMPLATE =
@@ -146,6 +147,7 @@ public class ProtocolNotificationProvider implements NotificationContentProvider
     return notificationMessage;
   }
 
+  @SuppressWarnings("PMD.ClassNamingConventions")
   public enum AllowedTypes {
     questionnaire,
     notification

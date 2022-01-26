@@ -12,6 +12,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.realtime.ActionConfig;
 import org.radarcns.util.EmailSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This action can be used to trigger an email to the user. Currently, it just notifies that the
@@ -21,6 +23,7 @@ import org.radarcns.util.EmailSender;
 public class EmailUserAction extends ActionBase {
 
   public static final String NAME = "EmailUserAction";
+  private static final Logger logger = LoggerFactory.getLogger(EmailUserAction.class);
   private final EmailSender emailSender;
   private final String customTitle;
   private final String customBody;
@@ -72,7 +75,7 @@ public class EmailUserAction extends ActionBase {
       this.emailSender.sendEmail(title, body);
       return true;
     } catch (MessagingException e) {
-      e.printStackTrace();
+      logger.error("Error sending email", e);
       return false;
     }
   }

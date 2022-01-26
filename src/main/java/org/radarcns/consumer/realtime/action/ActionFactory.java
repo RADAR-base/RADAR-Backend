@@ -9,7 +9,10 @@ import org.radarcns.config.realtime.ActionConfig;
  * Factory class for {@link Action}s. It instantiates actions based on the configuration provided
  * for the given consumer.
  */
-public class ActionFactory {
+@SuppressWarnings("PMD.ClassNamingConventions")
+public final class ActionFactory {
+
+  private ActionFactory() {}
 
   public static Action getActionFor(ActionConfig actionConfig) {
     switch (actionConfig.getName()) {
@@ -18,13 +21,13 @@ public class ActionFactory {
           return new ActiveAppNotificationAction(actionConfig);
         } catch (MalformedURLException exc) {
           throw new IllegalArgumentException(
-              "The supplied url config was incorrect. Please check.");
+              "The supplied url config was incorrect. Please check.", exc);
         }
       case EmailUserAction.NAME:
         try {
           return new EmailUserAction(actionConfig);
         } catch (AddressException | IOException e) {
-          throw new IllegalArgumentException("The configuration was invalid. Please check.");
+          throw new IllegalArgumentException("The configuration was invalid. Please check.", e);
         }
       default:
         throw new IllegalArgumentException(

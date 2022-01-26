@@ -33,7 +33,7 @@ public class PlayStoreLookupTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "nl.nos.app", "NEWS_AND_MAGAZINES" },
-                { "com.twitter.android", "NEWS_AND_MAGAZINES" },
+                { "com.twitter.android", "SOCIAL" },
                 { "com.facebook.katana", "SOCIAL" },
                 { "com.nintendo.zara", "GAME_ACTION" },
                 { "com.duolingo", "EDUCATION" },

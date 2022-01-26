@@ -25,10 +25,7 @@ public class TimeOfDayStrategy implements ScheduleTimeStrategy {
     }
 
     this.timeOfDay = timeOfDay;
-    if (timezone == null) {
-      timezone = "GMT";
-    }
-    this.timezone = timezone;
+    this.timezone = timezone == null ? "GMT" : timezone;
   }
 
   @Override

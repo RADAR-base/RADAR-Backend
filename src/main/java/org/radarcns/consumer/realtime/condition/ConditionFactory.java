@@ -1,14 +1,18 @@
 package org.radarcns.consumer.realtime.condition;
 
 import org.radarcns.config.realtime.ConditionConfig;
-import org.radarcns.consumer.realtime.action.Action;
 
 /**
- * Factory class for {@link Condition}s. It instantiates conditions based on
- * the configuration provided for the given consumer.
+ * Factory class for {@link Condition}s. It instantiates conditions based on the configuration
+ * provided for the given consumer.
  */
-public class ConditionFactory {
+@SuppressWarnings("PMD.ClassNamingConventions")
+public final class ConditionFactory {
 
+  private ConditionFactory() {
+  }
+
+  @SuppressWarnings("PMD.TooFewBranchesForASwitchStatement")
   public static Condition getConditionFor(ConditionConfig conditionConfig) {
     switch (conditionConfig.getName()) {
       case LocalJsonPathCondition.NAME:
