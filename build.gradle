@@ -67,8 +67,7 @@ dependencies {
     implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
     implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
-    implementation group: 'org.radarbase', name: 'radar-schemas-commons', version:
-            radarSchemasVersion
+    implementation group: 'org.radarbase', name: 'radar-schemas-commons', version: radarSchemasVersion
     implementation group: 'org.radarbase', name: 'oauth-client-util', version: '0.8.0'
 
     // Kafka streaming API

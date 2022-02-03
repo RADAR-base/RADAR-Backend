@@ -17,6 +17,7 @@
 package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.radarcns.config.EmailServerConfig;
 
 import java.util.List;
 
@@ -27,14 +28,8 @@ public class MonitorConfig {
     @JsonProperty("notify")
     private List<EmailNotifyConfig> emailNotifyConfig;
 
-    @JsonProperty("email_host")
-    private String emailHost;
-
-    @JsonProperty("email_port")
-    private int emailPort;
-
-    @JsonProperty("email_user")
-    private String emailUser;
+    @JsonProperty("email_server")
+    private EmailServerConfig emailServerConfig;
 
     @JsonProperty("log_interval")
     private int logInterval = 1000;
@@ -44,44 +39,12 @@ public class MonitorConfig {
     @JsonProperty("message")
     private String message = null;
 
-    public List<EmailNotifyConfig> getNotifyConfig() {
-        return emailNotifyConfig;
-    }
-
-    public void setNotifyConfig(List<EmailNotifyConfig> emailNotifyConfig) {
-        this.emailNotifyConfig = emailNotifyConfig;
-    }
-
     public List<String> getTopics() {
         return topics;
     }
 
     public void setTopics(List<String> topics) {
         this.topics = topics;
-    }
-
-    public String getEmailHost() {
-        return emailHost;
-    }
-
-    public void setEmailHost(String emailHost) {
-        this.emailHost = emailHost;
-    }
-
-    public int getEmailPort() {
-        return emailPort;
-    }
-
-    public void setEmailPort(int emailPort) {
-        this.emailPort = emailPort;
-    }
-
-    public String getEmailUser() {
-        return emailUser;
-    }
-
-    public void setEmailUser(String emailUser) {
-        this.emailUser = emailUser;
     }
 
     public int getLogInterval() {
@@ -98,5 +61,21 @@ public class MonitorConfig {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public EmailServerConfig getEmailServerConfig() {
+        return emailServerConfig;
+    }
+
+    public void setEmailServerConfig(EmailServerConfig emailServerConfig) {
+        this.emailServerConfig = emailServerConfig;
+    }
+
+    public List<EmailNotifyConfig> getEmailNotifyConfig() {
+        return emailNotifyConfig;
+    }
+
+    public void setEmailNotifyConfig(List<EmailNotifyConfig> emailNotifyConfig) {
+        this.emailNotifyConfig = emailNotifyConfig;
     }
 }

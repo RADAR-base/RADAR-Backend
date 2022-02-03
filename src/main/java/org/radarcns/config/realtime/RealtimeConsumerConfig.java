@@ -16,7 +16,7 @@ public class RealtimeConsumerConfig {
   @JsonProperty("actions")
   private List<ActionConfig> actionConfigs;
 
-  @JsonProperty("consumer_properties")
+  @JsonProperty("+")
   private Map<String, String> consumerProperties;
 
   public String getName() {

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import org.radarcns.config.monitor.MonitorConfig;
-import org.radarcns.config.monitor.NotifyConfig;
+import org.radarcns.config.monitor.EmailNotifyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +33,9 @@ public class EmailSenders {
      */
 
     public static EmailSenders parseConfig(MonitorConfig config) throws IOException {
-        String host = config.getEmailHost();
-        int port = config.getEmailPort();
-        String user = config.getEmailUser();
+        String host = config.getEmailServerConfig().getHost();
+        int port = config.getEmailServerConfig().getPort();
+        String user = config.getEmailServerConfig().getUser();
 
         if (host == null || user == null || port <= 0) {
             logger.error("Cannot configure email sender without hosts ({}), port ({}) or user ({})",
@@ -45,13 +45,13 @@ public class EmailSenders {
 
         Map<String, EmailSender> map = new HashMap<>();
 
-        for (NotifyConfig notifyConfig : config.getNotifyConfig()) {
+        for (EmailNotifyConfig emailNotifyConfig : config.getEmailNotifyConfig()) {
             try {
-                map.put(notifyConfig.getProjectId(),
-                        new EmailSender(host, port, user, notifyConfig.getEmailAddress()));
+                map.put(emailNotifyConfig.getProjectId(),
+                        new EmailSender(host, port, user, emailNotifyConfig.getEmailAddress()));
             } catch (AddressException e) {
                 logger.error("Failed to add email sender for addresses {} and {}",
-                        config.getEmailUser(), notifyConfig.getEmailAddress(), e);
+                        user, emailNotifyConfig.getEmailAddress(), e);
             }
         }
 

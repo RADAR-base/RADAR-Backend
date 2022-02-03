@@ -37,7 +37,7 @@ import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
-import org.radarcns.config.monitor.NotifyConfig;
+import org.radarcns.config.monitor.EmailNotifyConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.RadarPropertyHandlerImpl;
@@ -130,7 +130,7 @@ public class KafkaMonitorFactoryTest {
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
         disconnectConfig.setNotifyConfig(List.of(
-                new NotifyConfig("test", List.of("test@localhost"))));
+                new EmailNotifyConfig("test", List.of("test@localhost"))));
         disconnectConfig.setEmailUser("test@localhost");
         disconnectConfig.setEmailHost("localhost");
         disconnectConfig.setEmailPort(port);
@@ -148,7 +148,7 @@ public class KafkaMonitorFactoryTest {
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
         batteryConfig.setNotifyConfig(List.of(
-                new NotifyConfig("test", List.of("test@localhost"))));
+                new EmailNotifyConfig("test", List.of("test@localhost"))));
         batteryConfig.setEmailUser("test@localhost");
         batteryConfig.setEmailHost("localhost");
         batteryConfig.setEmailPort(port);

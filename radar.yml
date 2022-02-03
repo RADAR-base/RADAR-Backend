@@ -75,6 +75,12 @@ rest_proxy:
     port: 8082
     protocol: http
 
+email_server:
+    host: localhost
+    port: 25
+    user: no-reply@radarcns.org
+
+
 #======================== Battery level monitor ========================#
 battery_monitor:
   notify: # Each project can have a number of email addresses
@@ -85,9 +91,6 @@ battery_monitor:
       email_address:
         - radar@thehyve.nl
   level: LOW
-  email_host: localhost
-  email_port: 25
-  email_user: no-reply@radarcns.org
   topics:
     - android_empatica_e4_battery_level
 
@@ -100,9 +103,6 @@ disconnect_monitor:
     - project_id: s2
       email_address:
         - radar@thehyve.nl
-  email_host: localhost
-  email_port: 25
-  email_user: no-reply@radarcns.org
   topics:
     - android_empatica_e4_temperature
   timeout: 1800  # seconds after which a stream is set disconnected
