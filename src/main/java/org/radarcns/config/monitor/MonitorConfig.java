@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class MonitorConfig {
     @JsonProperty("notify")
-    private List<NotifyConfig> notifyConfig;
+    private List<EmailNotifyConfig> emailNotifyConfig;
 
     @JsonProperty("email_host")
     private String emailHost;
@@ -44,12 +44,12 @@ public class MonitorConfig {
     @JsonProperty("message")
     private String message = null;
 
-    public List<NotifyConfig> getNotifyConfig() {
-        return notifyConfig;
+    public List<EmailNotifyConfig> getNotifyConfig() {
+        return emailNotifyConfig;
     }
 
-    public void setNotifyConfig(List<NotifyConfig> notifyConfig) {
-        this.notifyConfig = notifyConfig;
+    public void setNotifyConfig(List<EmailNotifyConfig> emailNotifyConfig) {
+        this.emailNotifyConfig = emailNotifyConfig;
     }
 
     public List<String> getTopics() {

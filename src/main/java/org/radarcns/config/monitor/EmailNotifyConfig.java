@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * POJO to store each email Notification configuration.
  */
-public class NotifyConfig {
+public class EmailNotifyConfig {
     @JsonProperty("project_id")
     private String projectId;
 
@@ -16,8 +16,8 @@ public class NotifyConfig {
     private List<String> emailAddress;
 
     @JsonCreator
-    public NotifyConfig(@JsonProperty("project_id") String projectId,
-                        @JsonProperty("email_address") List<String> emailAddress) {
+    public EmailNotifyConfig(@JsonProperty("project_id") String projectId,
+                             @JsonProperty("email_address") List<String> emailAddress) {
         this.projectId = projectId;
         this.emailAddress = emailAddress;
     }
