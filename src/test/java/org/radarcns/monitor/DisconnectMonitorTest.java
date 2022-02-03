@@ -43,7 +43,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarcns.config.ConfigRadar;
-import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;

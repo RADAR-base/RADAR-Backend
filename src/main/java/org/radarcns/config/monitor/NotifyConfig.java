@@ -1,4 +1,4 @@
-package org.radarcns.config;
+package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.AddressException;
-import org.radarcns.config.MonitorConfig;
-import org.radarcns.config.NotifyConfig;
+import org.radarcns.config.monitor.MonitorConfig;
+import org.radarcns.config.monitor.NotifyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

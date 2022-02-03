@@ -39,7 +39,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.radarcns.config.DisconnectMonitorConfig;
+import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;

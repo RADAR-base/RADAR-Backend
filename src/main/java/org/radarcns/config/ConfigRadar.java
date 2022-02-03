@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.radarbase.config.ServerConfig;
 import org.radarbase.config.YamlConfigLoader;
+import org.radarcns.config.monitor.BatteryMonitorConfig;
+import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.realtime.RealtimeConsumerConfig;
 
 /**
