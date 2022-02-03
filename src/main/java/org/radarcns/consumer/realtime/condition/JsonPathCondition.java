@@ -26,10 +26,10 @@ public abstract class JsonPathCondition extends ConditionBase {
     } catch (ClassCastException exc) {
       throw new IOException(
           "The provided json path does not seem to contain an expression. Make sure it"
-              + " contains an expression. Docs: https://github.com/json-path/JsonPath");
+              + " contains an expression. Docs: https://github.com/json-path/JsonPath", exc);
     }
 
     // At least one result matches the condition
-    return result != null && result.size() > 0;
+    return result != null && !result.isEmpty();
   }
 }

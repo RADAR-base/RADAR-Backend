@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.radarcns.config.RadarPropertyHandler.Priority;
-import org.radarcns.stream.TimeWindowMetadata;
+import org.radarbase.stream.TimeWindowMetadata;
 
 // POJO class
 @SuppressWarnings("PMD.ImmutableField")
