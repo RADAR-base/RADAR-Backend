@@ -109,3 +109,26 @@ disconnect_monitor:
   alert_repetitions: 2  # number of additional emails to send after the first
 
 # persistence_path: /var/lib/radar/data
+
+#====================== Notification monitor=============================#
+notification_monitor:
+  topics:
+    - android_empatica_e4_temperature
+  notify:
+#    global:
+#      condition:
+#        json_path: '$.invocation_result.anomaly_detected == 1'
+#      questionnaire:
+#        - questionnaireA
+#        - questionnaireB
+    - project_id: p1
+      condition:
+        json_path: '$.invocation_result.anomaly_detected == 1'
+      questionnaire:
+        - questionnaireA
+        - questionnaireB
+    - project_id: p2
+      condition:
+        json_path: '$.invocation_result.anomaly_detected == 1'
+      questionnaire:
+        - questionnaireC
