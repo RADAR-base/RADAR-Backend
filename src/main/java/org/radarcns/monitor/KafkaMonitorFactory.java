@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.stream.Stream;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
+import org.radarcns.config.monitor.NotificationMonitorConfig;
 import org.radarcns.config.monitor.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
@@ -61,9 +62,12 @@ public class KafkaMonitorFactory {
             case "disconnect":
                 monitor = createDisconnectMonitor();
                 break;
+            case "notification":
+                monitor = createNotificationMonitor();
+                break;
             case "all":
                 monitor = new CombinedKafkaMonitor(
-                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor()));
+                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(), createDisconnectMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -72,6 +76,17 @@ public class KafkaMonitorFactory {
             throw new IllegalArgumentException("Monitor " + commandType + " is not configured.");
         }
         return monitor;
+    }
+
+    private KafkaMonitor createNotificationMonitor() {
+        NotificationMonitorConfig config = properties.getRadarProperties().getNotificationMonitor();
+        if (config == null) {
+            logger.warn("Notification monitor is not configured. Cannot start it.");
+            return null;
+        }
+
+//        return new InterventionMonitor();
+        return null;
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {
@@ -115,7 +130,7 @@ public class KafkaMonitorFactory {
 
 
     private EmailSenders getSenders(MonitorConfig config) throws IOException {
-        if (config != null && config.getNotifyConfig() != null) {
+        if (config != null && config.getEmailNotifyConfig() != null) {
             return EmailSenders.parseConfig(config);
         }
         return null;

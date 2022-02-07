@@ -112,6 +112,12 @@ disconnect_monitor:
 
 #====================== Notification monitor=============================#
 notification_monitor:
+  #=========================App Server======================================#
+  app_server:
+    base_url: http://localhost:8080/appserver/api
+    token_url: http://localhost:8090/managementportal/oauth/token
+    clientId: radar_backend_client
+    clientSecret: secret
   topics:
     - android_empatica_e4_temperature
   notify:
@@ -132,3 +138,5 @@ notification_monitor:
         json_path: '$.invocation_result.anomaly_detected == 1'
       questionnaire:
         - questionnaireC
+
+

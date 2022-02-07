@@ -5,21 +5,23 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.consumer.realtime.action.appserver.AppserverClient;
+import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
-public class InterventionMonitor extends
-            AbstractKafkaMonitor<GenericRecord, GenericRecord, InterventionMonitor.InterventionNotificationState> {
+public class NotificationMonitor extends
+            AbstractKafkaMonitor<GenericRecord, GenericRecord, NotificationMonitor.InterventionNotificationState> {
         private static final Logger logger = LoggerFactory.getLogger(BatteryLevelMonitor.class);
 
     private final AppserverClient appserverClient;
 
 
-    public InterventionMonitor(RadarPropertyHandler radar, Collection<String> topics,
+    public NotificationMonitor(RadarPropertyHandler radar, Collection<String> topics,
                                AppserverClient appserverClient ) {
-        super(radar, topics, "intervention_monitor", "1", new InterventionNotificationState());
+        super(radar, topics, "notification_monitor", "1", new InterventionNotificationState());
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
@@ -78,4 +80,15 @@ public class InterventionMonitor extends
             return name + SEPARATOR + timestamp;
         }
     }
+
+    public static void main(String... args) throws IOException {
+        RadarPropertyHandler radarPropertyHandler = RadarSingleton.getInstance()
+                .getRadarPropertyHandler();
+        radarPropertyHandler.load(null);
+
+        NotificationMonitor monitor = new NotificationMonitor(radarPropertyHandler,
+                List.of("topic"), null);
+        monitor.start();
+    }
+
 }
