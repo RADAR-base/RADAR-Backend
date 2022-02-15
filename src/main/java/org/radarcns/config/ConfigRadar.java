@@ -59,6 +59,9 @@ public class ConfigRadar {
     @JsonProperty("build_version")
     private String buildVersion;
 
+    @JsonProperty("email_server")
+    private EmailServerConfig emailServerConfig;
+
     public Date getReleased() {
         return released;
     }
@@ -208,5 +211,13 @@ public class ConfigRadar {
 
     public void setInterventionMonitor(InterventionMonitorConfig notificationMonitor) {
         this.interventionMonitor = notificationMonitor;
+    }
+
+    public EmailServerConfig getEmailServerConfig() {
+        return emailServerConfig;
+    }
+
+    public void setEmailServerConfig(EmailServerConfig emailServerConfig) {
+        this.emailServerConfig = emailServerConfig;
     }
 }

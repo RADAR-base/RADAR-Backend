@@ -16,12 +16,12 @@
 
 package org.radarcns.monitor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -96,9 +96,9 @@ public class KafkaMonitorFactoryTest {
     public void createAllMonitor() throws Exception {
         String[] args = {"monitor", "all"};
         RadarBackendOptions options = RadarBackendOptions.parse(args);
-        ConfigRadar config = createBasicConfig(folder);
-        config.setBatteryMonitor(getBatteryMonitorConfig(emailServer.getPort()));
-        config.setDisconnectMonitor(getDisconnectMonitorConfig(emailServer.getPort()));
+        ConfigRadar config = createBasicConfig(folder, emailServer.getPort());
+        config.setBatteryMonitor(getBatteryMonitorConfig());
+        config.setDisconnectMonitor(getDisconnectMonitorConfig());
         RadarPropertyHandler properties = getRadarPropertyHandler(config, folder);
 
         KafkaMonitor monitor = new KafkaMonitorFactory(options, properties).createMonitor();
@@ -120,60 +120,45 @@ public class KafkaMonitorFactoryTest {
         return properties;
     }
 
-    public static ConfigRadar createBasicConfig(TemporaryFolder folder) throws IOException {
+    public static ConfigRadar createBasicConfig(TemporaryFolder folder, int port) throws IOException {
         ConfigRadar config = new ConfigRadar();
+        EmailServerConfig serverConfig = new EmailServerConfig();
+        serverConfig.setHost("localhost");
+        serverConfig.setPort(port);
+        serverConfig.setUser("test@example");
+        config.setEmailServerConfig(serverConfig);
         config.setPersistencePath(folder.newFolder().getAbsolutePath());
         config.setSchemaRegistry(Collections.emptyList());
         config.setBroker(Collections.emptyList());
         return config;
     }
 
-    public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
+    public static DisconnectMonitorConfig getDisconnectMonitorConfig() {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
         disconnectConfig.setEmailNotifyConfig(List.of(
                 new EmailNotifyConfig("test", List.of("test@localhost"))));
-        EmailServerConfig serverConfig = new EmailServerConfig();
-        serverConfig.setHost("localhost");
-        serverConfig.setPort(port);
-        disconnectConfig.setEmailServerConfig(serverConfig);
         disconnectConfig.setTimeout(1L);
         disconnectConfig.setAlertRepeatInterval(20L);
         return disconnectConfig;
     }
 
     public static ConfigRadar getDisconnectMonitorConfig(int port, TemporaryFolder folder) throws IOException {
-        ConfigRadar config = createBasicConfig(folder);
-        config.setDisconnectMonitor(getDisconnectMonitorConfig(port));
+        ConfigRadar config = createBasicConfig(folder, port);
+        config.setDisconnectMonitor(getDisconnectMonitorConfig());
         return config;
     }
 
-    public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
+    public static BatteryMonitorConfig getBatteryMonitorConfig() {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
         batteryConfig.setEmailNotifyConfig(List.of(
                 new EmailNotifyConfig("test", List.of("test@localhost"))));
-        EmailServerConfig serverConfig = new EmailServerConfig();
-        serverConfig.setHost("localhost");
-        serverConfig.setPort(port);
-        batteryConfig.setEmailServerConfig(serverConfig);
         batteryConfig.setLevel("LOW");
         return batteryConfig;
     }
 
     public static ConfigRadar getBatteryMonitorConfig(int port, TemporaryFolder folder) throws IOException {
-        ConfigRadar config = createBasicConfig(folder);
-        config.setBatteryMonitor(getBatteryMonitorConfig(port));
-        return config;
-    }
-
-    public static ConfigRadar getSourceStatisticsMonitorConfig(TemporaryFolder folder) throws IOException {
-        ConfigRadar config = createBasicConfig(folder);
-        SourceStatisticsStreamConfig sourceConfig = new SourceStatisticsStreamConfig();
-        sourceConfig.setName("source_statistics_test");
-        sourceConfig.setTopics(List.of("android_empatica_e4_battery_level",
-                "android_empatica_e4_battery_level_10sec"));
-        sourceConfig.setOutputTopic("statistics_android_empatica_e4");
-        sourceConfig.setFlushTimeout(200L);
-        config.setStatisticsMonitors(Collections.singletonList(sourceConfig));
+        ConfigRadar config = createBasicConfig(folder, port);
+        config.setBatteryMonitor(getBatteryMonitorConfig());
         return config;
     }
 }

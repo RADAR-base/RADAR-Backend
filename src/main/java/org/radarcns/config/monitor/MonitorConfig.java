@@ -17,8 +17,6 @@
 package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.config.EmailServerConfig;
-
 import java.util.List;
 
 /**
@@ -27,9 +25,6 @@ import java.util.List;
 public class MonitorConfig {
     @JsonProperty("notify")
     private List<EmailNotifyConfig> emailNotifyConfig;
-
-    @JsonProperty("email_server")
-    private EmailServerConfig emailServerConfig;
 
     @JsonProperty("log_interval")
     private int logInterval = 1000;
@@ -61,14 +56,6 @@ public class MonitorConfig {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public EmailServerConfig getEmailServerConfig() {
-        return emailServerConfig;
-    }
-
-    public void setEmailServerConfig(EmailServerConfig emailServerConfig) {
-        this.emailServerConfig = emailServerConfig;
     }
 
     public List<EmailNotifyConfig> getEmailNotifyConfig() {

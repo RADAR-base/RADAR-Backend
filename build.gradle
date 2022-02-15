@@ -37,7 +37,7 @@ ext {
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
     mockitoVersion = '4.3.1'
-    radarCommonsVersion = '0.13.2'
+    radarCommonsVersion = '0.14.1-SNAPSHOT'
     radarSchemasVersion = '0.7.6'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.14.3'

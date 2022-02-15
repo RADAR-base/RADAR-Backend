@@ -3,6 +3,7 @@ package org.radarcns.consumer.realtime.action;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import javax.mail.internet.AddressException;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.realtime.ActionConfig;
 
 /**
@@ -14,7 +15,7 @@ public final class ActionFactory {
 
   private ActionFactory() {}
 
-  public static Action getActionFor(ActionConfig actionConfig) {
+  public static Action getActionFor(ConfigRadar config, ActionConfig actionConfig) {
     switch (actionConfig.getName()) {
       case ActiveAppNotificationAction.NAME:
         try {
@@ -25,7 +26,7 @@ public final class ActionFactory {
         }
       case EmailUserAction.NAME:
         try {
-          return new EmailUserAction(actionConfig);
+          return new EmailUserAction(actionConfig, config.getEmailServerConfig());
         } catch (AddressException | IOException e) {
           throw new IllegalArgumentException("The configuration was invalid. Please check.", e);
         }

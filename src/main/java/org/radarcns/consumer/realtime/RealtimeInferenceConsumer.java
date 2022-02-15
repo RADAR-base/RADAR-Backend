@@ -94,7 +94,7 @@ public class RealtimeInferenceConsumer implements KafkaMonitor {
 
     actions =
         consumerConfig.getActionConfigs().stream()
-            .map(ActionFactory::getActionFor)
+            .map(a -> ActionFactory.getActionFor(radar, a))
             .collect(Collectors.toList());
 
     if (conditions.isEmpty() || actions.isEmpty()) {

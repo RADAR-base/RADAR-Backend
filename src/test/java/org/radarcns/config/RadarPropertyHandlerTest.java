@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -39,9 +40,7 @@ public class RadarPropertyHandlerTest {
 
     @Before
     public void setUp() {
-
         this.propertyHandler = new RadarPropertyHandlerImpl();
-
     }
 
     @Rule
@@ -62,9 +61,8 @@ public class RadarPropertyHandlerTest {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
         properties.set(this.propertyHandler, null);
-        exception.expect(IOException.class);
         String invalidPath = "/usr/";
-        propertyHandler.load(invalidPath);
+        assertThrows(IOException.class, () -> propertyHandler.load(invalidPath));
     }
 
     @Test
@@ -121,13 +119,12 @@ public class RadarPropertyHandlerTest {
     }
 
     @Test
-    public void getKafkaProperties() throws Exception
-    {
+    public void getKafkaProperties() throws Exception {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
         properties.set(propertyHandler,null);
         propertyHandler.load("radar.yml");
-        KafkaProperty property =propertyHandler.getKafkaProperties();
+        KafkaProperty property = propertyHandler.getKafkaProperties();
         assertNotNull(property);
     }
 

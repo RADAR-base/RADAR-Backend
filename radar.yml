@@ -108,35 +108,22 @@ disconnect_monitor:
   timeout: 1800  # seconds after which a stream is set disconnected
   alert_repetitions: 2  # number of additional emails to send after the first
 
-# persistence_path: /var/lib/radar/data
+persistence_path: /tmp
 
 #====================== Notification monitor=============================#
-notification_monitor:
+intervention_monitor:
   #=========================App Server======================================#
-  app_server:
-    base_url: http://localhost:8080/appserver/api
+  app_server_url: http://localhost:8080/appserver/api
+  app_config_client: dynamint_ksql
+  app_config_url: http://localhost:8090/appconfig/api
+  auth:
     token_url: http://localhost:8090/managementportal/oauth/token
     clientId: radar_backend_client
     clientSecret: secret
-  topics:
-    - android_empatica_e4_temperature
+  topic: interventions
   notify:
-#    global:
-#      condition:
-#        json_path: '$.invocation_result.anomaly_detected == 1'
-#      questionnaire:
-#        - questionnaireA
-#        - questionnaireB
     - project_id: p1
-      condition:
-        json_path: '$.invocation_result.anomaly_detected == 1'
-      questionnaire:
-        - questionnaireA
-        - questionnaireB
-    - project_id: p2
-      condition:
-        json_path: '$.invocation_result.anomaly_detected == 1'
-      questionnaire:
-        - questionnaireC
-
+      email_address:
+        - test@thehyve.nl
+  protocol_directory: interventions
 

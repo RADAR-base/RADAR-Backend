@@ -10,6 +10,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarcns.config.EmailServerConfig;
 import org.radarcns.config.realtime.ActionConfig;
 import org.radarcns.util.EmailSender;
 import org.slf4j.Logger;
@@ -28,13 +29,12 @@ public class EmailUserAction extends ActionBase {
   private final String customTitle;
   private final String customBody;
 
-  public EmailUserAction(ActionConfig actionConfig) throws AddressException, IOException {
+  public EmailUserAction(ActionConfig actionConfig, EmailServerConfig emailServerConfig) throws AddressException, IOException {
     super(actionConfig);
     Map<String, Object> props = actionConfig.getProperties();
     this.emailSender =
         new EmailSender(
-            (String) props.getOrDefault("host", "localhost"),
-            (Integer) props.getOrDefault("port", 25),
+            emailServerConfig,
             (String) props.getOrDefault("from", "admin@radarbase.org"),
             (List<String>) props.getOrDefault("email_addresses", new ArrayList<String>()));
     customTitle = (String) props.getOrDefault("title", null);

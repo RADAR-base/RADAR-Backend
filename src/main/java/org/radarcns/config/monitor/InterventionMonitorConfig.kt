@@ -7,7 +7,7 @@ import java.time.Duration
 data class InterventionMonitorConfig(
     @JsonProperty("app_server_url")
     val appServerUrl: String,
-    @JsonProperty("ksql_app_config_client")
+    @JsonProperty("app_config_client")
     val ksqlAppConfigClient: String,
     @JsonProperty("app_config_url")
     val appConfigUrl: String,
@@ -33,6 +33,7 @@ data class InterventionMonitorConfig(
     @JsonProperty("max_interventions")
     var maxInterventions: Int = 4,
 
+    @JsonProperty("protocol_directory")
     val protocolDirectory: String,
     val defaultLanguage: String = "en",
 ) {

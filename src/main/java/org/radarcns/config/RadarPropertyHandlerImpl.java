@@ -19,6 +19,8 @@ package org.radarcns.config;
 
 import static org.radarbase.util.Strings.isNullOrEmpty;
 
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -79,7 +81,10 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         if (!Files.exists(file)) {
             throw new IllegalArgumentException("Config file " + file + " does not exist");
         }
-        properties = new YamlConfigLoader().load(file, ConfigRadar.class);
+        properties = new YamlConfigLoader(mapper -> mapper.registerModule(new KotlinModule.Builder()
+                .enable(KotlinFeature.NullIsSameAsDefault)
+                .build()))
+                .load(file, ConfigRadar.class);
 
         Properties buildProperties = new Properties();
         try (InputStream in = getClass().getResourceAsStream("/build.properties")) {
