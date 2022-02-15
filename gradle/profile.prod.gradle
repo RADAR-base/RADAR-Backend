@@ -6,6 +6,14 @@ task downloadRuntimeDependencies {
     }
 }
 
+tasks.register("copyDependencies", Copy.class) {
+    from(configurations.named("runtimeClasspath").map { it.files })
+    into("$buildDir/third-party/")
+    doLast {
+        println("Copied third-party runtime dependencies")
+    }
+}
+
 processResources {
     expand(version: version)
 }

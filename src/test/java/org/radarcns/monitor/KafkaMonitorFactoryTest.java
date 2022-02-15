@@ -34,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarbase.config.YamlConfigLoader;
+import org.radarcns.config.EmailServerConfig;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
@@ -129,11 +130,12 @@ public class KafkaMonitorFactoryTest {
 
     public static DisconnectMonitorConfig getDisconnectMonitorConfig(int port) {
         DisconnectMonitorConfig disconnectConfig = new DisconnectMonitorConfig();
-        disconnectConfig.setNotifyConfig(List.of(
+        disconnectConfig.setEmailNotifyConfig(List.of(
                 new EmailNotifyConfig("test", List.of("test@localhost"))));
-        disconnectConfig.setEmailUser("test@localhost");
-        disconnectConfig.setEmailHost("localhost");
-        disconnectConfig.setEmailPort(port);
+        EmailServerConfig serverConfig = new EmailServerConfig();
+        serverConfig.setHost("localhost");
+        serverConfig.setPort(port);
+        disconnectConfig.setEmailServerConfig(serverConfig);
         disconnectConfig.setTimeout(1L);
         disconnectConfig.setAlertRepeatInterval(20L);
         return disconnectConfig;
@@ -147,13 +149,13 @@ public class KafkaMonitorFactoryTest {
 
     public static BatteryMonitorConfig getBatteryMonitorConfig(int port) {
         BatteryMonitorConfig batteryConfig = new BatteryMonitorConfig();
-        batteryConfig.setNotifyConfig(List.of(
+        batteryConfig.setEmailNotifyConfig(List.of(
                 new EmailNotifyConfig("test", List.of("test@localhost"))));
-        batteryConfig.setEmailUser("test@localhost");
-        batteryConfig.setEmailHost("localhost");
-        batteryConfig.setEmailPort(port);
+        EmailServerConfig serverConfig = new EmailServerConfig();
+        serverConfig.setHost("localhost");
+        serverConfig.setPort(port);
+        batteryConfig.setEmailServerConfig(serverConfig);
         batteryConfig.setLevel("LOW");
-        batteryConfig.setEmailUser("someuser");
         return batteryConfig;
     }
 

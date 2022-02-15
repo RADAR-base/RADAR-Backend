@@ -1,6 +1,9 @@
 package org.radarcns.stream;
 
-import java.lang.Thread.UncaughtExceptionHandler;
+import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
+import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_APPLICATION;
+import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.errors.StreamsException;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.radarbase.topic.KafkaTopic;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.KafkaProperty;
@@ -16,7 +20,8 @@ import org.radarcns.config.SingleStreamConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExceptionHandler {
+public abstract class AbstractStreamWorker implements StreamWorker,
+        StreamsUncaughtExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(AbstractStreamWorker.class);
 
     public static final String OUTPUT_LABEL = "_output";
@@ -166,15 +171,17 @@ public abstract class AbstractStreamWorker implements StreamWorker, UncaughtExce
      * terminating due to an exception.
      */
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        logger.error("Thread {} has been terminated due to {}", t.getName(), e.getMessage(), e);
+    public StreamThreadExceptionResponse handle(Throwable e) {
+        logger.error("Stream worker has been terminated due to {}", e.getMessage(), e);
 
         closeStreams();
 
         if (e instanceof StreamsException) {
             master.restartStream(this);
+            return SHUTDOWN_CLIENT;
         } else {
             master.notifyCrashedStream(getClass().getSimpleName());
+            return SHUTDOWN_APPLICATION;
         }
     }
 }

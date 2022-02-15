@@ -17,7 +17,6 @@
 package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.radarcns.config.monitor.MonitorConfig;
 
 /**
  * POJO representing a disconnection status monitor configuration.

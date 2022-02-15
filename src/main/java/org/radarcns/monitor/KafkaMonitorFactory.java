@@ -24,10 +24,11 @@ import java.util.Locale;
 import java.util.stream.Stream;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
-import org.radarcns.config.monitor.NotificationMonitorConfig;
+import org.radarcns.config.monitor.InterventionMonitorConfig;
 import org.radarcns.config.monitor.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.monitor.intervention.InterventionMonitor;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +63,12 @@ public class KafkaMonitorFactory {
             case "disconnect":
                 monitor = createDisconnectMonitor();
                 break;
-            case "notification":
-                monitor = createNotificationMonitor();
+            case "intervention":
+                monitor = createInterventionMonitor();
                 break;
             case "all":
                 monitor = new CombinedKafkaMonitor(
-                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(), createDisconnectMonitor()));
+                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(), createInterventionMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -78,15 +79,24 @@ public class KafkaMonitorFactory {
         return monitor;
     }
 
-    private KafkaMonitor createNotificationMonitor() {
-        NotificationMonitorConfig config = properties.getRadarProperties().getNotificationMonitor();
+    private KafkaMonitor createInterventionMonitor() throws IOException {
+        InterventionMonitorConfig config = properties.getRadarProperties().getInterventionMonitor();
         if (config == null) {
             logger.warn("Notification monitor is not configured. Cannot start it.");
             return null;
         }
 
-//        return new InterventionMonitor();
-        return null;
+        EmailSenders senders;
+        if (config.getEmailServerConfig() != null && !config.getEmailNotifyConfig().isEmpty()) {
+            senders = EmailSenders.parseConfig(config.getEmailServerConfig(),
+                    config.getEmailNotifyConfig());
+        } else {
+            logger.warn("Notification monitor does not have email configured. "
+                    + "Will not send notifications of any exceptions.");
+            senders = null;
+        }
+
+        return new InterventionMonitor(config.withEnv(), properties, senders);
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {

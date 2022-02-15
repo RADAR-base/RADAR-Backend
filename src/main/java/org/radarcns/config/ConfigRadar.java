@@ -25,7 +25,7 @@ import org.radarbase.config.ServerConfig;
 import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
-import org.radarcns.config.monitor.NotificationMonitorConfig;
+import org.radarcns.config.monitor.InterventionMonitorConfig;
 import org.radarcns.config.realtime.RealtimeConsumerConfig;
 
 /**
@@ -46,8 +46,8 @@ public class ConfigRadar {
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("statistics_monitors")
     private List<SourceStatisticsStreamConfig> statisticsMonitors;
-    @JsonProperty("notification_monitor")
-    private NotificationMonitorConfig notificationMonitor;
+    @JsonProperty("intervention_monitor")
+    private InterventionMonitorConfig interventionMonitor;
     @JsonProperty("realtime_consumers")
     private List<RealtimeConsumerConfig> consumerConfigs;
     @JsonProperty("stream")
@@ -202,11 +202,11 @@ public class ConfigRadar {
         return stream;
     }
 
-    public NotificationMonitorConfig getNotificationMonitor() {
-        return notificationMonitor;
+    public InterventionMonitorConfig getInterventionMonitor() {
+        return interventionMonitor;
     }
 
-    public void setNotificationMonitor(NotificationMonitorConfig notificationMonitor) {
-        this.notificationMonitor = notificationMonitor;
+    public void setInterventionMonitor(InterventionMonitorConfig notificationMonitor) {
+        this.interventionMonitor = notificationMonitor;
     }
 }

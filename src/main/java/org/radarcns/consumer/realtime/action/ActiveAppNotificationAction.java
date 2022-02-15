@@ -6,8 +6,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.radarbase.appserver.client.AppserverClientConfig;
+import org.radarbase.appserver.client.MessagingType;
 import org.radarcns.config.realtime.ActionConfig;
-import org.radarcns.consumer.realtime.action.appserver.AppserverClient;
+import org.radarbase.appserver.client.AppserverClient;
 import org.radarcns.consumer.realtime.action.appserver.NotificationContentProvider;
 import org.radarcns.consumer.realtime.action.appserver.ProtocolNotificationProvider;
 import org.radarcns.consumer.realtime.action.appserver.ScheduleTimeStrategy;
@@ -54,13 +56,20 @@ public class ActiveAppNotificationAction extends ActionBase {
             (String)
                 actionConfig
                     .getProperties()
-                    .getOrDefault("message_type", MessagingType.notifications.toString()));
+                    .getOrDefault("message_type", MessagingType.NOTIFICATIONS.toString()));
 
     String clientId =
         (String) actionConfig.getProperties().getOrDefault("client_id", "realtime_consumer");
     String clientSecret =
         (String) actionConfig.getProperties().getOrDefault("client_secret", "secret");
-    appserverClient = new AppserverClient(appServerBaseUrl, mpTokenUrl, clientId, clientSecret);
+
+    AppserverClientConfig config = new AppserverClientConfig();
+    config.setClientId(clientId);
+    config.setClientSecret(clientSecret);
+    config.appserverUrl(appServerBaseUrl);
+    config.tokenUrl(mpTokenUrl);
+
+    appserverClient = new AppserverClient(config);
   }
 
   @Override
@@ -110,10 +119,10 @@ public class ActiveAppNotificationAction extends ActionBase {
 
     String body;
     switch (type) {
-      case notifications:
+      case NOTIFICATIONS:
         body = contentProvider.getNotificationMessage();
         break;
-      case data:
+      case DATA:
         body = contentProvider.getDataMessage();
         break;
       default:
@@ -129,9 +138,4 @@ public class ActiveAppNotificationAction extends ActionBase {
     return (String) appserverClient.getUserDetails(project, user).getOrDefault("timezone", "gmt");
   }
 
-  @SuppressWarnings({"PMD.ClassNamingConventions", "PMD.FieldNamingConventions"})
-  public enum MessagingType {
-    notifications,
-    data
-  }
 }

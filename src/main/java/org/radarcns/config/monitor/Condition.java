@@ -1,4 +1,4 @@
-package org.radarcns.monitor.notification;
+package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

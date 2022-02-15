@@ -16,8 +16,6 @@
 
 package org.radarcns.config.monitor;
 
-import org.radarcns.config.monitor.MonitorConfig;
-
 /**
  * POJO representing a battery status monitor configuration.
  */

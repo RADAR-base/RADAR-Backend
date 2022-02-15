@@ -2,6 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
 }
 
 //---------------------------------------------------------------------------//
@@ -27,24 +28,23 @@ ext {
     issueUrl = 'https://github.com/' + githubRepoName + '/issues'
     website = 'http://radar-base.org'
 
-    codacyVersion = '4.0.2'
-    confluentVersion = '5.5.1'
-    hamcrestVersion = '1.3'
-    kafkaVersion = '2.5.0'
-    jacksonVersion = '2.11.2'
+    confluentVersion = '7.0.1'
+    hamcrestVersion = '2.2'
+    kafkaVersion = '3.0.0'
+    jacksonVersion = '2.13.1'
     javaMailVersion = '1.6.2'
-    junitVersion = '4.12'
+    junitVersion = '4.13.1'
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
-    mockitoVersion = '3.5.11'
+    mockitoVersion = '4.3.1'
     radarCommonsVersion = '0.13.2'
-    radarSchemasVersion = '0.7.4'
+    radarSchemasVersion = '0.7.6'
     subethamailVersion = '3.1.7'
-    jsoupVersion = '1.13.1'
-    slf4jVersion = '1.7.30'
-    log4jVersion = '1.2.17'
-    avroVersion = '1.9.2'
-    jsonPathVersion = '2.6.0'
+    jsoupVersion = '1.14.3'
+    slf4jVersion = '1.7.35'
+    reload4jVersion = '1.2.18.5'
+    avroVersion = '1.11.0'
+    jsonPathVersion = '2.7.0'
 }
 
 //---------------------------------------------------------------------------//
@@ -55,10 +55,8 @@ ext {
 repositories {
     mavenCentral()
     // Kafka/confluent releases
-    maven { url 'http://packages.confluent.io/maven/' }
-    // For working with dev-branches
-    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
-    // Github code
+    maven { url 'https://packages.confluent.io/maven/' }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://jitpack.io' }
 }
 
@@ -69,10 +67,12 @@ dependencies {
     implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
     implementation group: 'org.radarbase', name: 'radar-schemas-commons', version: radarSchemasVersion
     implementation group: 'org.radarbase', name: 'oauth-client-util', version: '0.8.0'
+    implementation group: 'org.radarbase', name: 'radar-app-config-client', version: '0.4.1-SNAPSHOT'
 
     // Kafka streaming API
     implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     implementation group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion
+    implementation group: 'io.confluent', name: 'kafka-json-schema-serializer', version: confluentVersion
 
     // Nonnull annotation
     implementation group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
@@ -83,6 +83,7 @@ dependencies {
     // Configuration @JsonProperty
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jacksonVersion
 
     // Monitor mail sending
     implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
@@ -94,14 +95,25 @@ dependencies {
     // JsonPath for evaluating json conditions dynamically.
     implementation group: 'com.jayway.jsonpath', name: 'json-path', version: jsonPathVersion
 
-    runtimeOnly group: 'org.radarbase', name: 'radar-commons-unsafe', version: radarCommonsVersion
-
-    runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
-    runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    runtimeOnly group: 'ch.qos.reload4j', name: 'reload4j', version: reload4jVersion
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: slf4jVersion
 }
 
 if (!hasProperty('profile')) {
     ext.profile = 'dev'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs = [
+                "-Xjavac-arguments='-Xlint:unchecked -Xlint:deprecation'"
+        ]
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
 apply from: "gradle/profile.${profile}.gradle"

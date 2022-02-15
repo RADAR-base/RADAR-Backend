@@ -1,5 +1,4 @@
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 
 ext.sharedManifest = manifest {
     attributes(
@@ -89,31 +88,6 @@ publishing {
                     url = githubUrl
                 }
             }
-        }
-    }
-}
-
-bintray {
-    user project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    override false
-    publications 'mavenJar'
-    pkg {
-        repo = project.group
-        name = rootProject.name
-        userOrg = 'radar-cns'
-        desc = moduleDescription
-        licenses = ['Apache-2.0']
-        websiteUrl = website
-        issueTrackerUrl = issueUrl
-        vcsUrl = githubUrl
-        githubRepo = githubRepoName
-        githubReleaseNotesFile = 'README.md'
-        version {
-            name = project.version
-            desc = moduleDescription
-            vcsTag = System.getenv('TRAVIS_TAG')
-            released = new Date()
         }
     }
 }

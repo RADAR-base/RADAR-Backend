@@ -47,4 +47,16 @@ public class AppServerConfig {
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
     }
+
+    public AppServerConfig withEnv() {
+        String envClientId = System.getenv("APP_SERVER_CLIENT_ID");
+        if (envClientId != null) {
+            clientId = envClientId;
+        }
+        String envClientSecret = System.getenv("APP_SERVER_CLIENT_SECRET");
+        if (envClientSecret != null) {
+            clientSecret = envClientSecret;
+        }
+        return this;
+    }
 }
