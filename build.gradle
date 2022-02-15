@@ -16,8 +16,8 @@ mainClassName = 'org.radarcns.RadarBackend'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
 
 
-targetCompatibility = '11.0'
-sourceCompatibility = '11.0'
+targetCompatibility = '17'
+sourceCompatibility = '17'
 
 ext {
     moduleDescription = 'Kafka backend for processing device data.'
@@ -105,7 +105,7 @@ if (!hasProperty('profile')) {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
         freeCompilerArgs = [
                 "-Xjavac-arguments='-Xlint:unchecked -Xlint:deprecation'"
         ]

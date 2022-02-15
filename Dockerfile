@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gradle:7.3-jdk17 as builder
+FROM gradle:7.4-jdk17 as builder
 
 RUN mkdir /code
 WORKDIR /code
@@ -33,7 +33,7 @@ MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.n
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl bash
 
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 ENV RADAR_BACKEND_CONFIG /etc/radar.yml
@@ -44,5 +44,7 @@ COPY --from=builder /code/build/libs/* /usr/lib/
 
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
+
+USER 101
 
 ENTRYPOINT ["radar-backend-init"]
