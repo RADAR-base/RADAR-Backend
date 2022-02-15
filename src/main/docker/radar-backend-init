@@ -6,34 +6,13 @@ set -e
 echo "===> Waiting for RADAR-CNS topics ... "
 
 # Check if variables exist
-if [ -n "$KAFKA_REST_PROXY" ] && [ -n "$KAFKA_SCHEMA_REGISTRY" ] && [ -n "$KAFKA_BROKERS" ]; then
+if [ -n "$KAFKA_SCHEMA_REGISTRY" ]; then
   max_timeout=32
 
   tries=10
   timeout=1
   while true; do
-      IFS=, read -r -a array <<< $(curl -s "${KAFKA_REST_PROXY}/brokers" | sed 's/^.*\[\(.*\)\]\}/\1/')
-      LENGTH=${#array[@]}
-      if [ "$LENGTH" -eq "$KAFKA_BROKERS" ]; then
-          echo "Kafka brokers available."
-          break
-      fi
-      tries=$((tries - 1))
-      if [ $tries -eq 0 ]; then
-          echo "FAILED: KAFKA BROKERs NOT READY."
-          exit 5
-      fi
-      echo "Kafka brokers or Kafka REST proxy not ready. Retrying in ${timeout} seconds."
-      sleep $timeout
-      if [ $timeout -lt $max_timeout ]; then
-          timeout=$((timeout * 2))
-      fi
-  done
-
-  tries=10
-  timeout=1
-  while true; do
-      if wget --spider -q "${KAFKA_SCHEMA_REGISTRY}/subjects" 2>/dev/null; then
+      if [ $(curl -s "${KAFKA_SCHEMA_REGISTRY}/subjects" | wc -c) -le 3 ]; then
           break
       fi
       tries=$((tries - 1))
