@@ -16,6 +16,9 @@
 
 package org.radarcns.util;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -37,14 +40,16 @@ public class YamlPersistentStateStore implements PersistentStateStore {
     /**
      * State store that creates files at given directory. The directory will be created if it
      * does not exist.
+     *
+     * @param loader
      * @param basePath path to a directory.
      * @throws IOException if the given directory is not writable for states.
      */
-    public YamlPersistentStateStore(Path basePath) throws IOException {
+    public YamlPersistentStateStore(YamlConfigLoader loader, Path basePath) throws IOException {
         checkBasePath(basePath);
 
         this.basePath = basePath;
-        this.loader = new YamlConfigLoader();
+        this.loader = loader;
     }
 
     /**

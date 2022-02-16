@@ -26,6 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.File;
 import java.time.Duration;
 import java.util.Collections;
@@ -42,6 +45,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
@@ -63,6 +67,15 @@ public class DisconnectMonitorTest {
     private Schema valueSchema;
     private EmailSenders senders;
     private EmailSender sender;
+
+    private final YamlConfigLoader loader = new YamlConfigLoader(mapper -> {
+        mapper.registerModule(new KotlinModule.Builder()
+                .enable(KotlinFeature.NullIsSameAsDefault)
+                .enable(KotlinFeature.NullToEmptyCollection)
+                .enable(KotlinFeature.NullToEmptyMap)
+                .build());
+        mapper.registerModule(new JavaTimeModule());
+    });
 
     private static final String PROJECT_ID = "test";
 
@@ -154,7 +167,7 @@ public class DisconnectMonitorTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base.toPath());
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(loader, base.toPath());
         DisconnectMonitorState state = new DisconnectMonitorState();
         ObservationKey key1 = new ObservationKey(PROJECT_ID, "a", "b");
         ObservationKey key2 = new ObservationKey(PROJECT_ID, "b", "c");
@@ -166,7 +179,7 @@ public class DisconnectMonitorTest {
                 (now -60L, now + 2L, 0));
         stateStore.storeState("one", "two", state);
 
-        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base.toPath());
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(loader, base.toPath());
         DisconnectMonitorState state2 = stateStore2.retrieveState("one", "two", new DisconnectMonitorState());
         Map<String, Long> lastSeen = state2.getLastSeen();
         assertThat(lastSeen.size(), is(2));

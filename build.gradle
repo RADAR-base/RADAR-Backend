@@ -15,10 +15,6 @@ version = '0.4.1-SNAPSHOT'
 mainClassName = 'org.radarcns.RadarBackend'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
 
-
-targetCompatibility = '17'
-sourceCompatibility = '17'
-
 ext {
     moduleDescription = 'Kafka backend for processing device data.'
     githubRepoName = 'RADAR-Base/RADAR-Backend'
@@ -66,13 +62,13 @@ dependencies {
     implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
     implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
     implementation group: 'org.radarbase', name: 'radar-schemas-commons', version: radarSchemasVersion
-    implementation group: 'org.radarbase', name: 'oauth-client-util', version: '0.8.0'
+    implementation group: 'org.radarbase', name: 'oauth-client-util', version: '0.8.1'
     implementation group: 'org.radarbase', name: 'radar-app-config-client', version: '0.4.1-SNAPSHOT'
 
     // Kafka streaming API
     implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
     implementation group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion
-    implementation group: 'io.confluent', name: 'kafka-json-schema-serializer', version: confluentVersion
+    implementation group: 'io.confluent', name: 'kafka-json-serializer', version: confluentVersion
 
     // Nonnull annotation
     implementation group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
@@ -101,6 +97,12 @@ dependencies {
 
 if (!hasProperty('profile')) {
     ext.profile = 'dev'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {

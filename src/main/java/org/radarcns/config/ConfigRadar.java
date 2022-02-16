@@ -16,7 +16,11 @@
 
 package org.radarcns.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +64,9 @@ public class ConfigRadar {
 
     @JsonProperty("email_server")
     private EmailServerConfig emailServerConfig;
+
+    @JsonIgnore
+    private YamlConfigLoader loader;
 
     public Date getReleased() {
         return released;
@@ -156,9 +163,17 @@ public class ConfigRadar {
         this.extras = extras;
     }
 
+    public void setConfigLoader(YamlConfigLoader loader) {
+        this.loader = loader;
+    }
+
     @Override
     public String toString() {
-        return new YamlConfigLoader().prettyString(this);
+        if (loader != null) {
+            return loader.prettyString(this);
+        } else {
+            return "ConfigRadar(...)";
+        }
     }
 
     public String getBuildVersion() {

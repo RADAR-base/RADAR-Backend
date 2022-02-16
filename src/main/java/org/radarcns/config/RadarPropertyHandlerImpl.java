@@ -19,6 +19,7 @@ package org.radarcns.config;
 
 import static org.radarbase.util.Strings.isNullOrEmpty;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.kotlin.KotlinFeature;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.IOException;
@@ -46,6 +47,18 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
 
     private ConfigRadar properties;
     private KafkaProperty kafkaProperty;
+    private YamlConfigLoader loader;
+
+    public RadarPropertyHandlerImpl() {
+        loader = new YamlConfigLoader(mapper -> {
+            mapper.registerModule(new KotlinModule.Builder()
+                    .enable(KotlinFeature.NullIsSameAsDefault)
+                    .enable(KotlinFeature.NullToEmptyCollection)
+                    .enable(KotlinFeature.NullToEmptyMap)
+                    .build());
+            mapper.registerModule(new JavaTimeModule());
+        });
+    }
 
     @Override
     public ConfigRadar getRadarProperties() {
@@ -54,6 +67,11 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
                     "Properties cannot be accessed without calling load() first");
         }
         return properties;
+    }
+
+    @Override
+    public YamlConfigLoader getLoader() {
+        return loader;
     }
 
     @Override
@@ -81,10 +99,8 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
         if (!Files.exists(file)) {
             throw new IllegalArgumentException("Config file " + file + " does not exist");
         }
-        properties = new YamlConfigLoader(mapper -> mapper.registerModule(new KotlinModule.Builder()
-                .enable(KotlinFeature.NullIsSameAsDefault)
-                .build()))
-                .load(file, ConfigRadar.class);
+        properties = loader.load(file, ConfigRadar.class);
+        properties.setConfigLoader(loader);
 
         Properties buildProperties = new Properties();
         try (InputStream in = getClass().getResourceAsStream("/build.properties")) {
@@ -127,7 +143,7 @@ public class RadarPropertyHandlerImpl implements RadarPropertyHandler {
     public PersistentStateStore getPersistentStateStore() throws IOException {
         if (getRadarProperties().getPersistencePath() != null) {
             Path persistenceDir = Paths.get(getRadarProperties().getPersistencePath());
-            return new YamlPersistentStateStore(persistenceDir);
+            return new YamlPersistentStateStore(loader, persistenceDir);
         } else {
             return null;
         }

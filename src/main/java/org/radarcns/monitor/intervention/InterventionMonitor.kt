@@ -1,8 +1,7 @@
 package org.radarcns.monitor.intervention
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer
+import io.confluent.kafka.serializers.KafkaJsonDeserializer
 import okhttp3.OkHttpClient
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -20,7 +19,7 @@ import java.util.concurrent.*
 /**
  * The main Kafka Consumer class that runs a single consumer on any topic. The consumer evaluates
  * each incoming record based on the Conditions provided in the config. If and only If all
- * the conditions evaluate to true, only then all the configured [Action]s are fired.
+ * the conditions evaluate to true, only then all the configured Actions are fired.
  *
  * To be used with the model-invocation-endpoint and KSQL API_INFERENCE function to evaluate and
  * take action on incoming results from realtime inference on data.
@@ -29,7 +28,7 @@ class InterventionMonitor(
     config: InterventionMonitorConfig,
     radar: RadarPropertyHandler,
     emailSenders: EmailSenders?,
-) : AbstractKafkaMonitor<JsonNode, JsonNode, InterventionMonitorState>(
+) : AbstractKafkaMonitor<String, Map<String, Any>, InterventionMonitorState>(
     radar,
     listOf(config.topic),
     "intervention_monitors",
@@ -79,7 +78,7 @@ class InterventionMonitor(
 
     private fun configureConsumer() {
         val properties = Properties()
-        val deserializer: String = KafkaJsonSchemaSerializer::class.java.name
+        val deserializer: String = KafkaJsonDeserializer::class.java.name
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, deserializer)
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer)
         configure(properties)
@@ -113,25 +112,25 @@ class InterventionMonitor(
         )
     }
 
-    override fun evaluateRecord(record: ConsumerRecord<JsonNode, JsonNode>) {
+    override fun evaluateRecord(record: ConsumerRecord<String, Map<String, Any>>) {
         val intervention = parseRecord(record) ?: return
 
         if (intervention.exception.isNotEmpty()) {
             addException(intervention)
         }
 
-        val interventionDeadline = intervention.time + deadline
+        val interventionDeadline = intervention.timeCompleted + deadline
 
         executor.execute {
             val userInterventions = state[intervention].interventions
 
             if (intervention.decision) {
-                userInterventions += intervention.timeNotification
+                userInterventions += intervention.time
                 if (userInterventions.size > maxInterventions) {
                     return@execute
                 }
             } else {
-                userInterventions -= intervention.timeNotification
+                userInterventions -= intervention.time
             }
 
             queue.remove(intervention.queueKey)
@@ -173,19 +172,19 @@ class InterventionMonitor(
         }
     }
 
-    private fun parseRecord(record: ConsumerRecord<JsonNode, JsonNode>): InterventionRecord? {
-        val userId = record.key().asText()
-        if (userId.isEmpty()) {
+    private fun parseRecord(record: ConsumerRecord<String, Map<String, Any>>): InterventionRecord? {
+        val userId = record.key()
+        if (userId.isNullOrEmpty()) {
             logger.error("Cannot map record without user ID")
             return null
         }
         val intervention = try {
             record.value().toInterventionRecord(userId)
-        } catch (ex: IllegalArgumentException) {
-            logger.error("Cannot map intervention record: {}", ex.toString())
+        } catch (ex: Exception) {
+            logger.error("Cannot map intervention record from {}: {}", record.value(), ex.toString())
             return null
         }
-        if (intervention.time < state.fromDate) {
+        if (intervention.timeCompleted < state.fromDate) {
             return null
         }
         return intervention
@@ -212,6 +211,6 @@ class InterventionMonitor(
         private val logger = LoggerFactory.getLogger(InterventionMonitor::class.java)
 
         private val InterventionRecord.queueKey: String
-            get() = "$userId-$timeNotification"
+            get() = "$userId-$timeCompleted"
     }
 }

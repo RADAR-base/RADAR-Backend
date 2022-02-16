@@ -45,6 +45,9 @@ COPY --from=builder /code/build/libs/* /usr/lib/
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
 
-USER 101
+RUN mkdir -p /var/lib/radar/data
+RUN chown 101:101 /var/lib/radar/data
+
+USER 101:101
 
 ENTRYPOINT ["radar-backend-init"]

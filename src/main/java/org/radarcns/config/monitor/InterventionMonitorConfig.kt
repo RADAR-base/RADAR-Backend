@@ -1,7 +1,6 @@
 package org.radarcns.config.monitor
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.radarcns.config.EmailServerConfig
 import java.time.Duration
 
 data class InterventionMonitorConfig(
@@ -16,8 +15,6 @@ data class InterventionMonitorConfig(
 
     @JsonProperty("notify")
     var emailNotifyConfig: List<EmailNotifyConfig> = listOf(),
-    @JsonProperty("email_server")
-    val emailServerConfig: EmailServerConfig?,
 
     // The list of intervention topics, which will be used to evaluate the conditions
     var topic: String,
