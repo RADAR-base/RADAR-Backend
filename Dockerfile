@@ -33,7 +33,7 @@ MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.n
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 
-RUN apk add --no-cache curl bash
+RUN apk add --no-cache curl
 
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 ENV RADAR_BACKEND_CONFIG /etc/radar.yml
