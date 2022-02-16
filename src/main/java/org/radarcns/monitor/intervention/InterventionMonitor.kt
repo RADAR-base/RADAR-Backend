@@ -15,10 +15,7 @@ import org.radarcns.util.EmailSenders
 import org.slf4j.LoggerFactory
 import java.time.*
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 /**
  * The main Kafka Consumer class that runs a single consumer on any topic. The consumer evaluates
@@ -31,7 +28,7 @@ import java.util.concurrent.TimeUnit
 class InterventionMonitor(
     config: InterventionMonitorConfig,
     radar: RadarPropertyHandler,
-    private val emailSenders: EmailSenders?,
+    emailSenders: EmailSenders?,
 ) : AbstractKafkaMonitor<JsonNode, JsonNode, InterventionMonitorState>(
     radar,
     listOf(config.topic),
@@ -46,6 +43,8 @@ class InterventionMonitor(
     private val maxInterventions = config.maxInterventions
     private val thresholdAdjust: ThresholdAdjustmentAlgorithm
     private val appServerNotifications: AppServerIntervention
+    private var emailer: InterventionExceptionEmailer?
+    private val exceptionBatch: LinkedBlockingQueue<InterventionRecord> = LinkedBlockingQueue()
 
     init {
         configureConsumer()
@@ -71,6 +70,11 @@ class InterventionMonitor(
             httpClient = httpClient,
             mapper = mapper,
         )
+
+        emailer = if (emailSenders != null) InterventionExceptionEmailer(
+            emailSenders = emailSenders,
+            state = state,
+        ) else null
     }
 
     private fun configureConsumer() {
@@ -95,7 +99,7 @@ class InterventionMonitor(
             {
                 try {
                     thresholdAdjust.updateThresholds()
-                    emailExceptions()
+                    emailer?.emailExceptions()
                     resetQueue()
                     state.reset(state.nextMidnight())
                     storeState()
@@ -107,47 +111,6 @@ class InterventionMonitor(
             Duration.ofHours(24).toMillis(),
             TimeUnit.MILLISECONDS,
         )
-    }
-
-    private fun emailExceptions() {
-        emailSenders ?: return
-
-        state.exceptions.forEach { (projectId, projectExceptions) ->
-            val userMessages: List<String> = projectExceptions.exceptions
-                .entries
-                .map { (userId, userExceptions) ->
-                    val exceptionList = userExceptions.lines
-                    val numLines = exceptionList.size
-                    if (userExceptions.isTruncated) {
-                        exceptionList.addFirst("...")
-                    }
-                    val exceptionString = exceptionList.joinToString(separator = "") { "$exceptionPrefix$it" }
-                    "user $userId - listing $numLines out of ${userExceptions.count} exceptions:$exceptionString"
-                }
-
-            val totalCount = projectExceptions.exceptions.values.sumOf { it.count }
-
-            val date = LocalDate.ofInstant(state.fromDate, ZoneOffset.UTC).toString()
-
-            val subject = "[RADAR-base $projectId] Errors in intervention algorithm on $date"
-            val message = """
-                Hi,
-                
-                On $date, some errors occurred in the RADAR-base intervention algorithm. This message summarizes the errors occurred for the RADAR-base $projectId project in the last 24 hours. A total of $totalCount errors were counted. Below is a summary of the errors:
-                
-                ${userMessages.joinToString(separator = "\n\n")}
-                
-                This is an automated message from the RADAR-base platform. Please refer to your RADAR-base administrator for more information.
-                """.trimIndent()
-
-            val sender = emailSenders.getEmailSenderForProject(projectId)
-
-            if (sender != null) {
-                sender.sendEmail(subject, message)
-            } else {
-                logger.error("No email sender configured for project {}. Not sending exception message.", projectId)
-            }
-        }
     }
 
     override fun evaluateRecord(record: ConsumerRecord<JsonNode, JsonNode>) {
@@ -184,10 +147,7 @@ class InterventionMonitor(
                 } else {
                     queue[intervention.queueKey] = executor.schedule(
                         {
-                            sendNotification(
-                                intervention = intervention,
-                                interventionDeadline = interventionDeadline,
-                            )
+                            sendNotification(intervention, interventionDeadline,)
                             queue -= intervention.queueKey
                         },
                         durationBeforeDeadline.toMillis(),
@@ -201,8 +161,15 @@ class InterventionMonitor(
     private fun addException(intervention: InterventionRecord) {
         logger.warn("Record has exception for {} - {}: {}",
             intervention.projectId, intervention.userId, intervention.exception)
+        exceptionBatch += intervention
+    }
+
+    override fun afterEvaluate() {
         executor.execute {
-            state.addException(intervention)
+            val localExceptions = mutableListOf<InterventionRecord>()
+            exceptionBatch.drainTo(localExceptions)
+            localExceptions.forEach { state.addException(it) }
+            super.afterEvaluate()
         }
     }
 
@@ -246,7 +213,5 @@ class InterventionMonitor(
 
         private val InterventionRecord.queueKey: String
             get() = "$userId-$timeNotification"
-
-        private const val exceptionPrefix = "\n - "
     }
 }

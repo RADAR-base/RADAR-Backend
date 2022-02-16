@@ -78,8 +78,6 @@ public class RadarPropertyHandlerTest {
         assertNotNull(properties.getReleased());
         assertNotNull(properties.getSchemaRegistry());
         assertNotNull(properties.getSchemaRegistryPaths());
-        assertNotNull(properties.getZookeeper());
-        assertNotNull(properties.getZookeeperPaths());
         assertNotNull(properties.getVersion());
         assertThat(properties.getExtras(), hasEntry("somethingother", "bla"));
     }

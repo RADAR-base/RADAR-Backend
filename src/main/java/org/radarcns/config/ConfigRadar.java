@@ -34,7 +34,6 @@ import org.radarcns.config.realtime.RealtimeConsumerConfig;
 public class ConfigRadar {
     private Date released;
     private String version;
-    private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
     @JsonProperty("schema_registry")
     private List<ServerConfig> schemaRegistry;
@@ -78,14 +77,6 @@ public class ConfigRadar {
         this.version = version;
     }
 
-    public List<ServerConfig> getZookeeper() {
-        return zookeeper;
-    }
-
-    public void setZookeeper(List<ServerConfig> zookeeper) {
-        this.zookeeper = zookeeper;
-    }
-
     public List<ServerConfig> getBroker() {
         return broker;
     }
@@ -108,13 +99,6 @@ public class ConfigRadar {
 
     public void setRestProxy(ServerConfig restProxy) {
         this.restProxy = restProxy;
-    }
-
-    public String getZookeeperPaths() {
-        if (zookeeper == null) {
-            throw new IllegalStateException("'zookeeper' is not configured");
-        }
-        return ServerConfig.getPaths(zookeeper);
     }
 
     public String getBrokerPaths() {
