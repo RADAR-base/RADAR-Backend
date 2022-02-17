@@ -40,23 +40,25 @@ class AppServerIntervention(
         }
     }
 
-    fun sendNotification(intervention: InterventionRecord, ttl: Duration) {
-        val ttlSeconds = ttl.toSeconds()
+    fun createMessages(intervention: InterventionRecord, ttl: Duration) {
+        val attributes = if (intervention.name != null) mapOf("intervention" to intervention.name) else emptyMap()
         val protocol = protocolDirectory.get(
             projectId = intervention.projectId,
             userId = intervention.userId,
-            attributes = mapOf("intervention" to intervention.name),
+            attributes = attributes,
         ) ?: throw NoSuchElementException("No protocol found for $intervention")
 
         val body = protocolWriter.writeValueAsString(protocol)
-        val notificationResponse = sendNotification(intervention, ttlSeconds, protocol, body)
-        val dataResponse = sendData(intervention, ttlSeconds, body)
+
+        val ttlSeconds = ttl.toSeconds()
+        val notificationResponse = createNotificationMessage(intervention, ttlSeconds, protocol, body)
+        val dataResponse = createDataMessage(intervention, ttlSeconds, body)
 
         logger.debug("Created App Server message for notification {} and data {}",
             notificationResponse, dataResponse)
     }
 
-    private fun sendNotification(
+    private fun createNotificationMessage(
         intervention: InterventionRecord,
         ttlSeconds: Long,
         protocol: QuestionnaireTrigger,
@@ -87,7 +89,7 @@ class AppServerIntervention(
         )
     }
 
-    private fun sendData(
+    private fun createDataMessage(
         intervention: InterventionRecord,
         ttlSeconds: Long,
         body: String,

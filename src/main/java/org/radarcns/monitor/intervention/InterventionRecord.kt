@@ -10,8 +10,8 @@ data class InterventionRecord(
     val timeCompleted: Instant,
     val isFinal: Boolean,
     val decision: Boolean,
-    val name: String,
-    val exception: String,
+    val name: String?,
+    val exception: String?,
 ) {
     companion object {
         fun Map<String, Any>.toInterventionRecord(userId: String): InterventionRecord {
@@ -26,8 +26,8 @@ data class InterventionRecord(
                 timeCompleted = Instant.ofEpochMilli(((this["TIMECOMPLETED"] as Number).toDouble() * 1000.0).toLong()),
                 isFinal = this["ISFINAL"] as Boolean,
                 decision = intervention["DECISION"] as Boolean,
-                name = intervention["NAME"] as String,
-                exception = intervention["EXCEPTION"] as String,
+                name = intervention["NAME"] as? String,
+                exception = intervention["EXCEPTION"] as? String,
             )
         }
     }

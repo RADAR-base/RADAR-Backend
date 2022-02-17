@@ -35,6 +35,9 @@ LABEL description="RADAR-CNS Backend streams and monitor"
 
 RUN apk add --no-cache curl
 
+RUN mkdir -p /var/lib/radar/data
+RUN chown 101:101 /var/lib/radar/data
+
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 ENV RADAR_BACKEND_CONFIG /etc/radar.yml
 
@@ -44,9 +47,6 @@ COPY --from=builder /code/build/libs/* /usr/lib/
 
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
-
-RUN mkdir -p /var/lib/radar/data
-RUN chown 101:101 /var/lib/radar/data
 
 USER 101:101
 

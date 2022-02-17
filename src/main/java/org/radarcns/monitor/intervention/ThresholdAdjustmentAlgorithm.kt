@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import org.radarbase.appconfig.client.AppConfigClient
 import org.radarcns.config.monitor.AuthConfig
 import org.radarcns.config.monitor.ThresholdAdaptationConfig
+import org.slf4j.LoggerFactory
 
 class ThresholdAdjustmentAlgorithm(
     private val clientId: String,
@@ -31,12 +32,32 @@ class ThresholdAdjustmentAlgorithm(
 
     fun updateThresholds() {
         state.counts.forEach { (userId, counts) ->
-            val interventionConfig = appConfigClient.getUserConfig(counts.projectId, userId, clientId = clientId)
-            interventionConfig.threshold = calculateThreshold(
-                currentValue = interventionConfig.threshold,
-                numberOfInterventions = counts.numberOfInterventions,
-            )
-            appConfigClient.setUserConfig(counts.projectId, userId, interventionConfig, clientId = clientId)
+            try {
+                val interventionConfig = appConfigClient.getUserConfig(
+                    projectId = counts.projectId,
+                    userId = userId,
+                    clientId = clientId,
+                )
+                val newInterventionConfig = interventionConfig.copy(
+                    threshold = calculateThreshold(
+                        currentValue = interventionConfig.threshold,
+                        numberOfInterventions = counts.interventions.size,
+                    )
+                )
+                logger.info(
+                    "Updating thresholds for user {} from {} to {}",
+                    userId, interventionConfig, newInterventionConfig
+                )
+                appConfigClient.setUserConfig(
+                    projectId = counts.projectId,
+                    userId = userId,
+                    config = newInterventionConfig,
+                    clientId = clientId,
+                )
+            } catch (ex: Throwable) {
+                logger.error("Failed to update app config for {} - {}: {}",
+                    counts.projectId, userId, ex.toString())
+            }
         }
     }
 
@@ -51,5 +72,9 @@ class ThresholdAdjustmentAlgorithm(
         } else {
             currentValue
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(ThresholdAdjustmentAlgorithm::class.java)
     }
 }

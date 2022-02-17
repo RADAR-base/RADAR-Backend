@@ -86,7 +86,7 @@ class AppserverClient(config: AppserverClientConfig) {
         } catch (e: TokenException) {
             throw IOException(e)
         }
-        return httpClient.newCall(request).execute().use { handleResponse(it) }
+        return httpClient.newCall(request).execute().use { handleResponse(request, it) }
     }
 
     @Throws(IOException::class)
@@ -107,18 +107,18 @@ class AppserverClient(config: AppserverClientConfig) {
         } catch (e: TokenException) {
             throw IOException(e)
         }
-        return httpClient.newCall(request).execute().use { handleResponse(it) }
+        return httpClient.newCall(request).execute().use { handleResponse(request, it) }
     }
 
     @Throws(IOException::class)
-    private fun handleResponse(response: Response): Map<String, Any> {
-        val body = response.body
-            ?: throw IOException("Response body from appserver was null.")
+    private fun handleResponse(request: Request, response: Response): Map<String, Any> {
+        val body = response.body?.string()
+            ?: throw IOException("Response body from appserver ${request.url} was null.")
 
         return when (response.code) {
-            404 -> throw IOException("The Entity or URL was not found in the appserver: $body")
-            200, 201 -> objectMapper.readValue(body.string(), object : TypeReference<Map<String, Any>>() {})
-            else -> throw IOException("There was an error requesting the appserver. $response")
+            404 -> throw IOException("The Entity or URL ${request.url}  was not found in the appserver: $body")
+            200, 201 -> objectMapper.readValue(body, object : TypeReference<Map<String, Any>>() {})
+            else -> throw IOException("There was an error requesting the appserver URL ${request.url}. ${response.code} - $body")
         }
     }
 

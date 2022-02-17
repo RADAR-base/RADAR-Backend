@@ -23,7 +23,7 @@ data class InterventionMonitorState(
     }
 
     fun addException(intervention: InterventionRecord) {
-        require(intervention.exception.isNotBlank()) { "Missing exception in intervention" }
+        require(!intervention.exception.isNullOrEmpty()) { "Missing exception in intervention" }
         val userExceptions = exceptions
             .computeIfAbsent(intervention.projectId) { ProjectExceptions() }
             .exceptions
@@ -38,7 +38,6 @@ data class InterventionMonitorState(
     data class InterventionCount(
         val projectId: String,
         val interventions: MutableSet<Long> = mutableSetOf(),
-        var numberOfInterventions: Int = 0,
     )
 
     data class ProjectExceptions(

@@ -27,12 +27,15 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.BatteryLevelMonitor.BatteryLevelState;
 
 public class PersistentStateStoreTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
+
+    private final YamlConfigLoader loader = new YamlConfigLoader();
 
     @Test
     public void retrieveState() throws Exception {

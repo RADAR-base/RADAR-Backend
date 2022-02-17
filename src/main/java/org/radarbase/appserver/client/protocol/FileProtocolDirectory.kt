@@ -6,6 +6,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import java.util.stream.Collectors
+import kotlin.collections.HashMap
+import kotlin.streams.asSequence
 
 class FileProtocolDirectory(
     protocolDir: String,
@@ -16,27 +18,28 @@ class FileProtocolDirectory(
     init {
         val jsonReader = mapper.readerFor(QuestionnaireTrigger::class.java)
 
-        protocols = Files.list(Paths.get(protocolDir))
-            .filter { it.endsWith(".json") }
-            .map { path ->
-                path to try {
-                    Files.newInputStream(path).use {
-                        jsonReader.readValue<QuestionnaireTrigger>(it)
+        protocols = Files.walk(Paths.get(protocolDir)).use { pathStream ->
+            pathStream
+                .filter { path -> path.fileName.toString().endsWith(".json") }
+                .asSequence()
+                .mapNotNull { path ->
+                    try {
+                        Pair(
+                            path.fileName.toString()
+                                .lowercase()
+                                .removeSuffix(".json"),
+                            Files.newInputStream(path).use {
+                                jsonReader.readValue<QuestionnaireTrigger>(it)
+                            },
+                        )
+                    } catch (ex: Exception) {
+                        logger.error("Failed to read JSON protocol {}", path, ex)
+                        null
                     }
-                } catch (ex: Exception) {
-                    logger.error("Failed to read JSON protocol {}", path, ex)
-                    null
                 }
-            }
-            .filter(Objects::nonNull)
-            .collect(Collectors.toMap(
-                { (path, _) ->
-                    path.fileName.toString()
-                        .lowercase()
-                        .removeSuffix(".json")
-                },
-                { (_, value) -> value as QuestionnaireTrigger },
-            ))
+                .toMap(TreeMap())
+        }
+        logger.info("From {} loaded protocols {}", protocolDir, protocols)
     }
 
     override fun get(

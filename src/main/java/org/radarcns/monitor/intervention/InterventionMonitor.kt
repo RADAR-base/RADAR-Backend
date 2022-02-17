@@ -1,18 +1,25 @@
 package org.radarcns.monitor.intervention
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.confluent.kafka.serializers.KafkaJsonDeserializer
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectReader
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinFeature
+import com.fasterxml.jackson.module.kotlin.jsonMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import okhttp3.OkHttpClient
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.BytesDeserializer
+import org.apache.kafka.common.utils.Bytes
+import org.radarbase.appserver.client.protocol.FileProtocolDirectory
 import org.radarcns.config.RadarPropertyHandler
 import org.radarcns.config.monitor.InterventionMonitorConfig
 import org.radarcns.monitor.AbstractKafkaMonitor
-import org.radarcns.monitor.intervention.InterventionRecord.Companion.toInterventionRecord
-import org.radarbase.appserver.client.protocol.FileProtocolDirectory
+import org.radarcns.monitor.intervention.InterventionMonitorState.Companion.lastMidnight
 import org.radarcns.util.EmailSenders
 import org.slf4j.LoggerFactory
-import java.time.*
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.*
 
@@ -25,31 +32,40 @@ import java.util.concurrent.*
  * take action on incoming results from realtime inference on data.
  */
 class InterventionMonitor(
-    config: InterventionMonitorConfig,
+    private val config: InterventionMonitorConfig,
     radar: RadarPropertyHandler,
     emailSenders: EmailSenders?,
-) : AbstractKafkaMonitor<String, Map<String, Any>, InterventionMonitorState>(
+) : AbstractKafkaMonitor<Bytes, Bytes, InterventionMonitorState>(
     radar,
-    listOf(config.topic),
+    config.topics,
     "intervention_monitors",
     "1",
     InterventionMonitorState(),
 ) {
     private val queue: MutableMap<String, Future<*>> = HashMap()
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val deadline: Duration = config.deadline
-    private val ttlMargin: Duration = config.ttlMargin
-    private val maxInterventions = config.maxInterventions
     private val thresholdAdjust: ThresholdAdjustmentAlgorithm
     private val appServerNotifications: AppServerIntervention
     private var emailer: InterventionExceptionEmailer?
     private val exceptionBatch: LinkedBlockingQueue<InterventionRecord> = LinkedBlockingQueue()
+    private val keyReader: ObjectReader
+    private val valueReader: ObjectReader
 
     init {
         configureConsumer()
 
         val httpClient = OkHttpClient()
-        val mapper = jacksonObjectMapper()
+        val mapper = jsonMapper {
+            addModule(kotlinModule {
+                enable(KotlinFeature.NullIsSameAsDefault)
+                enable(KotlinFeature.NullToEmptyMap)
+                enable(KotlinFeature.NullToEmptyCollection)
+            })
+            addModule(JavaTimeModule())
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        }
+        keyReader = mapper.readerFor(String::class.java)
+        valueReader = mapper.readerFor(RawInterventionRecord::class.java)
 
         appServerNotifications = AppServerIntervention(
             protocolDirectory = FileProtocolDirectory(config.protocolDirectory, mapper),
@@ -78,81 +94,89 @@ class InterventionMonitor(
 
     private fun configureConsumer() {
         val properties = Properties()
-        val deserializer: String = KafkaJsonDeserializer::class.java.name
+        val deserializer: String = BytesDeserializer::class.java.name
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, deserializer)
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer)
         configure(properties)
     }
 
     override fun start() {
-        val lastMidnight = InterventionMonitorState.lastMidnight()
-        if (lastMidnight != state.fromDate) {
-            state.reset(lastMidnight)
+        executor.execute {
+            if (state.fromDate.passedDuration() > config.stateResetInterval) {
+                emailer?.emailExceptions()
+                val lastMidnight = lastMidnight()
+                val numberOfIterations = lastMidnight.passedDuration().dividedBy(config.stateResetInterval)
+                state.reset(lastMidnight + config.stateResetInterval.multipliedBy(numberOfIterations))
+                storeState()
+            }
+
+            // At the next interval, update the threshold levels
+            val remainingInterval = (state.fromDate + config.stateResetInterval).pendingDuration()
+            executor.scheduleAtFixedRate(
+                {
+                    logger.info("Updating intervention state")
+                    try {
+                        thresholdAdjust.updateThresholds()
+                        emailer?.emailExceptions()
+                        resetQueue()
+                        state.reset(state.fromDate + config.stateResetInterval)
+                        storeState()
+                    } catch (ex: Throwable) {
+                        logger.error("Failed to update thresholds", ex)
+                    }
+                },
+                remainingInterval.toMillis(),
+                config.stateResetInterval.toMillis(),
+                TimeUnit.MILLISECONDS,
+            )
         }
 
         super.start()
-
-        // At midnight, update the threshold levels
-        val nextMidnight = state.nextMidnight()
-        executor.scheduleAtFixedRate(
-            {
-                try {
-                    thresholdAdjust.updateThresholds()
-                    emailer?.emailExceptions()
-                    resetQueue()
-                    state.reset(state.nextMidnight())
-                    storeState()
-                } catch (ex: Throwable) {
-                    logger.error("Failed to update thresholds", ex)
-                }
-            },
-            Duration.between(Instant.now(), nextMidnight).toMillis(),
-            Duration.ofHours(24).toMillis(),
-            TimeUnit.MILLISECONDS,
-        )
     }
 
-    override fun evaluateRecord(record: ConsumerRecord<String, Map<String, Any>>) {
+    override fun evaluateRecord(record: ConsumerRecord<Bytes, Bytes>) {
+        logger.info("Evaluating {}", record)
         val intervention = parseRecord(record) ?: return
 
-        if (intervention.exception.isNotEmpty()) {
+        if (!intervention.exception.isNullOrEmpty()) {
             addException(intervention)
+            return
         }
 
-        val interventionDeadline = intervention.timeCompleted + deadline
+        val interventionDeadline = intervention.timeCompleted + config.deadline
+        val interventionDeadlineTotal = interventionDeadline + config.ttlMargin
 
         executor.execute {
-            val userInterventions = state[intervention].interventions
+            try {
+                logger.info("Scheduling intervention {}", intervention)
 
-            if (intervention.decision) {
-                userInterventions += intervention.time
-                if (userInterventions.size > maxInterventions) {
+                queue.remove(intervention.queueKey)
+                    ?.cancel(false)
+
+                if (!intervention.decision) {
                     return@execute
                 }
-            } else {
-                userInterventions -= intervention.time
-            }
 
-            queue.remove(intervention.queueKey)
-                ?.cancel(false)
-
-            val durationBeforeDeadline = Duration.between(Instant.now(), interventionDeadline)
-            if (durationBeforeDeadline.isNegative) {
-                return@execute
-            }
-            if (intervention.decision) {
+                val timeBeforeDeadlineTotal = interventionDeadlineTotal.pendingDuration()
+                if (timeBeforeDeadlineTotal.isNegative) {
+                    logger.info("For user {}, deadline for intervention {} has passed. Skipping.",
+                        intervention.userId, interventionDeadline)
+                    return@execute
+                }
                 if (intervention.isFinal) {
-                    sendNotification(intervention, interventionDeadline)
+                    createAppMessages(intervention, timeBeforeDeadlineTotal)
                 } else {
                     queue[intervention.queueKey] = executor.schedule(
                         {
-                            sendNotification(intervention, interventionDeadline,)
+                            createAppMessages(intervention, interventionDeadlineTotal.pendingDuration())
                             queue -= intervention.queueKey
                         },
-                        durationBeforeDeadline.toMillis(),
-                        TimeUnit.MILLISECONDS
+                        interventionDeadline.pendingDuration().toMillis(),
+                        TimeUnit.MILLISECONDS,
                     )
                 }
+            } catch (ex: Throwable) {
+                logger.error("Failed to process intervention $intervention", ex)
             }
         }
     }
@@ -165,41 +189,64 @@ class InterventionMonitor(
 
     override fun afterEvaluate() {
         executor.execute {
-            val localExceptions = mutableListOf<InterventionRecord>()
-            exceptionBatch.drainTo(localExceptions)
-            localExceptions.forEach { state.addException(it) }
-            super.afterEvaluate()
+            try {
+                val localExceptions = mutableListOf<InterventionRecord>()
+                exceptionBatch.drainTo(localExceptions)
+                localExceptions.forEach { state.addException(it) }
+                super.afterEvaluate()
+            } catch (ex: Throwable) {
+                logger.error("Failed to run intervention afterEvaluate", ex)
+            }
         }
     }
 
-    private fun parseRecord(record: ConsumerRecord<String, Map<String, Any>>): InterventionRecord? {
-        val userId = record.key()
+    private fun parseRecord(record: ConsumerRecord<Bytes, Bytes>): InterventionRecord? {
+        val userId = try {
+            keyReader.readValue(record.key().get(), String::class.java)
+        } catch (ex: Exception) {
+            logger.error("Cannot map intervention record key from {}: {}", record.key(), ex.toString())
+            return null
+        }
         if (userId.isNullOrEmpty()) {
             logger.error("Cannot map record without user ID")
             return null
         }
         val intervention = try {
-            record.value().toInterventionRecord(userId)
+            valueReader.readValue(record.value().get(), RawInterventionRecord::class.java)
+                ?.toInterventionRecord(userId)
         } catch (ex: Exception) {
-            logger.error("Cannot map intervention record from {}: {}", record.value(), ex.toString())
+            logger.error("Cannot map user {} intervention record value from {}: {}", userId, record.value(), ex.toString())
             return null
         }
+        if (intervention == null) {
+            logger.error("Cannot map user {} null intervention record value from {}", userId, record.value())
+            return null
+        }
+
         if (intervention.timeCompleted < state.fromDate) {
             return null
         }
         return intervention
     }
 
-    private fun sendNotification(
+    private fun createAppMessages(
         intervention: InterventionRecord,
-        interventionDeadline: Instant
+        ttl: Duration
     ) {
-        state[intervention].numberOfInterventions += 1
+        val userInterventions = state[intervention]
+        if (!userInterventions.interventions.add(intervention.time)) {
+            logger.info("Already sent intervention for time point {}. Skipping.", intervention.time)
+            return
+        }
+        if (userInterventions.interventions.size > config.maxInterventions) {
+            logger.info("For user {}, number of interventions {} would exceed maximum {}. Skipping.",
+                intervention.userId, userInterventions.interventions.size, config.maxInterventions)
+            return
+        } else {
+            logger.info("Creating app notification for intervention {}", intervention.userId, intervention)
+        }
 
-        val durationBeforeDeadline = Duration.between(Instant.now(), interventionDeadline)
-        val ttl = ttlMargin + durationBeforeDeadline
-
-        appServerNotifications.sendNotification(intervention, ttl)
+        appServerNotifications.createMessages(intervention, ttl)
     }
 
     private fun resetQueue() {
@@ -209,6 +256,9 @@ class InterventionMonitor(
 
     companion object {
         private val logger = LoggerFactory.getLogger(InterventionMonitor::class.java)
+
+        private fun Instant.pendingDuration(): Duration = Duration.between(Instant.now(), this)
+        private fun Instant.passedDuration(): Duration = Duration.between(this, Instant.now())
 
         private val InterventionRecord.queueKey: String
             get() = "$userId-$timeCompleted"

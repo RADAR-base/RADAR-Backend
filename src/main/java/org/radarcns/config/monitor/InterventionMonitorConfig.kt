@@ -14,26 +14,28 @@ data class InterventionMonitorConfig(
     val authConfig: AuthConfig,
 
     @JsonProperty("notify")
-    var emailNotifyConfig: List<EmailNotifyConfig> = listOf(),
+    val emailNotifyConfig: List<EmailNotifyConfig> = listOf(),
 
     // The list of intervention topics, which will be used to evaluate the conditions
-    var topic: String,
+    val topics: List<String>,
 
     // List of notification configs and corresponding conditions to trigger
-    var ttlMargin: Duration = Duration.ofMinutes(5),
-    var properties: Map<String, String> = mapOf(),
-    var deadline: Duration = Duration.ofMinutes(15),
+    @JsonProperty("ttl_margin")
+    val ttlMargin: Duration = Duration.ofMinutes(5),
+    val properties: Map<String, String> = mapOf(),
+    val deadline: Duration = Duration.ofMinutes(15),
+    @JsonProperty("state_reset_interval")
+    val stateResetInterval: Duration = Duration.ofHours(24),
 
     @JsonProperty("threshold_adaptation")
-    var thresholdAdaptation: ThresholdAdaptationConfig = ThresholdAdaptationConfig(),
+    val thresholdAdaptation: ThresholdAdaptationConfig = ThresholdAdaptationConfig(),
 
     @JsonProperty("max_interventions")
-    var maxInterventions: Int = 4,
+    val maxInterventions: Int = 4,
 
     @JsonProperty("protocol_directory")
     val protocolDirectory: String,
     val defaultLanguage: String = "en",
 ) {
-
     fun withEnv(): InterventionMonitorConfig = copy(authConfig = authConfig.withEnv())
 }

@@ -19,7 +19,6 @@ package org.radarcns.config;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -27,9 +26,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Created by nivethika on 19-12-16.
@@ -43,17 +40,12 @@ public class RadarPropertyHandlerTest {
         this.propertyHandler = new RadarPropertyHandlerImpl();
     }
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     @Test
     public void getInstanceEmptyProperties() throws NoSuchFieldException, IllegalAccessException, SecurityException {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
         properties.set(this.propertyHandler,null);
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Properties cannot be accessed without calling load() first");
-        propertyHandler.getRadarProperties();
+        assertThrows(IllegalStateException.class, () -> propertyHandler.getRadarProperties());
     }
 
     @Test
@@ -84,23 +76,18 @@ public class RadarPropertyHandlerTest {
 
     @Test
     public void loadInvalidYaml() throws Exception {
-        exception.expect(UnrecognizedPropertyException.class);
-        propertyHandler.load("src/test/resources/config/invalidradar.yml");
+        assertThrows(UnrecognizedPropertyException.class, () -> propertyHandler.load("src/test/resources/config/invalidradar.yml"));
     }
 
     @Test
     public void loadInvalidStreamPriority() throws Exception {
-        exception.expect(JsonMappingException.class);
-        propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml");
+        assertThrows(JsonMappingException.class, () -> propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml"));
     }
 
     @Test
     public void loadWithInstance() throws Exception {
-
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Properties class has been already loaded");
         propertyHandler.load("radar.yml");
-        propertyHandler.load("again.yml");
+        assertThrows(IllegalStateException.class, () ->  propertyHandler.load("again.yml"));
         ConfigRadar propertiesS = propertyHandler.getRadarProperties();
         assertNotNull(propertiesS);
     }
@@ -110,10 +97,7 @@ public class RadarPropertyHandlerTest {
         Field properties = RadarPropertyHandlerImpl.class.getDeclaredField("properties");
         properties.setAccessible(true);
         properties.set(this.propertyHandler,null);
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Properties cannot be accessed without calling load() first");
-        KafkaProperty property =propertyHandler.getKafkaProperties();
-        assertNull(property);
+        assertThrows(IllegalStateException.class, () -> propertyHandler.getKafkaProperties());
     }
 
     @Test
