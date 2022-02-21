@@ -1,141 +1,97 @@
-package org.radarcns.consumer.realtime.action;
+package org.radarcns.consumer.realtime.action
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.radarbase.appserver.client.AppserverClientConfig;
-import org.radarbase.appserver.client.MessagingType;
-import org.radarcns.config.realtime.ActionConfig;
-import org.radarbase.appserver.client.AppserverClient;
-import org.radarcns.consumer.realtime.action.appserver.NotificationContentProvider;
-import org.radarcns.consumer.realtime.action.appserver.ProtocolNotificationProvider;
-import org.radarcns.consumer.realtime.action.appserver.ScheduleTimeStrategy;
-import org.radarcns.consumer.realtime.action.appserver.SimpleTimeStrategy;
-import org.radarcns.consumer.realtime.action.appserver.TimeOfDayStrategy;
+import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.radarbase.appserver.client.AppserverClient
+import org.radarbase.appserver.client.AppserverClientConfig
+import org.radarbase.appserver.client.MessagingType
+import org.radarcns.config.realtime.ActionConfig
+import org.radarcns.consumer.realtime.action.appserver.*
+import java.io.IOException
+import java.time.temporal.ChronoUnit
 
 /**
  * This action can be used to trigger a notification for the aRMT app and schedule a corresponding
  * questionnaire for the user to fill out. This can also work as an intervention mechanism in some
  * use-cases.
  */
-public class ActiveAppNotificationAction extends ActionBase {
+class ActiveAppNotificationAction(
+        actionConfig: ActionConfig,
+        override val name: String = NAME,
+) : ActionBase(actionConfig) {
+    private val questionnaireName: String
+    private val timeOfDay: String?
+    private val appserverClient: AppserverClient
+    private val type: MessagingType
 
-  public static final String NAME = "ActiveAppNotificationAction";
-  private final String questionnaireName;
-  private final String timeOfDay;
-  private final AppserverClient appserverClient;
-  private final MessagingType type;
+    @Throws(IllegalArgumentException::class, IOException::class)
+    override fun executeFor(record: ConsumerRecord<*, *>?): Boolean {
+        val key = record?.key() as GenericRecord
 
-  public ActiveAppNotificationAction(ActionConfig actionConfig) throws MalformedURLException {
-    super(actionConfig);
-    questionnaireName =
-        (String) actionConfig.getProperties().getOrDefault("questionnaire_name", "ers");
+        require(key["projectId"] is String) { "Cannot execute Action $NAME. The projectId is not valid." }
+        require(key["userId"] is String) { "Cannot execute Action $NAME. The userId is not valid." }
+        require(key["sourceId"] is String) { "Cannot execute Action $NAME. The sourceId is not valid." }
 
-    String appServerBaseUrl =
-        (String)
-            actionConfig
-                .getProperties()
+        val project = key["projectId"] as String
+        val user = key["userId"] as String
+        val source = key["sourceId"] as String
+
+        val timeStrategy: ScheduleTimeStrategy = if (timeOfDay != null && !timeOfDay.isEmpty()) {
+            // get timezone for the user and create the correct local time of the day
+            TimeOfDayStrategy(timeOfDay, getUserTimezone(project, user))
+        } else {
+            // no time of the day provided, schedule now.
+            SimpleTimeStrategy(5, ChronoUnit.MINUTES)
+        }
+
+        // create the notification in appserver
+        val contentProvider: NotificationContentProvider = ProtocolNotificationProvider(
+                name = questionnaireName,
+                scheduledTime = timeStrategy.scheduledTime,
+                sourceId = source,
+        )
+
+        val body = when (type) {
+            MessagingType.NOTIFICATIONS -> contentProvider.notificationMessage
+            MessagingType.DATA -> contentProvider.dataMessage
+        }
+        appserverClient.createMessage(project, user, type, body)
+        return true
+    }
+
+    @Throws(IOException::class)
+    private fun getUserTimezone(project: String, user: String): String {
+        return (appserverClient.getUserDetails(project, user)["timezone"] ?: "gmt") as String
+    }
+
+    companion object {
+        const val NAME = "ActiveAppNotificationAction"
+    }
+
+    init {
+        questionnaireName = actionConfig.properties!!.getOrDefault("questionnaire_name", "ers") as String
+        val appServerBaseUrl = actionConfig
+                .properties
                 .getOrDefault(
-                    "appserver_base_url",
-                    "https://radar-cns-platform.rosalind.kcl.ac.uk/appserver");
-
-    timeOfDay = (String) actionConfig.getProperties().getOrDefault("time_of_day", null);
-
-    String mpTokenUrl =
-        (String)
-            actionConfig
-                .getProperties()
+                        "appserver_base_url",
+                        "https://radar-cns-platform.rosalind.kcl.ac.uk/appserver") as String
+        timeOfDay = actionConfig.properties.getOrDefault("time_of_day", null) as String?
+        val mpTokenUrl = actionConfig
+                .properties
                 .getOrDefault(
-                    "management_portal_token_url",
-                    "https://radar-cns-platform.rosalind.kcl.ac.uk/managementportal/api/ouath/token");
-    type =
-        MessagingType.valueOf(
-            (String)
-                actionConfig
-                    .getProperties()
-                    .getOrDefault("message_type", MessagingType.NOTIFICATIONS.toString()));
-
-    String clientId =
-        (String) actionConfig.getProperties().getOrDefault("client_id", "realtime_consumer");
-    String clientSecret =
-        (String) actionConfig.getProperties().getOrDefault("client_secret", "secret");
-
-    AppserverClientConfig config = new AppserverClientConfig();
-    config.setClientId(clientId);
-    config.setClientSecret(clientSecret);
-    config.appserverUrl(appServerBaseUrl);
-    config.tokenUrl(mpTokenUrl);
-
-    appserverClient = new AppserverClient(config);
-  }
-
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public Boolean executeFor(ConsumerRecord<?, ?> record)
-      throws IllegalArgumentException, IOException {
-    GenericRecord key = (GenericRecord) record.key();
-
-    if (!(key.get("projectId") instanceof String)) {
-      throw new IllegalArgumentException(
-          "Cannot execute Action " + NAME + ". The projectId is not valid.");
+                        "management_portal_token_url",
+                        "https://radar-cns-platform.rosalind.kcl.ac.uk/managementportal/api/ouath/token") as String
+        type = MessagingType.valueOf(
+                (actionConfig
+                        .properties
+                        .getOrDefault("message_type", MessagingType.NOTIFICATIONS.toString()) as String))
+        val clientId = actionConfig.properties.getOrDefault("client_id", "realtime_consumer") as String
+        val clientSecret = actionConfig.properties.getOrDefault("client_secret", "secret") as String
+        val config = AppserverClientConfig()
+        config.clientId = clientId
+        config.clientSecret = clientSecret
+        config.appserverUrl(appServerBaseUrl)
+        config.tokenUrl(mpTokenUrl)
+        appserverClient = AppserverClient(config)
     }
-
-    if (!(key.get("userId") instanceof String)) {
-      throw new IllegalArgumentException(
-          "Cannot execute Action " + NAME + ". The userId is not valid.");
-    }
-
-    if (!(key.get("sourceId") instanceof String)) {
-      throw new IllegalArgumentException(
-          "Cannot execute Action " + NAME + ". The sourceId is not valid.");
-    }
-    String project = (String) key.get("projectId");
-    String user = (String) key.get("userId");
-    String source = (String) key.get("sourceId");
-
-    ScheduleTimeStrategy timeStrategy;
-    if (timeOfDay != null && !timeOfDay.isEmpty()) {
-      // get timezone for the user and create the correct local time of the day
-      timeStrategy = new TimeOfDayStrategy(timeOfDay, getUserTimezone(project, user));
-    } else {
-      // no time of the day provided, schedule now.
-      timeStrategy = new SimpleTimeStrategy(5, ChronoUnit.MINUTES);
-    }
-
-    // create the notification in appserver
-    NotificationContentProvider contentProvider =
-        new ProtocolNotificationProvider.Builder()
-            .setName(questionnaireName)
-            .setScheduledTime(timeStrategy.getScheduledTime())
-            .setSourceId(source)
-            .build();
-
-    String body;
-    switch (type) {
-      case NOTIFICATIONS:
-        body = contentProvider.getNotificationMessage();
-        break;
-      case DATA:
-        body = contentProvider.getDataMessage();
-        break;
-      default:
-        throw new IllegalArgumentException(
-            "The type must be in " + Arrays.toString(MessagingType.values()));
-    }
-
-    appserverClient.createMessage(project, user, type, body);
-    return true;
-  }
-
-  private String getUserTimezone(String project, String user) throws IOException {
-    return (String) appserverClient.getUserDetails(project, user).getOrDefault("timezone", "gmt");
-  }
-
 }

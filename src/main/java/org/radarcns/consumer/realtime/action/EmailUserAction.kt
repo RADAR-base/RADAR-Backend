@@ -1,82 +1,68 @@
-package org.radarcns.consumer.realtime.action;
+package org.radarcns.consumer.realtime.action
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.radarcns.config.EmailServerConfig;
-import org.radarcns.config.realtime.ActionConfig;
-import org.radarcns.util.EmailSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.radarcns.config.EmailServerConfig
+import org.radarcns.config.realtime.ActionConfig
+import org.radarcns.consumer.realtime.action.EmailUserAction
+import org.radarcns.util.EmailSender
+import org.slf4j.LoggerFactory
+import java.time.Instant
+import javax.mail.MessagingException
 
 /**
  * This action can be used to trigger an email to the user. Currently, it just notifies that the
  * conditions evaluated to true and provides some context. This is useful for project admins but can
  * be modified to also work as an intervention mechanism in some use-cases.
  */
-public class EmailUserAction extends ActionBase {
+class EmailUserAction(
+        actionConfig: ActionConfig,
+        emailServerConfig: EmailServerConfig?,
+        override val name: String = NAME,
+) : ActionBase(actionConfig) {
 
-  public static final String NAME = "EmailUserAction";
-  private static final Logger logger = LoggerFactory.getLogger(EmailUserAction.class);
-  private final EmailSender emailSender;
-  private final String customTitle;
-  private final String customBody;
+    private val props = actionConfig.properties
 
-  public EmailUserAction(ActionConfig actionConfig, EmailServerConfig emailServerConfig) throws AddressException, IOException {
-    super(actionConfig);
-    Map<String, Object> props = actionConfig.getProperties();
-    this.emailSender =
-        new EmailSender(
+    @Suppress("UNCHECKED_CAST")
+    private val emailSender: EmailSender = EmailSender(
             emailServerConfig,
-            (String) props.getOrDefault("from", "admin@radarbase.org"),
-            (List<String>) props.getOrDefault("email_addresses", new ArrayList<String>()));
-    customTitle = (String) props.getOrDefault("title", null);
-    customBody = (String) props.getOrDefault("body", null);
-  }
+            (props?.getOrDefault("from", "admin@radarbase.org") as String),
+            props.getOrDefault("email_addresses", ArrayList<String>()) as List<String?>)
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    private val customTitle: String? = props?.getOrDefault("title", null) as String?
+    private val customBody: String? = props?.getOrDefault("body", null) as String?
 
-  @Override
-  public Boolean executeFor(ConsumerRecord<?, ?> record) {
-    String title;
-    title =
-        Objects.requireNonNullElseGet(
-            customTitle,
-            () ->
-                "Conditions triggered the action "
-                    + NAME
-                    + " for user "
-                    + ((GenericRecord) record.key()).get("userId")
-                    + " from topic "
-                    + record.topic());
-    String body;
-    body =
-        Objects.requireNonNullElseGet(
-            customBody,
-            () ->
-                "Record: \n"
-                    + record.value().toString()
-                    + "\n\nTimestamp: "
-                    + Instant.now()
-                    + "\nKey: "
-                    + record.key().toString());
+    override fun executeFor(record: ConsumerRecord<*, *>?): Boolean {
+        val title: String = if (customTitle.isNullOrEmpty()) buildString {
+            append("Conditions triggered the action ")
+            append(name)
+            append(" for user ")
+            append((record?.key() as GenericRecord)["userId"])
+            append(" from topic ")
+            append(record.topic())
+        } else customTitle
 
-    try {
-      this.emailSender.sendEmail(title, body);
-      return true;
-    } catch (MessagingException e) {
-      logger.error("Error sending email", e);
-      return false;
+        val body: String = if (customBody.isNullOrEmpty()) {
+            """
+             Record: 
+             ${record?.value()}
+             
+             Timestamp: ${Instant.now()}
+             Key: ${record?.key()}
+            """.trimIndent()
+        } else customBody
+
+        return try {
+            emailSender.sendEmail(title, body)
+            true
+        } catch (e: MessagingException) {
+            logger.error("Error sending email", e)
+            false
+        }
     }
-  }
+
+    companion object {
+        const val NAME = "EmailUserAction"
+        private val logger = LoggerFactory.getLogger(EmailUserAction::class.java)
+    }
 }

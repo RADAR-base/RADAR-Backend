@@ -1,36 +1,33 @@
-package org.radarcns.consumer.realtime.condition;
+package org.radarcns.consumer.realtime.condition
 
-import java.io.IOException;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.radarcns.config.realtime.ConditionConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.radarcns.config.realtime.ConditionConfig
+import java.io.IOException
 
 /**
- * Reads the JsonPath specification from the configuration file, provided to this class in {@link
- * ConditionConfig}.
+ * Reads the JsonPath specification from the configuration file, provided to this class in [ ].
  */
-public class LocalJsonPathCondition extends JsonPathCondition {
+class LocalJsonPathCondition(
+        conditionConfig: ConditionConfig,
+        override val name: String = NAME,
+) : JsonPathCondition(conditionConfig) {
+    private val jsonPath: String?
 
-  public static final String NAME = "LocalJsonPathCondition";
-
-  private final String jsonPath;
-
-  public LocalJsonPathCondition(ConditionConfig conditionConfig) {
-    super(conditionConfig);
-    this.jsonPath = (String) conditionConfig.getProperties().get("jsonpath");
-    if (jsonPath == null) {
-      throw new IllegalArgumentException(
-          "The 'jsonpath' property needs to be specified when "
-              + "using the LocalJsonPathCondition.");
+    @Throws(IOException::class)
+    override fun isTrueFor(record: ConsumerRecord<*, *>?): Boolean {
+        return evaluateJsonPath(record!!, jsonPath)
     }
-  }
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
+    companion object {
+        const val NAME = "LocalJsonPathCondition"
+    }
 
-  @Override
-  public Boolean isTrueFor(ConsumerRecord<?, ?> record) throws IOException {
-    return evaluateJsonPath(record, jsonPath);
-  }
+    init {
+        jsonPath = requireNotNull(
+                conditionConfig.properties?.let { it["jsonpath"] as String? }
+        ) {
+            ("The 'jsonpath' property needs to be specified when "
+                    + "using the LocalJsonPathCondition.")
+        }
+    }
 }

@@ -1,23 +1,25 @@
-package org.radarcns.consumer.realtime.action;
+package org.radarcns.consumer.realtime.action
 
-import java.io.IOException;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.radarcns.consumer.realtime.Grouping;
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.radarcns.consumer.realtime.Grouping
+import java.io.IOException
 
 /**
  * An action can be defined as any process that needs to take place when data is received and all
- * the {@link org.radarcns.consumer.realtime.condition.Condition}s have evaluated to true. It can be
+ * the [org.radarcns.consumer.realtime.condition.Condition]s have evaluated to true. It can be
  * emailing someone or just logging something.
  *
- * <p>See {@link ActiveAppNotificationAction}, {@link EmailUserAction}
+ *
+ * See [ActiveAppNotificationAction], [EmailUserAction]
  */
-public interface Action extends Grouping {
+interface Action : Grouping {
+    val name: String
 
-  String getName();
+    @Throws(IllegalArgumentException::class, IOException::class)
+    fun executeFor(record: ConsumerRecord<*, *>?): Boolean
 
-  Boolean executeFor(ConsumerRecord<?, ?> record) throws IllegalArgumentException, IOException;
-
-  default Boolean run(ConsumerRecord<?, ?> record) throws IllegalArgumentException, IOException {
-    return evaluateProject(record) && executeFor(record);
-  }
+    @Throws(IllegalArgumentException::class, IOException::class)
+    fun run(record: ConsumerRecord<*, *>?): Boolean {
+        return evaluateProject(record) && executeFor(record)
+    }
 }

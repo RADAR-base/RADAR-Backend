@@ -1,20 +1,16 @@
-package org.radarcns.consumer.realtime.action.appserver;
+package org.radarcns.consumer.realtime.action.appserver
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.temporal.ChronoUnit
+import java.time.Duration
+import java.time.Instant
 
-/** Schedules the time based on current time with an optional added delay. */
-public class SimpleTimeStrategy implements ScheduleTimeStrategy {
+/** Schedules the time based on current time with an optional added delay.  */
+class SimpleTimeStrategy(delay: Long, unit: ChronoUnit?) : ScheduleTimeStrategy {
+    private val delay: Duration
+    override val scheduledTime: Instant
+        get() = Instant.now().plus(delay)
 
-  private final Duration delay;
-
-  public SimpleTimeStrategy(long delay, ChronoUnit unit) {
-    this.delay = Duration.of(delay, unit);
-  }
-
-  @Override
-  public Instant getScheduledTime() {
-    return Instant.now().plus(delay);
-  }
+    init {
+        this.delay = Duration.of(delay, unit)
+    }
 }

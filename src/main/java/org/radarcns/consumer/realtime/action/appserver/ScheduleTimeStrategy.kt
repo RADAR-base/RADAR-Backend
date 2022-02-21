@@ -1,14 +1,13 @@
-package org.radarcns.consumer.realtime.action.appserver;
+package org.radarcns.consumer.realtime.action.appserver
 
-import java.time.Instant;
+import java.time.Instant
 
 /**
- * The time calculation strategy for scheduling the notification via the {@link
- * org.radarcns.consumer.realtime.action.ActiveAppNotificationAction}.
+ * The time calculation strategy for scheduling the notification via the [ ].
  *
- * <p>See {@link SimpleTimeStrategy}, {@link TimeOfDayStrategy}
+ *
+ * See [SimpleTimeStrategy], [TimeOfDayStrategy]
  */
-public interface ScheduleTimeStrategy {
-
-  Instant getScheduledTime();
+interface ScheduleTimeStrategy {
+    val scheduledTime: Instant
 }

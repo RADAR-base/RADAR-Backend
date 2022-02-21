@@ -1,62 +1,26 @@
-package org.radarcns.config;
+package org.radarcns.config
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty
 
-public class AppServerConfig {
-
-    @JsonProperty("base_url")
-    private String baseUrl;
-
-    @JsonProperty("token_url")
-    private String tokenUrl;
-
-    @JsonProperty("client_id")
-    private String clientId;
-
-    @JsonProperty("client_secret")
-    private String clientSecret;
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public String getTokenUrl() {
-        return tokenUrl;
-    }
-
-    public void setTokenUrl(String tokenUrl) {
-        this.tokenUrl = tokenUrl;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
-    }
-
-    public AppServerConfig withEnv() {
-        String envClientId = System.getenv("APP_SERVER_CLIENT_ID");
+data class AppServerConfig(
+        @JsonProperty("base_url")
+        val baseUrl: String,
+        @JsonProperty("token_url")
+        val tokenUrl: String,
+        @JsonProperty("client_id")
+        var clientId: String? = null,
+        @JsonProperty("client_secret")
+        var clientSecret: String? = null,
+) {
+    fun withEnv(): AppServerConfig {
+        val envClientId = System.getenv("APP_SERVER_CLIENT_ID")
         if (envClientId != null) {
-            clientId = envClientId;
+            clientId = envClientId
         }
-        String envClientSecret = System.getenv("APP_SERVER_CLIENT_SECRET");
+        val envClientSecret = System.getenv("APP_SERVER_CLIENT_SECRET")
         if (envClientSecret != null) {
-            clientSecret = envClientSecret;
+            clientSecret = envClientSecret
         }
-        return this;
+        return this
     }
 }
