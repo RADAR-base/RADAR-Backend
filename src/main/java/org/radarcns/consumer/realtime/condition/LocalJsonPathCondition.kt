@@ -12,10 +12,11 @@ class LocalJsonPathCondition(
         override val name: String = NAME,
 ) : JsonPathCondition(conditionConfig) {
     private val jsonPath: String?
+    private val rootKey: String?
 
     @Throws(IOException::class)
     override fun isTrueFor(record: ConsumerRecord<*, *>?): Boolean {
-        return evaluateJsonPath(record!!, jsonPath)
+        return evaluateJsonPath(record!!, jsonPath, rootKey)
     }
 
     companion object {
@@ -23,6 +24,7 @@ class LocalJsonPathCondition(
     }
 
     init {
+        rootKey = conditionConfig.properties?.let { it.getOrDefault("key", null) as String? }
         jsonPath = requireNotNull(
                 conditionConfig.properties?.let { it["jsonpath"] as String? }
         ) {

@@ -104,6 +104,25 @@ disconnect_monitor:
 
 persistence_path: /tmp
 
+realtime_consumers:
+  - name: 'lstm-lung-study-consumer'
+    topic: 'REST_API_INFERENCE_LSTM_COPD'
+    conditions:
+      - name: 'LocalJsonPathCondition'
+        properties:
+          jsonpath: '$[0].invocation_result.anomaly_detected == true'
+          key: 'INFERENCE_RESULT_JSON'
+    actions:
+      - name: 'ActiveAppNotificationAction'
+        properties:
+          questionnaire_name: 'ers'
+          time_of_day: '09:00:00'
+          appserver_base_url: 'http://localhost:8080/'
+          management_portal_token_url: 'http://localhost:8090/managementportal/oauth/token'
+          client_id: 'radar_appserver_client'
+          client_secret: 'secret'
+          metadata_key: 'INFERENCE_RESULT_JSON'
+
 #====================== Notification monitor=============================#
 intervention_monitor:
   #=========================App Server======================================#

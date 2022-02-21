@@ -1,15 +1,10 @@
 package org.radarcns.consumer.realtime.condition
 
-import kotlin.Throws
-import java.io.IOException
-import org.radarcns.config.realtime.ConditionConfig
-import org.radarcns.consumer.realtime.condition.LocalJsonPathCondition
-import java.lang.IllegalArgumentException
-import org.radarcns.consumer.realtime.condition.ConditionBase
 import com.jayway.jsonpath.JsonPath
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import java.lang.ClassCastException
-import org.radarcns.consumer.realtime.condition.JsonPathCondition
+import org.radarcns.config.realtime.ConditionConfig
+import java.io.IOException
 
 /**
  * Uses https://github.com/json-path/JsonPath to evaluate json expressions directly in the record
@@ -18,16 +13,25 @@ import org.radarcns.consumer.realtime.condition.JsonPathCondition
  */
 abstract class JsonPathCondition(config: ConditionConfig) : ConditionBase(config) {
     @Throws(IOException::class)
-    protected fun evaluateJsonPath(record: ConsumerRecord<*, *>, jsonPath: String?): Boolean {
+    protected fun evaluateJsonPath(
+            record: ConsumerRecord<*, *>,
+            jsonPath: String?, rootKey: String? = null): Boolean {
         // JsonPath expressions always return a List.
         val result: List<*>? = try {
-            JsonPath.parse(record.value()).read(jsonPath)
+
+            val valueToParse = if (rootKey != null) {
+                (record.value() as GenericRecord).get(rootKey) as String
+            } else {
+                (record.value() as GenericRecord).toString()
+            }
+
+            JsonPath.parse(valueToParse).read(jsonPath)
         } catch (exc: ClassCastException) {
             throw IOException("The provided json path does not seem to contain an expression. Make sure it"
                     + " contains an expression. Docs: https://github.com/json-path/JsonPath", exc)
         }
 
         // At least one result matches the condition
-        return result != null && result.isNotEmpty()
+        return !result.isNullOrEmpty()
     }
 }

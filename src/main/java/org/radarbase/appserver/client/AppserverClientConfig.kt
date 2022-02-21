@@ -7,11 +7,12 @@ import okhttp3.OkHttpClient
 import java.net.MalformedURLException
 import java.net.URL
 
-class AppserverClientConfig {
-    var appserverUrl: HttpUrl? = null
-    var tokenUrl: URL? = null
-    var clientId: String? = null
-    var clientSecret: String? = null
+data class AppserverClientConfig(
+        var appserverUrl: HttpUrl? = null,
+        var tokenUrl: URL? = null,
+        var clientId: String? = null,
+        var clientSecret: String? = null,
+) {
     var httpClient: OkHttpClient? = null
         set(value) {
             field = value?.newBuilder()?.build()

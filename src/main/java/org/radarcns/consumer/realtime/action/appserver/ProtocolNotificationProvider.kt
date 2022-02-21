@@ -25,7 +25,7 @@ class ProtocolNotificationProvider(
         val notificationBody: String = "Urgent Questionnaire Pending. Please complete now.",
         val ttlSeconds: Int = 0,
         val scheduledTime: Instant,
-        val sourceId: String,
+        val sourceId: String? = null,
         val appPackage: String = "org.phidatalab.radar_armt",
         val referenceTimestamp: Instant = scheduledTime,
 ) : NotificationContentProvider {
