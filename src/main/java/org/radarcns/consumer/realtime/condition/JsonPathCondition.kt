@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.radarcns.config.realtime.ConditionConfig
+import org.slf4j.LoggerFactory
 import java.io.IOException
 
 /**
@@ -20,10 +21,12 @@ abstract class JsonPathCondition(config: ConditionConfig) : ConditionBase(config
         val result: List<*>? = try {
 
             val valueToParse = if (rootKey != null) {
-                (record.value() as GenericRecord).get(rootKey) as String
+                (record.value() as GenericRecord).get(rootKey).toString()
             } else {
                 (record.value() as GenericRecord).toString()
             }
+
+            logger.debug("value: $valueToParse")
 
             JsonPath.parse(valueToParse).read(jsonPath)
         } catch (exc: ClassCastException) {
@@ -31,7 +34,13 @@ abstract class JsonPathCondition(config: ConditionConfig) : ConditionBase(config
                     + " contains an expression. Docs: https://github.com/json-path/JsonPath", exc)
         }
 
+        logger.debug("JsonPath result: $result")
+
         // At least one result matches the condition
         return !result.isNullOrEmpty()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(JsonPathCondition::class.java)
     }
 }

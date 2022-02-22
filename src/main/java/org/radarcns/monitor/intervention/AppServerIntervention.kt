@@ -64,7 +64,7 @@ class AppServerIntervention(
         protocol: QuestionnaireTrigger,
         body: String,
     ): Map<String, Any> {
-        val notification = protocol.questionnaire.protocol.notification
+        val notification = protocol.singleProtocol.protocol.notification
 
         // TODO: get the language from the app client somehow?
         val notificationTitle = notification.title.translation(defaultLanguage) ?: defaultNotificationTitle
@@ -75,7 +75,7 @@ class AppServerIntervention(
                 title = notificationTitle,
                 body = notificationText,
                 sourceId = intervention.sourceId,
-                type = protocol.questionnaire.questionnaire.name,
+                type = protocol.singleProtocol.questionnaire.name,
                 ttlSeconds = ttlSeconds,
                 scheduledTime = Instant.now().toString(),
                 additionalData = body,

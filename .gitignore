@@ -29,3 +29,5 @@ smtp.env
 # Distribution
 /radar-backend-*
 /src/integrationTest/docker/etc/google-credentials.json
+
+temp

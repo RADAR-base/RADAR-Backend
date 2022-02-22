@@ -150,6 +150,8 @@ services:
     depends_on:
       - radarbase-postgresql
       - managementportal-app
+    networks:
+      - kafka
     environment:
       JDK_JAVA_OPTIONS: -Xmx4G -Djava.security.egd=file:/dev/./urandom
       SPRING_DATASOURCE_URL: jdbc:postgresql://radarbase-postgresql:5432/appserver
@@ -174,6 +176,8 @@ services:
     restart: always
     ports:
       - 8888:1111
+    networks:
+      - kafka
     environment:
       SPRING_BOOT_ADMIN_USER_NAME: radar
       SPRING_BOOT_ADMIN_USER_PASSWORD: appserver
@@ -188,6 +192,8 @@ services:
       - radarbase-postgresql
     ports:
       - 8090:8080
+    networks:
+      - kafka
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:postgresql://radarbase-postgresql:5432/managementportal
@@ -207,7 +213,23 @@ services:
     image: radarbase/radarbase-postgres:latest
     ports:
       - "5434:5432"
+    networks:
+      - kafka
     environment:
       - POSTGRES_USER=radarcns
       - POSTGRES_PASSWORD=radarcns
       - POSTGRES_MULTIPLE_DATABASES=managementportal,appserver
+
+
+  realtime-consumer:
+    image: radarbase/realtime-consumer:latest
+    build: ../../../
+    networks:
+      - kafka
+    volumes:
+      - "../../../radar.yml:/etc/radar.yml"
+    command:
+      - "realtime_consumers"
+      - "-c /etc/radar.yml"
+    environment:
+      KAFKA_SCHEMA_REGISTRY: http://schema-registry-1:8081

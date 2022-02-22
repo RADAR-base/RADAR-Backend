@@ -100,6 +100,8 @@ class RealtimeInferenceConsumer(
                     shutdown()
                 } catch (ex: KafkaException) {
                     logger.error("Kafka consumer gave exception", ex)
+                } catch (ex: Exception) {
+                    logger.error("Consumer gave exception", ex)
                 }
             }
         } finally {

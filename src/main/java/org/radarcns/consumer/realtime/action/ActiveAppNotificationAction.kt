@@ -1,5 +1,7 @@
 package org.radarcns.consumer.realtime.action
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.avro.generic.GenericRecord
@@ -8,12 +10,14 @@ import org.radarbase.appserver.client.AppserverClient
 import org.radarbase.appserver.client.AppserverClientConfig
 import org.radarbase.appserver.client.MessagingType
 import org.radarcns.config.realtime.ActionConfig
-import org.radarcns.consumer.realtime.Grouping.Companion.PROJECT_ID_KEYS
-import org.radarcns.consumer.realtime.Grouping.Companion.SOURCE_ID_KEYS
-import org.radarcns.consumer.realtime.Grouping.Companion.USER_ID_KEYS
-import org.radarcns.consumer.realtime.Grouping.Companion.findKey
+import org.radarcns.consumer.realtime.Grouping.Companion.getKeys
+import org.radarcns.consumer.realtime.Grouping.Companion.getTime
+import org.radarcns.consumer.realtime.Grouping.Companion.objectMapper
 import org.radarcns.consumer.realtime.action.appserver.*
+import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 /**
@@ -25,111 +29,152 @@ class ActiveAppNotificationAction(
         actionConfig: ActionConfig,
         override val name: String = NAME,
 ) : ActionBase(actionConfig) {
-    private val questionnaireName: String
-    private val timeOfDay: String?
+    private val parsedConfig: ActiveAppNotificationActionConfig
     private val appserverClient: AppserverClient
-    private val type: MessagingType
-    private val metadataKey: String?
 
 
     init {
-        questionnaireName = requireNotNull(actionConfig
-                .properties!!
-                .getOrDefault(
-                        "questionnaire_name",
-                        null
-                ) as String?) { "Questionnaire name is required" }
-
-        val appServerBaseUrl = requireNotNull(actionConfig
-                .properties
-                .getOrDefault(
-                        "appserver_base_url",
-                        null
-                ) as String?) { "Appserver base url is required" }
-
-        timeOfDay = actionConfig.properties.getOrDefault("time_of_day", null) as String?
-        val mpTokenUrl = actionConfig
-                .properties
-                .getOrDefault(
-                        "management_portal_token_url",
-                        null) as String?
-        type = MessagingType.valueOf(
-                (actionConfig
-                        .properties
-                        .getOrDefault("message_type", MessagingType.NOTIFICATIONS.toString()) as String))
-
-        val clientId = actionConfig.properties.getOrDefault("client_id", "realtime_consumer") as String
-        val clientSecret = actionConfig.properties.getOrDefault("client_secret", "secret") as String
-        val config = AppserverClientConfig(
-                clientId = clientId,
-                clientSecret = clientSecret,
-        )
-        config.appserverUrl(appServerBaseUrl)
-        config.tokenUrl(mpTokenUrl)
-        appserverClient = AppserverClient(config)
-
-        metadataKey = actionConfig
-                .properties
-                .getOrDefault(
-                        "metadata_key",
-                        null) as String?
+        parsedConfig = ActiveAppNotificationActionConfig.fromMap(actionConfig.properties)
+        appserverClient = AppserverClient(parsedConfig.appserverClientConfig)
     }
 
     @Throws(IllegalArgumentException::class, IOException::class)
     override fun executeFor(record: ConsumerRecord<*, *>?): Boolean {
-        val key = record?.key() as GenericRecord
 
-        val pidKey: String = findKey(record, PROJECT_ID_KEYS)
-                ?: throw IllegalArgumentException("No project id found in key")
+        logger.debug("Executing action for record: $record")
 
-        val uidKey: String = findKey(record, USER_ID_KEYS)
-                ?: throw IllegalArgumentException("No user id found in key")
+        record?.key() ?: return false
+        val key = getKeys(record) ?: return false
 
-        val sidKey: String? = findKey(record, SOURCE_ID_KEYS)
-
-        require(key[pidKey] is String) { "Cannot execute Action $NAME. The projectId is not valid." }
-        require(key[uidKey] is String) { "Cannot execute Action $NAME. The userId is not valid." }
-
-        val project = key[pidKey] as String
-        val user = key[uidKey] as String
-        val source = if (sidKey != null) key[sidKey] as String else null
-
-        val timeStrategy: ScheduleTimeStrategy = if (!timeOfDay.isNullOrEmpty()) {
+        val timeStrategy: ScheduleTimeStrategy = if (!parsedConfig.timeOfDay.isNullOrEmpty()) {
             // get timezone for the user and create the correct local time of the day
-            TimeOfDayStrategy(timeOfDay, getUserTimezone(project, user))
+            TimeOfDayStrategy(parsedConfig.timeOfDay, getUserTimezone(key.projectId, key.userId))
         } else {
             // no time of the day provided, schedule now.
             SimpleTimeStrategy(5, ChronoUnit.MINUTES)
         }
 
-        val metadata = ObjectMapper()
-                .readValue(
-                        (record.value() as GenericRecord?)?.get(metadataKey) as String,
-                        object : TypeReference<Map<String, String>?>() {}
-                )
+        val metadata = try {
+            if (!parsedConfig.metadataKey.isNullOrEmpty()) {
+                val root = ObjectMapper()
+                        .readTree(
+                                (record.value() as GenericRecord?)
+                                        ?.get(parsedConfig.metadataKey).toString()
+                        )
+                if (root.isArray) {
+                    root.mapIndexed { k1, v1 ->
+                        Pair("metadata-$k1", objectMapper.writeValueAsString(v1))
+                    }.toMap()
+                } else {
+                    objectMapper.convertValue(root, object : TypeReference<Map<String, String?>>() {})
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to parse metadata", e)
+            null
+        }
+
+        if (getTime(record) < Instant.now()
+                        .minus(Duration.ofDays(parsedConfig.toleranceInDays))
+                        .toEpochMilli()
+        ) {
+            logger.info("Skipping notification for ${key.userId} because it is too late.")
+            return false
+        }
 
         // create the notification in appserver
         val contentProvider: NotificationContentProvider = ProtocolNotificationProvider(
-                name = questionnaireName,
+                name = parsedConfig.questionnaireName,
                 scheduledTime = timeStrategy.scheduledTime,
-                sourceId = source,
+                sourceId = key.sourceId,
                 metadata = metadata ?: emptyMap(),
         )
 
-        val body = when (type) {
+        val body = when (parsedConfig.type) {
             MessagingType.NOTIFICATIONS -> contentProvider.notificationMessage
             MessagingType.DATA -> contentProvider.dataMessage
         }
-        appserverClient.createMessage(project, user, type, body)
+
+        logger.debug("Sending message to appserver: ${key.projectId}, ${key.userId}, $parsedConfig.type, $body")
+
+        appserverClient.createMessage(key.projectId, key.userId, parsedConfig.type, body)
         return true
     }
 
     @Throws(IOException::class)
     private fun getUserTimezone(project: String, user: String): String {
-        return (appserverClient.getUserDetails(project, user)["timezone"] ?: "gmt") as String
+        return (appserverClient.getUserDetails(project, user)["timezone"]
+                ?: parsedConfig.defaultTimeZone) as String
     }
 
     companion object {
         const val NAME = "ActiveAppNotificationAction"
+        private val logger = LoggerFactory.getLogger(ActiveAppNotificationAction::class.java)
     }
+}
+
+data class ActiveAppNotificationActionConfig(
+        @JsonProperty("appserver_base_url")
+        val appServerBaseUrl: String,
+        @JsonProperty("questionnaire_name")
+        val questionnaireName: String,
+        @JsonProperty("management_portal_token_url")
+        val mpTokenUrl: String,
+        @JsonProperty("message_type")
+        val type: MessagingType = MessagingType.NOTIFICATIONS,
+        @JsonProperty("client_id")
+        val clientId: String = "realtime_consumer",
+        @JsonProperty("client_secret")
+        val clientSecret: String = "secret",
+        @JsonProperty("time_of_day")
+        val timeOfDay: String? = null,
+        @JsonProperty("default_timezone")
+        val defaultTimeZone: String = "UTC",
+        @JsonProperty("metadata_key")
+        val metadataKey: String? = null,
+        @JsonProperty("tolerance_in_days")
+        val toleranceInDays: Long = 5,
+        @JsonIgnore
+        val appserverClientConfig: AppserverClientConfig = AppserverClientConfig(
+                clientId = clientId,
+                clientSecret = clientSecret,
+        ).apply { appserverUrl(appServerBaseUrl); tokenUrl(mpTokenUrl); this.mapper = objectMapper }
+) {
+    init {
+        if (timeOfDay != null && !timeOfDay.matches("[0-9]{2}:[0-9]{2}:[0-9]{2}".toRegex())) {
+            throw IllegalArgumentException("timeOfDay must be in the format HH:mm:ss")
+        }
+    }
+
+    companion object {
+
+//        val objMapper = ObjectMapper()
+//                .registerModule(KotlinModule
+//                        .Builder()
+//                        .enable(KotlinFeature.NullIsSameAsDefault)
+//                        .build()
+//                )
+
+        fun fromMap(properties: Map<String, Any>?): ActiveAppNotificationActionConfig {
+            return properties?.let { map ->
+//                objMapper.convertValue(map, ActiveAppNotificationActionConfig::class.java)
+
+            ActiveAppNotificationActionConfig(
+                    appServerBaseUrl = requireNotNull(map["appserver_base_url"]) as String,
+                    questionnaireName = requireNotNull(map["questionnaire_name"]) as String,
+                    mpTokenUrl = requireNotNull(map["management_portal_token_url"]) as String,
+                    type = MessagingType.valueOf(map["message_type"] as String?
+                            ?: "NOTIFICATIONS"),
+                    clientId = map["client_id"] as String? ?: "realtime_consumer",
+                    clientSecret = map["client_secret"] as String? ?: "secret",
+                    timeOfDay = map["time_of_day"] as String?,
+                    defaultTimeZone = map["default_timezone"] as String? ?: "UTC",
+                    metadataKey = map["metadata_key"] as String?,
+                    toleranceInDays = map["tolerance_in_days"] as Long? ?: 5,
+            )
+        } ?: throw IllegalArgumentException("Missing required properties")
+    }
+}
 }
