@@ -27,7 +27,7 @@ class TimeOfDayStrategy(
         var ldt = localDate.atTime(LocalTime.parse(timeOfDay, DateTimeFormatter.ISO_LOCAL_TIME))
 
         // If time has already passed, schedule the next day
-        if (ldt.isBefore(now.plus(jitter).atZone(ZoneId.of(timezone)).toLocalDateTime())) {
+        if (ldt.plus(jitter).isBefore(now.atZone(ZoneId.of(timezone)).toLocalDateTime())) {
             ldt = ldt.plusDays(1)
         }
 

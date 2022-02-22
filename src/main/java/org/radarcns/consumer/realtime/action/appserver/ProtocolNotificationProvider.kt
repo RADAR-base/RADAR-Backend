@@ -119,6 +119,6 @@ class ProtocolNotificationProvider(
                 + " }")
 
         private val logger = LoggerFactory.getLogger(ProtocolNotificationProvider::class.java)
-        private const val REPO = "https://raw.githubusercontent.com/RADAR-CNS/RADAR-REDCap-aRMT-Definitions/master/questionnaires/"
+        private const val REPO = "https://raw.githubusercontent.com/RADAR-base/RADAR-REDCap-aRMT-Definitions/master/questionnaires"
     }
 }

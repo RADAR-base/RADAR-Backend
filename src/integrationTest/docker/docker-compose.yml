@@ -173,7 +173,6 @@ services:
 
   spring-boot-admin:
     image: slydeveloper/spring-boot-admin:latest
-    restart: always
     ports:
       - 8888:1111
     networks:

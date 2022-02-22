@@ -76,6 +76,9 @@ class ActiveAppNotificationAction(
             null
         }
 
+        logger.debug("Parsed metadata")
+
+
         if (getTime(record) < Instant.now()
                         .minus(Duration.ofDays(parsedConfig.toleranceInDays))
                         .toEpochMilli()
@@ -83,6 +86,8 @@ class ActiveAppNotificationAction(
             logger.info("Skipping notification for ${key.userId} because it is too late.")
             return false
         }
+
+        logger.debug("Tolerance is ok")
 
         // create the notification in appserver
         val contentProvider: NotificationContentProvider = ProtocolNotificationProvider(
@@ -100,11 +105,13 @@ class ActiveAppNotificationAction(
         logger.debug("Sending message to appserver: ${key.projectId}, ${key.userId}, $parsedConfig.type, $body")
 
         appserverClient.createMessage(key.projectId, key.userId, parsedConfig.type, body)
+        logger.info("Sent notification to appserver for ${key.userId}")
         return true
     }
 
     @Throws(IOException::class)
     private fun getUserTimezone(project: String, user: String): String {
+        logger.debug("Got user timezone")
         return (appserverClient.getUserDetails(project, user)["timezone"]
                 ?: parsedConfig.defaultTimeZone) as String
     }
