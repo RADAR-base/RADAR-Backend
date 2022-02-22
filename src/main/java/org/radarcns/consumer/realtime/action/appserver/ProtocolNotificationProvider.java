@@ -17,53 +17,52 @@ import java.util.Map;
 public class ProtocolNotificationProvider implements NotificationContentProvider {
 
   static final String PROTOCOL_TEMPLATE =
-      "{"
-          + "     \"action\" : \"QUESTIONNAIRE_TRIGGER\",\n"
-          + "     \"questionnaire\": {\n"
-          + "        \"name\": \"%s\",\n"
-          + "        \"showIntroduction\": false,\n"
-          + "        \"showInCalendar\": true,\n"
-          + "        \"order\": %d,\n"
-          + "        \"referenceTimestamp\": \"%s\",\n"
-          + "        \"questionnaire\": {\n"
-          + "          \"repository\": \"%s\",\n"
-          + "          \"name\": \"%s\",\n"
-          + "          \"avsc\": \"%s\"\n"
-          + "        },\n"
-          + "        \"startText\": {\n"
-          + "          \"en\": \"\"\n"
-          + "        },\n"
-          + "        \"endText\": {\n"
-          + "          \"en\": \"Thank you for taking the time today.\"\n"
-          + "        },\n"
-          + "        \"warn\": {\n"
-          + "          \"en\": \"\"\n"
-          + "        },\n"
-          + "        \"estimatedCompletionTime\": 1,\n"
-          + "        \"protocol\": {\n"
-          + "          \"repeatProtocol\": {\n"
-          + "            \"unit\": \"min\",\n"
-          + "            \"amount\": %d\n"
-          + "          },\n"
-          + "          \"repeatQuestionnaire\": {\n"
-          + "            \"unit\": \"min\",\n"
-          + "            \"unitsFromZero\": \n"
-          + "              %s\n"
-          + "          },\n"
-          + "          \"reminders\": {\n"
-          + "            \"unit\": \"day\",\n"
-          + "            \"amount\": 0,\n"
-          + "            \"repeat\": 0\n"
-          + "          },\n"
-          + "          \"completionWindow\": {\n"
-          + "            \"unit\": \"day\",\n"
-          + "            \"amount\": %d\n"
-          + "          }\n"
-          + "        }\n"
-          + "      },\n"
-          + "      \"metadata\": %s\n"
-          + " }"
-          + "}";
+          """
+                  {
+                     "action" : "QUESTIONNAIRE_TRIGGER",
+                     "questionnaire": {
+                        "name": "%s",
+                        "showIntroduction": false,
+                        "showInCalendar": true,
+                        "order": %d,
+                        "referenceTimestamp": "%s",
+                        "questionnaire": {
+                          "repository": "%s",
+                          "name": "%s",
+                          "avsc": "%s"
+                        },
+                        "startText": {
+                          "en": ""
+                        },
+                        "endText": {
+                          "en": "Thank you for taking the time today."
+                        },
+                        "warn": {
+                          "en": ""
+                        },
+                        "estimatedCompletionTime": 1,
+                        "protocol": {
+                          "repeatProtocol": {
+                            "unit": "min",
+                            "amount": %d
+                          },
+                          "repeatQuestionnaire": {
+                            "unit": "min",
+                            "unitsFromZero": %s
+                          },
+                          "reminders": {
+                            "unit": "day",
+                            "amount": 0,
+                            "repeat": 0
+                          },
+                          "completionWindow": {
+                            "unit": "day",
+                            "amount": %d
+                          }
+                        }
+                      },
+                      "metadata": %s
+                   }}""";
 
   static final String NOTIFICATION_TEMPLATE =
       "{\n"

@@ -1,10 +1,10 @@
 package org.radarbase.appserver.client
 
-data class AppServerData(
+data class AppServerDataMessage(
     val ttlSeconds: Long,
-    val sourceId: String,
+    val sourceId: String? = null,
     val sourceType: String = "aRMT",
     val appPackage: String = "org.phidatalab.radar_armt",
     val scheduledTime: String,
-    val dataMap: String,
+    val dataMap: Map<String, String> = mapOf(),
 ) : AppServerMessageContents

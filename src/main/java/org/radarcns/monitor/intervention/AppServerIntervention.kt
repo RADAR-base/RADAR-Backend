@@ -1,8 +1,9 @@
 package org.radarcns.monitor.intervention
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.OkHttpClient
-import org.radarbase.appserver.client.AppServerData
+import org.radarbase.appserver.client.AppServerDataMessage
 import org.radarbase.appserver.client.AppServerNotification
 import org.radarbase.appserver.client.AppserverClient
 import org.radarbase.appserver.client.MessagingType
@@ -11,6 +12,7 @@ import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNot
 import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNotificationTitle
 import org.radarbase.appserver.client.protocol.ProtocolDirectory
 import org.radarbase.appserver.client.protocol.QuestionnaireTrigger
+import org.radarbase.appserver.client.protocol.SingleProtocol
 import org.radarbase.appserver.client.protocol.translation
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -25,9 +27,11 @@ class AppServerIntervention(
     mapper: ObjectMapper,
 ) {
     private val appserverClient: AppserverClient
-    private val protocolWriter = mapper.writerFor(QuestionnaireTrigger::class.java)
+    private val questionnaireWriter = mapper.writerFor(SingleProtocol::class.java)
     private val notificationWriter = mapper.writerFor(AppServerNotification::class.java)
-    private val dataWriter = mapper.writerFor(AppServerData::class.java)
+    private val dataWriter = mapper.writerFor(AppServerDataMessage::class.java)
+    private val mapWriter = mapper.writerFor(object : TypeReference<Map<String, String>>() {})
+    private val userLanguages: MutableMap<String, String> = mutableMapOf()
 
     init {
         appserverClient = AppserverClient {
@@ -48,11 +52,15 @@ class AppServerIntervention(
             attributes = attributes,
         ) ?: throw NoSuchElementException("No protocol found for $intervention")
 
-        val body = protocolWriter.writeValueAsString(protocol)
+        val dataMap =  mapOf(
+            "action" to protocol.action,
+            "metadata" to mapWriter.writeValueAsString(protocol.metadata),
+            "questionnaire" to questionnaireWriter.writeValueAsString(protocol.questionnaire),
+        )
 
         val ttlSeconds = ttl.toSeconds()
-        val notificationResponse = createNotificationMessage(intervention, ttlSeconds, protocol, body)
-        val dataResponse = createDataMessage(intervention, ttlSeconds, body)
+        val notificationResponse = createNotificationMessage(intervention, ttlSeconds, protocol, dataMap)
+        val dataResponse = createDataMessage(intervention, ttlSeconds, dataMap)
 
         logger.debug("Created App Server message for notification {} and data {}",
             notificationResponse, dataResponse)
@@ -62,13 +70,22 @@ class AppServerIntervention(
         intervention: InterventionRecord,
         ttlSeconds: Long,
         protocol: QuestionnaireTrigger,
-        body: String,
+        dataMap: Map<String, String>,
     ): Map<String, Any> {
         val notification = protocol.questionnaire.protocol.notification
 
-        // TODO: get the language from the app client somehow?
-        val notificationTitle = notification.title.translation(defaultLanguage) ?: defaultNotificationTitle
-        val notificationText = notification.text.translation(defaultLanguage) ?: defaultNotificationText
+        val language = userLanguages.computeIfAbsent(intervention.userId) {
+            try {
+                appserverClient.getUserDetails(intervention.projectId, intervention.userId)["language"]
+                    ?.toString()
+            } catch (ex: Exception) {
+                logger.error("Failed to fetch user {} - {} language",
+                    intervention.projectId, intervention.userId, ex)
+                null
+            } ?: defaultLanguage
+        }
+        val notificationTitle = notification.title.translation(language) ?: defaultNotificationTitle
+        val notificationText = notification.text.translation(language) ?: defaultNotificationText
 
         val notificationBody = notificationWriter.writeValueAsString(
             AppServerNotification(
@@ -78,7 +95,7 @@ class AppServerIntervention(
                 type = protocol.questionnaire.questionnaire.name,
                 ttlSeconds = ttlSeconds,
                 scheduledTime = Instant.now().toString(),
-                additionalData = body,
+                additionalData = dataMap,
             )
         )
         return appserverClient.createMessage(
@@ -92,15 +109,15 @@ class AppServerIntervention(
     private fun createDataMessage(
         intervention: InterventionRecord,
         ttlSeconds: Long,
-        body: String,
+        dataMap: Map<String, String>,
     ): Map<String, Any> {
         val now = Instant.now().toString()
         val data = dataWriter.writeValueAsString(
-            AppServerData(
+            AppServerDataMessage(
                 sourceId = intervention.sourceId,
                 ttlSeconds = ttlSeconds,
                 scheduledTime = now,
-                dataMap = body,
+                dataMap = dataMap,
             )
         )
         return appserverClient.createMessage(
