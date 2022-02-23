@@ -70,6 +70,7 @@ class InterventionMonitor(
         appServerNotifications = AppServerIntervention(
             protocolDirectory = FileProtocolDirectory(config.protocolDirectory, mapper),
             defaultLanguage = config.defaultLanguage,
+            cacheDuration = config.cacheDuration,
             appserverUrl = config.appServerUrl,
             authConfig = config.authConfig,
             httpClient = httpClient,
@@ -257,8 +258,8 @@ class InterventionMonitor(
     companion object {
         private val logger = LoggerFactory.getLogger(InterventionMonitor::class.java)
 
-        private fun Instant.pendingDuration(): Duration = Duration.between(Instant.now(), this)
-        private fun Instant.passedDuration(): Duration = Duration.between(this, Instant.now())
+        fun Instant.pendingDuration(): Duration = Duration.between(Instant.now(), this)
+        fun Instant.passedDuration(): Duration = Duration.between(this, Instant.now())
 
         private val InterventionRecord.queueKey: String
             get() = "$userId-$timeCompleted"

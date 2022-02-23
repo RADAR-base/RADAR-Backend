@@ -14,4 +14,5 @@ data class SingleProtocolSchedule(
         unit = "min",
     ),
     val repeatQuestionnaire: RepeatQuestionnaire? = null,
+    val referenceTimestamp: String? = null,
 )

@@ -7,21 +7,23 @@ import org.radarbase.appserver.client.AppServerDataMessage
 import org.radarbase.appserver.client.AppServerNotification
 import org.radarbase.appserver.client.AppserverClient
 import org.radarbase.appserver.client.MessagingType
+import org.radarbase.appserver.client.protocol.*
 import org.radarcns.config.monitor.AuthConfig
 import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNotificationText
 import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNotificationTitle
-import org.radarbase.appserver.client.protocol.ProtocolDirectory
-import org.radarbase.appserver.client.protocol.QuestionnaireTrigger
-import org.radarbase.appserver.client.protocol.SingleProtocol
-import org.radarbase.appserver.client.protocol.translation
+import org.radarcns.monitor.intervention.InterventionMonitor.Companion.passedDuration
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 class AppServerIntervention(
     private val protocolDirectory: ProtocolDirectory,
     appserverUrl: String,
     private val defaultLanguage: String,
+    private val cacheDuration: Duration,
     authConfig: AuthConfig,
     httpClient: OkHttpClient,
     mapper: ObjectMapper,
@@ -31,7 +33,7 @@ class AppServerIntervention(
     private val notificationWriter = mapper.writerFor(AppServerNotification::class.java)
     private val dataWriter = mapper.writerFor(AppServerDataMessage::class.java)
     private val mapWriter = mapper.writerFor(object : TypeReference<Map<String, String>>() {})
-    private val userLanguages: MutableMap<String, String> = mutableMapOf()
+    private val userDetailCache: MutableMap<String, UserDetailCache> = mutableMapOf()
 
     init {
         appserverClient = AppserverClient {
@@ -52,38 +54,49 @@ class AppServerIntervention(
             attributes = attributes,
         ) ?: throw NoSuchElementException("No protocol found for $intervention")
 
+        val userDetails = getUserDetails(intervention)
+        val questionnaire = adjustTimestamp(protocol.questionnaire, userDetails)
         val dataMap =  mapOf(
             "action" to protocol.action,
             "metadata" to mapWriter.writeValueAsString(protocol.metadata),
-            "questionnaire" to questionnaireWriter.writeValueAsString(protocol.questionnaire),
+            "questionnaire" to questionnaireWriter.writeValueAsString(questionnaire),
         )
 
         val ttlSeconds = ttl.toSeconds()
-        val notificationResponse = createNotificationMessage(intervention, ttlSeconds, protocol, dataMap)
+        val notificationResponse = createNotificationMessage(intervention, ttlSeconds, protocol, userDetails, dataMap)
         val dataResponse = createDataMessage(intervention, ttlSeconds, dataMap)
 
         logger.debug("Created App Server message for notification {} and data {}",
             notificationResponse, dataResponse)
     }
 
+    private fun getUserDetails(intervention: InterventionRecord): UserDetailCache {
+        val cache = userDetailCache[intervention.userId]
+        return if (cache == null || cache.fetchedAt.passedDuration() > cacheDuration) {
+            val userDetails = appserverClient.getUserDetails(intervention.projectId, intervention.userId)
+            UserDetailCache(
+                language = userDetails["language"] as? String,
+                zoneId = (userDetails["timezone"] as? String)?.let { timezone ->
+                    try {
+                        ZoneId.of(timezone)
+                    } catch (ex: Exception) {
+                        null
+                    }
+                },
+            ).also { userDetailCache[intervention.userId] = it }
+        } else cache
+    }
+
     private fun createNotificationMessage(
         intervention: InterventionRecord,
         ttlSeconds: Long,
         protocol: QuestionnaireTrigger,
+        userDetails: UserDetailCache,
         dataMap: Map<String, String>,
     ): Map<String, Any> {
         val notification = protocol.questionnaire.protocol.notification
 
-        val language = userLanguages.computeIfAbsent(intervention.userId) {
-            try {
-                appserverClient.getUserDetails(intervention.projectId, intervention.userId)["language"]
-                    ?.toString()
-            } catch (ex: Exception) {
-                logger.error("Failed to fetch user {} - {} language",
-                    intervention.projectId, intervention.userId, ex)
-                null
-            } ?: defaultLanguage
-        }
+        val language = userDetails.language ?: defaultLanguage
         val notificationTitle = notification.title.translation(language) ?: defaultNotificationTitle
         val notificationText = notification.text.translation(language) ?: defaultNotificationText
 
@@ -125,6 +138,29 @@ class AppServerIntervention(
             userId = intervention.userId,
             type = MessagingType.DATA,
             contents = data,
+        )
+    }
+
+    private fun adjustTimestamp(protocol: SingleProtocol, userDetails: UserDetailCache): SingleProtocol {
+        val zoneId = userDetails.zoneId ?: ZoneOffset.UTC
+        val now = ZonedDateTime.now(zoneId)
+        val lastMidnight = now.toLocalDate().atStartOfDay(zoneId)
+
+        val minutesSinceMidnight = Duration.between(lastMidnight, now).toMinutes()
+        val existingStartTime = protocol.protocol.repeatQuestionnaire
+        val repeatQuestionnaire = when {
+            existingStartTime == null -> RepeatQuestionnaire(listOf(minutesSinceMidnight))
+            existingStartTime.unit == "min" -> existingStartTime.copy(
+                unitsFromZero = existingStartTime.unitsFromZero.map { it + minutesSinceMidnight }
+            )
+            else -> existingStartTime
+        }
+
+        return protocol.copy(
+            protocol = protocol.protocol.copy(
+                repeatQuestionnaire = repeatQuestionnaire,
+                referenceTimestamp = now.toInstant().toString(),
+            )
         )
     }
 

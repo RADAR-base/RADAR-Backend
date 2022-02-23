@@ -43,6 +43,7 @@ import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarcns.monitor.DisconnectMonitor.DisconnectMonitorState;
+import org.radarcns.monitor.intervention.InterventionMonitor;
 import org.radarcns.util.EmailSender;
 import org.radarcns.util.EmailSenders;
 import org.radarcns.util.Monitor;
@@ -163,8 +164,8 @@ public class DisconnectMonitor extends AbstractKafkaMonitor<
     private void scheduleRepetition(final String key, final MissingRecordsReport report) {
         if (report.getMessageNumber() < numRepetitions) {
             long reportedMissing = report.getReportedMissing();
-            Instant now = Instant.now();
-            Duration passedInterval = Duration.between(Instant.ofEpochMilli(reportedMissing), now);
+            Duration passedInterval = InterventionMonitor.Companion.passedDuration(
+                    Instant.ofEpochMilli(reportedMissing));
 
             Duration nextRepetition;
             if (minRepetitionInterval.compareTo(repeatInterval.minus(passedInterval)) >= 0) {

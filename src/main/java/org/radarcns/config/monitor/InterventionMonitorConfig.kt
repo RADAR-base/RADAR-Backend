@@ -36,6 +36,7 @@ data class InterventionMonitorConfig(
     @JsonProperty("protocol_directory")
     val protocolDirectory: String,
     val defaultLanguage: String = "en",
+    val cacheDuration: Duration = Duration.ofHours(1),
 ) {
     fun withEnv(): InterventionMonitorConfig = copy(authConfig = authConfig.withEnv())
 }
