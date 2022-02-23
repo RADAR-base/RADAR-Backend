@@ -1,12 +1,11 @@
 package org.radarbase.appserver.client.protocol
 
-import java.time.Instant
 
 data class SingleProtocol(
     val name: String,
     val questionnaire: Questionnaire,
     val protocol: SingleProtocolSchedule,
-    val referenceTimestamp: Instant,
+    val referenceTimestamp: String? = null,
     val showInCalendar: Boolean = true,
     val showIntroduction: Boolean = false,
     val estimatedCompletionTime: Int = 1,

@@ -3,7 +3,10 @@ package org.radarcns.consumer.realtime.action.appserver
 import org.radarbase.appserver.client.protocol.*
 import org.radarcns.consumer.realtime.Grouping.Companion.objectMapper
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * The content provides a questionnaire's protocol block in the message to be added to the appserver
@@ -17,7 +20,6 @@ class ProtocolNotificationProvider(
         val name: String,
         val avsc: AvscTypes = AvscTypes.QUESTIONNAIRE,
         val repeatProtocolMinutes: Long = 9999999999L, // a lot of years, it will not repeat
-        val repeatQuestionnaireMinutes: Array<Long> = arrayOf(0L), // Immediately scheduled once
         val completionWindowMinutes: Long = 24 * 60L, // 1day
         val metadata: Map<String, String?> = HashMap(),
         val notificationTitle: String = "Questionnaire Time",
@@ -27,6 +29,9 @@ class ProtocolNotificationProvider(
         val sourceId: String? = null,
         val appPackage: String = "org.phidatalab.radar_armt",
         val referenceTimestamp: Instant = scheduledTime,
+        val userTimezone: String = "UTC",
+        val repeatQuestionnaireMinutes: Array<Long> =
+                arrayOf(getTimeSinceMidnight(referenceTimestamp, userTimezone)),
 ) : NotificationContentProvider {
 
     override val notificationMessage: String
@@ -42,6 +47,7 @@ class ProtocolNotificationProvider(
     }
 
     init {
+
         val questionnaire = SingleProtocol(
                 name = name,
                 order = order,
@@ -66,7 +72,10 @@ class ProtocolNotificationProvider(
                                 unit = "minutes"
                         ),
                 ),
-                referenceTimestamp = referenceTimestamp,
+                referenceTimestamp = referenceTimestamp
+                        .atZone(ZoneId.of(userTimezone))
+                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy:HH:mm")),
+                //.format(DateTimeFormatter.ISO_ZONED_DATE_TIME),
         )
 
         val trigger = QuestionnaireTrigger(
@@ -120,5 +129,12 @@ class ProtocolNotificationProvider(
 
         private val logger = LoggerFactory.getLogger(ProtocolNotificationProvider::class.java)
         private const val REPO = "https://raw.githubusercontent.com/RADAR-base/RADAR-REDCap-aRMT-Definitions/master/questionnaires"
+
+        fun getTimeSinceMidnight(time: Instant, timezone: String): Long {
+            val zoned = time.atZone(ZoneId.of(timezone))
+            val midnight = zoned.toLocalDate().atStartOfDay(zoned.zone).toInstant()
+            val duration = Duration.between(midnight, time)
+            return duration.toMinutes()
+        }
     }
 }

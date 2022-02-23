@@ -10,8 +10,6 @@ import org.radarbase.appserver.client.AppserverClient
 import org.radarbase.appserver.client.AppserverClientConfig
 import org.radarbase.appserver.client.MessagingType
 import org.radarcns.config.realtime.ActionConfig
-import org.radarcns.consumer.realtime.Grouping.Companion.getKeys
-import org.radarcns.consumer.realtime.Grouping.Companion.getTime
 import org.radarcns.consumer.realtime.Grouping.Companion.objectMapper
 import org.radarcns.consumer.realtime.action.appserver.*
 import org.slf4j.LoggerFactory
@@ -43,12 +41,14 @@ class ActiveAppNotificationAction(
 
         logger.debug("Executing action for record: $record")
 
-        record?.key() ?: return false
         val key = getKeys(record) ?: return false
+
+        val timezone = getUserTimezone(key.projectId, key.userId)
+        logger.debug("Got user timezone")
 
         val timeStrategy: ScheduleTimeStrategy = if (!parsedConfig.timeOfDay.isNullOrEmpty()) {
             // get timezone for the user and create the correct local time of the day
-            TimeOfDayStrategy(parsedConfig.timeOfDay, getUserTimezone(key.projectId, key.userId))
+            TimeOfDayStrategy(parsedConfig.timeOfDay, timezone)
         } else {
             // no time of the day provided, schedule now.
             SimpleTimeStrategy(5, ChronoUnit.MINUTES)
@@ -58,7 +58,7 @@ class ActiveAppNotificationAction(
             if (!parsedConfig.metadataKey.isNullOrEmpty()) {
                 val root = ObjectMapper()
                         .readTree(
-                                (record.value() as GenericRecord?)
+                                (record?.value() as GenericRecord?)
                                         ?.get(parsedConfig.metadataKey).toString()
                         )
                 if (root.isArray) {
@@ -95,6 +95,7 @@ class ActiveAppNotificationAction(
                 scheduledTime = timeStrategy.scheduledTime,
                 sourceId = key.sourceId,
                 metadata = metadata ?: emptyMap(),
+                userTimezone = timezone
         )
 
         val body = when (parsedConfig.type) {
@@ -111,7 +112,6 @@ class ActiveAppNotificationAction(
 
     @Throws(IOException::class)
     private fun getUserTimezone(project: String, user: String): String {
-        logger.debug("Got user timezone")
         return (appserverClient.getUserDetails(project, user)["timezone"]
                 ?: parsedConfig.defaultTimeZone) as String
     }
@@ -157,31 +157,23 @@ data class ActiveAppNotificationActionConfig(
 
     companion object {
 
-//        val objMapper = ObjectMapper()
-//                .registerModule(KotlinModule
-//                        .Builder()
-//                        .enable(KotlinFeature.NullIsSameAsDefault)
-//                        .build()
-//                )
-
         fun fromMap(properties: Map<String, Any>?): ActiveAppNotificationActionConfig {
             return properties?.let { map ->
-//                objMapper.convertValue(map, ActiveAppNotificationActionConfig::class.java)
 
-            ActiveAppNotificationActionConfig(
-                    appServerBaseUrl = requireNotNull(map["appserver_base_url"]) as String,
-                    questionnaireName = requireNotNull(map["questionnaire_name"]) as String,
-                    mpTokenUrl = requireNotNull(map["management_portal_token_url"]) as String,
-                    type = MessagingType.valueOf(map["message_type"] as String?
-                            ?: "NOTIFICATIONS"),
-                    clientId = map["client_id"] as String? ?: "realtime_consumer",
-                    clientSecret = map["client_secret"] as String? ?: "secret",
-                    timeOfDay = map["time_of_day"] as String?,
-                    defaultTimeZone = map["default_timezone"] as String? ?: "UTC",
-                    metadataKey = map["metadata_key"] as String?,
-                    toleranceInDays = map["tolerance_in_days"] as Long? ?: 5,
-            )
-        } ?: throw IllegalArgumentException("Missing required properties")
+                ActiveAppNotificationActionConfig(
+                        appServerBaseUrl = requireNotNull(map["appserver_base_url"]) as String,
+                        questionnaireName = requireNotNull(map["questionnaire_name"]) as String,
+                        mpTokenUrl = requireNotNull(map["management_portal_token_url"]) as String,
+                        type = MessagingType.valueOf(map["message_type"] as String?
+                                ?: "NOTIFICATIONS"),
+                        clientId = map["client_id"] as String? ?: "realtime_consumer",
+                        clientSecret = map["client_secret"] as String? ?: "secret",
+                        timeOfDay = map["time_of_day"] as String?,
+                        defaultTimeZone = map["default_timezone"] as String? ?: "UTC",
+                        metadataKey = map["metadata_key"] as String?,
+                        toleranceInDays = map["tolerance_in_days"] as Long? ?: 5,
+                )
+            } ?: throw IllegalArgumentException("Missing required properties")
+        }
     }
-}
 }

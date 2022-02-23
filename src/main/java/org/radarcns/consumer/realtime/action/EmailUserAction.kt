@@ -26,8 +26,9 @@ class EmailUserAction(
     @Suppress("UNCHECKED_CAST")
     private val emailSender: EmailSender = EmailSender(
             emailServerConfig,
-            (props?.getOrDefault("from", "admin@radarbase.org") as String),
-            props.getOrDefault("email_addresses", ArrayList<String>()) as List<String?>)
+            (props?.get("from") as String?)
+                    ?: throw IllegalArgumentException("Missing 'from' property"),
+            props?.getOrDefault("email_addresses", ArrayList<String>()) as List<String?>)
 
     private val customTitle: String? = props?.getOrDefault("title", null) as String?
     private val customBody: String? = props?.getOrDefault("body", null) as String?

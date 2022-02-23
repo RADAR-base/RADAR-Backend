@@ -12,27 +12,53 @@ import java.io.IOException
 interface Grouping {
     val projects: List<String>?
     val subjects: List<String>?
+    val projectIdField: String?
+    val subjectIdField: String?
+    val sourceIdField: String?
+    val timeField: String?
 
     @Throws(IOException::class)
     fun evaluateProject(record: ConsumerRecord<*, *>?): Boolean {
-        return record?.key()?.let {
+        return try {
+            return getObservationKey(record) != null
+        } catch (ex: IllegalArgumentException) {
+            false
+        }
+    }
 
-            val projectEval = if (!projects.isNullOrEmpty()) {
-                val pidKey: String = findKey(record, PROJECT_ID_KEYS)
-                        ?: // No valid project id key found in the record
-                        return false
-                return projects!!.contains((record.key() as GenericRecord)[pidKey].toString())
-            } else true
+    fun getKeys(record: ConsumerRecord<*, *>?): ObservationKey? {
+        return getObservationKey(record) ?: throw IllegalArgumentException("No key found in record")
+    }
 
-            val subjectEval = if (!subjects.isNullOrEmpty()) {
-                val uidKey: String = findKey(record, USER_ID_KEYS)
-                        ?: // No valid user id key found in the record
-                        return false
-                return subjects!!.contains((record.key() as GenericRecord)[uidKey].toString())
-            } else true
+    fun getTime(record: ConsumerRecord<*, *>?): Long {
+        return record?.value()?.let { v ->
+            val value = v as GenericRecord
+            val key = timeField
+                    ?: TIME_VALUE_KEYS.find { k -> value.hasField(k) }
+                    ?: throw IllegalArgumentException("No time found in key")
+            value[key].toString().toDouble().toLong()
+        } ?: throw IllegalArgumentException("Time could  not be parsed from record")
+    }
 
-            return projectEval && subjectEval
-        } ?: false // No valid key found in the record
+    private fun getObservationKey(record: ConsumerRecord<*, *>?): ObservationKey? {
+        return record?.key()?.let { k ->
+            val key = k as GenericRecord
+
+            val pidKey: String = projectIdField
+                    ?: findKey(record, PROJECT_ID_KEYS)
+                    ?: throw IllegalArgumentException("No project id found in key")
+
+            val uidKey: String = subjectIdField
+                    ?: findKey(record, USER_ID_KEYS)
+                    ?: throw IllegalArgumentException("No user id found in key")
+
+            val sidKey: String? = sourceIdField ?: findKey(record, SOURCE_ID_KEYS)
+
+            val project = key[pidKey].toString()
+            val user = key[uidKey].toString()
+            val source = if (sidKey != null) key[sidKey].toString() else null
+            ObservationKey(project, user, source)
+        }
     }
 
     companion object {
@@ -54,35 +80,6 @@ interface Grouping {
                 val key = it as GenericRecord
                 keys.find { k -> key.hasField(k) }
             }
-        }
-
-        fun getKeys(record: ConsumerRecord<*, *>?): ObservationKey? {
-            return record?.key()?.let { k ->
-                val key = k as GenericRecord
-
-                val pidKey: String = findKey(record, PROJECT_ID_KEYS)
-                        ?: throw IllegalArgumentException("No project id found in key")
-
-                val uidKey: String = findKey(record, USER_ID_KEYS)
-                        ?: throw IllegalArgumentException("No user id found in key")
-
-                val sidKey: String? = findKey(record, SOURCE_ID_KEYS)
-
-                val project = key[pidKey].toString()
-                val user = key[uidKey].toString()
-                val source = if (sidKey != null) key[sidKey].toString() else null
-
-                ObservationKey(project, user, source)
-            }
-        }
-
-        fun getTime(record: ConsumerRecord<*, *>?): Long {
-            return record?.value()?.let { v ->
-                val value = v as GenericRecord
-                val key = TIME_VALUE_KEYS.find { k -> value.hasField(k) }
-                        ?: throw IllegalArgumentException("No time found in key")
-                value[key].toString().toDouble().toLong()
-            } ?: throw IllegalArgumentException("Time could  not be parsed from record")
         }
     }
 }
