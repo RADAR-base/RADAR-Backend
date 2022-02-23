@@ -57,7 +57,9 @@ class AppServerIntervention(
         ) ?: throw NoSuchElementException("No protocol found for $intervention")
 
         val userDetails = getUserDetails(intervention)
-        val questionnaire = adjustTimestamp(protocol.questionnaire, userDetails)
+        val questionnaire = protocol.questionnaire.copy(
+            protocol = protocol.questionnaire.protocol.adjustTimestamp(userDetails),
+        )
         val dataMap =  mapOf(
             "action" to protocol.action,
             "metadata" to mapWriter.writeValueAsString(protocol.metadata),
@@ -143,26 +145,24 @@ class AppServerIntervention(
         )
     }
 
-    private fun adjustTimestamp(protocol: SingleProtocol, userDetails: UserDetailCache): SingleProtocol {
+    private fun SingleProtocolSchedule.adjustTimestamp(
+        userDetails: UserDetailCache,
+    ): SingleProtocolSchedule {
         val zoneId = userDetails.zoneId ?: ZoneOffset.UTC
         val now = ZonedDateTime.now(zoneId)
         val lastMidnight = now.toLocalDate().atStartOfDay(zoneId)
 
         val minutesSinceMidnight = Duration.between(lastMidnight, now).toMinutes()
-        val existingStartTime = protocol.protocol.repeatQuestionnaire
-        val repeatQuestionnaire = when {
-            existingStartTime == null -> RepeatQuestionnaire(listOf(minutesSinceMidnight))
-            existingStartTime.unit == "min" -> existingStartTime.copy(
-                unitsFromZero = existingStartTime.unitsFromZero.map { it + minutesSinceMidnight }
-            )
-            else -> existingStartTime
-        }
 
-        return protocol.copy(
-            protocol = protocol.protocol.copy(
-                repeatQuestionnaire = repeatQuestionnaire,
-                referenceTimestamp = dateTimeFormatter.format(now),
-            )
+        return copy(
+            repeatQuestionnaire = when {
+                repeatQuestionnaire == null -> RepeatQuestionnaire(listOf(minutesSinceMidnight))
+                repeatQuestionnaire.unit == "min" -> repeatQuestionnaire.copy(
+                    unitsFromZero = repeatQuestionnaire.unitsFromZero.map { it + minutesSinceMidnight }
+                )
+                else -> repeatQuestionnaire
+            },
+            referenceTimestamp = dateTimeFormatter.format(now),
         )
     }
 
