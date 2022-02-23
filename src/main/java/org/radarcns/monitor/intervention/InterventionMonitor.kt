@@ -154,6 +154,8 @@ class InterventionMonitor(
                 queue.remove(intervention.queueKey)
                     ?.cancel(false)
 
+                val interventionState = state[intervention]
+
                 if (!intervention.decision) {
                     return@execute
                 }
@@ -165,11 +167,15 @@ class InterventionMonitor(
                     return@execute
                 }
                 if (intervention.isFinal) {
-                    createAppMessages(intervention, timeBeforeDeadlineTotal)
+                    createAppMessages(intervention, interventionState, timeBeforeDeadlineTotal)
                 } else {
                     queue[intervention.queueKey] = executor.schedule(
                         {
-                            createAppMessages(intervention, interventionDeadlineTotal.pendingDuration())
+                            createAppMessages(
+                                intervention,
+                                interventionState,
+                                interventionDeadlineTotal.pendingDuration()
+                            )
                             queue -= intervention.queueKey
                         },
                         interventionDeadline.pendingDuration().toMillis(),
@@ -232,16 +238,16 @@ class InterventionMonitor(
 
     private fun createAppMessages(
         intervention: InterventionRecord,
+        interventionState: InterventionMonitorState.InterventionCount,
         ttl: Duration
     ) {
-        val userInterventions = state[intervention]
-        if (!userInterventions.interventions.add(intervention.time)) {
+        if (!interventionState.interventions.add(intervention.time)) {
             logger.info("Already sent intervention for time point {}. Skipping.", intervention.time)
             return
         }
-        if (userInterventions.interventions.size > config.maxInterventions) {
+        if (interventionState.interventions.size > config.maxInterventions) {
             logger.info("For user {}, number of interventions {} would exceed maximum {}. Skipping.",
-                intervention.userId, userInterventions.interventions.size, config.maxInterventions)
+                intervention.userId, interventionState.interventions.size, config.maxInterventions)
             return
         } else {
             logger.info("Creating app notification for intervention {}", intervention.userId, intervention)

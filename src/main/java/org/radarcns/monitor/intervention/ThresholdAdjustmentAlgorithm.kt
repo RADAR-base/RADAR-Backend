@@ -66,9 +66,9 @@ class ThresholdAdjustmentAlgorithm(
         numberOfInterventions: Int
     ): Float {
         return if (numberOfInterventions > config.optimalInterventions) {
-            currentValue - config.adjustValue
-        } else if (numberOfInterventions < config.optimalInterventions) {
             currentValue + config.adjustValue
+        } else if (numberOfInterventions < config.optimalInterventions) {
+            currentValue - config.adjustValue
         } else {
             currentValue
         }

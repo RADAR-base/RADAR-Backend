@@ -18,6 +18,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class AppServerIntervention(
     private val protocolDirectory: ProtocolDirectory,
@@ -34,6 +35,7 @@ class AppServerIntervention(
     private val dataWriter = mapper.writerFor(AppServerDataMessage::class.java)
     private val mapWriter = mapper.writerFor(object : TypeReference<Map<String, String>>() {})
     private val userDetailCache: MutableMap<String, UserDetailCache> = mutableMapOf()
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("DD-MM-YYYY:hh:mm")
 
     init {
         appserverClient = AppserverClient {
@@ -159,7 +161,7 @@ class AppServerIntervention(
         return protocol.copy(
             protocol = protocol.protocol.copy(
                 repeatQuestionnaire = repeatQuestionnaire,
-                referenceTimestamp = now.toInstant().toString(),
+                referenceTimestamp = dateTimeFormatter.format(now),
             )
         )
     }
