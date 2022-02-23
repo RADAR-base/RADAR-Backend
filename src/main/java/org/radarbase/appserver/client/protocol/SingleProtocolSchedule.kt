@@ -1,6 +1,9 @@
 package org.radarbase.appserver.client.protocol
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 data class SingleProtocolSchedule(
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     val clinicalProtocol: ClinicalProtocol? = null,
     val completionWindow: ProtocolDuration = ProtocolDuration(
         amount = 15,
