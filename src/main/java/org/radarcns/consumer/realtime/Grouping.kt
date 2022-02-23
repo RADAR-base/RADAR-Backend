@@ -20,14 +20,17 @@ interface Grouping {
     @Throws(IOException::class)
     fun evaluateProject(record: ConsumerRecord<*, *>?): Boolean {
         return try {
-            return getObservationKey(record) != null
+            val key = getObservationKey(record)
+            return key != null
+                    && projects?.contains(key.projectId) ?: true
+                    && subjects?.contains(key.userId) ?: true
         } catch (ex: IllegalArgumentException) {
             false
         }
     }
 
     fun getKeys(record: ConsumerRecord<*, *>?): ObservationKey? {
-        return getObservationKey(record) ?: throw IllegalArgumentException("No key found in record")
+        return getObservationKey(record)
     }
 
     fun getTime(record: ConsumerRecord<*, *>?): Long {
