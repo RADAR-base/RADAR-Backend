@@ -35,7 +35,7 @@ class AppServerIntervention(
     private val dataWriter = mapper.writerFor(AppServerDataMessage::class.java)
     private val mapWriter = mapper.writerFor(object : TypeReference<Map<String, String>>() {})
     private val userDetailCache: MutableMap<String, UserDetailCache> = mutableMapOf()
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("DD-MM-YYYY:hh:mm")
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-YYYY:HH:mm")
 
     init {
         appserverClient = AppserverClient {
