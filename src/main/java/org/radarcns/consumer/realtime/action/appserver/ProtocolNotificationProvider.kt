@@ -31,7 +31,7 @@ class ProtocolNotificationProvider(
         val referenceTimestamp: Instant = scheduledTime,
         val userTimezone: String = "UTC",
         val repeatQuestionnaireMinutes: Array<Long> =
-                arrayOf(getTimeSinceMidnight(referenceTimestamp, userTimezone)),
+                arrayOf(referenceTimestamp.timeSinceMidnight(userTimezone)),
 ) : NotificationContentProvider {
 
     override val notificationMessage: String
@@ -59,23 +59,23 @@ class ProtocolNotificationProvider(
                 protocol = SingleProtocolSchedule(
                         completionWindow = ProtocolDuration(
                                 amount = completionWindowMinutes,
-                                unit = "minutes",
+                                unit = "min",
 
                                 ),
                         repeatProtocol = ProtocolDuration(
                                 amount = repeatProtocolMinutes,
-                                unit = "minutes",
+                                unit = "min",
 
                                 ),
                         repeatQuestionnaire = RepeatQuestionnaire(
                                 unitsFromZero = repeatQuestionnaireMinutes.map { it.toInt() }.toList(),
-                                unit = "minutes"
+                                unit = "min"
                         ),
+                        referenceTimestamp = referenceTimestamp
+                                .atZone(ZoneId.of(userTimezone))
+                                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy:HH:mm")),
+                        //.format(DateTimeFormatter.ISO_ZONED_DATE_TIME),
                 ),
-                referenceTimestamp = referenceTimestamp
-                        .atZone(ZoneId.of(userTimezone))
-                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy:HH:mm")),
-                //.format(DateTimeFormatter.ISO_ZONED_DATE_TIME),
         )
 
         val trigger = QuestionnaireTrigger(
@@ -130,10 +130,10 @@ class ProtocolNotificationProvider(
         private val logger = LoggerFactory.getLogger(ProtocolNotificationProvider::class.java)
         private const val REPO = "https://raw.githubusercontent.com/RADAR-base/RADAR-REDCap-aRMT-Definitions/master/questionnaires"
 
-        fun getTimeSinceMidnight(time: Instant, timezone: String): Long {
-            val zoned = time.atZone(ZoneId.of(timezone))
+        fun Instant.timeSinceMidnight(timezone: String = "UTC"): Long {
+            val zoned = atZone(ZoneId.of(timezone))
             val midnight = zoned.toLocalDate().atStartOfDay(zoned.zone).toInstant()
-            val duration = Duration.between(midnight, time)
+            val duration = Duration.between(midnight, this)
             return duration.toMinutes()
         }
     }
