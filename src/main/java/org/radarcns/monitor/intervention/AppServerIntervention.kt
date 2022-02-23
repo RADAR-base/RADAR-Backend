@@ -58,7 +58,7 @@ class AppServerIntervention(
 
         val userDetails = getUserDetails(intervention)
         val questionnaire = protocol.questionnaire.copy(
-            protocol = protocol.questionnaire.protocol.adjustTimestamp(userDetails),
+            protocol = protocol.questionnaire.protocol.adjustTimestamp(userDetails.zoneId ?: ZoneOffset.UTC),
         )
         val dataMap =  mapOf(
             "action" to protocol.action,
@@ -146,9 +146,8 @@ class AppServerIntervention(
     }
 
     private fun SingleProtocolSchedule.adjustTimestamp(
-        userDetails: UserDetailCache,
+        zoneId: ZoneId,
     ): SingleProtocolSchedule {
-        val zoneId = userDetails.zoneId ?: ZoneOffset.UTC
         val now = ZonedDateTime.now(zoneId)
         val lastMidnight = now.toLocalDate().atStartOfDay(zoneId)
 
