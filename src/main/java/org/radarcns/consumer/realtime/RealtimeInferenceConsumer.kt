@@ -22,6 +22,7 @@ import org.radarcns.consumer.realtime.action.ActionFactory.getActionFor
 import org.radarcns.consumer.realtime.condition.Condition
 import org.radarcns.consumer.realtime.condition.ConditionFactory.getConditionFor
 import org.radarcns.monitor.KafkaMonitor
+import org.radarcns.util.EmailSender
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Duration
@@ -66,11 +67,16 @@ class RealtimeInferenceConsumer(
     private var done: Boolean = false
     private var pollTimeout: Duration = Duration.ofDays(365)
     private var consumer: Consumer<GenericRecord, GenericRecord>? = null
+    private val notifyErrorEmailSender: EmailSender?
 
     init {
         require(topic.isNotBlank()) { "Cannot start consumer without topic." }
         require(!(conditions.isEmpty() || actions.isEmpty())) {
             "At least one each of condition and action is necessary to run the consumer."
+        }
+
+        notifyErrorEmailSender = consumerConfig.notifyErrorsEmails?.emailAddresses?.let {
+            EmailSender(radar.emailServerConfig, radar.emailServerConfig.user, it)
         }
     }
 
@@ -93,15 +99,20 @@ class RealtimeInferenceConsumer(
                     }
                 } catch (ex: SerializationException) {
                     logger.warn("Failed to deserialize the record: {}", ex.message)
+                    notifyErrorEmailSender?.notifyErrors(null, ex)
                 } catch (ex: WakeupException) {
                     logger.info("Consumer woke up")
+                    notifyErrorEmailSender?.notifyErrors(null, ex)
                 } catch (ex: InterruptException) {
                     logger.info("Consumer was interrupted")
+                    notifyErrorEmailSender?.notifyErrors(null, ex)
                     shutdown()
                 } catch (ex: KafkaException) {
                     logger.error("Kafka consumer gave exception", ex)
+                    notifyErrorEmailSender?.notifyErrors(null, ex)
                 } catch (ex: Exception) {
                     logger.error("Consumer gave exception", ex)
+                    notifyErrorEmailSender?.notifyErrors(null, ex)
                 }
             }
         } finally {
@@ -118,12 +129,14 @@ class RealtimeInferenceConsumer(
                         "I/O Error evaluating one of the conditions: {}. Will not continue.",
                         c.name,
                         exc)
+                notifyErrorEmailSender?.notifyErrors(record, exc, condition = c)
                 false
             } catch (exc: Exception) {
                 logger.warn(
                         "Error evaluating one of the conditions: {}. Will not continue.",
                         c.name,
                         exc)
+                notifyErrorEmailSender?.notifyErrors(record, exc, condition = c)
                 false
             }
         }
@@ -135,13 +148,16 @@ class RealtimeInferenceConsumer(
                 a.run(record)
             } catch (ex: IllegalArgumentException) {
                 logger.warn("Argument was not valid. Error executing action", ex)
+                notifyErrorEmailSender?.notifyErrors(record, ex, a)
                 false
             } catch (ex: IOException) {
                 logger.warn("I/O Error executing action", ex)
+                notifyErrorEmailSender?.notifyErrors(record, ex, action = a)
                 false
             } catch (ex: Exception) {
                 // Catch all exceptions so that we can continue to execute the other actions
                 logger.warn("Error executing action", ex)
+                notifyErrorEmailSender?.notifyErrors(record, ex, action = a)
                 false
             }
         }
@@ -168,5 +184,26 @@ class RealtimeInferenceConsumer(
 
     companion object {
         private val logger = LoggerFactory.getLogger(RealtimeInferenceConsumer::class.java)
+
+        private fun EmailSender.notifyErrors(
+                record: ConsumerRecord<GenericRecord, GenericRecord>?,
+                throwable: Throwable,
+                action: Action? = null,
+                condition: Condition? = null,
+        ) {
+            val prefix = when {
+                action != null -> "Action ${action.name} failed"
+                condition != null -> "Condition ${condition.name} failed"
+                else -> "Unknown error"
+            }
+
+            val customSubject = "$prefix for ${record?.key()?.toString() ?: "Realtime Inference"}"
+
+            val customBody = "$prefix for ${record?.key()?.toString()}:\n" +
+                    "Error: ${throwable.message}\n\n" +
+                    "Stacktrace: \n${throwable.stackTrace.joinToString("\n\t")}"
+
+            sendEmail(customSubject, customBody)
+        }
     }
 }
