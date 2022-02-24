@@ -70,10 +70,14 @@ rest_proxy:
     protocol: http
 
 email_server:
-    host: localhost
-    port: 25
-    user: no-reply@radarcns.org
+  host: localhost
+  port: 25
+  user: no-reply@radarcns.org
 
+auth:
+  token_url: http://localhost:8080/managementportal/oauth/token
+  client_id: radar-backend
+  client_secret: secret
 
 #======================== Battery level monitor ========================#
 battery_monitor:
@@ -110,11 +114,8 @@ intervention_monitor:
   app_server_url: http://localhost:8080/appserver/api
   app_config_client: dynamint_ksql
   app_config_url: http://localhost:8090/appconfig/api
-  auth:
-    token_url: http://localhost:8090/managementportal/oauth/token
-    clientId: radar_backend_client
-    clientSecret: secret
-  topic: interventions
+  topics:
+    - interventions
   notify:
     - project_id: p1
       email_address:

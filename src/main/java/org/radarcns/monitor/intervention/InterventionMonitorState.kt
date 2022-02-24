@@ -12,8 +12,8 @@ data class InterventionMonitorState(
     val counts: MutableMap<String, InterventionCount> = HashMap(),
     val exceptions: MutableMap<String, ProjectExceptions> = HashMap()
 ) {
-    fun reset(midnight: Instant) {
-        this.fromDate = midnight
+    fun reset(fromDate: Instant) {
+        this.fromDate = fromDate
         counts.clear()
         exceptions.clear()
     }

@@ -72,7 +72,7 @@ class InterventionMonitor(
             defaultLanguage = config.defaultLanguage,
             cacheDuration = config.cacheDuration,
             appserverUrl = config.appServerUrl,
-            authConfig = config.authConfig,
+            authConfig = radar.radarProperties.auth,
             httpClient = httpClient,
             mapper = mapper,
         )
@@ -82,7 +82,7 @@ class InterventionMonitor(
             state = state,
             config = config.thresholdAdaptation,
             appConfigUrl = config.appConfigUrl,
-            authConfig = config.authConfig,
+            authConfig = radar.radarProperties.auth,
             httpClient = httpClient,
             mapper = mapper,
         )
@@ -102,32 +102,34 @@ class InterventionMonitor(
     }
 
     override fun start() {
+        val resetInterval = config.stateResetInterval
         executor.execute {
-            if (state.fromDate.passedDuration() > config.stateResetInterval) {
-                emailer?.emailExceptions()
+            if (state.fromDate.passedDuration() > resetInterval) {
+                emailer?.emailExceptions(state.fromDate + resetInterval)
                 val lastMidnight = lastMidnight()
-                val numberOfIterations = lastMidnight.passedDuration().dividedBy(config.stateResetInterval)
-                state.reset(lastMidnight + config.stateResetInterval.multipliedBy(numberOfIterations))
+                val numberOfIterations = lastMidnight.passedDuration().dividedBy(resetInterval)
+                state.reset(lastMidnight + resetInterval.multipliedBy(numberOfIterations))
                 storeState()
             }
 
             // At the next interval, update the threshold levels
-            val remainingInterval = (state.fromDate + config.stateResetInterval).pendingDuration()
+            val remainingInterval = (state.fromDate + resetInterval).pendingDuration()
             executor.scheduleAtFixedRate(
                 {
                     logger.info("Updating intervention state")
+                    val nextInterval = state.fromDate + resetInterval
                     try {
                         thresholdAdjust.updateThresholds()
-                        emailer?.emailExceptions()
+                        emailer?.emailExceptions(nextInterval)
                         resetQueue()
-                        state.reset(state.fromDate + config.stateResetInterval)
+                        state.reset(nextInterval)
                         storeState()
                     } catch (ex: Throwable) {
                         logger.error("Failed to update thresholds", ex)
                     }
                 },
                 remainingInterval.toMillis(),
-                config.stateResetInterval.toMillis(),
+                resetInterval.toMillis(),
                 TimeUnit.MILLISECONDS,
             )
         }

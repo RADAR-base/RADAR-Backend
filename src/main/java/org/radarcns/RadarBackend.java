@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
 import org.apache.commons.cli.ParseException;
+import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
@@ -49,9 +50,9 @@ public final class RadarBackend {
             @Nonnull RadarPropertyHandler properties) {
         this.options = options;
         this.radarPropertyHandler = properties;
-
-        log.info("Configuration successfully updated");
-        log.info("radar.yml configuration: {}", radarPropertyHandler.getRadarProperties());
+        ConfigRadar config = this.radarPropertyHandler.getRadarProperties();
+        config.withEnv();
+        log.info("radar.yml configuration: {}", config);
     }
 
     private static RadarPropertyHandler createPropertyHandler(@Nonnull RadarBackendOptions options)
@@ -66,23 +67,19 @@ public final class RadarBackend {
         if (subCommand == null) {
             subCommand = "stream";
         }
-        switch (subCommand) {
-            case "stream":
-                return new KafkaStreamFactory(options, radarPropertyHandler)
-                        .createSensorStreams();
-            case "statistics":
-                return new KafkaStreamFactory(options, radarPropertyHandler)
-                        .createStreamStatistics();
-            case "monitor":
-                return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
-            case "mock":
-                return new MockProducerCommand(options, radarPropertyHandler);
-            case "realtime_consumers":
-                return RealtimeInferenceConsumerFactory.createConsumersFor(radarPropertyHandler);
-            default:
-                throw new IllegalArgumentException("Unknown subcommand "
-                        + options.getSubCommand());
-        }
+        return switch (subCommand) {
+            case "stream" -> new KafkaStreamFactory(options, radarPropertyHandler)
+                    .createSensorStreams();
+            case "statistics" -> new KafkaStreamFactory(options, radarPropertyHandler)
+                    .createStreamStatistics();
+            case "monitor" -> new KafkaMonitorFactory(options,
+                    radarPropertyHandler).createMonitor();
+            case "mock" -> new MockProducerCommand(options, radarPropertyHandler);
+            case "realtime_consumers" -> RealtimeInferenceConsumerFactory.createConsumersFor(
+                    radarPropertyHandler);
+            default -> throw new IllegalArgumentException("Unknown subcommand "
+                    + options.getSubCommand());
+        };
     }
 
     /**

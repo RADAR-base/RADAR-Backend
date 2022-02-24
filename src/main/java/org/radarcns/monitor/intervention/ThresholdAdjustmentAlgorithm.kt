@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.OkHttpClient
 import org.radarbase.appconfig.client.AppConfigClient
-import org.radarcns.config.monitor.AuthConfig
+import org.radarbase.mock.config.AuthConfig
 import org.radarcns.config.monitor.ThresholdAdaptationConfig
 import org.slf4j.LoggerFactory
 

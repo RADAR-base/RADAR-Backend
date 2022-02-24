@@ -60,23 +60,16 @@ public class KafkaMonitorFactory {
             commandType = args.get(0);
         }
 
-        switch (commandType) {
-            case "battery":
-                monitor = createBatteryLevelMonitor();
-                break;
-            case "disconnect":
-                monitor = createDisconnectMonitor();
-                break;
-            case "intervention":
-                monitor = createInterventionMonitor();
-                break;
-            case "all":
-                monitor = new CombinedKafkaMonitor(
-                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(), createInterventionMonitor()));
-                break;
-            default:
-                throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
-        }
+        monitor = switch (commandType) {
+            case "battery" -> createBatteryLevelMonitor();
+            case "disconnect" -> createDisconnectMonitor();
+            case "intervention" -> createInterventionMonitor();
+            case "all" -> new CombinedKafkaMonitor(
+                    Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(),
+                            createInterventionMonitor()));
+            default -> throw new IllegalArgumentException(
+                    "Cannot create unknown monitor " + commandType);
+        };
         if (monitor == null) {
             throw new IllegalArgumentException("Monitor " + commandType + " is not configured.");
         }
@@ -91,7 +84,7 @@ public class KafkaMonitorFactory {
         }
 
         EmailSenders senders = createSenders(config.getEmailNotifyConfig());
-        return new InterventionMonitor(config.withEnv(), properties, senders);
+        return new InterventionMonitor(config, properties, senders);
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {

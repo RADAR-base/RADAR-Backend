@@ -10,9 +10,6 @@ data class InterventionMonitorConfig(
     val ksqlAppConfigClient: String,
     @JsonProperty("app_config_url")
     val appConfigUrl: String,
-    @JsonProperty("auth")
-    val authConfig: AuthConfig,
-
     @JsonProperty("notify")
     val emailNotifyConfig: List<EmailNotifyConfig> = listOf(),
 
@@ -37,6 +34,4 @@ data class InterventionMonitorConfig(
     val protocolDirectory: String,
     val defaultLanguage: String = "en",
     val cacheDuration: Duration = Duration.ofHours(1),
-) {
-    fun withEnv(): InterventionMonitorConfig = copy(authConfig = authConfig.withEnv())
-}
+)

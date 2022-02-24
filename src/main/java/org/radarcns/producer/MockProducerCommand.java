@@ -19,6 +19,7 @@ package org.radarcns.producer;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.apache.avro.SchemaValidationException;
+import org.radarbase.mock.config.AuthConfig;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.MockConfig;
 import org.radarcns.config.RadarBackendOptions;
@@ -48,6 +49,7 @@ public class MockProducerCommand implements SubCommand {
         } else {
             producerConfig.setNumberOfDevices(options.getNumMockDevices());
         }
+        producerConfig.setAuthConfig(radar.getAuth());
         producerConfig.setRestProxy(radar.getRestProxy());
         producerConfig.setSchemaRegistry(radar.getSchemaRegistry().get(0));
         producerConfig.setProducerMode(options.isMockDirect() ? "direct" : "rest");

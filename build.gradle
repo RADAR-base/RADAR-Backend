@@ -56,6 +56,11 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'hours'
+    resolutionStrategy.cacheChangingModulesFor 0, 'hours'
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
     implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion

@@ -18,15 +18,14 @@ package org.radarcns.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.kotlin.KotlinFeature;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.radarbase.config.ServerConfig;
 import org.radarbase.config.YamlConfigLoader;
+import org.radarbase.mock.config.AuthConfig;
 import org.radarcns.config.monitor.BatteryMonitorConfig;
 import org.radarcns.config.monitor.DisconnectMonitorConfig;
 import org.radarcns.config.monitor.InterventionMonitorConfig;
@@ -36,6 +35,8 @@ import org.radarcns.config.realtime.RealtimeConsumerConfig;
  * POJO representing the yml file
  */
 public class ConfigRadar {
+    private static final Pattern SECRET_PATTERN = Pattern.compile("^(\s*client_secret): \".*$");
+
     private Date released;
     private String version;
     private List<ServerConfig> broker;
@@ -58,6 +59,8 @@ public class ConfigRadar {
     @JsonProperty("persistence_path")
     private String persistencePath;
     private Map<String, Object> extras;
+
+    private AuthConfig auth;
 
     @JsonProperty("build_version")
     private String buildVersion;
@@ -167,10 +170,24 @@ public class ConfigRadar {
         this.loader = loader;
     }
 
+    public AuthConfig getAuth() {
+        return auth;
+    }
+
+    public void setAuth(AuthConfig auth) {
+        this.auth = auth;
+    }
+
+    public void withEnv() {
+        this.auth.withEnv("AUTH");
+    }
+
     @Override
     public String toString() {
         if (loader != null) {
-            return loader.prettyString(this);
+            return loader.prettyString(this).lines()
+                    .map(s -> SECRET_PATTERN.matcher(s).replaceAll("$1: \"******\""))
+                    .collect(Collectors.joining("\n"));
         } else {
             return "ConfigRadar(...)";
         }

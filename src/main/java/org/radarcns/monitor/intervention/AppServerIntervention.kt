@@ -8,9 +8,9 @@ import org.radarbase.appserver.client.AppServerNotification
 import org.radarbase.appserver.client.AppserverClient
 import org.radarbase.appserver.client.MessagingType
 import org.radarbase.appserver.client.protocol.*
-import org.radarcns.config.monitor.AuthConfig
 import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNotificationText
 import org.radarbase.appserver.client.protocol.Notification.Companion.defaultNotificationTitle
+import org.radarbase.mock.config.AuthConfig
 import org.radarcns.monitor.intervention.InterventionMonitor.Companion.passedDuration
 import org.slf4j.LoggerFactory
 import java.time.Duration
