@@ -16,7 +16,6 @@ import org.radarcns.config.ConfigRadar
 import org.radarcns.config.realtime.ActionConfig
 import org.radarcns.config.realtime.ConditionConfig
 import org.radarcns.config.realtime.RealtimeConsumerConfig
-import org.radarcns.consumer.realtime.RealtimeInferenceConsumer
 import org.radarcns.consumer.realtime.action.Action
 import org.radarcns.consumer.realtime.action.ActionFactory.getActionFor
 import org.radarcns.consumer.realtime.condition.Condition
@@ -75,7 +74,7 @@ class RealtimeInferenceConsumer(
             "At least one each of condition and action is necessary to run the consumer."
         }
 
-        notifyErrorEmailSender = consumerConfig.notifyErrorsEmails?.emailAddresses?.let {
+        notifyErrorEmailSender = consumerConfig.notifyErrors?.emailAddresses?.let {
             EmailSender(radar.emailServerConfig, radar.emailServerConfig.user, it)
         }
     }

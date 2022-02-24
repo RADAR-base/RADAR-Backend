@@ -7,6 +7,7 @@ data class SingleProtocol(
     val protocol: SingleProtocolSchedule,
     val showInCalendar: Boolean = true,
     val showIntroduction: Boolean = false,
+    val type: String = "scheduled",
     val estimatedCompletionTime: Int = 1,
     val order: Int = 0,
     val isDemo: Boolean = false,

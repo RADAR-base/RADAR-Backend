@@ -6,7 +6,7 @@ data class RealtimeConsumerConfig(
         val name: String,
         val topic: String,
         @JsonProperty("notify_errors")
-        val notifyErrorsEmails: NotifyErrorConfig? = null,
+        val notifyErrors: NotifyErrorConfig? = null,
         @JsonProperty("conditions")
         val conditionConfigs: List<ConditionConfig>,
         @JsonProperty("actions")

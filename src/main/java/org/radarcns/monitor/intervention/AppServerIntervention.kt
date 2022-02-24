@@ -68,8 +68,8 @@ class AppServerIntervention(
 
         val language = try {
             (appserverClient
-                    .getUserDetails(intervention.projectId, intervention.userId)["language"]
-                    ?: defaultLanguage) as String
+                    .getUserDetails(intervention.projectId, intervention.userId)["language"] as String?)
+                    ?: defaultLanguage
 
         } catch (e: Exception) {
             logger.warn("Failed to get user language for ${intervention.userId}. Using default", e)
