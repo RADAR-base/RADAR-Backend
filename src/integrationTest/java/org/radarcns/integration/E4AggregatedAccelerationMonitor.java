@@ -52,7 +52,7 @@ public class E4AggregatedAccelerationMonitor
     }
 
     @Override
-    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> records) {
+    protected void evaluateRecord(ConsumerRecord<GenericRecord, GenericRecord> record) {
         // noop
     }
 

@@ -7,8 +7,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.radarcns.config.RadarPropertyHandler.Priority;
+
 import org.radarbase.stream.TimeWindowMetadata;
+import org.radarcns.config.RadarPropertyHandler.Priority;
 
 public class SingleStreamConfig {
     @JsonProperty("class")

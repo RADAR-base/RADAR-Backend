@@ -22,11 +22,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
-import org.radarcns.config.BatteryMonitorConfig;
-import org.radarcns.config.DisconnectMonitorConfig;
-import org.radarcns.config.MonitorConfig;
+import org.radarcns.config.EmailServerConfig;
+import org.radarcns.config.monitor.BatteryMonitorConfig;
+import org.radarcns.config.monitor.DisconnectMonitorConfig;
+import org.radarcns.config.monitor.EmailNotifyConfig;
+import org.radarcns.config.monitor.InterventionMonitorConfig;
+import org.radarcns.config.monitor.MonitorConfig;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
+import org.radarcns.monitor.intervention.InterventionMonitor;
 import org.radarcns.util.EmailSenders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +41,13 @@ public class KafkaMonitorFactory {
 
     private final RadarPropertyHandler properties;
     private final RadarBackendOptions options;
+    private final EmailServerConfig emailServer;
 
     public KafkaMonitorFactory(RadarBackendOptions options,
             RadarPropertyHandler properties) {
         this.options = options;
         this.properties = properties;
+        this.emailServer = properties.getRadarProperties().getEmailServerConfig();
     }
 
     public KafkaMonitor createMonitor() throws IOException {
@@ -61,9 +67,12 @@ public class KafkaMonitorFactory {
             case "disconnect":
                 monitor = createDisconnectMonitor();
                 break;
+            case "intervention":
+                monitor = createInterventionMonitor();
+                break;
             case "all":
                 monitor = new CombinedKafkaMonitor(
-                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor()));
+                        Stream.of(createDisconnectMonitor(), createBatteryLevelMonitor(), createInterventionMonitor()));
                 break;
             default:
                 throw new IllegalArgumentException("Cannot create unknown monitor " + commandType);
@@ -72,6 +81,17 @@ public class KafkaMonitorFactory {
             throw new IllegalArgumentException("Monitor " + commandType + " is not configured.");
         }
         return monitor;
+    }
+
+    private KafkaMonitor createInterventionMonitor() throws IOException {
+        InterventionMonitorConfig config = properties.getRadarProperties().getInterventionMonitor();
+        if (config == null) {
+            logger.warn("Notification monitor is not configured. Cannot start it.");
+            return null;
+        }
+
+        EmailSenders senders = createSenders(config.getEmailNotifyConfig());
+        return new InterventionMonitor(config.withEnv(), properties, senders);
     }
 
     private KafkaMonitor createBatteryLevelMonitor() throws IOException {
@@ -83,7 +103,7 @@ public class KafkaMonitorFactory {
         }
 
         BatteryLevelMonitor.Status minLevel = BatteryLevelMonitor.Status.CRITICAL;
-        EmailSenders senders = getSenders(config);
+        EmailSenders senders = createSenders(config.getEmailNotifyConfig());
         Collection<String> topics = getTopics(config, "android_empatica_e4_battery_level");
 
         if (config.getLevel() != null) {
@@ -108,15 +128,18 @@ public class KafkaMonitorFactory {
             logger.warn("Disconnect monitor is not configured. Cannot start it.");
             return null;
         }
-        EmailSenders senders = getSenders(config);
+        EmailSenders senders = createSenders(config.getEmailNotifyConfig());
         Collection<String> topics = getTopics(config, "android_empatica_e4_temperature");
         return new DisconnectMonitor(properties, topics, "disconnect_monitor", senders);
     }
 
 
-    private EmailSenders getSenders(MonitorConfig config) throws IOException {
-        if (config != null && config.getNotifyConfig() != null) {
-            return EmailSenders.parseConfig(config);
+    private EmailSenders createSenders(List<EmailNotifyConfig> notifyConfig) throws IOException {
+        if (emailServer != null && notifyConfig != null) {
+            return EmailSenders.parseConfig(emailServer, notifyConfig);
+        } else {
+            logger.warn("Monitor does not have email configured. "
+                    + "Will not send email notifications.");
         }
         return null;
     }

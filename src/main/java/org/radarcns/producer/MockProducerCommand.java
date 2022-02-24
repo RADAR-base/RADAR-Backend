@@ -43,7 +43,7 @@ public class MockProducerCommand implements SubCommand {
         Path mockFile = options.getMockFile();
 
         if (mockFile != null) {
-            MockConfig mockConfig = new YamlConfigLoader().load(mockFile, MockConfig.class);
+            MockConfig mockConfig = radarPropertyHandler.getLoader().load(mockFile, MockConfig.class);
             producerConfig.setData(mockConfig.getData());
         } else {
             producerConfig.setNumberOfDevices(options.getNumMockDevices());

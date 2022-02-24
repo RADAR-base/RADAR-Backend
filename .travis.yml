@@ -35,8 +35,6 @@ script:
   - sudo docker-compose up -d zookeeper-1 kafka-1 schema-registry-1 && sleep 30 && sudo docker-compose run --rm integration-test
   - sudo docker-compose down
   - cd ../../..
-after_script:
-  - ./gradlew sendCoverageToCodacy
 
 deploy:
   provider: releases
@@ -49,6 +47,3 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-
-after_deploy:
-  - ./gradlew bintrayUpload

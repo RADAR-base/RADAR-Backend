@@ -16,13 +16,20 @@
 
 package org.radarcns.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.radarbase.config.ServerConfig;
 import org.radarbase.config.YamlConfigLoader;
+import org.radarcns.config.monitor.BatteryMonitorConfig;
+import org.radarcns.config.monitor.DisconnectMonitorConfig;
+import org.radarcns.config.monitor.InterventionMonitorConfig;
 import org.radarcns.config.realtime.RealtimeConsumerConfig;
 
 /**
@@ -31,7 +38,6 @@ import org.radarcns.config.realtime.RealtimeConsumerConfig;
 public class ConfigRadar {
     private Date released;
     private String version;
-    private List<ServerConfig> zookeeper;
     private List<ServerConfig> broker;
     @JsonProperty("schema_registry")
     private List<ServerConfig> schemaRegistry;
@@ -43,6 +49,8 @@ public class ConfigRadar {
     private DisconnectMonitorConfig disconnectMonitor;
     @JsonProperty("statistics_monitors")
     private List<SourceStatisticsStreamConfig> statisticsMonitors;
+    @JsonProperty("intervention_monitor")
+    private InterventionMonitorConfig interventionMonitor;
     @JsonProperty("realtime_consumers")
     private List<RealtimeConsumerConfig> consumerConfigs;
     @JsonProperty("stream")
@@ -53,6 +61,12 @@ public class ConfigRadar {
 
     @JsonProperty("build_version")
     private String buildVersion;
+
+    @JsonProperty("email_server")
+    private EmailServerConfig emailServerConfig;
+
+    @JsonIgnore
+    private YamlConfigLoader loader;
 
     public Date getReleased() {
         return released;
@@ -68,14 +82,6 @@ public class ConfigRadar {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public List<ServerConfig> getZookeeper() {
-        return zookeeper;
-    }
-
-    public void setZookeeper(List<ServerConfig> zookeeper) {
-        this.zookeeper = zookeeper;
     }
 
     public List<ServerConfig> getBroker() {
@@ -100,13 +106,6 @@ public class ConfigRadar {
 
     public void setRestProxy(ServerConfig restProxy) {
         this.restProxy = restProxy;
-    }
-
-    public String getZookeeperPaths() {
-        if (zookeeper == null) {
-            throw new IllegalStateException("'zookeeper' is not configured");
-        }
-        return ServerConfig.getPaths(zookeeper);
     }
 
     public String getBrokerPaths() {
@@ -164,9 +163,17 @@ public class ConfigRadar {
         this.extras = extras;
     }
 
+    public void setConfigLoader(YamlConfigLoader loader) {
+        this.loader = loader;
+    }
+
     @Override
     public String toString() {
-        return new YamlConfigLoader().prettyString(this);
+        if (loader != null) {
+            return loader.prettyString(this);
+        } else {
+            return "ConfigRadar(...)";
+        }
     }
 
     public String getBuildVersion() {
@@ -195,5 +202,21 @@ public class ConfigRadar {
 
     public StreamConfig getStream() {
         return stream;
+    }
+
+    public InterventionMonitorConfig getInterventionMonitor() {
+        return interventionMonitor;
+    }
+
+    public void setInterventionMonitor(InterventionMonitorConfig notificationMonitor) {
+        this.interventionMonitor = notificationMonitor;
+    }
+
+    public EmailServerConfig getEmailServerConfig() {
+        return emailServerConfig;
+    }
+
+    public void setEmailServerConfig(EmailServerConfig emailServerConfig) {
+        this.emailServerConfig = emailServerConfig;
     }
 }

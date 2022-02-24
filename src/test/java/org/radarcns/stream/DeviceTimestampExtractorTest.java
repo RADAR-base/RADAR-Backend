@@ -17,16 +17,14 @@
 package org.radarcns.stream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * Created by nivethika on 20-12-16.
@@ -35,9 +33,6 @@ public class DeviceTimestampExtractorTest {
 
     private DeviceTimestampExtractor timestampExtractor;
     private String topic;
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -68,11 +63,7 @@ public class DeviceTimestampExtractorTest {
         record.put("time", "timeValue");
         ConsumerRecord<Object, Object> consumerRecord = new ConsumerRecord<>(topic, 3, 30, null, record);
 
-        exception.expect(RuntimeException.class);
-        exception.expectMessage("Impossible to extract timeReceived from");
-        long extracted = this.timestampExtractor.extract(consumerRecord, -1L);
-        assertNull(extracted);
-
+        assertThrows(RuntimeException.class, () -> this.timestampExtractor.extract(consumerRecord, -1L));
     }
 
     private static GenericRecord buildIndexedRecord(String userSchema) {
