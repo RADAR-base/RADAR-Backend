@@ -1,0 +1,7 @@
+data:
+  - topic: android_imec_chillplus_feature_stats
+    value_schema: org.radarcns.passive.imec.ImecChillPlusFeatureExtraction
+    file: mock/epa.csv
+  - topic: questionnaire_ESM_DynaMINT
+    value_schema: org.radarcns.active.questionnaire.Questionnaire
+    file: mock/ema.csv
