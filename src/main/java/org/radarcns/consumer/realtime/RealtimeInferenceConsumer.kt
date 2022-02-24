@@ -115,6 +115,12 @@ class RealtimeInferenceConsumer(
                 c.evaluate(record)
             } catch (exc: IOException) {
                 logger.warn(
+                        "I/O Error evaluating one of the conditions: {}. Will not continue.",
+                        c.name,
+                        exc)
+                false
+            } catch (exc: Exception) {
+                logger.warn(
                         "Error evaluating one of the conditions: {}. Will not continue.",
                         c.name,
                         exc)
@@ -128,9 +134,13 @@ class RealtimeInferenceConsumer(
             try {
                 a.run(record)
             } catch (ex: IllegalArgumentException) {
-                logger.warn("Error executing action", ex)
+                logger.warn("Argument was not valid. Error executing action", ex)
                 false
             } catch (ex: IOException) {
+                logger.warn("I/O Error executing action", ex)
+                false
+            } catch (ex: Exception) {
+                // Catch all exceptions so that we can continue to execute the other actions
                 logger.warn("Error executing action", ex)
                 false
             }

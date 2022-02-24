@@ -1,6 +1,5 @@
 package org.radarcns.consumer.realtime.action
 
-import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.radarcns.config.EmailServerConfig
 import org.radarcns.config.realtime.ActionConfig
@@ -34,27 +33,26 @@ class EmailUserAction(
     private val customBody: String? = props?.getOrDefault("body", null) as String?
 
     override fun executeFor(record: ConsumerRecord<*, *>?): Boolean {
-        val title: String = if (customTitle.isNullOrEmpty()) buildString {
-            append("Conditions triggered the action ")
-            append(name)
-            append(" for user ")
-            append((record?.key() as GenericRecord)["userId"])
-            append(" from topic ")
-            append(record.topic())
+        val key = getKeys(record)
+
+        val title: String = if (customTitle.isNullOrEmpty()) {
+            "Conditions triggered the action $name for user" +
+                    " ${key?.userId}) from topic ${record?.topic()}"
         } else customTitle
 
         val body: String = if (customBody.isNullOrEmpty()) {
             """
              Record: 
-             ${record?.value()}
+             ${record?.value()?.toString()}
              
              Timestamp: ${Instant.now()}
-             Key: ${record?.key()}
+             Key: ${key.toString()}
             """.trimIndent()
         } else customBody
 
         return try {
             emailSender.sendEmail(title, body)
+            logger.info("Email sent to admin for project ${key?.projectId}, user ${key?.userId}")
             true
         } catch (e: MessagingException) {
             logger.error("Error sending email", e)

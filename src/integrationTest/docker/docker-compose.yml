@@ -114,26 +114,26 @@ services:
       KAFKA_REST_HOST_NAME: rest-proxy-1
       KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 5000
 
-#  #---------------------------------------------------------------------------#
-#  # Integration test                                                          #
-#  #---------------------------------------------------------------------------#
-#  integration-test:
-#    build:
-#      context: ../../..
-#      dockerfile: src/integrationTest/docker/Dockerfile
-#    # Right now, only direct connections to kafka are tested
-#    depends_on:
-#      - kafka-1
-#      - schema-registry-1
-#    networks:
-#      - kafka
-#      - default
-#    command:
-#      - gradle
-#      - integrationTest
-#    volumes:
-#      - ../../../build/jacoco:/code/build/jacoco
-#      - ../../../build/reports:/code/build/reports
+  #  #---------------------------------------------------------------------------#
+  #  # Integration test                                                          #
+  #  #---------------------------------------------------------------------------#
+  #  integration-test:
+  #    build:
+  #      context: ../../..
+  #      dockerfile: src/integrationTest/docker/Dockerfile
+  #    # Right now, only direct connections to kafka are tested
+  #    depends_on:
+  #      - kafka-1
+  #      - schema-registry-1
+  #    networks:
+  #      - kafka
+  #      - default
+  #    command:
+  #      - gradle
+  #      - integrationTest
+  #    volumes:
+  #      - ../../../build/jacoco:/code/build/jacoco
+  #      - ../../../build/reports:/code/build/reports
 
   #---------------------------------------------------------------------------#
   # RADAR APPSERVER                                                           #
@@ -166,7 +166,7 @@ services:
       SPRING_BOOT_ADMIN_CLIENT_INSTANCE_NAME: radar-appserver
     healthcheck:
       # should give an unauthenticated response, rather than a 404
-      test: ["CMD-SHELL", "wget --spider localhost:8080/projects 2>&1 | grep -q 401 || exit 1"]
+      test: [ "CMD-SHELL", "wget --spider localhost:8080/projects 2>&1 | grep -q 401 || exit 1" ]
       interval: 1m30s
       timeout: 5s
       retries: 3
@@ -232,3 +232,15 @@ services:
       - "-c /etc/radar.yml"
     environment:
       KAFKA_SCHEMA_REGISTRY: http://schema-registry-1:8081
+
+  smtp:
+    image: namshi/smtp:latest
+    networks:
+      - kafka
+    volumes:
+      - /var/spool/exim
+    restart: always
+    ports:
+      - "25:25"
+    env_file:
+      - ./etc/smtp.env
