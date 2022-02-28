@@ -21,9 +21,9 @@ abstract class JsonPathCondition(config: ConditionConfig) : ConditionBase(config
         val result: List<*>? = try {
 
             val valueToParse = if (rootKey != null) {
-                (record.value() as GenericRecord).get(rootKey).toString()
+                (record.value() as GenericRecord?)?.get(rootKey)?.toString() ?: return false
             } else {
-                (record.value() as GenericRecord).toString()
+                (record.value() as GenericRecord?)?.toString() ?: return false
             }
 
             logger.debug("value: $valueToParse")
