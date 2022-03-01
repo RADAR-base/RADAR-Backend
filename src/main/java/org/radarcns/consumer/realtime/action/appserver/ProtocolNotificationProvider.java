@@ -22,7 +22,7 @@ public class ProtocolNotificationProvider implements NotificationContentProvider
                      "action" : "QUESTIONNAIRE_TRIGGER",
                      "questionnaire": {
                         "name": "%s",
-                        "type": "scheduled",qS
+                        "type": "scheduled",
                         "showIntroduction": false,
                         "showInCalendar": true,
                         "order": %d,
