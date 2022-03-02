@@ -60,14 +60,14 @@ stream:
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
 schema_registry:
-    - host: localhost
-      port: 8081
-      protocol: http
+  - host: dynamint-dev.thehyve.net
+    protocol: https
+    path: /schema
 
 rest_proxy:
-    host: radar-test.thehyve.net
-    port: 8082
-    protocol: http
+  host: dynamint-dev.thehyve.net
+  protocol: https
+  path: /kafka/
 
 email_server:
   host: localhost
@@ -75,7 +75,7 @@ email_server:
   user: no-reply@radarcns.org
 
 auth:
-  token_url: http://localhost:8080/managementportal/oauth/token
+  token_url: https://dynamint-dev.thehyve.net/managementportal/oauth/token
   client_id: radar-backend
   client_secret: secret
 
