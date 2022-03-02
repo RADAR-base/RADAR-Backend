@@ -2,7 +2,10 @@ package org.radarbase.appserver.client.protocol
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import java.lang.String.CASE_INSENSITIVE_ORDER
+import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
 import java.util.stream.Collectors
@@ -18,16 +21,16 @@ class FileProtocolDirectory(
     init {
         val jsonReader = mapper.readerFor(QuestionnaireTrigger::class.java)
 
+        val jsonFileMatcher = FileSystems.getDefault().getPathMatcher("glob:**.json");
+
         protocols = Files.walk(Paths.get(protocolDir)).use { pathStream ->
             pathStream
-                .filter { path -> path.fileName.toString().endsWith(".json") }
+                .filter(jsonFileMatcher::matches)
                 .asSequence()
                 .mapNotNull { path ->
                     try {
                         Pair(
-                            path.fileName.toString()
-                                .lowercase()
-                                .removeSuffix(".json"),
+                            path.fileName.toString().removeSuffix(".json"),
                             Files.newInputStream(path).use {
                                 jsonReader.readValue<QuestionnaireTrigger>(it)
                             },
@@ -37,7 +40,7 @@ class FileProtocolDirectory(
                         null
                     }
                 }
-                .toMap(TreeMap())
+                .toMap(TreeMap(CASE_INSENSITIVE_ORDER))
         }
         logger.info("From {} loaded protocols {}", protocolDir, protocols)
     }
