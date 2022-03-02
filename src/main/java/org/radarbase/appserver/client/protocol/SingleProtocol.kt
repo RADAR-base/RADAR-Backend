@@ -2,6 +2,7 @@ package org.radarbase.appserver.client.protocol
 
 data class SingleProtocol(
     val name: String,
+    val type: String = "scheduled",
     val questionnaire: Questionnaire,
     val protocol: SingleProtocolSchedule,
     val showInCalendar: Boolean = true,
