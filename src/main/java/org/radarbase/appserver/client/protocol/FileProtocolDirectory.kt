@@ -5,11 +5,8 @@ import org.slf4j.LoggerFactory
 import java.lang.String.CASE_INSENSITIVE_ORDER
 import java.nio.file.FileSystems
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
-import java.util.stream.Collectors
-import kotlin.collections.HashMap
 import kotlin.streams.asSequence
 
 class FileProtocolDirectory(

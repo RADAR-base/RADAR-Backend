@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
-
 import org.radarbase.stream.TimeWindowMetadata;
 import org.radarcns.config.RadarPropertyHandler.Priority;
 

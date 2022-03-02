@@ -7,8 +7,8 @@ import java.util.Map;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import org.radarcns.config.EmailServerConfig;
-import org.radarcns.config.monitor.MonitorConfig;
 import org.radarcns.config.monitor.EmailNotifyConfig;
+import org.radarcns.config.monitor.MonitorConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

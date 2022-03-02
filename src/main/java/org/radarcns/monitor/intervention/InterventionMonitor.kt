@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import okhttp3.OkHttpClient
 import org.apache.avro.generic.GenericRecord
-import org.apache.avro.util.Utf8
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.radarbase.appserver.client.protocol.FileProtocolDirectory
 import org.radarcns.config.RadarPropertyHandler

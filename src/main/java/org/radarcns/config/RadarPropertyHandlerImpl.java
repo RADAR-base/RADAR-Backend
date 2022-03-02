@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-
 import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.RadarBackend;
 import org.radarcns.util.PersistentStateStore;
