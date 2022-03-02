@@ -1,16 +1,14 @@
 package org.radarcns.monitor.intervention
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectReader
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import okhttp3.OkHttpClient
-import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.avro.generic.GenericRecord
+import org.apache.avro.util.Utf8
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.common.serialization.BytesDeserializer
-import org.apache.kafka.common.utils.Bytes
 import org.radarbase.appserver.client.protocol.FileProtocolDirectory
 import org.radarcns.config.RadarPropertyHandler
 import org.radarcns.config.monitor.InterventionMonitorConfig
@@ -20,7 +18,6 @@ import org.radarcns.util.EmailSenders
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 import java.util.concurrent.*
 
 /**
@@ -35,7 +32,7 @@ class InterventionMonitor(
     private val config: InterventionMonitorConfig,
     radar: RadarPropertyHandler,
     emailSenders: EmailSenders?,
-) : AbstractKafkaMonitor<Bytes, Bytes, InterventionMonitorState>(
+) : AbstractKafkaMonitor<String, GenericRecord, InterventionMonitorState>(
     radar,
     config.topics,
     "intervention_monitors",
@@ -48,12 +45,8 @@ class InterventionMonitor(
     private val appServerNotifications: AppServerIntervention
     private var emailer: InterventionExceptionEmailer?
     private val exceptionBatch: LinkedBlockingQueue<InterventionRecord> = LinkedBlockingQueue()
-    private val keyReader: ObjectReader
-    private val valueReader: ObjectReader
 
     init {
-        configureConsumer()
-
         val httpClient = OkHttpClient()
         val mapper = jsonMapper {
             addModule(kotlinModule {
@@ -64,9 +57,6 @@ class InterventionMonitor(
             addModule(JavaTimeModule())
             disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         }
-        keyReader = mapper.readerFor(String::class.java)
-        valueReader = mapper.readerFor(RawInterventionRecord::class.java)
-
         appServerNotifications = AppServerIntervention(
             protocolDirectory = FileProtocolDirectory(config.protocolDirectory, mapper),
             defaultLanguage = config.defaultLanguage,
@@ -91,14 +81,6 @@ class InterventionMonitor(
             emailSenders = emailSenders,
             state = state,
         ) else null
-    }
-
-    private fun configureConsumer() {
-        val properties = Properties()
-        val deserializer: String = BytesDeserializer::class.java.name
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, deserializer)
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer)
-        configure(properties)
     }
 
     override fun start() {
@@ -137,7 +119,7 @@ class InterventionMonitor(
         super.start()
     }
 
-    override fun evaluateRecord(record: ConsumerRecord<Bytes, Bytes>) {
+    override fun evaluateRecord(record: ConsumerRecord<String, GenericRecord>) {
         logger.info("Evaluating {}", record)
         val intervention = parseRecord(record) ?: return
 
@@ -209,26 +191,16 @@ class InterventionMonitor(
         }
     }
 
-    private fun parseRecord(record: ConsumerRecord<Bytes, Bytes>): InterventionRecord? {
-        val userId = try {
-            keyReader.readValue(record.key().get(), String::class.java)
-        } catch (ex: Exception) {
-            logger.error("Cannot map intervention record key from {}: {}", record.key(), ex.toString())
-            return null
-        }
+    private fun parseRecord(record: ConsumerRecord<String, GenericRecord>): InterventionRecord? {
+        val userId = record.key()?.toString()
         if (userId.isNullOrEmpty()) {
             logger.error("Cannot map record without user ID")
             return null
         }
         val intervention = try {
-            valueReader.readValue(record.value().get(), RawInterventionRecord::class.java)
-                ?.toInterventionRecord(userId)
+            record.value().toInterventionRecord(userId)
         } catch (ex: Exception) {
             logger.error("Cannot map user {} intervention record value from {}: {}", userId, record.value(), ex.toString())
-            return null
-        }
-        if (intervention == null) {
-            logger.error("Cannot map user {} null intervention record value from {}", userId, record.value())
             return null
         }
 
@@ -271,5 +243,20 @@ class InterventionMonitor(
 
         private val InterventionRecord.queueKey: String
             get() = "$userId-$timeCompleted"
+
+        private fun GenericRecord.toInterventionRecord(userId: String): InterventionRecord {
+            val intervention = get("INTERVENTION") as GenericRecord
+            return InterventionRecord(
+                projectId = get("PROJECTID").toString(),
+                userId = userId,
+                sourceId = get("SOURCEID").toString(),
+                time = (get("TIME") as Number).toLong(),
+                timeCompleted = Instant.ofEpochMilli(((get("TIMECOMPLETED") as Number).toDouble() * 1000.0).toLong()),
+                isFinal = get("ISFINAL") as Boolean,
+                decision = intervention.get("DECISION") as Boolean,
+                name = intervention.get("NAME")?.toString(),
+                exception = intervention.get("EXCEPTION")?.toString(),
+            )
+        }
     }
 }
