@@ -48,7 +48,9 @@ class ActiveAppNotificationAction(
 
         val timeStrategy: ScheduleTimeStrategy = if (!parsedConfig.timeOfDay.isNullOrEmpty()) {
             // get timezone for the user and create the correct local time of the day
-            TimeOfDayStrategy(parsedConfig.timeOfDay, timezone)
+            TimeOfDayStrategy(parsedConfig.timeOfDay, timezone, parsedConfig.jitterInMinutes?.let {
+                Duration.ofMinutes(it.toLong())
+            })
         } else {
             // no time of the day provided, schedule now.
             SimpleTimeStrategy(parsedConfig.optionalDelayMinutes.toLong(), ChronoUnit.MINUTES)
@@ -158,6 +160,8 @@ data class ActiveAppNotificationActionConfig(
         val toleranceInDays: Int = 5,
         @JsonProperty("optional_delay_minutes")
         val optionalDelayMinutes: Int = 5,
+        @JsonProperty("jitter_in_minutes")
+        val jitterInMinutes: Int? = null,
         @JsonIgnore
         val appserverClientConfig: AppserverClientConfig = AppserverClientConfig(
                 clientId = clientId,
@@ -188,6 +192,7 @@ data class ActiveAppNotificationActionConfig(
                         metadataKey = map["metadata_key"] as String?,
                         toleranceInDays = map["tolerance_in_days"] as Int? ?: 5,
                         optionalDelayMinutes = map["optional_delay_minutes"] as Int? ?: 5,
+                        jitterInMinutes = map["jitter_in_minutes"] as Int?,
                 )
             } ?: throw IllegalArgumentException("Missing required properties")
         }

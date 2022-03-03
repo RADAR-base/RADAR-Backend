@@ -5,7 +5,6 @@ import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.random.Random.Default.nextLong
 
 /**
  * Schedules the time based on the next Time Of Day (eg- 09:00:00 means 9 am on the day) as
@@ -15,7 +14,7 @@ import kotlin.random.Random.Default.nextLong
 class TimeOfDayStrategy(
         private val timeOfDay: String,
         private val timezone: String = "GMT",
-        private val jitter: Duration = Duration.ofMinutes(nextLong(1, 5)),
+        private val jitter: Duration? = null,
 ) : ScheduleTimeStrategy {
 
     // If time has already passed, schedule the next day
@@ -25,13 +24,15 @@ class TimeOfDayStrategy(
         val now = Instant.now()
         val localDate = now.atZone(ZoneId.of(timezone)).toLocalDate()
         var ldt = localDate.atTime(LocalTime.parse(timeOfDay, DateTimeFormatter.ISO_LOCAL_TIME))
-
+        if (jitter != null) {
+            ldt = ldt.plus(jitter)
+        }
         // If time has already passed, schedule the next day
-        if (ldt.plus(jitter).isBefore(now.atZone(ZoneId.of(timezone)).toLocalDateTime())) {
+        if (ldt.isBefore(now.atZone(ZoneId.of(timezone)).toLocalDateTime())) {
             ldt = ldt.plusDays(1)
         }
 
-        return ldt.plus(jitter).atZone(ZoneId.of(timezone)).toInstant()
+        return ldt.atZone(ZoneId.of(timezone)).toInstant()
     }
 
     init {
