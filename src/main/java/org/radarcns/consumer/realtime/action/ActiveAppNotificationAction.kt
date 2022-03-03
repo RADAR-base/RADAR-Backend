@@ -51,7 +51,7 @@ class ActiveAppNotificationAction(
             TimeOfDayStrategy(parsedConfig.timeOfDay, timezone)
         } else {
             // no time of the day provided, schedule now.
-            SimpleTimeStrategy(5, ChronoUnit.MINUTES)
+            SimpleTimeStrategy(parsedConfig.optionalDelayMinutes.toLong(), ChronoUnit.MINUTES)
         }
 
         val metadata = try {
@@ -80,7 +80,7 @@ class ActiveAppNotificationAction(
 
 
         if (getTime(record) < Instant.now()
-                        .minus(Duration.ofDays(parsedConfig.toleranceInDays))
+                        .minus(Duration.ofDays(parsedConfig.toleranceInDays.toLong()))
                         .toEpochMilli()
         ) {
             logger.info("Skipping notification for ${key.userId} because it is too late.")
@@ -98,14 +98,20 @@ class ActiveAppNotificationAction(
                 userTimezone = timezone
         )
 
-        val body = when (parsedConfig.type) {
-            MessagingType.NOTIFICATIONS -> contentProvider.notificationMessage
-            MessagingType.DATA -> contentProvider.dataMessage
+        logger.debug("Sending message to appserver: ${key.projectId}, ${key.userId}, ${parsedConfig.type}")
+
+        when (parsedConfig.type) {
+            MessagingType.NOTIFICATIONS -> appserverClient.createMessage(
+                    key.projectId, key.userId, MessagingType.NOTIFICATIONS, contentProvider.notificationMessage
+            )
+            MessagingType.DATA -> appserverClient.createMessage(
+                    key.projectId, key.userId, MessagingType.DATA, contentProvider.dataMessage
+            )
+            MessagingType.ALL -> {
+                appserverClient.createMessage(key.projectId, key.userId, MessagingType.NOTIFICATIONS, contentProvider.notificationMessage)
+                appserverClient.createMessage(key.projectId, key.userId, MessagingType.DATA, contentProvider.dataMessage)
+            }
         }
-
-        logger.debug("Sending message to appserver: ${key.projectId}, ${key.userId}, $parsedConfig.type, $body")
-
-        appserverClient.createMessage(key.projectId, key.userId, parsedConfig.type, body)
         logger.info("Sent notification to appserver for ${key.userId}")
         return true
     }
@@ -142,7 +148,9 @@ data class ActiveAppNotificationActionConfig(
         @JsonProperty("metadata_key")
         val metadataKey: String? = null,
         @JsonProperty("tolerance_in_days")
-        val toleranceInDays: Long = 5,
+        val toleranceInDays: Int = 5,
+        @JsonProperty("optional_delay_minutes")
+        val optionalDelayMinutes: Int = 5,
         @JsonIgnore
         val appserverClientConfig: AppserverClientConfig = AppserverClientConfig(
                 clientId = clientId,
@@ -171,7 +179,8 @@ data class ActiveAppNotificationActionConfig(
                         timeOfDay = map["time_of_day"] as String?,
                         defaultTimeZone = map["default_timezone"] as String? ?: "UTC",
                         metadataKey = map["metadata_key"] as String?,
-                        toleranceInDays = map["tolerance_in_days"] as Long? ?: 5,
+                        toleranceInDays = map["tolerance_in_days"] as Int? ?: 5,
+                        optionalDelayMinutes = map["optional_delay_minutes"] as Int? ?: 5,
                 )
             } ?: throw IllegalArgumentException("Missing required properties")
         }
