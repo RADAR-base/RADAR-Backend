@@ -124,6 +124,7 @@ class ProtocolNotificationProvider(
                 + "\t\"sourceType\": \"aRMT\",\n"
                 + "\t\"appPackage\": \"%s\",\n"
                 + "\t\"scheduledTime\": \"%s\",\n"
+                + "\t\"priority\": \"HIGH\",\n"
                 + "\t\"dataMap\": %s\n"
                 + " }")
 

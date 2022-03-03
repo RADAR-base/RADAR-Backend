@@ -100,19 +100,26 @@ class ActiveAppNotificationAction(
 
         logger.debug("Sending message to appserver: ${key.projectId}, ${key.userId}, ${parsedConfig.type}")
 
-        when (parsedConfig.type) {
-            MessagingType.NOTIFICATIONS -> appserverClient.createMessage(
-                    key.projectId, key.userId, MessagingType.NOTIFICATIONS, contentProvider.notificationMessage
-            )
-            MessagingType.DATA -> appserverClient.createMessage(
-                    key.projectId, key.userId, MessagingType.DATA, contentProvider.dataMessage
-            )
+        val msgType = when (parsedConfig.type) {
+            MessagingType.NOTIFICATIONS -> {
+                appserverClient.createMessage(
+                        key.projectId, key.userId, MessagingType.NOTIFICATIONS, contentProvider.notificationMessage
+                )
+                "notification message"
+            }
+            MessagingType.DATA -> {
+                appserverClient.createMessage(
+                        key.projectId, key.userId, MessagingType.DATA, contentProvider.dataMessage
+                )
+                "data message"
+            }
             MessagingType.ALL -> {
                 appserverClient.createMessage(key.projectId, key.userId, MessagingType.NOTIFICATIONS, contentProvider.notificationMessage)
                 appserverClient.createMessage(key.projectId, key.userId, MessagingType.DATA, contentProvider.dataMessage)
+                "notification and data message"
             }
         }
-        logger.info("Sent notification to appserver for ${key.userId}")
+        logger.info("Sent $msgType to appserver for ${key.userId}")
         return true
     }
 
