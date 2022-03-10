@@ -132,8 +132,6 @@ class InterventionMonitor(
 
         executor.execute {
             try {
-                logger.info("Scheduling intervention {}", intervention)
-
                 queue.remove(intervention.queueKey)
                     ?.cancel(false)
 
@@ -142,6 +140,8 @@ class InterventionMonitor(
                 if (!intervention.decision) {
                     return@execute
                 }
+
+                logger.info("Scheduling intervention {}", intervention)
 
                 val timeBeforeDeadlineTotal = interventionDeadlineTotal.pendingDuration()
                 if (timeBeforeDeadlineTotal.isNegative) {
