@@ -166,7 +166,7 @@ class InterventionMonitor(
                     )
                 }
             } catch (ex: Throwable) {
-                logger.error("Failed to process intervention $intervention", ex)
+                logger.error("Failed to process intervention {}", intervention, ex)
             }
         }
     }
