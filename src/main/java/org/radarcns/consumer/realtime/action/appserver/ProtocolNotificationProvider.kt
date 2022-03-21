@@ -24,7 +24,7 @@ class ProtocolNotificationProvider(
         val metadata: Map<String, String?> = HashMap(),
         val notificationTitle: String = "Questionnaire Time",
         val notificationBody: String = "Urgent Questionnaire Pending. Please complete now.",
-        val ttlSeconds: Int = 0,
+        val ttlSeconds: Int = completionWindowMinutes.toInt() * 60,
         val scheduledTime: Instant,
         val sourceId: String? = null,
         val appPackage: String = "org.phidatalab.radar_armt",
