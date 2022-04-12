@@ -22,7 +22,7 @@ ext {
 
     githubUrl = 'https://github.com/' + githubRepoName + '.git'
     issueUrl = 'https://github.com/' + githubRepoName + '/issues'
-    website = 'http://radar-base.org'
+    website = 'https://radar-base.org'
 
     confluentVersion = '7.0.1'
     hamcrestVersion = '2.2'
