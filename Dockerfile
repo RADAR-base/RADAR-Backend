@@ -10,44 +10,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gradle:6.6.1-jdk11 as builder
+FROM gradle:7.4-jdk17 as builder
 
 RUN mkdir /code
 WORKDIR /code
 
-ENV GRADLE_OPTS=-Dorg.gradle.project.profile=prod \
+ENV GRADLE_OPTS="-Dorg.gradle.project.profile=prod -Djdk.lang.Process.launchMechanism=vfork" \
   GRADLE_USER_HOME=/code/.gradlecache
 
 COPY ./gradle/profile.prod.gradle /code/gradle/
 COPY ./build.gradle ./gradle.properties ./settings.gradle /code/
 
-RUN gradle downloadRuntimeDependencies
+RUN gradle downloadRuntimeDependencies copyDependencies startScripts
 
 COPY ./src/ /code/src
 
-RUN gradle distTar && \
-  tar xf build/distributions/*.tar && \
-  rm build/distributions/*.tar
+RUN gradle jar
 
-FROM openjdk:11-jre-slim
+FROM azul/zulu-openjdk-alpine:17-jre-headless
 
 MAINTAINER Nivethika M <nivethika@thehyve.nl> , Joris Borgdorff <joris@thehyve.nl> , Yatharth Ranjan <yatharth.ranjan@kcl.ac.uk>
 
 LABEL description="RADAR-CNS Backend streams and monitor"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		curl \
-		wget \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
-ENV KAFKA_REST_PROXY http://rest-proxy:8082
+RUN mkdir -p /var/lib/radar/data
+RUN chown 101:101 /var/lib/radar/data
+
 ENV KAFKA_SCHEMA_REGISTRY http://schema-registry:8081
 ENV RADAR_BACKEND_CONFIG /etc/radar.yml
 
-COPY --from=builder /code/radar-backend-*/bin/* /usr/bin/
-COPY --from=builder /code/radar-backend-*/lib/* /usr/lib/
+COPY --from=builder /code/build/third-party/* /usr/lib/
+COPY --from=builder /code/build/scripts/* /usr/bin/
+COPY --from=builder /code/build/libs/* /usr/lib/
 
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
+
+USER 101:101
 
 ENTRYPOINT ["radar-backend-init"]

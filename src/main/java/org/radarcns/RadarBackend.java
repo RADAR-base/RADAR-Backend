@@ -23,6 +23,7 @@ import org.apache.commons.cli.ParseException;
 import org.radarcns.config.RadarBackendOptions;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.config.SubCommand;
+import org.radarcns.consumer.realtime.RealtimeInferenceConsumerFactory;
 import org.radarcns.monitor.KafkaMonitorFactory;
 import org.radarcns.producer.MockProducerCommand;
 import org.radarcns.stream.KafkaStreamFactory;
@@ -76,6 +77,8 @@ public final class RadarBackend {
                 return new KafkaMonitorFactory(options, radarPropertyHandler).createMonitor();
             case "mock":
                 return new MockProducerCommand(options, radarPropertyHandler);
+            case "realtime_consumers":
+                return RealtimeInferenceConsumerFactory.createConsumersFor(radarPropertyHandler);
             default:
                 throw new IllegalArgumentException("Unknown subcommand "
                         + options.getSubCommand());

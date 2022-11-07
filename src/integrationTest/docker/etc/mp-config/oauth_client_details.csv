@@ -1,0 +1,4 @@
+client_id;resource_ids;client_secret;scope;authorized_grant_types;redirect_uri;authorities;access_token_validity;refresh_token_validity;additional_information;autoapprove
+pRMT;res_ManagementPortal,res_gateway;;MEASUREMENT.CREATE,SUBJECT.UPDATE,SUBJECT.READ,PROJECT.READ,SOURCETYPE.READ,SOURCE.READ,SOURCETYPE.READ,SOURCEDATA.READ,USER.READ,ROLE.READ;refresh_token,authorization_code;;;43200;7948800;{"dynamic_registration": true};
+aRMT;res_ManagementPortal,res_gateway;secret;MEASUREMENT.CREATE,SUBJECT.UPDATE,SUBJECT.READ,PROJECT.READ,SOURCETYPE.READ,SOURCE.READ,SOURCETYPE.READ,SOURCEDATA.READ,USER.READ,ROLE.READ;refresh_token,authorization_code;;;43200;7948800;{"dynamic_registration": true};
+radar_appserver_client;res_ManagementPortal,res_AppServer;secret;SUBJECT.UPDATE,SUBJECT.READ,PROJECT.READ,SOURCETYPE.READ,SOURCE.READ,SOURCETYPE.READ,SOURCEDATA.READ,USER.READ,ROLE.READ;client_credentials;;;43200;259200;{};

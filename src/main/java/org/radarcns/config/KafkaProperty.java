@@ -16,7 +16,9 @@
 
 package org.radarcns.config;
 
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS;
+import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import java.util.Properties;
 import javax.annotation.Nonnull;
@@ -46,9 +48,9 @@ public class KafkaProperty {
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, clientId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, configRadar.getBrokerPaths());
-        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+        props.put(SCHEMA_REGISTRY_URL_CONFIG,
                 configRadar.getSchemaRegistryPaths());
-        props.put(AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS, true);
+        props.put(AUTO_REGISTER_SCHEMAS, true);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
         props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG,

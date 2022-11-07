@@ -27,6 +27,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.junit.Rule;
 import org.junit.Test;
+import org.radarcns.config.EmailServerConfig;
 
 public class EmailSenderTest {
     @Rule
@@ -34,7 +35,10 @@ public class EmailSenderTest {
 
     @Test
     public void testEmail() throws MessagingException, IOException {
-        EmailSender sender = new EmailSender("localhost", 2525, "no-reply@radar-cns.org",
+        EmailServerConfig emailServerConfig = new EmailServerConfig();
+        emailServerConfig.setHost("localhost");
+        emailServerConfig.setPort(emailServer.getPort());
+        EmailSender sender = new EmailSender(emailServerConfig, "no-reply@radar-cns.org",
                 List.of("test@radar-cns.org"));
 
         assertEquals(Collections.emptyList(), emailServer.getMessages());
@@ -58,7 +62,10 @@ public class EmailSenderTest {
 
     @Test(expected = IOException.class)
     public void testEmailNonExisting() throws MessagingException, IOException {
-        EmailSender sender = new EmailSender("non-existing-host", 2525, "no-reply@radar-cns.org",
+        EmailServerConfig emailServerConfig = new EmailServerConfig();
+        emailServerConfig.setHost("non-existing-host");
+        emailServerConfig.setPort(emailServer.getPort());
+        EmailSender sender = new EmailSender(emailServerConfig, "no-reply@radar-cns.org",
                 List.of("test@radar-cns.org"));
     }
 }

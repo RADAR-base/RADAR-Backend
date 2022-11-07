@@ -9,7 +9,8 @@ import org.radarcns.kafka.ObservationKey;
  * as a map key by serializing it to String.
  */
 public interface PersistentStateStore {
-    /** Retrieve a state. The default is returned if no existing state is found.
+    /**
+     * Retrieve a state. The default is returned if no existing state is found.
      *
      * @param groupId Kafka group ID of a consumer or producer.
      * @param clientId Kafka client ID of a consumer or producer.

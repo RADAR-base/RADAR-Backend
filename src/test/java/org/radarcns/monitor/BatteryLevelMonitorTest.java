@@ -24,6 +24,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.radarcns.monitor.BatteryLevelMonitor.Status.LOW;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
@@ -33,6 +36,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.config.ConfigRadar;
 import org.radarcns.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
@@ -50,8 +54,15 @@ public class BatteryLevelMonitorTest {
     private long offset;
     private long timeReceived;
     private int timesSent;
-    private EmailSenders senders;
     private EmailSender sender;
+    private final YamlConfigLoader loader = new YamlConfigLoader(mapper -> {
+        mapper.registerModule(new KotlinModule.Builder()
+                .enable(KotlinFeature.NullIsSameAsDefault)
+                .enable(KotlinFeature.NullToEmptyCollection)
+                .enable(KotlinFeature.NullToEmptyMap)
+                .build());
+        mapper.registerModule(new JavaTimeModule());
+    });
 
     private static final String PROJECT_ID = "test";
 
@@ -62,7 +73,7 @@ public class BatteryLevelMonitorTest {
         timesSent = 0;
         sender = mock(EmailSender.class);
 
-        senders = new EmailSenders(Collections.singletonMap(PROJECT_ID, sender));
+        EmailSenders senders = new EmailSenders(Collections.singletonMap(PROJECT_ID, sender));
 
         ConfigRadar config = KafkaMonitorFactoryTest
                 .getBatteryMonitorConfig(25252, folder);
@@ -108,14 +119,14 @@ public class BatteryLevelMonitorTest {
     @Test
     public void retrieveState() throws Exception {
         File base = folder.newFolder();
-        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(base.toPath());
+        YamlPersistentStateStore stateStore = new YamlPersistentStateStore(loader, base.toPath());
         BatteryLevelState state = new BatteryLevelState();
         ObservationKey key1 = new ObservationKey("test", "a", "b");
         String keyString = stateStore.keyToString(key1);
         state.updateLevel(keyString, 0.1f);
         stateStore.storeState("one", "two", state);
 
-        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(base.toPath());
+        YamlPersistentStateStore stateStore2 = new YamlPersistentStateStore(loader, base.toPath());
         BatteryLevelState state2 = stateStore2.retrieveState("one", "two", new BatteryLevelState());
         Map<String, Float> values = state2.getLevels();
         assertThat(values, hasEntry(keyString, 0.1f));

@@ -67,8 +67,8 @@ import org.radarcns.passive.empatica.EmpaticaE4InterBeatInterval;
 import org.radarcns.passive.empatica.EmpaticaE4Temperature;
 import org.radarcns.passive.phone.PhoneUsageEvent;
 import org.radarcns.passive.phone.UsageEventType;
-import org.radarcns.schema.registration.KafkaTopics;
-import org.radarcns.schema.registration.SchemaRegistry;
+import org.radarbase.schema.registration.KafkaTopics;
+import org.radarbase.schema.registration.SchemaRegistry;
 import org.radarcns.util.RadarSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,8 @@ public class PhoneStreamTest {
         }
 
         ConfigRadar props = propHandler.getRadarProperties();
-        KafkaTopics topics = new KafkaTopics(props.getZookeeperPaths());
+        Map<String, Object> kafkaConf = Map.of("bootstrap.servers", props.getBrokerPaths());
+        KafkaTopics topics = new KafkaTopics(kafkaConf);
         int expectedBrokers = props.getBroker().size();
         topics.initialize(expectedBrokers);
 

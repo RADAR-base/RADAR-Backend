@@ -17,6 +17,7 @@
 package org.radarcns.config;
 
 import java.io.IOException;
+import org.radarbase.config.YamlConfigLoader;
 import org.radarcns.util.PersistentStateStore;
 
 /**
@@ -39,6 +40,8 @@ public interface RadarPropertyHandler {
     }
 
     ConfigRadar getRadarProperties();
+
+    YamlConfigLoader getLoader();
 
     void load(String pathFile) throws IOException;
 

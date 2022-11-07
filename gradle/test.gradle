@@ -25,15 +25,15 @@ dependencies {
     // Testing
     testImplementation group: 'junit', name: 'junit', version: junitVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
 
     // Mock mail server
     testImplementation group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
 
-    testRuntimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+    testRuntimeOnly group: 'ch.qos.reload4j', name: 'reload4j', version: reload4jVersion
+    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: slf4jVersion
 
-    integrationTestImplementation group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
+    integrationTestImplementation group: 'org.radarbase', name: 'radar-schemas-registration', version: radarSchemasVersion
 }
 
 tasks.matching {it instanceof Test}.all {
@@ -60,3 +60,7 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTestClasses
+
+tasks.named("processIntegrationTestResources", Copy.class) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}

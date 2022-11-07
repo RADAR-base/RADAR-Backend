@@ -7,7 +7,7 @@ import static org.radarcns.monitor.AbstractKafkaMonitor.extractKey;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
@@ -25,9 +25,10 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.Cancellable;
-import org.apache.kafka.streams.processor.Processor;
-import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
+import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
+import org.apache.kafka.streams.processor.api.Record;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.StoreBuilder;
@@ -82,9 +83,9 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         Topology topology = new Topology();
 
         final Map<String, ?> serdeConfig = Map.of(
-                AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
-                getStreamsConfig().get(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG),
-                AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS,
+                AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                getStreamsConfig().get(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG),
+                AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS,
                 true);
 
         addSource("source", topology, serdeConfig);
@@ -163,17 +164,16 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
         return settings;
     }
 
-    private class SourceStatisticsProcessor implements Processor<GenericRecord, GenericRecord> {
+    private class SourceStatisticsProcessor implements
+            Processor<GenericRecord, GenericRecord, ObservationKey, SourceStatistics> {
         private KeyValueStore<ObservationKey, SourceStatisticsRecord> store;
-        private ProcessorContext context;
+        private ProcessorContext<ObservationKey, SourceStatistics> context;
         private Cancellable punctuateCancellor;
         private Duration localInterval = Duration.ZERO;
 
-        @SuppressWarnings("unchecked")
         @Override
-        public void init(ProcessorContext context) {
-            store = (KeyValueStore<ObservationKey, SourceStatisticsRecord>) context
-                    .getStateStore("statistics");
+        public void init(ProcessorContext<ObservationKey, SourceStatistics> context) {
+            store = context.getStateStore("statistics");
             this.context = context;
             updatePunctuate();
         }
@@ -197,7 +197,8 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
                 while (iterator.hasNext()) {
                     KeyValue<ObservationKey, SourceStatisticsRecord> next = iterator.next();
                     if (!next.value.isSent) {
-                        context.forward(next.key, next.value.sourceStatistics());
+                        context.forward(new Record<>(
+                                next.key, next.value.sourceStatistics(), timestamp));
                         sent.add(new KeyValue<>(next.key, next.value.sentRecord()));
                     }
                 }
@@ -211,7 +212,9 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
 
         @SuppressWarnings("PMD.AccessorMethodGeneration")
         @Override
-        public void process(GenericRecord genericKey, GenericRecord value) {
+        public void process(Record<GenericRecord, GenericRecord> record) {
+            GenericRecord genericKey = record.key();
+            GenericRecord value = record.value();
             if (genericKey == null || value == null) {
                 logger.error("Cannot process records without both a key and a value");
                 return;
@@ -244,11 +247,6 @@ public class SourceStatisticsStream extends AbstractStreamWorker {
             if (!newStats.equals(stats)) {
                 store.put(key, newStats);
             }
-        }
-
-        @Override
-        public void close() {
-            // do nothing
         }
     }
 

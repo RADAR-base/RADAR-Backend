@@ -16,7 +16,7 @@
 
 package org.radarcns.monitor;
 
-import static io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
+import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
@@ -152,7 +152,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      * Monitor a given topic until the {@link #isShutdown()} method returns true.
      *
      * <p>When a message is encountered that cannot be deserialized,
-     * {@link #handleSerializationException()} is called.
+     * {@link #handleSerializationException(SerializationException)} is called.
      */
     @Override
     public void start() {
@@ -170,7 +170,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
                     ops.add(records.count());
                     evaluateRecords(records);
                 } catch (SerializationException ex) {
-                    handleSerializationException();
+                    handleSerializationException(ex);
                 } catch (WakeupException ex) {
                     logger.info("Consumer woke up");
                 } catch (InterruptException ex) {
@@ -193,27 +193,31 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
      *
      * <p>The new position is not committed, so on failure of the client, the message must be
      * skipped again.
+     * @param ex
      */
     // TODO: submit the message to another topic to indicate that it could not be deserialized.
-    protected void handleSerializationException() {
-        logger.error("Failed to deserialize message. Skipping message.");
+    protected void handleSerializationException(
+            SerializationException ex) {
+        logger.error("Failed to deserialize message. Skipping message.", ex);
         topics.parallelStream()
                 .flatMap(t -> consumer.partitionsFor(t).stream())
                 .map(tp -> new TopicPartition(tp.topic(), tp.partition()))
                 .filter(tp -> {
+                    String tmpId = "-tmp-" + UUID.randomUUID();
                     Properties tmpProperties = new Properties();
                     tmpProperties.putAll(properties);
+                    tmpProperties.setProperty(GROUP_ID_CONFIG,
+                            properties.getProperty(GROUP_ID_CONFIG) + tmpId);
                     tmpProperties.setProperty(CLIENT_ID_CONFIG,
-                            properties.getProperty(CLIENT_ID_CONFIG)
-                                    + "-tmp-" + UUID.randomUUID().toString());
+                            properties.getProperty(CLIENT_ID_CONFIG) + tmpId);
 
                     try (Consumer<K, V> tmpConsumer = new KafkaConsumer<>(tmpProperties)) {
                         tmpConsumer.assign(List.of(tp));
                         tmpConsumer.seek(tp, consumer.position(tp));
                         tmpConsumer.poll(Duration.ZERO);
                         return false;
-                    } catch (SerializationException ex) {
-                        logger.error("Serialization error, skipping message", ex);
+                    } catch (SerializationException ex2) {
+                        logger.error("Serialization error, skipping message", ex2);
                         return true;
                     }
                 })
@@ -221,7 +225,7 @@ public abstract class AbstractKafkaMonitor<K, V, S> implements KafkaMonitor {
     }
 
     /** Evaluate a single record that the monitor receives by overriding this function. */
-    protected abstract void evaluateRecord(ConsumerRecord<K, V> records);
+    protected abstract void evaluateRecord(ConsumerRecord<K, V> record);
 
     /** Evaluates the records that the monitor receives. */
     protected void evaluateRecords(ConsumerRecords<K, V> records) {

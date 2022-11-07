@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @param <V> input value type.
  */
 public abstract class SensorStreamWorker<K extends SpecificRecord, V extends SpecificRecord>
-        extends AbstractStreamWorker implements Thread.UncaughtExceptionHandler {
+        extends AbstractStreamWorker {
     @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
     private final Logger monitorLog;
     private Collection<ScheduledFuture<?>> monitors;
