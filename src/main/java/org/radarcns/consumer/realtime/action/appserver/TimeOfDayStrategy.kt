@@ -15,13 +15,14 @@ class TimeOfDayStrategy(
         private val timeOfDay: String,
         private val timezone: String = "GMT",
         private val jitter: Duration? = null,
+        private val reference: Instant = Instant.now(),
 ) : ScheduleTimeStrategy {
 
     // If time has already passed, schedule the next day
     override val scheduledTime: Instant = getTimeOfDay()
 
     fun getTimeOfDay(): Instant {
-        val now = Instant.now()
+        val now = reference
         val localDate = now.atZone(ZoneId.of(timezone)).toLocalDate()
         var ldt = localDate.atTime(LocalTime.parse(timeOfDay, DateTimeFormatter.ISO_LOCAL_TIME))
         if (jitter != null) {

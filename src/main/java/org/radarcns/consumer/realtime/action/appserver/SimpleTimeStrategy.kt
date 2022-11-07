@@ -6,10 +6,10 @@ import java.time.temporal.ChronoUnit
 
 /** Schedules the time based on current time with an optional added delay.  */
 class SimpleTimeStrategy(
-        delay: Long,
-        unit: ChronoUnit?,
-        private val delayDuration: Duration = Duration.of(delay, unit)
+    delay: Long,
+    unit: ChronoUnit?,
+    delayDuration: Duration = Duration.of(delay, unit),
+    reference: Instant = Instant.now(),
 ) : ScheduleTimeStrategy {
-    override val scheduledTime: Instant
-        get() = Instant.now().plus(delayDuration)
+    override val scheduledTime: Instant = reference.plus(delayDuration)
 }

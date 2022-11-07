@@ -21,7 +21,7 @@ class AppserverClient(config: AppserverClientConfig) {
     private val objectMapper: ObjectMapper = config.mapper ?: ObjectMapper()
     private val oauthClient: OAuth2Client?
 
-    constructor(build: AppserverClientConfig.() -> Unit): this(AppserverClientConfig().apply(build))
+    constructor(build: AppserverClientConfig.() -> Unit) : this(AppserverClientConfig().apply(build))
 
     init {
         baseUrl = requireNotNull(config.appserverUrl) { "Appserver client needs base URL" }
@@ -90,6 +90,33 @@ class AppserverClient(config: AppserverClientConfig) {
     }
 
     @Throws(IOException::class)
+    fun createScheduleForAssessment(
+        projectId: String,
+        userId: String,
+        body: String
+    ) {
+        val request: Request = try {
+            Request.Builder()
+                .put(body.toRequestBody(APPLICATION_JSON))
+                .url(
+                    baseUrl.newBuilder()
+                        .addEncodedPathSegment("projects")
+                        .addPathSegment(projectId)
+                        .addEncodedPathSegment("users")
+                        .addPathSegment(userId)
+                        .addEncodedPathSegment("questionnaire")
+                        .addEncodedPathSegment("schedule")
+                        .build()
+                )
+                .headers(headers())
+                .build()
+        } catch (e: TokenException) {
+            throw IOException(e)
+        }
+        return httpClient.newCall(request).execute().use { handleResponse(request, it) }
+    }
+
+    @Throws(IOException::class)
     fun getUserDetails(projectId: String, userId: String): Map<String, Any> {
         val request: Request = try {
             Request.Builder()
@@ -117,7 +144,10 @@ class AppserverClient(config: AppserverClientConfig) {
 
         return when (response.code) {
             404 -> throw IOException("The Entity or URL ${request.url}  was not found in the appserver: $body")
-            200, 201 -> objectMapper.readValue(body, object : TypeReference<Map<String, Any>>() {})
+            200, 201 ->
+                if (body.isNotEmpty())
+                    objectMapper.readValue(body, object : TypeReference<Map<String, Any>>() {})
+                else emptyMap()
             else -> throw IOException("There was an error requesting the appserver URL ${request.url}. ${response.code} - $body")
         }
     }

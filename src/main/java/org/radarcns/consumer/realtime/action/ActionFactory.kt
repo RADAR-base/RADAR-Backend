@@ -22,6 +22,14 @@ object ActionFactory {
                             "The supplied url config was incorrect. Please check.", exc)
                 }
             }
+            AppServerTriggerAction.NAME -> {
+                return try {
+                    AppServerTriggerAction(actionConfig)
+                } catch (exc: MalformedURLException) {
+                    throw IllegalArgumentException(
+                        "The supplied url config was incorrect. Please check.", exc)
+                }
+            }
             EmailUserAction.NAME -> {
                 return try {
                     EmailUserAction(actionConfig, config.emailServerConfig)
