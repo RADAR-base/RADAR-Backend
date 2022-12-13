@@ -2,7 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
-    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
 }
 
 //---------------------------------------------------------------------------//
@@ -24,21 +24,21 @@ ext {
     issueUrl = 'https://github.com/' + githubRepoName + '/issues'
     website = 'https://radar-base.org'
 
-    confluentVersion = '7.0.1'
+    confluentVersion = '7.3.0'
     hamcrestVersion = '2.2'
-    kafkaVersion = '3.0.0'
-    jacksonVersion = '2.13.1'
+    kafkaVersion = '3.3.0'
+    jacksonVersion = '2.14.1'
     javaMailVersion = '1.6.2'
     junitVersion = '4.13.1'
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
     mockitoVersion = '4.3.1'
-    radarCommonsVersion = '0.14.1-SNAPSHOT'
-    radarSchemasVersion = '0.7.6'
+    radarCommonsVersion = '0.15.0'
+    radarSchemasVersion = '0.8.2'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.14.3'
-    slf4jVersion = '1.7.35'
-    reload4jVersion = '1.2.18.5'
+    slf4jVersion = '1.7.36'
+    reload4jVersion = '1.2.24'
     avroVersion = '1.11.0'
     jsonPathVersion = '2.7.0'
 }
