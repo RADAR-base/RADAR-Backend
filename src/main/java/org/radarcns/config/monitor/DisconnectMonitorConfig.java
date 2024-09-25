@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarcns.config;
+package org.radarcns.config.monitor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

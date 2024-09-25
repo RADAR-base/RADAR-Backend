@@ -51,7 +51,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output,
             @Nullable Duration window) {
-        this(input, output, window == null ? null : TimeWindows.of(window),
+        this(input, output, window == null ? null : TimeWindows.ofSizeWithNoGrace(window),
             TIME_WINDOW_COMMIT_INTERVAL_DEFAULT);
     }
 
@@ -65,7 +65,7 @@ public class StreamDefinition implements Comparable<StreamDefinition> {
      */
     public StreamDefinition(@Nonnull KafkaTopic input, @Nullable KafkaTopic output,
             @Nullable Duration window, @Nonnull Duration commitIntervalMs) {
-        this(input, output, window == null ? null : TimeWindows.of(window),
+        this(input, output, window == null ? null : TimeWindows.ofSizeWithNoGrace(window),
                 commitIntervalMs);
     }
 

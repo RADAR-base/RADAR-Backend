@@ -27,11 +27,16 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.radarcns.config.EmailServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sends emails.
  */
 public class EmailSender {
+    private static final Logger logger = LoggerFactory.getLogger(EmailSender.class);
+
     private final InternetAddress from;
     private final InternetAddress[] recipients;
     private final Session session;
@@ -44,8 +49,13 @@ public class EmailSender {
      * @param to list of recipients in the MIME To header
      * @throws IOException if a connection cannot be established with the email provider.
      */
-    public EmailSender(String host, int port, @Nonnull String from, List<String> to)
+    public EmailSender(EmailServerConfig config, @Nonnull String from, List<String> to)
             throws IOException, AddressException {
+        this(createSession(config), from, to);
+    }
+
+    public EmailSender(Session session, @Nonnull String from, List<String> to)
+            throws AddressException {
         this.from = new InternetAddress(from);
         if (to == null || to.isEmpty()) {
             throw new AddressException("Cannot create email sender without recipients.");
@@ -58,29 +68,40 @@ public class EmailSender {
             }
             recipients[i] = new InternetAddress(addr);
         }
+        this.session = session;
+    }
+
+    public static Session createSession(EmailServerConfig config) throws IOException {
+        String host = config.getHost();
+        int port = config.getPort();
+
+        if (host == null || port <= 0) {
+            logger.error("Cannot configure email sender without hosts ({}), port ({})",
+                    host, port);
+            return null;
+        }
+
 
         Properties properties = new Properties();
         // Get system properties
         properties.putAll(System.getProperties());
 
-        if (host != null) {
-            // Setup mail server
-            properties.setProperty("mail.smtp.host", host);
-        }
-        if (port > 0) {
-            properties.setProperty("mail.smtp.port", String.valueOf(port));
-        }
+        // Setup mail server
+        properties.setProperty("mail.smtp.host", host);
+        properties.setProperty("mail.smtp.port", String.valueOf(port));
 
-        session = Session.getInstance(properties);
+        Session session = Session.getInstance(properties);
         try {
             Transport transport = session.getTransport("smtp");
             transport.connect();
             if (!transport.isConnected()) {
-                throw new IOException("Cannot connect to SMTP server " + host + ":" + port);
+                throw new IOException("Cannot connect to SMTP server "
+                        + config.getHost() + ":" + config.getPort());
             }
         } catch (MessagingException ex) {
             throw new IOException("Cannot instantiate SMTP server", ex);
         }
+        return session;
     }
 
     /**
