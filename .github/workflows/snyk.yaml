@@ -1,0 +1,36 @@
+name: Snyk test
+on:
+  pull_request:
+    branches: [ master, dev ]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: snyk/actions/setup@master
+        with:
+          snyk-version: v1.1032.0
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: >
+          snyk test
+          --all-projects
+          --configuration-matching='^runtimeClasspath$'
+          --org=radar-base
+          --policy-path=$PWD/.snyk
+          --severity-threshold=high
