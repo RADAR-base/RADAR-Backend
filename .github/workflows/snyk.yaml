@@ -14,4 +14,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           DEBUG: '*snyk*'
         with:
-          args: --all-projects --configuration-matching='^runtimeClasspath$' --severity-threshold=high
+          args: --all-projects --configuration-matching='^runtimeClasspath$' --severity-threshold=high --policy-path=$PWD/.snyk
