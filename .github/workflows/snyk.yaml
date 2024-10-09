@@ -1,0 +1,16 @@
+name: Snyk test
+on:
+  pull_request:
+    branches: [ master, dev ]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/gradle-jdk17@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --configuration-matching='^runtimeClasspath$' --severity-threshold=high
