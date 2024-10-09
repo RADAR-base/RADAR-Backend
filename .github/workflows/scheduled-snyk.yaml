@@ -1,0 +1,35 @@
+name: Snyk scheduled test
+on:
+  schedule:
+    - cron: '0 2 * * 1'
+  push:
+    branches:
+      - master
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    env:
+      REPORT_FILE: test.json
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/gradle-jdk17@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --configuration-matching='^runtimeClasspath$' --fail-on=upgradable --severity-threshold=high --json-file-output=${{ env.REPORT_FILE }}
+
+      - name: Report new vulnerabilities
+        uses: thehyve/report-vulnerability@master
+        if: success() || failure()
+        with:
+          report-file: ${{ env.REPORT_FILE }}
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
