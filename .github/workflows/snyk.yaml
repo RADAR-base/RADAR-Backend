@@ -12,5 +12,6 @@ jobs:
         uses: snyk/actions/gradle-jdk17@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          DEBUG: '*snyk*'
         with:
           args: --all-projects --configuration-matching='^runtimeClasspath$' --severity-threshold=high
