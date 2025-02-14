@@ -1,0 +1,38 @@
+name: Snyk scheduled code base scan
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node
+        with:
+          node-version: 16
+          cache: npm
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/gradle-jdk17@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: >-
+            --all-projects
+            --configuration-matching='^runtimeClasspath$'
+            --fail-on=upgradable
+            --severity-threshold=high
+            --policy-path=.snyk
+            --org=radar-base
+            --sarif-file-output=snyk.sarif
+
+      # Detected vulnerabilities will appear on Github in Security->Code_scanning_alerts tab
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
