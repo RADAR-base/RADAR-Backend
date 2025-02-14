@@ -1,9 +1,19 @@
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+        maven {
+            url = uri("https://nexus.web.cern.ch/nexus/content/repositories/public/")
+        }
+    }
+}
+
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
-    id 'com.jfrog.bintray' version '1.8.1' apply false
-
+    id 'com.jfrog.bintray' version '1.8.5' apply false
 }
 
 //---------------------------------------------------------------------------//
