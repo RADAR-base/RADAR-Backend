@@ -2,8 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     id 'application'
-    id 'com.jfrog.bintray' version '1.8.1' apply false
-
+    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
 }
 
 //---------------------------------------------------------------------------//
@@ -17,8 +16,8 @@ mainClassName = 'org.radarcns.RadarBackend'
 applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
 
 
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+targetCompatibility = '17'
+sourceCompatibility = '17'
 
 ext {
     moduleDescription = 'Kafka backend for processing device data.'
@@ -39,13 +38,14 @@ ext {
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.4'
     mockitoVersion = '2.19.1'
-    radarCommonsVersion = '0.10.0'
-    radarSchemasVersion = '0.4.0'
+    radarCommonsVersion = '1.2.4'
+    radarSchemasVersion = '0.8.15'
     subethamailVersion = '3.1.7'
     jsoupVersion = '1.11.3'
     slf4jVersion = '1.7.25'
     log4jVersion = '1.2.17'
     avroVersion = '1.8.2'
+    kotlinVersion = '1.9.24'
 }
 
 //---------------------------------------------------------------------------//
@@ -55,26 +55,30 @@ ext {
 // In this section you declare where to find the dependencies of your project
 repositories {
     mavenCentral()
-    // Non-jcenter radar releases
-    maven { url 'http://dl.bintray.com/radar-cns/org.radarcns' }
     // Kafka/confluent releases
-    maven { url 'http://packages.confluent.io/maven/' }
-    // For working with dev-branches
-    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url 'https://packages.confluent.io/maven/' }
+    // For working with dev-branches (if really needed); prefer HTTPS
+    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
     // Github code
     maven { url 'https://jitpack.io' }
+    // RADAR-Base releases
+    maven { url 'https://repo1.maven.org/maven2/' }
 }
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile group: 'org.radarcns', name: 'radar-commons', version: radarCommonsVersion
-    compile group: 'org.apache.avro', name: 'avro', version: avroVersion
-    compile group: 'org.radarcns', name: 'radar-commons-testing', version: radarCommonsVersion
-    compile group: 'org.radarcns', name: 'radar-schemas-commons', version: radarSchemasVersion
+    implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
+    implementation group: 'org.radarbase', name: 'radar-commons-server', version: radarCommonsVersion
+    implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
+    implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
+    implementation group: 'org.radarbase', name: 'radar-schemas-commons', version: radarSchemasVersion
+
+    // Kotlin stdlib
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: kotlinVersion
 
     // Kafka streaming API
-    compile group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    compile (group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion) {
+    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
+    implementation (group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
         exclude group: 'log4j', module: 'log4j'
         exclude group: 'jline', module: 'jline'
@@ -82,23 +86,27 @@ dependencies {
     }
 
     // Nonnull annotation
-    compile group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
+    implementation group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
 
     // Command-line interface
-    compile group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    implementation group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
 
     // Configuration @JsonProperty
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
 
     // Monitor mail sending
-    compile group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
-    compile group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
+    implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
 
     // JSoup html parser
-    compile group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
+    implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
 
     runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
     runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+}
+
+tasks.withType(ProcessResources) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 if (!hasProperty('profile')) {
@@ -106,3 +114,15 @@ if (!hasProperty('profile')) {
 }
 
 apply from: "gradle/profile.${profile}.gradle"
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}

@@ -18,9 +18,9 @@ dependencies {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        csv.enabled false
-        html.enabled true
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
     }
     executionData test, integrationTest
 }
