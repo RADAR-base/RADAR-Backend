@@ -106,7 +106,7 @@ public class KafkaMonitorFactoryTest {
 
     public static RadarPropertyHandler getRadarPropertyHandler(ConfigRadar config, TemporaryFolder folder) throws IOException {
         File tmpConfig = folder.newFile("radar.yml");
-        new YamlConfigLoader().store(tmpConfig, config);
+        new YamlConfigLoader().store(tmpConfig.toPath(), config);
 
         RadarPropertyHandler properties = new RadarPropertyHandlerImpl();
         properties.load(tmpConfig.getAbsolutePath());

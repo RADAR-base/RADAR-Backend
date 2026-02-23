@@ -43,7 +43,7 @@ public class MockProducerCommand implements SubCommand {
         File mockFile = options.getMockFile();
 
         if (mockFile != null) {
-            MockConfig mockConfig = new YamlConfigLoader().load(mockFile, MockConfig.class);
+            MockConfig mockConfig = new YamlConfigLoader().load(mockFile.toPath(), MockConfig.class);
             producerConfig.setData(mockConfig.getData());
         } else {
             producerConfig.setNumberOfDevices(options.getNumMockDevices());
@@ -56,15 +56,11 @@ public class MockProducerCommand implements SubCommand {
 
     @Override
     public void start() throws IOException {
-        producer.start();
+//        producer.start();
     }
 
     @Override
     public void shutdown() throws IOException, InterruptedException {
-        try {
-            producer.shutdown();
-        } catch (SchemaValidationException e) {
-            logger.error("Data did not match schema", e);
-        }
+        //            producer.shutdown();
     }
 }
