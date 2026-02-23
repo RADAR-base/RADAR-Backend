@@ -18,7 +18,7 @@ package org.radarbase.util.serde;
 
 import java.nio.charset.Charset;
 import junit.framework.TestCase;
-import org.radarbase.kafka.ObservationKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class JsonDeserializerTest extends TestCase {
     public void testSerialize() throws Exception {

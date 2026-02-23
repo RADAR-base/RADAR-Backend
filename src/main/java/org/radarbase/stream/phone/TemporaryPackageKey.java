@@ -14,7 +14,7 @@ import org.apache.avro.specific.SpecificData;
 @org.apache.avro.specific.AvroGenerated
 public class TemporaryPackageKey extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   private static final long serialVersionUID = 5825691401492875312L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarcns.stream.phone\",\"fields\":[{\"name\":\"projectId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Project ID.\"},{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User ID.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Source ID.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarbase.stream.phone\",\"fields\":[{\"name\":\"projectId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Project ID.\"},{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User ID.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Source ID.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();

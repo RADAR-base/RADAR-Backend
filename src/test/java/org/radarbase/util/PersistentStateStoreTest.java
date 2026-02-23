@@ -27,7 +27,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.radarbase.kafka.ObservationKey;
+import org.radarcns.kafka.ObservationKey;
 import org.radarbase.monitor.BatteryLevelMonitor.BatteryLevelState;
 
 public class PersistentStateStoreTest {

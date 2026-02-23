@@ -23,8 +23,8 @@ import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.internals.TimeWindow;
 import org.junit.Before;
 import org.junit.Test;
-import org.radarbase.kafka.AggregateKey;
-import org.radarbase.kafka.ObservationKey;
+import org.radarcns.kafka.AggregateKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class RadarUtilsTest {
 

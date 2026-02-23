@@ -56,7 +56,7 @@ The RADAR command-line has three subcommands: `stream`, `monitor` and `mock`. Th
     radar-backend -c path/to/radar.yml stream
     ```
 
-The phone usage event stream uses an internal cache of 1 million elements, which may take about 50 MB of memory. Adjust `org.radarcns.stream.phone.PhoneUsageStream.MAX_CACHE_SIZE` to change it. 
+The phone usage event stream uses an internal cache of 1 million elements, which may take about 50 MB of memory. Adjust `org.radarbase.stream.phone.PhoneUsageStream.MAX_CACHE_SIZE` to change it. 
 
 ### RADAR-backend monitors
 

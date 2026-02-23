@@ -17,7 +17,7 @@
 package org.radarbase.util.serde;
 
 import junit.framework.TestCase;
-import org.radarbase.kafka.ObservationKey;
+import org.radarcns.kafka.ObservationKey;
 
 public class JsonSerializerTest extends TestCase {
     public void testSerialize() throws Exception {

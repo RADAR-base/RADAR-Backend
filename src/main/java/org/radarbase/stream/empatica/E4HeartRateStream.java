@@ -45,6 +45,10 @@ public class E4HeartRateStream extends
             StreamDefinition definition,
             @Nonnull KStream<ObservationKey, EmpaticaE4InterBeatInterval> kstream) {
         return aggregateCustomNumeric(definition, kstream,
-                v -> 60d / (Double) v.getInterBeatInterval(), "heartRate");
+                v -> 60d / floatToDouble(v.getInterBeatInterval()), "heartRate");
+    }
+
+    private double floatToDouble(float value) {
+        return Double.parseDouble(Float.toString(value));
     }
 }
