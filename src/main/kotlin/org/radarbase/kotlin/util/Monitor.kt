@@ -25,10 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger
 class Monitor(private val log: Logger, private val message: String) : Runnable {
     private val count = AtomicInteger(0)
 
-    init {
-        requireNotNull(log) { "Argument log may not be null" }
-    }
-
     /**
      * Logs the current count and, if applicable buffer size. This resets the current count to 0.
      */

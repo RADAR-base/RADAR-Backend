@@ -28,7 +28,6 @@ class RadarThreadFactoryBuilder {
     private var priority = Thread.NORM_PRIORITY
 
     fun setNamePrefix(namePrefix: String): RadarThreadFactoryBuilder {
-        requireNotNull(namePrefix) { "namePrefix cannot be null" }
         this.namePrefix = namePrefix
         return this
     }
