@@ -4,20 +4,20 @@ import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.WindowStore
-import org.radarbase.stream.collector.AggregateListCollector
-import org.radarbase.stream.collector.NumericAggregateCollector
+import org.radarbase.stream.collector.AggregateListState
+import org.radarbase.stream.collector.NumericAggregateState
 import org.radarbase.stream.phone.PhoneUsageCollector
 
 class RadarSerdes private constructor() {
-    private val numericCollector: Serde<NumericAggregateCollector> =
-        RadarSerde(NumericAggregateCollector::class.java).getSerde()
-    private val aggregateListCollector: Serde<AggregateListCollector> =
-        RadarSerde(AggregateListCollector::class.java).getSerde()
+    private val numericCollector: Serde<NumericAggregateState> =
+        RadarSerde(NumericAggregateState::class.java).getSerde()
+    private val aggregateListCollector: Serde<AggregateListState> =
+        RadarSerde(AggregateListState::class.java).getSerde()
     private val phoneUsageCollector: Serde<PhoneUsageCollector> =
         RadarSerde(PhoneUsageCollector::class.java).getSerde()
 
-    fun getNumericAggregateCollector(): Serde<NumericAggregateCollector> = numericCollector
-    fun getAggregateListCollector(): Serde<AggregateListCollector> = aggregateListCollector
+    fun getNumericAggregateCollector(): Serde<NumericAggregateState> = numericCollector
+    fun getAggregateListCollector(): Serde<AggregateListState> = aggregateListCollector
     fun getPhoneUsageCollector(): Serde<PhoneUsageCollector> = phoneUsageCollector
 
     companion object {
