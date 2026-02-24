@@ -23,7 +23,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSenders
 import org.radarbase.kotlin.util.Monitor
@@ -56,8 +56,8 @@ class DisconnectMonitor(
     private val message: String?
 
     init {
-        val config = radar.getRadarProperties().disconnectMonitor
-        timeUntilReportedMissing = Duration.ofSeconds(config.timeout)
+        val config = radar.radarProperties.disconnectMonitor
+        timeUntilReportedMissing = Duration.ofSeconds(config!!.timeout)
         numRepetitions = config.alertRepetitions
         repeatInterval = Duration.ofSeconds(config.alertRepeatInterval)
         message = config.message

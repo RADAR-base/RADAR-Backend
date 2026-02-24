@@ -40,7 +40,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         val future: ScheduledFuture<*>?
         if (monitorLog != null) {
             monitor = Monitor(monitorLog, "records have been read from ${def.inputTopic} to ${def.outputTopic}")
-            future = master.addMonitor(monitor as org.radarbase.util.Monitor)
+            future = master.addMonitor(monitor)
         } else {
             monitor = null
             future = null

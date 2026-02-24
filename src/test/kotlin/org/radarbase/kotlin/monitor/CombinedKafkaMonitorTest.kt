@@ -21,14 +21,12 @@ import org.junit.Test
 import org.mockito.Mockito.*
 import java.io.IOException
 import java.time.Duration
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 
 class CombinedKafkaMonitorTest {
 
     @Test(expected = IOException::class)
-    @Throws(Exception::class)
     fun testExceptionFlow() {
         val kafkaMonitor1 = mock(KafkaMonitor::class.java)
         val kafkaMonitor2 = mock(KafkaMonitor::class.java)
@@ -50,14 +48,13 @@ class CombinedKafkaMonitorTest {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testFlow() {
         val kafkaMonitor1 = mock(KafkaMonitor::class.java)
         val kafkaMonitor2 = mock(KafkaMonitor::class.java)
 
         val km = CombinedKafkaMonitor(Stream.of(kafkaMonitor1, kafkaMonitor2))
 
-        val executor = Executors.newSingleThreadExecutor()
+        val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
         executor.submit {
             try {
                 km.start()

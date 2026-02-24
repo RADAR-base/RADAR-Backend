@@ -19,10 +19,10 @@ package org.radarbase.kotlin.monitor
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSenders
-import org.radarbase.util.RadarSingletonFactory
+import org.radarbase.kotlin.util.RadarSingletonFactory
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
@@ -139,7 +139,7 @@ class BatteryLevelMonitor(
         @JvmStatic
         @Throws(IOException::class)
         fun main(args: Array<String>) {
-            val radarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler()
+            val radarPropertyHandler = RadarSingletonFactory.radarPropertyHandler
             radarPropertyHandler.load(null)
 
             val monitor = BatteryLevelMonitor(radarPropertyHandler,

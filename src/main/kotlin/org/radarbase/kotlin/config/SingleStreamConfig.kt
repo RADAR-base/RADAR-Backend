@@ -11,7 +11,6 @@ open class SingleStreamConfig {
 
     @JsonProperty
     var properties: Map<String, String> = emptyMap()
-        get() = field ?: emptyMap()
 
     @JsonProperty
     var priority: Priority = Priority.NORMAL

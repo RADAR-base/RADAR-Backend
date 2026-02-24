@@ -17,8 +17,10 @@
 package org.radarbase.kotlin.monitor
 
 import org.radarbase.config.MonitorConfig as JavaMonitorConfig
+import org.radarbase.config.NotifyConfig as JavaNotifyConfig
 import org.radarbase.config.RadarPropertyHandler as JavaRadarPropertyHandler
 import org.radarbase.kotlin.config.MonitorConfig
+import org.radarbase.kotlin.config.NotifyConfig
 import org.radarbase.kotlin.config.RadarBackendOptions
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarbase.util.EmailSenders
@@ -65,7 +67,7 @@ class KafkaMonitorFactory(
         }
         val logInterval = config.logInterval.toLong()
 
-        return BatteryLevelMonitor(properties as JavaRadarPropertyHandler, topics, senders, minLevel, logInterval)
+        return BatteryLevelMonitor(properties, topics, senders, minLevel, logInterval)
     }
 
     private fun createDisconnectMonitor(): KafkaMonitor? {
@@ -75,15 +77,22 @@ class KafkaMonitorFactory(
         }
         val senders = getSenders(config)
         val topics = getTopics(config, "android_empatica_e4_temperature")
-        return DisconnectMonitor(properties as JavaRadarPropertyHandler, topics, "disconnect_monitor", senders)
+        return DisconnectMonitor(properties, topics, "disconnect_monitor", senders)
     }
 
     private fun getSenders(config: MonitorConfig?): EmailSenders? {
-        return if (config?.notifyConfig != null) {
-            EmailSenders.parseConfig(config as JavaMonitorConfig)
-        } else {
-            null
+        if (config?.notifyConfig == null) {
+            return null
         }
+        val javaConfig = JavaMonitorConfig()
+        javaConfig.notifyConfig = config.notifyConfig?.map { c -> JavaNotifyConfig(c.projectId, c.emailAddress) }
+        javaConfig.emailHost = config.emailHost
+        javaConfig.emailPort = config.emailPort
+        javaConfig.emailUser = config.emailUser
+        javaConfig.logInterval = config.logInterval
+        javaConfig.message = config.message
+        javaConfig.topics = config.topics
+        return EmailSenders.parseConfig(javaConfig)
     }
 
     private fun getTopics(config: MonitorConfig?, defaultTopic: String): Collection<String> {

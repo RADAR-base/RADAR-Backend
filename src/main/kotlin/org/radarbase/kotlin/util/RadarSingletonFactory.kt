@@ -16,8 +16,8 @@
 
 package org.radarbase.kotlin.util
 
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.RadarPropertyHandlerImpl
+import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.RadarPropertyHandlerImpl
 
 /**
  * SingletonFactory of RadarBackend project. This factory composites all singleton objects that need

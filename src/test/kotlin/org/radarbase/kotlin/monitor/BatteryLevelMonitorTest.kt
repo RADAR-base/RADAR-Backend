@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.*
-import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.config.RadarPropertyHandler as JavaRadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel
 import org.radarbase.util.EmailSender

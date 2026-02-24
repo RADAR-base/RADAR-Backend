@@ -3,8 +3,6 @@ package org.radarbase.kotlin.stream
 import org.radarbase.config.RadarPropertyHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.config.SubCommand
-import org.radarbase.topic.KafkaTopic
-import org.radarbase.util.Monitor
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -137,7 +135,7 @@ open class StreamMaster(
         )
     }
 
-    fun addMonitor(monitor: Monitor): ScheduledFuture<*> {
+    fun addMonitor(monitor: org.radarbase.kotlin.util.Monitor): ScheduledFuture<*> {
         return executor.scheduleAtFixedRate(monitor, 0, 30, TimeUnit.SECONDS)
     }
 

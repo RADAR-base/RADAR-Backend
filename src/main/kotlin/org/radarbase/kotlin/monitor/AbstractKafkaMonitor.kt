@@ -30,7 +30,7 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.InterruptException
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.errors.WakeupException
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.PersistentStateStore
 import org.slf4j.LoggerFactory
@@ -87,14 +87,14 @@ abstract class AbstractKafkaMonitor<K, V, S>(
             radar.getPersistentStateStore()
         } catch (ex: IOException) {
             logger.warn("Cannot get persistent state store {}. Not persisting state.",
-                stateDefault?.let { it!!::class.java.name } ?: "null", ex)
+                stateDefault?.let { it::class.java.name } ?: "null", ex)
             null
         }
 
         var localState = stateDefault
         if (stateStore != null && stateDefault != null) {
             try {
-                localState = stateStore.retrieveState(groupId, this.clientId, stateDefault)
+                localState = stateStore.retrieveState(groupId, this.clientId, stateDefault!!)
                 logger.info("Using existing {} from persistence store.", stateDefault!!::class.java.name)
             } catch (ex: IOException) {
                 logger.warn("Cannot retrieve persistent state {}. Restarting from empty state.",

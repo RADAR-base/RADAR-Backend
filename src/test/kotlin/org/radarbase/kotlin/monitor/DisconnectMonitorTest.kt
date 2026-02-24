@@ -89,7 +89,7 @@ class DisconnectMonitorTest {
 
         val properties = KafkaMonitorFactoryTest.getRadarPropertyHandler(config, folder)
 
-        val monitor = DisconnectMonitor(properties as JavaRadarPropertyHandler, listOf("mytopic"), "mygroup", senders)
+        val monitor = DisconnectMonitor(properties, listOf("mytopic"), "mygroup", senders)
         monitor.startScheduler()
 
         assertEquals(timeout, monitor.pollTimeout)
