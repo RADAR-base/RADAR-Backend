@@ -95,7 +95,7 @@ class RadarBackend(
             "monitor" -> KafkaMonitorFactory(options, radarPropertyHandler).createMonitor()
             "mock" -> MockProducerCommand(options, radarPropertyHandler)
             else -> throw IllegalArgumentException("Unknown subcommand ${options.subCommand}")
-        } as SubCommand
+        }
     }
 
     companion object {
