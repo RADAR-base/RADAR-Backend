@@ -16,7 +16,7 @@
 
 package org.radarbase.kotlin.config
 
-import org.radarbase.util.PersistentStateStore
+import org.radarbase.kotlin.util.PersistentStateStore
 import java.io.IOException
 
 /**

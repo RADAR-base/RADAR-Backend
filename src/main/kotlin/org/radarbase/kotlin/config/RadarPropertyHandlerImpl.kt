@@ -18,8 +18,8 @@ package org.radarbase.kotlin.config
 
 import org.radarbase.RadarBackend
 import org.radarbase.config.YamlConfigLoader
-import org.radarbase.util.PersistentStateStore
-import org.radarbase.util.YamlPersistentStateStore
+import org.radarbase.kotlin.util.PersistentStateStore
+import org.radarbase.kotlin.util.YamlPersistentStateStore
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException

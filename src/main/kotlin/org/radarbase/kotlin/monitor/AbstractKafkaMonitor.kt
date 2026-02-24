@@ -32,7 +32,7 @@ import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.errors.WakeupException
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
-import org.radarbase.util.PersistentStateStore
+import org.radarbase.kotlin.util.PersistentStateStore
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Duration

@@ -31,7 +31,7 @@ import org.radarbase.kotlin.config.KafkaProperty
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarbase.kotlin.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
-import org.radarbase.util.RadarSingletonFactory
+import org.radarbase.kotlin.util.RadarSingletonFactory
 import java.io.IOException
 import java.util.stream.Stream
 
@@ -53,7 +53,7 @@ class SensorStreamWorkerKotlinTest {
         val sensorTopic = StreamDefinition(KafkaTopic(topicName), KafkaTopic(topicName + "_output"))
         `when`(aggregator.getStreamDefinitions()).thenReturn(Stream.of(sensorTopic))
 
-        val propertyHandler: RadarPropertyHandler = RadarSingletonFactory.getRadarPropertyHandler()
+        val propertyHandler: RadarPropertyHandler = RadarSingletonFactory.radarPropertyHandler
         propertyHandler.load("src/test/resources/config/radar.yml")
         val kafkaProperty: KafkaProperty = propertyHandler.kafkaProperties
         `when`(aggregator.getStreamProperties(eq(sensorTopic))).thenReturn(

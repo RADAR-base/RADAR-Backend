@@ -1,7 +1,6 @@
 package org.radarbase.kotlin.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.java.stream.phone.PhoneUsageCollector
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarbase.kotlin.stream.SensorStreamWorker
 import org.radarbase.kotlin.stream.StreamDefinition

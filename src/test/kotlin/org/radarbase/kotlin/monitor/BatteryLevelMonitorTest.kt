@@ -27,9 +27,9 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.*
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel
-import org.radarbase.util.EmailSender
+import org.radarbase.kotlin.util.EmailSender
 import org.radarbase.kotlin.util.EmailSenders
-import org.radarbase.util.YamlPersistentStateStore
+import org.radarbase.kotlin.util.YamlPersistentStateStore
 import java.util.*
 
 class BatteryLevelMonitorTest {
