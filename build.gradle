@@ -36,7 +36,7 @@ ext {
     javaMailVersion = '1.6.1'
     junitVersion = '4.12'
     findbugVersion = '3.0.2'
-    commonsCliVersion = '1.4'
+    commonsCliVersion = '1.11.0'
     mockitoVersion = '5.21.0'
     radarCommonsVersion = '1.2.4'
     radarSchemasVersion = '0.8.15'

@@ -41,7 +41,7 @@ class RadarBackendOptions(private val cli: CommandLine) {
     }
 
     val propertyPath: String?
-        get() = cli.getOptionValue("config", null)
+        get() = cli.getOptionValue("config")
 
     val numMockDevices: Int
         get() = cli.getOptionValue("devices", "1").toInt()
@@ -50,7 +50,7 @@ class RadarBackendOptions(private val cli: CommandLine) {
         get() = cli.hasOption("direct")
 
     val mockFile: File?
-        get() = cli.getOptionValue("file", null)?.let { File(it) }
+        get() = cli.getOptionValue("file")?.let { File(it) }
 
     companion object {
         private val log = LoggerFactory.getLogger(RadarBackendOptions::class.java)
