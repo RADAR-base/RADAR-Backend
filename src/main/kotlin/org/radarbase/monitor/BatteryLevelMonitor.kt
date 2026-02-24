@@ -26,7 +26,7 @@ import org.radarbase.util.RadarSingletonFactory
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
-import javax.mail.MessagingException
+import jakarta.mail.MessagingException
 
 /**
  * Monitors the battery level for any devices running empty. It will optionally notify someone when

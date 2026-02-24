@@ -1,0 +1,59 @@
+[versions]
+# Project and Plugins
+kotlin = "1.9.24"
+
+# Dependencies
+confluent = "8.1.1"
+hamcrest = "1.3"
+kafka = "3.6.1"
+jackson = "2.21"
+javaMail = "2.1.5"
+junit = "4.12"
+findbug = "3.0.2"
+commonsCli = "1.11.0"
+mockito = "5.21.0"
+radarCommons = "1.2.4"
+radarSchemas = "0.8.15"
+jsoup = "1.11.3"
+slf4j = "1.7.25"
+log4j = "1.2.17"
+avro = "1.12.1"
+greenmail = "2.1.0" # Use 2.x for Jakarta support
+
+[libraries]
+# RADAR-Base
+radar-commons = { group = "org.radarbase", name = "radar-commons", version.ref = "radarCommons" }
+radar-commons-server = { group = "org.radarbase", name = "radar-commons-server", version.ref = "radarCommons" }
+radar-commons-testing = { group = "org.radarbase", name = "radar-commons-testing", version.ref = "radarCommons" }
+radar-schemas-commons = { group = "org.radarbase", name = "radar-schemas-commons", version.ref = "radarSchemas" }
+
+# Kotlin
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
+
+# Kafka & Confluent
+kafka-streams = { group = "org.apache.kafka", name = "kafka-streams", version.ref = "kafka" }
+kafka-streams-avro-serde = { group = "io.confluent", name = "kafka-streams-avro-serde", version.ref = "confluent" }
+avro = { group = "org.apache.avro", name = "avro", version.ref = "avro" }
+
+# Utilities
+jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "findbug" }
+commons-cli = { group = "commons-cli", name = "commons-cli", version.ref = "commonsCli" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+jakarta-mail = { group = "jakarta.mail", name = "jakarta.mail-api", version.ref = "javaMail" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+
+# Logging
+log4j = { group = "log4j", name = "log4j", version.ref = "log4j" }
+slf4j-log4j = { group = "org.slf4j", name = "slf4j-log4j12", version.ref = "slf4j" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+hamcrest-all = { group = "org.hamcrest", name = "hamcrest-all", version.ref = "hamcrest" }
+greenmail = { group = "com.icegreen", name = "greenmail", version.ref = "greenmail" }
+
+[plugins]
+
+[bundles]
+# This allows you to include both logging libs with one line
+logging-log4j = ["log4j", "slf4j-log4j"]

@@ -32,8 +32,8 @@ ext {
     confluentVersion = '8.1.1'
     hamcrestVersion = '1.3'
     kafkaVersion = '3.6.1'
-    jacksonVersion = '2.9.6'
-    javaMailVersion = '1.6.1'
+    jacksonVersion = '2.21'
+    javaMailVersion = '2.1.5'
     junitVersion = '4.12'
     findbugVersion = '3.0.2'
     commonsCliVersion = '1.11.0'
@@ -67,44 +67,41 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    implementation group: 'org.radarbase', name: 'radar-commons', version: radarCommonsVersion
-    implementation group: 'org.radarbase', name: 'radar-commons-server', version: radarCommonsVersion
-    implementation group: 'org.apache.avro', name: 'avro', version: avroVersion
-    implementation group: 'org.radarbase', name: 'radar-commons-testing', version: radarCommonsVersion
-    implementation group: 'org.radarbase', name: 'radar-schemas-commons', version: radarSchemasVersion
+    implementation(libs.radar.commons)
+    implementation(libs.radar.commons.server)
+    implementation(libs.avro)
+    implementation(libs.radar.commons.testing)
+    implementation(libs.radar.schemas.commons)
 
-    // Kotlin stdlib
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: kotlinVersion
+    implementation(libs.kotlin.stdlib)
 
-    // Kafka streaming API
-    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafkaVersion
-    implementation (group: 'io.confluent', name: 'kafka-streams-avro-serde', version: confluentVersion) {
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j'
-        exclude group: 'jline', module: 'jline'
-        exclude group: 'io.netty', module: 'netty'
+    implementation(libs.kafka.streams)
+    implementation(libs.kafka.streams.avro.serde) {
+        exclude(group: 'org.slf4j', module: 'slf4j-log4j12')
+        exclude(group: 'log4j', module: 'log4j')
+        exclude(group: 'jline', module: 'jline')
+        exclude(group: 'io.netty', module: 'netty')
     }
 
-    // Nonnull annotation
-    implementation group: 'com.google.code.findbugs' , name: 'jsr305' , version: findbugVersion
+    implementation(libs.jsr305)
+    implementation(libs.commons.cli)
+    implementation(libs.jackson.annotations)
+    implementation(libs.jakarta.mail)
+    implementation(libs.jsoup)
 
-    // Command-line interface
-    implementation group: 'commons-cli', name: 'commons-cli', version: commonsCliVersion
+    runtimeOnly(libs.log4j)
+    runtimeOnly(libs.slf4j.log4j)
 
-    // Configuration @JsonProperty
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.hamcrest.all)
 
-    // Monitor mail sending
-    implementation group: 'javax.mail', name: 'javax.mail-api', version: javaMailVersion
-    implementation group: 'com.sun.mail', name: 'javax.mail', version: javaMailVersion
+    // Mock mail server
+    testImplementation(libs.greenmail)
 
-    // JSoup html parser
-    implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
-
-    runtimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
-    runtimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-
-    testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+    // Using the bundle for Logging
+    testImplementation(libs.bundles.logging.log4j)
 }
 
 tasks.withType(ProcessResources) {

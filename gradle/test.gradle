@@ -18,22 +18,6 @@ sourceSets {
     }
 }
 
-dependencies {
-    // Testing
-    testImplementation group: 'junit', name: 'junit', version: junitVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testImplementation group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrestVersion
-
-    // Mock mail server
-    testImplementation group: 'org.subethamail', name: 'subethasmtp', version: subethamailVersion
-
-//    integrationTestImplementation group: 'org.radarcns', name: 'radar-schemas-tools', version: radarSchemasVersion
-    testImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-    integrationTestImplementation group: 'log4j', name: 'log4j', version: log4jVersion
-    integrationTestImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-}
-
 tasks.matching {it instanceof Test}.all {
     testLogging {
         showStandardStreams = true

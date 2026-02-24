@@ -33,7 +33,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.*
-import javax.mail.MessagingException
+import jakarta.mail.MessagingException
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.

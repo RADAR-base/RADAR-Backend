@@ -16,32 +16,35 @@
 
 package org.radarbase.util
 
+import jakarta.mail.Message
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
-import javax.mail.Message.RecipientType
 
 class EmailSenderTest {
     @Rule @JvmField
-    val emailServer = EmailServerRule(2525)
+    val emailServer = EmailServerRule(2525, "localhost")
 
     @Test
     fun testEmail() {
         val sender = EmailSender("localhost", 2525, "no-reply@radar-cns.org", listOf("test@radar-cns.org"))
 
-        assertEquals(emptyList<Any>(), emailServer.messages())
+        assertEquals(0, emailServer.messages()?.size)
 
         sender.sendEmail("hi", "it's me")
 
         val messages = emailServer.messages()
-        assertEquals(1, messages.size)
+        assertNotNull(messages)
+        assertEquals(1, messages!!.size)
         val mime = messages[0]
+        assertNotNull(mime)
 
-        assertEquals(1, mime.from.size)
+        assertEquals(1, mime!!.from.size)
         assertEquals("no-reply@radar-cns.org", mime.from[0].toString())
 
-        val to = mime.getRecipients(RecipientType.TO)
+        val to = mime.getRecipients(Message.RecipientType.TO)
         assertEquals(1, to.size)
         assertEquals("test@radar-cns.org", to[0].toString())
 
