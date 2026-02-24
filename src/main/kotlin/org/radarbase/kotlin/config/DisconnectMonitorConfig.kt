@@ -19,26 +19,14 @@ package org.radarbase.kotlin.config
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
- * POJO representing a monitor configuration
+ * POJO representing a disconnection status monitor configuration
  */
-open class MonitorConfig {
-    @JsonProperty("notify")
-    var notifyConfig: List<NotifyConfig>? = null
+class DisconnectMonitorConfig : MonitorConfig() {
+    var timeout: Long = 1800L // 30 minutes
 
-    @JsonProperty("email_host")
-    var emailHost: String? = null
+    @JsonProperty("alert_repeat_interval")
+    var alertRepeatInterval: Long = 86400 // 1 day
 
-    @JsonProperty("email_port")
-    var emailPort: Int = 0
-
-    @JsonProperty("email_user")
-    var emailUser: String? = null
-
-    @JsonProperty("log_interval")
-    var logInterval: Int = 1000
-
-    var topics: List<String>? = null
-
-    @JsonProperty("message")
-    var message: String? = null
+    @JsonProperty("alert_repetitions")
+    var alertRepetitions: Int = 0
 }

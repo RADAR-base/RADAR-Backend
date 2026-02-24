@@ -16,29 +16,22 @@
 
 package org.radarbase.kotlin.config
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import java.io.IOException
 
 /**
- * POJO representing a monitor configuration
+ * Subcommand of RadarBackend to run.
  */
-open class MonitorConfig {
-    @JsonProperty("notify")
-    var notifyConfig: List<NotifyConfig>? = null
+interface SubCommand {
+    /**
+     * Start the subcommand. The command is not guaranteed to return
+     * immediately.
+     * @throws IOException if the command cannot be started
+     * @throws InterruptedException if the command is interrupted
+     */
+    @Throws(IOException::class, InterruptedException::class)
+    fun start()
 
-    @JsonProperty("email_host")
-    var emailHost: String? = null
-
-    @JsonProperty("email_port")
-    var emailPort: Int = 0
-
-    @JsonProperty("email_user")
-    var emailUser: String? = null
-
-    @JsonProperty("log_interval")
-    var logInterval: Int = 1000
-
-    var topics: List<String>? = null
-
-    @JsonProperty("message")
-    var message: String? = null
+    /** Stop the subcommand, possibly waiting for it to complete. */
+    @Throws(IOException::class, InterruptedException::class)
+    fun shutdown()
 }

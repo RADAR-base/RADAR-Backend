@@ -35,7 +35,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         this.monitors = mutableListOf<ScheduledFuture<*>>()
     }
 
-    protected fun createBuilder(def: StreamDefinition): KeyValue<ScheduledFuture<*>?, KafkaStreams> {
+    internal fun createBuilder(def: StreamDefinition): KeyValue<ScheduledFuture<*>?, KafkaStreams> {
         val monitor: Monitor?
         val future: ScheduledFuture<*>?
         if (monitorLog != null) {
@@ -64,7 +64,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         return KeyValue.pair(future, KafkaStreams(builder.build(), properties))
     }
 
-    protected fun getStreamProperties(definition: StreamDefinition): Properties {
+    internal fun getStreamProperties(definition: StreamDefinition): Properties {
         val localClientId = buildString {
             append(javaClass.name)
             append("-")
@@ -91,7 +91,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         return props
     }
 
-    protected abstract fun implementStream(definition: StreamDefinition, kstream: KStream<K, V>): KStream<*, *>
+    internal abstract fun implementStream(definition: StreamDefinition, kstream: KStream<K, V>): KStream<*, *>
 
     override fun createStreams(): List<KafkaStreams>? {
         val streamBuilders = getStreamDefinitions()

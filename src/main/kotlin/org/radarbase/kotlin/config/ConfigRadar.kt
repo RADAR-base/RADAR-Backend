@@ -1,12 +1,25 @@
+/*
+ * Copyright 2017 King's College London and The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.radarbase.kotlin.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.radarbase.config.BatteryMonitorConfig
-import org.radarbase.config.DisconnectMonitorConfig
-import org.radarbase.config.SourceStatisticsStreamConfig
-import org.radarbase.config.StreamConfig
+import org.radarbase.config.ServerConfig
 import org.radarbase.config.YamlConfigLoader
-import java.util.Date
+import java.util.*
 
 /**
  * POJO representing the yml file
@@ -14,14 +27,14 @@ import java.util.Date
 class ConfigRadar {
     var released: Date? = null
     var version: String? = null
-    var zookeeper: List<org.radarbase.config.ServerConfig>? = null
-    var broker: List<org.radarbase.config.ServerConfig>? = null
+    var zookeeper: List<ServerConfig>? = null
+    var broker: List<ServerConfig>? = null
 
     @JsonProperty("schema_registry")
-    var schemaRegistry: List<org.radarbase.config.ServerConfig>? = null
+    var schemaRegistry: List<ServerConfig>? = null
 
     @JsonProperty("rest_proxy")
-    var restProxy: org.radarbase.config.ServerConfig? = null
+    var restProxy: ServerConfig? = null
 
     @JsonProperty("battery_monitor")
     var batteryMonitor: BatteryMonitorConfig? = null
@@ -43,17 +56,20 @@ class ConfigRadar {
     @JsonProperty("build_version")
     var buildVersion: String? = null
 
-    fun getZookeeperPaths(): String = zookeeper?.let { org.radarbase.config.ServerConfig.getPaths(it) }
-        ?: throw IllegalStateException("'zookeeper' is not configured")
+    val zookeeperPaths: String
+        get() = zookeeper?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("'zookeeper' is not configured")
 
-    fun getBrokerPaths(): String = broker?.let { org.radarbase.config.ServerConfig.getPaths(it) }
-        ?: throw IllegalStateException("Kafka 'broker' is not configured")
+    val brokerPaths: String
+        get() = broker?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("Kafka 'broker' is not configured")
 
-    fun getSchemaRegistryPaths(): String = schemaRegistry?.let { org.radarbase.config.ServerConfig.getPaths(it) }
-        ?: throw IllegalStateException("'schema_registry' is not configured")
+    val schemaRegistryPaths: String
+        get() = schemaRegistry?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("'schema_registry' is not configured")
 
-    fun getRestProxyPath(): String = restProxy?.path
-        ?: throw IllegalStateException("'rest_proxy' is not configured")
+    val restProxyPath: String
+        get() {
+            checkNotNull(restProxy) { "'rest_proxy' is not configured" }
+            return restProxy!!.path
+        }
 
     override fun toString(): String = YamlConfigLoader().prettyString(this)
 }

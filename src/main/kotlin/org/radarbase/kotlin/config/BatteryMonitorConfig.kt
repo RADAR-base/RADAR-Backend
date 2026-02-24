@@ -16,29 +16,9 @@
 
 package org.radarbase.kotlin.config
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
 /**
- * POJO representing a monitor configuration
+ * POJO representing a battery status monitor configuration
  */
-open class MonitorConfig {
-    @JsonProperty("notify")
-    var notifyConfig: List<NotifyConfig>? = null
-
-    @JsonProperty("email_host")
-    var emailHost: String? = null
-
-    @JsonProperty("email_port")
-    var emailPort: Int = 0
-
-    @JsonProperty("email_user")
-    var emailUser: String? = null
-
-    @JsonProperty("log_interval")
-    var logInterval: Int = 1000
-
-    var topics: List<String>? = null
-
-    @JsonProperty("message")
-    var message: String? = null
+class BatteryMonitorConfig : MonitorConfig() {
+    var level: String? = null
 }
