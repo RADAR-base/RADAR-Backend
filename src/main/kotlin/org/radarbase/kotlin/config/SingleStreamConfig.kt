@@ -2,7 +2,7 @@ package org.radarbase.kotlin.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
-import org.radarbase.config.RadarPropertyHandler.Priority
+import org.radarbase.kotlin.config.RadarPropertyHandler.Priority
 import java.util.*
 
 open class SingleStreamConfig {

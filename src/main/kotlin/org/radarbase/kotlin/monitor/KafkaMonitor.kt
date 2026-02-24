@@ -17,7 +17,7 @@
 package org.radarbase.kotlin.monitor
 
 import java.time.Duration
-import org.radarbase.config.SubCommand
+import org.radarbase.kotlin.config.SubCommand
 
 interface KafkaMonitor : SubCommand {
     val isShutdown: Boolean

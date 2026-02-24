@@ -18,7 +18,7 @@ package org.radarbase.producer;
 
 import java.io.File;
 import java.io.IOException;
-import org.apache.avro.SchemaValidationException;
+
 import org.radarbase.config.ConfigRadar;
 import org.radarbase.config.MockConfig;
 import org.radarbase.config.RadarBackendOptions;

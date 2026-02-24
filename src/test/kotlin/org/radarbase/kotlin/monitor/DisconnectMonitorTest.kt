@@ -25,18 +25,15 @@ import org.apache.kafka.common.TopicPartition
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.*
-import org.radarbase.config.RadarPropertyHandler as JavaRadarPropertyHandler
-import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSender
-import org.radarbase.util.EmailSenders
+import org.radarbase.kotlin.util.EmailSenders
 import org.radarbase.util.YamlPersistentStateStore
 import java.time.Duration
 import java.util.*

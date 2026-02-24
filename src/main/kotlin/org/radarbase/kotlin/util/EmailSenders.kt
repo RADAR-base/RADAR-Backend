@@ -1,6 +1,6 @@
 package org.radarbase.kotlin.util
 
-import org.radarbase.config.MonitorConfig
+import org.radarbase.kotlin.config.MonitorConfig
 import java.io.IOException
 
 /**
@@ -21,7 +21,7 @@ class EmailSenders(private val emailSenderMap: Map<String, EmailSender>) {
         @JvmStatic
         @Throws(IOException::class)
         fun parseConfig(config: MonitorConfig): EmailSenders {
-            val map = config.notifyConfig.associate { notifyConfig ->
+            val map = config.notifyConfig!!.associate { notifyConfig ->
                 notifyConfig.projectId to EmailSender(
                     config.emailHost,
                     config.emailPort,

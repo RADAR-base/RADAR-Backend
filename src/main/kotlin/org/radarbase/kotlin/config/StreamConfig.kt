@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
-import org.radarbase.config.RadarPropertyHandler.Priority
+import org.radarbase.kotlin.config.RadarPropertyHandler.Priority
 import org.radarbase.stream.TimeWindowMetadata
 import java.time.Duration
 import java.util.*

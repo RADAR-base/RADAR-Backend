@@ -25,7 +25,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarcns.kafka.ObservationKey
-import org.radarbase.util.EmailSenders
+import org.radarbase.kotlin.util.EmailSenders
 import org.radarbase.kotlin.util.Monitor
 import org.slf4j.LoggerFactory
 import java.text.DateFormat

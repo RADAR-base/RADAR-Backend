@@ -50,7 +50,6 @@ import org.radarbase.config.ConfigRadar;
 import org.radarbase.config.RadarPropertyHandler;
 import org.radarcns.kafka.ObservationKey;
 import org.radarbase.util.PersistentStateStore;
-import org.radarbase.util.RollingTimeAverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

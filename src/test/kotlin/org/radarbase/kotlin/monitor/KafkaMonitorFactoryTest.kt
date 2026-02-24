@@ -17,14 +17,11 @@
 package org.radarbase.kotlin.monitor
 
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
 import org.junit.Assert.*
 import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.radarbase.config.RadarPropertyHandler as JavaRadarPropertyHandler
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.kotlin.config.*
 import org.radarbase.kotlin.config.RadarPropertyHandler as KotlinRadarPropertyHandler
@@ -32,8 +29,6 @@ import org.radarbase.kotlin.config.RadarPropertyHandlerImpl as KotlinRadarProper
 import org.radarbase.util.EmailServerRule
 import java.io.File
 import java.io.IOException
-import java.util.*
-import java.util.stream.Stream
 
 class KafkaMonitorFactoryTest {
     @Rule

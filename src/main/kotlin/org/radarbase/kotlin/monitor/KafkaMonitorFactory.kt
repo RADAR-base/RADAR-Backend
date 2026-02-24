@@ -16,14 +16,11 @@
 
 package org.radarbase.kotlin.monitor
 
-import org.radarbase.config.MonitorConfig as JavaMonitorConfig
-import org.radarbase.config.NotifyConfig as JavaNotifyConfig
-import org.radarbase.config.RadarPropertyHandler as JavaRadarPropertyHandler
 import org.radarbase.kotlin.config.MonitorConfig
 import org.radarbase.kotlin.config.NotifyConfig
 import org.radarbase.kotlin.config.RadarBackendOptions
 import org.radarbase.kotlin.config.RadarPropertyHandler
-import org.radarbase.util.EmailSenders
+import org.radarbase.kotlin.util.EmailSenders
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
@@ -84,8 +81,8 @@ class KafkaMonitorFactory(
         if (config?.notifyConfig == null) {
             return null
         }
-        val javaConfig = JavaMonitorConfig()
-        javaConfig.notifyConfig = config.notifyConfig?.map { c -> JavaNotifyConfig(c.projectId, c.emailAddress) }
+        val javaConfig = MonitorConfig()
+        javaConfig.notifyConfig = config.notifyConfig?.map { c -> NotifyConfig(c.projectId, c.emailAddress) }
         javaConfig.emailHost = config.emailHost
         javaConfig.emailPort = config.emailPort
         javaConfig.emailUser = config.emailUser

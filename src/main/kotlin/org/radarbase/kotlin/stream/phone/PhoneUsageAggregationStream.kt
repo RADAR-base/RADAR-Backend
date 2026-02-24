@@ -1,7 +1,7 @@
 package org.radarbase.kotlin.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarbase.kotlin.stream.SensorStreamWorker
 import org.radarbase.kotlin.stream.StreamDefinition
 import org.radarbase.kotlin.util.serde.RadarSerdes

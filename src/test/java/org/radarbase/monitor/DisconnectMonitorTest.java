@@ -48,7 +48,7 @@ import org.radarcns.kafka.ObservationKey;
 import org.radarbase.monitor.DisconnectMonitor.DisconnectMonitorState;
 import org.radarbase.monitor.DisconnectMonitor.MissingRecordsReport;
 import org.radarbase.util.EmailSender;
-import org.radarbase.util.EmailSenders;
+import org.radarbase.java.util.EmailSenders;
 import org.radarbase.util.YamlPersistentStateStore;
 
 public class DisconnectMonitorTest {

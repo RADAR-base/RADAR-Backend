@@ -31,7 +31,7 @@ import javax.mail.internet.MimeMessage
 class EmailSender @Throws(IOException::class) constructor(
     host: String?,
     port: Int,
-    private val from: String,
+    private val from: String?,
     private val to: List<String>
 ) {
     private val session: Session
