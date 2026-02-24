@@ -13,6 +13,7 @@ import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.processor.*
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
+import org.radarbase.kotlin.monitor.AbstractKafkaMonitor
 import org.radarbase.kotlin.config.SourceStatisticsStreamConfig
 import org.radarbase.kotlin.stream.AbstractStreamWorker
 import org.radarbase.kotlin.util.serde.RadarSerde
@@ -151,7 +152,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             }
 
             val key: ObservationKey = try {
-                org.radarbase.monitor.AbstractKafkaMonitor.extractKey(genericKey, keySchema)
+                AbstractKafkaMonitor.extractKey(genericKey, keySchema)
             } catch (ex: IllegalArgumentException) {
                 logger.error("Could not deserialize key without projectId, userId or sourceId: {}", genericKey)
                 return

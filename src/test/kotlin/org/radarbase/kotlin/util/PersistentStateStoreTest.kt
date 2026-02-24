@@ -23,7 +23,7 @@ import org.hamcrest.core.Is.`is`
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.radarbase.monitor.BatteryLevelMonitor.BatteryLevelState
+import org.radarbase.kotlin.monitor.BatteryLevelMonitor.BatteryLevelState
 import org.radarcns.kafka.ObservationKey
 import java.io.File
 import java.nio.file.Files
