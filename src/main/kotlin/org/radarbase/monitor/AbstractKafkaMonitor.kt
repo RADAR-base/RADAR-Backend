@@ -16,7 +16,7 @@
 
 package org.radarbase.monitor
 
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
@@ -80,7 +80,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
         }
 
         val config = radar.radarProperties
-        properties.setProperty(SCHEMA_REGISTRY_URL_CONFIG, config.schemaRegistryPaths)
+        properties.setProperty(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, config.schemaRegistryPaths)
         properties.setProperty(BOOTSTRAP_SERVERS_CONFIG, config.brokerPaths)
 
         stateStore = try {

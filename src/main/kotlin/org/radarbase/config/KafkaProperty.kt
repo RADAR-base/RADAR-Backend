@@ -16,7 +16,7 @@
 
 package org.radarbase.config
 
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.streams.StreamsConfig
@@ -41,7 +41,7 @@ class KafkaProperty(private val configRadar: ConfigRadar) {
 
         props[StreamsConfig.APPLICATION_ID_CONFIG] = clientId
         props[StreamsConfig.BOOTSTRAP_SERVERS_CONFIG] = configRadar.brokerPaths
-        props[AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG] = configRadar.schemaRegistryPaths
+        props[AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG] = configRadar.schemaRegistryPaths
         props[StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.NUM_STREAM_THREADS_CONFIG] = streamConfig.threadsByPriority(singleStreamConfig.priority)
