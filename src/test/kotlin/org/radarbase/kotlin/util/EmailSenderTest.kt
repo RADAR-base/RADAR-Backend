@@ -19,7 +19,6 @@ package org.radarbase.kotlin.util
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import org.radarbase.util.EmailServerRule
 import java.io.IOException
 import javax.mail.Message.RecipientType
 
@@ -31,11 +30,11 @@ class EmailSenderTest {
     fun testEmail() {
         val sender = EmailSender("localhost", 2525, "no-reply@radar-cns.org", listOf("test@radar-cns.org"))
 
-        assertEquals(emptyList<Any>(), emailServer.messages)
+        assertEquals(emptyList<Any>(), emailServer.messages())
 
         sender.sendEmail("hi", "it's me")
 
-        val messages = emailServer.messages
+        val messages = emailServer.messages()
         assertEquals(1, messages.size)
         val mime = messages[0]
 
