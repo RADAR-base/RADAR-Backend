@@ -29,17 +29,17 @@ stream:
     session.timeout.ms: 20000
 
   streams:
-    - class: org.radarbase.stream.empatica.E4AccelerationStream
-    - class: org.radarbase.stream.empatica.E4BatteryLevelStream
-    - class: org.radarbase.stream.empatica.E4BloodVolumePulseStream
-    - class: org.radarbase.stream.empatica.E4ElectroDermalActivityStream
-    - class: org.radarbase.stream.empatica.E4HeartRateStream
-    - class: org.radarbase.stream.empatica.E4InterBeatIntervalStream
-    - class: org.radarbase.stream.empatica.E4TemperatureStream
-    - class: org.radarbase.stream.phone.PhoneAccelerationStream
-    - class: org.radarbase.stream.phone.PhoneBatteryStream
-    - class: org.radarbase.stream.phone.PhoneUsageStream
-    - class: org.radarbase.stream.phone.PhoneUsageAggregationStream
+    - class: org.radarbase.kotlin.stream.empatica.E4AccelerationStream
+    - class: org.radarbase.kotlin.stream.empatica.E4BatteryLevelStream
+    - class: org.radarbase.kotlin.stream.empatica.E4BloodVolumePulseStream
+    - class: org.radarbase.kotlin.stream.empatica.E4ElectroDermalActivityStream
+    - class: org.radarbase.kotlin.stream.empatica.E4HeartRateStream
+    - class: org.radarbase.kotlin.stream.empatica.E4InterBeatIntervalStream
+    - class: org.radarbase.kotlin.stream.empatica.E4TemperatureStream
+    - class: org.radarbase.kotlin.stream.phone.PhoneAccelerationStream
+    - class: org.radarbase.kotlin.stream.phone.PhoneBatteryStream
+    - class: org.radarbase.kotlin.stream.phone.PhoneUsageStream
+    - class: org.radarbase.kotlin.stream.phone.PhoneUsageAggregationStream
 
   #====================== Source statistics monitor ======================#
   source_statistics:
