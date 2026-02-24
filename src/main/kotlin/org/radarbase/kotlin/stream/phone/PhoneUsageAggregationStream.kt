@@ -1,6 +1,7 @@
 package org.radarbase.kotlin.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
+import org.radarbase.java.stream.phone.PhoneUsageCollector
 import org.radarbase.kotlin.config.RadarPropertyHandler
 import org.radarbase.kotlin.stream.SensorStreamWorker
 import org.radarbase.kotlin.stream.StreamDefinition
@@ -8,8 +9,6 @@ import org.radarbase.kotlin.util.serde.RadarSerdes
 import org.radarcns.kafka.AggregateKey
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.passive.phone.PhoneUsageEvent
-import org.radarbase.stream.phone.PhoneUsageCollector
-import org.radarbase.stream.phone.TemporaryPackageKey
 import org.radarcns.stream.aggregator.PhoneUsageAggregate
 import java.time.Duration
 

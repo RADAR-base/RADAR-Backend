@@ -20,8 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.radarbase.stream.AbstractStreamWorker.OUTPUT_LABEL
-import org.radarbase.stream.StreamDefinition
+import org.radarbase.kotlin.stream.AbstractStreamWorker.Companion.OUTPUT_LABEL
 import org.radarbase.topic.KafkaTopic
 import java.util.regex.Pattern
 

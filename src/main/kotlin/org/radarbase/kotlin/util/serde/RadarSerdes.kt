@@ -6,7 +6,7 @@ import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.WindowStore
 import org.radarbase.stream.collector.AggregateListState
 import org.radarbase.stream.collector.NumericAggregateState
-import org.radarbase.stream.phone.PhoneUsageCollector
+import org.radarbase.java.stream.phone.PhoneUsageCollector
 
 class RadarSerdes private constructor() {
     private val numericCollector: Serde<NumericAggregateState> =

@@ -1,7 +1,7 @@
 package org.radarbase.kotlin.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.radarbase.stream.statistics.SourceStatisticsStream
+import org.radarbase.kotlin.stream.statistics.SourceStatisticsStream
 
 class SourceStatisticsStreamConfig : SingleStreamConfig() {
     var name: String? = null

@@ -24,7 +24,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
-import org.radarbase.stream.DeviceTimestampExtractor
 
 class DeviceTimestampExtractorTest {
     private val timestampExtractor = DeviceTimestampExtractor()
