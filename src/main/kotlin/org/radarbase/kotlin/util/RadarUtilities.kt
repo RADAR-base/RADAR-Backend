@@ -2,6 +2,8 @@ package org.radarbase.kotlin.util
 
 import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.kstream.Windowed
+import org.radarbase.kotlin.stream.phone.PhoneUsageCollector
+import org.radarbase.kotlin.stream.phone.TemporaryPackageKey
 import org.radarcns.kafka.AggregateKey
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.stream.aggregator.AggregateList
@@ -9,8 +11,6 @@ import org.radarcns.stream.aggregator.NumericAggregate
 import org.radarcns.stream.aggregator.PhoneUsageAggregate
 import org.radarbase.stream.collector.AggregateListCollector
 import org.radarbase.stream.collector.NumericAggregateCollector
-import org.radarbase.java.stream.phone.PhoneUsageCollector
-import org.radarbase.java.stream.phone.TemporaryPackageKey
 
 /**
  * Kotlin counterpart of RadarUtilities. Provides utility transformations to Avro models.
