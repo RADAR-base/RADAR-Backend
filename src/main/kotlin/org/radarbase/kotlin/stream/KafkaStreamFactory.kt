@@ -1,9 +1,9 @@
 package org.radarbase.kotlin.stream
 
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.SingleStreamConfig
-import org.radarbase.config.SubCommand
+import org.radarbase.kotlin.config.RadarBackendOptions
+import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.SingleStreamConfig
+import org.radarbase.kotlin.config.SubCommand
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Stream
@@ -20,10 +20,10 @@ class KafkaStreamFactory(
             emptySet()
         }
 
-        val configs = radarProperties.radarProperties.stream.streamConfigs.stream()
+        val configs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream()
             .filter { s ->
                 streamTypes.isEmpty() || streamTypes.any { n ->
-                    s.streamClass.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
+                    s.streamClass!!.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
                 }
             }
 
@@ -35,7 +35,7 @@ class KafkaStreamFactory(
     }
 
     fun createStreamStatistics(): SubCommand {
-        val configs = radarProperties.radarProperties.stream.sourceStatistics
+        val configs = radarProperties.radarProperties.stream!!.sourceStatistics
 
         if (configs == null) {
             logger.warn("Statistics monitor is not configured. Cannot start it.")

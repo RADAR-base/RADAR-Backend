@@ -1,8 +1,8 @@
 package org.radarbase.kotlin.stream
 
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.SingleStreamConfig
-import org.radarbase.config.SubCommand
+import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.SingleStreamConfig
+import org.radarbase.kotlin.config.SubCommand
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.Executors
@@ -34,7 +34,7 @@ open class StreamMaster(
 
     private fun createWorker(config: RadarPropertyHandler, c: SingleStreamConfig): StreamWorker {
         return try {
-            val worker = c.streamClass.getDeclaredConstructor().newInstance() as StreamWorker
+            val worker = c.streamClass!!.getDeclaredConstructor().newInstance() as StreamWorker
             worker.configure(this, config, c)
             worker
         } catch (e: Exception) {

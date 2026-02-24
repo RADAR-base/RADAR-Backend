@@ -2,17 +2,17 @@ package org.radarbase.kotlin.stream
 
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.errors.StreamsException
-import org.radarbase.config.ConfigRadar
-import org.radarbase.config.KafkaProperty
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.SingleStreamConfig
+import org.radarbase.kotlin.config.ConfigRadar
+import org.radarbase.kotlin.config.KafkaProperty
+import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 
 abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHandler {
-    private val streamDefinitions = CopyOnWriteArrayList<StreamDefinition>()
+    internal val streamDefinitions = CopyOnWriteArrayList<StreamDefinition>()
     protected lateinit var config: SingleStreamConfig
     protected lateinit var allConfig: ConfigRadar
     protected var numThreads: Int = 0
@@ -47,7 +47,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
                     KafkaTopic(input),
                     KafkaTopic(w.getTopicLabel(outputBase)),
                     Duration.ofMillis(w.intervalInMilliSec),
-                    allConfig.stream.getCommitIntervalForTimeWindow(w)
+                    allConfig.stream!!.getCommitIntervalForTimeWindow(w)
                 )
             )
         }
@@ -64,7 +64,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     ) {
         this.kafkaProperty = properties.kafkaProperties
         this.allConfig = properties.radarProperties
-        this.numThreads = allConfig.stream.threadsByPriority(singleConfig.priority)
+        this.numThreads = allConfig.stream!!.threadsByPriority(singleConfig.priority)
         this.config = singleConfig
         this.master = streamMaster
         this.initialize()

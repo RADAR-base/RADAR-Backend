@@ -1,7 +1,7 @@
 package org.radarbase.kotlin.stream
 
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.SingleStreamConfig
+import org.radarbase.kotlin.config.RadarPropertyHandler
+import org.radarbase.kotlin.config.SingleStreamConfig
 import java.util.stream.Stream
 
 interface StreamWorker {
