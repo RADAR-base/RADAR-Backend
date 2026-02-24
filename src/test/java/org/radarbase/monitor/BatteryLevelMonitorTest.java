@@ -33,11 +33,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.radarbase.config.ConfigRadar;
 import org.radarbase.config.RadarPropertyHandler;
+import org.radarbase.util.EmailSenders;
 import org.radarcns.kafka.ObservationKey;
 import org.radarbase.monitor.BatteryLevelMonitor.BatteryLevelState;
 import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel;
 import org.radarbase.util.EmailSender;
-import org.radarbase.java.util.EmailSenders;
 import org.radarbase.util.YamlPersistentStateStore;
 
 public class BatteryLevelMonitorTest {
