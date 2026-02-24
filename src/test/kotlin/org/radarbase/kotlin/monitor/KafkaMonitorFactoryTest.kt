@@ -24,9 +24,9 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.kotlin.config.*
+import org.radarbase.kotlin.util.EmailServerRule
 import org.radarbase.kotlin.config.RadarPropertyHandler as KotlinRadarPropertyHandler
 import org.radarbase.kotlin.config.RadarPropertyHandlerImpl as KotlinRadarPropertyHandlerImpl
-import org.radarbase.util.EmailServerRule
 import java.io.File
 import java.io.IOException
 
