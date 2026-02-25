@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.radar.publishing)
     alias(libs.plugins.radar.kotlin)
     alias(libs.plugins.radar.root.project)
+    alias(libs.plugins.version.catalog.update)
 }
 
 description = "RADAR-base service for Kafka stream processing, monitoring, and statistics utilities."
