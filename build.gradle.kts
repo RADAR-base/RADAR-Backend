@@ -26,6 +26,10 @@ radarPublishing {
     }
 }
 
+radarKotlin {
+    sentryEnabled.set(true)
+}
+
 application {
     mainClass.set("org.radarbase.RadarBackend")
     applicationDefaultJvmArgs = listOf("-Dlog4j.configuration=log4j.properties")
