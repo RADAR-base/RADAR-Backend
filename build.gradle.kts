@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.commons.cli)
     implementation(libs.jackson.annotations)
     implementation(libs.jakarta.mail)
-    implementation(libs.jsoup)
+    implementation(libs.bundles.ksoup)
 
     runtimeOnly(libs.log4j)
     runtimeOnly(libs.slf4j.log4j)

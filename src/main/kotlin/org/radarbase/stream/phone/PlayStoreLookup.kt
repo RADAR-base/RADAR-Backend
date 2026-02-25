@@ -1,8 +1,8 @@
 package org.radarbase.stream.phone
 
-import org.jsoup.HttpStatusException
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.network.parseGetRequestBlocking
+import com.fleeksoft.ksoup.nodes.Document
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -49,9 +49,9 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
         fun fetchCategory(packageName: String): AppCategory {
             val url = URL_PLAY_STORE_APP_DETAILS + packageName
             return try {
-                val doc = Jsoup.connect(url).get()
+                val doc = Ksoup.parseGetRequestBlocking(url = url)
                 getCategoryFromDocument(doc, packageName)
-            } catch (ex: HttpStatusException) {
+            } catch (ex: Exception) {
                 logger.warn("Package {} page could not be found", packageName)
                 AppCategory(null)
             }
@@ -61,10 +61,8 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
             val categoryElement = doc.select(CATEGORY_ANCHOR_SELECTOR).first()
             if (categoryElement != null) {
                 val href = categoryElement.attr("href")
-                if (href != null) {
-                    val urlSplit = href.split("/")
-                    return AppCategory(urlSplit.last())
-                }
+                val urlSplit = href.split("/")
+                return AppCategory(urlSplit.last())
             }
             logger.warn("Could not find category of {}: element containing category could not be found", packageName)
             return AppCategory(null)

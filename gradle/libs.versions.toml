@@ -15,7 +15,7 @@ commonsCli = "1.11.0"
 mockito = "5.21.0"
 radarCommons = "1.2.4"
 radarSchemas = "0.8.15"
-jsoup = "1.11.3"
+ksoup = "0.2.6"
 slf4j = "1.7.25"
 log4j = "1.2.17"
 avro = "1.12.1"
@@ -41,7 +41,8 @@ jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "f
 commons-cli = { group = "commons-cli", name = "commons-cli", version.ref = "commonsCli" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 jakarta-mail = { group = "jakarta.mail", name = "jakarta.mail-api", version.ref = "javaMail" }
-jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
+ksoup-network = { group = "com.fleeksoft.ksoup", name = "ksoup-network", version.ref = "ksoup" }
 
 # Logging
 log4j = { group = "log4j", name = "log4j", version.ref = "log4j" }
@@ -62,3 +63,4 @@ radar-root-project = { id = "org.radarbase.radar-root-project", version.ref = "r
 [bundles]
 # This allows you to include both logging libs with one line
 logging-log4j = ["log4j", "slf4j-log4j"]
+ksoup = ["ksoup", "ksoup-network"]
