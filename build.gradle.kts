@@ -34,9 +34,6 @@ application {
 repositories {
     mavenCentral()
     maven { url = uri("https://packages.confluent.io/maven/") }
-    maven { url = uri("https://oss.jfrog.org/artifactory/oss-snapshot-local/") }
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://repo1.maven.org/maven2/") }
 }
 
 dependencies {
