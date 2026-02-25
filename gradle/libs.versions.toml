@@ -1,6 +1,7 @@
 [versions]
 # Project and Plugins
 kotlin = "1.9.24"
+gradle = "8.14"
 
 # Dependencies
 confluent = "8.1.1"
@@ -53,6 +54,10 @@ hamcrest-all = { group = "org.hamcrest", name = "hamcrest-all", version.ref = "h
 greenmail = { group = "com.icegreen", name = "greenmail", version.ref = "greenmail" }
 
 [plugins]
+radar-dependency-management = { id = "org.radarbase.radar-dependency-management", version.ref = "radarCommons" }
+radar-kotlin = { id = "org.radarbase.radar-kotlin", version.ref = "radarCommons" }
+radar-publishing = { id = "org.radarbase.radar-publishing", version.ref = "radarCommons" }
+radar-root-project = { id = "org.radarbase.radar-root-project", version.ref = "radarCommons" }
 
 [bundles]
 # This allows you to include both logging libs with one line
