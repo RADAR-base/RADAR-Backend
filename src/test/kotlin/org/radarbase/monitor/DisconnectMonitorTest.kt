@@ -98,23 +98,23 @@ class DisconnectMonitorTest {
 
         assertEquals(timeout, monitor.pollTimeout)
 
-        sendMessage(monitor, "1", 0)
-        sendMessage(monitor, "1", 1)
-        sendMessage(monitor, "2", 0)
+        sendMessage(monitor, "1")
+        sendMessage(monitor, "1")
+        sendMessage(monitor, "2")
         Thread.sleep(timeout.toMillis() + disconnectConfig.timeout * 1000)
-        monitor.evaluateRecords(ConsumerRecords(emptyMap()))
+        monitor.evaluateRecords(ConsumerRecords(emptyMap(), emptyMap()))
         timesSent += 2
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
-        sendMessage(monitor, "1", 1)
-        sendMessage(monitor, "1", 0)
+        sendMessage(monitor, "1")
+        sendMessage(monitor, "1")
         timesSent += 1
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
-        sendMessage(monitor, "2", 1)
-        sendMessage(monitor, "2", 0)
-        sendMessage(monitor, "0", 0)
+        sendMessage(monitor, "2")
+        sendMessage(monitor, "2")
+        sendMessage(monitor, "0")
         timesSent += 1
         Thread.sleep(timeout.toMillis() + disconnectConfig.timeout * 1000)
-        monitor.evaluateRecords(ConsumerRecords(emptyMap()))
+        monitor.evaluateRecords(ConsumerRecords(emptyMap(), emptyMap()))
         timesSent += 3
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
     }
@@ -127,7 +127,7 @@ class DisconnectMonitorTest {
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
     }
 
-    private fun sendMessage(monitor: DisconnectMonitor, source: String, sentMessages: Int) {
+    private fun sendMessage(monitor: DisconnectMonitor, source: String) {
         val key = Record(keySchema)
         key.put("projectId", PROJECT_ID)
         key.put("sourceId", source)
@@ -138,7 +138,7 @@ class DisconnectMonitorTest {
         val record = ConsumerRecord<GenericRecord, GenericRecord>("mytopic", 0, offset++, key, value)
         val partition = TopicPartition(record.topic(), record.partition())
 
-        monitor.evaluateRecords(ConsumerRecords(mapOf(partition to listOf(record))))
+        monitor.evaluateRecords(ConsumerRecords(mapOf(partition to listOf(record)), emptyMap()))
     }
 
     @Test
