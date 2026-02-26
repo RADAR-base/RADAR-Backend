@@ -19,8 +19,11 @@ class RadarUtilitiesImpl : RadarUtilities {
         val key = window.key()
         val timeWindow: Window = window.window()
         return AggregateKey(
-            key.projectId, key.userId, key.sourceId,
-            timeWindow.start() / 1000.0, timeWindow.end() / 1000.0
+            key.projectId,
+            key.userId,
+            key.sourceId,
+            timeWindow.start() / 1000.0,
+            timeWindow.end() / 1000.0,
         )
     }
 
@@ -28,14 +31,17 @@ class RadarUtilitiesImpl : RadarUtilities {
         val key = window.key()
         val timeWindow: Window = window.window()
         return AggregateKey(
-            key.projectId, key.userId, key.sourceId,
-            timeWindow.start() / 1000.0, timeWindow.end() / 1000.0
+            key.projectId,
+            key.userId,
+            key.sourceId,
+            timeWindow.start() / 1000.0,
+            timeWindow.end() / 1000.0,
         )
     }
 
     override fun phoneCollectorToAvro(
         window: Windowed<TemporaryPackageKey>,
-        collector: PhoneUsageCollector
+        collector: PhoneUsageCollector,
     ): KeyValue<AggregateKey, PhoneUsageAggregate> = pair(
         getWindowedTuple(window),
         PhoneUsageAggregate(
@@ -43,13 +49,13 @@ class RadarUtilitiesImpl : RadarUtilities {
             collector.totalForegroundTime.toDouble(),
             collector.timesTurnedOn,
             collector.categoryName,
-            collector.categoryNameFetchTime
-        )
+            collector.categoryNameFetchTime,
+        ),
     )
 
     override fun listCollectorToAvro(
         window: Windowed<ObservationKey>,
-        collector: AggregateListCollector
+        collector: AggregateListCollector,
     ): KeyValue<AggregateKey, AggregateList> {
         val fields = collector.getCollectors().map { numericCollectorToAggregate(it) }
         return pair(getWindowed(window), AggregateList(fields))
@@ -57,15 +63,16 @@ class RadarUtilitiesImpl : RadarUtilities {
 
     override fun numericCollectorToAvro(
         window: Windowed<ObservationKey>,
-        collector: NumericAggregateCollector
-    ): KeyValue<AggregateKey, NumericAggregate> =
-        pair(getWindowed(window), numericCollectorToAggregate(collector))
+        collector: NumericAggregateCollector,
+    ): KeyValue<AggregateKey, NumericAggregate> = pair(getWindowed(window), numericCollectorToAggregate(collector))
 
-    private fun numericCollectorToAggregate(collector: NumericAggregateCollector): NumericAggregate =
-        NumericAggregate(
-            collector.name,
-            collector.min, collector.max,
-            collector.getSum(), collector.count.toInt(),
-            collector.mean, collector.quartile
-        )
+    private fun numericCollectorToAggregate(collector: NumericAggregateCollector): NumericAggregate = NumericAggregate(
+        collector.name,
+        collector.min,
+        collector.max,
+        collector.getSum(),
+        collector.count.toInt(),
+        collector.mean,
+        collector.quartile,
+    )
 }

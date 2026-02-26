@@ -17,12 +17,19 @@
 package org.radarbase.monitor
 
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.junit.Assert.*
-import org.junit.ClassRule
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.api.io.TempDir
-import org.radarbase.config.*
+import org.radarbase.config.BatteryMonitorConfig
+import org.radarbase.config.ConfigRadar
+import org.radarbase.config.DisconnectMonitorConfig
+import org.radarbase.config.NotifyConfig
+import org.radarbase.config.RadarBackendOptions
+import org.radarbase.config.SourceStatisticsStreamConfig
+import org.radarbase.config.YamlConfigLoader
 import org.radarbase.util.EmailServerExtension
 import java.io.File
 import java.io.IOException
@@ -47,8 +54,12 @@ class KafkaMonitorFactoryTest {
         assertEquals(BatteryLevelMonitor::class.java, monitor.javaClass)
         val batteryMonitor = monitor as BatteryLevelMonitor
         batteryMonitor.evaluateRecords(ConsumerRecords(emptyMap()))
-        assertTrue(File(config.persistencePath!!, "battery_monitors_" +
-                BatteryLevelMonitor::class.java.name + "-1.yml").isFile)
+        assertTrue(
+            File(
+                config.persistencePath!!,
+                "battery_monitors_${BatteryLevelMonitor::class.java.name}-1.yml",
+            ).isFile,
+        )
     }
 
     @Test(expected = IOException::class)
@@ -72,8 +83,12 @@ class KafkaMonitorFactoryTest {
         assertEquals(DisconnectMonitor::class.java, monitor.javaClass)
         val disconnectMonitor = monitor as DisconnectMonitor
         disconnectMonitor.evaluateRecords(ConsumerRecords(emptyMap()))
-        assertTrue(File(config.persistencePath!!, "disconnect_monitor_" +
-                DisconnectMonitor::class.java.name + "-1.yml").isFile)
+        assertTrue(
+            File(
+                config.persistencePath!!,
+                "disconnect_monitor_${DisconnectMonitor::class.java.name}-1.yml",
+            ).isFile,
+        )
     }
 
     @Test

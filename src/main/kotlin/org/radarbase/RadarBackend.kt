@@ -17,7 +17,7 @@ import kotlin.system.exitProcess
  */
 class RadarBackend(
     private val options: RadarBackendOptions,
-    private val radarPropertyHandler: RadarPropertyHandler
+    private val radarPropertyHandler: RadarPropertyHandler,
 ) {
 
     constructor(options: RadarBackendOptions) : this(options, createPropertyHandler(options))
@@ -42,13 +42,15 @@ class RadarBackend(
             logger.error("The current instance was interrupted", ex)
         }
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            try {
-                shutdown()
-            } catch (ex: Exception) {
-                logger.error("Impossible to finalise the shutdown hook", ex)
-            }
-        })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                try {
+                    shutdown()
+                } catch (ex: Exception) {
+                    logger.error("Impossible to finalise the shutdown hook", ex)
+                }
+            },
+        )
     }
 
     /**
@@ -86,11 +88,9 @@ class RadarBackend(
     fun createCommand(): SubCommand {
         val subCommand = options.subCommand ?: "stream"
         return when (subCommand) {
-            "stream" -> KafkaStreamFactory(options, radarPropertyHandler)
-                .createSensorStreams()
+            "stream" -> KafkaStreamFactory(options, radarPropertyHandler).createSensorStreams()
 
-            "statistics" -> KafkaStreamFactory(options, radarPropertyHandler)
-                .createStreamStatistics()
+            "statistics" -> KafkaStreamFactory(options, radarPropertyHandler).createStreamStatistics()
 
             "monitor" -> KafkaMonitorFactory(options, radarPropertyHandler).createMonitor()
             "mock" -> MockProducerCommand(options, radarPropertyHandler)
@@ -117,7 +117,8 @@ class RadarBackend(
             } catch (ex: ParseException) {
                 logger.error(
                     "Cannot parse arguments {}. Valid options are:\n{}",
-                    args.contentToString(), RadarBackendOptions.Companion.OPTIONS
+                    args.contentToString(),
+                    RadarBackendOptions.Companion.OPTIONS,
                 )
                 exitProcess(1)
             } catch (ex: Exception) {

@@ -17,18 +17,20 @@ class E4HeartRateStream : SensorStreamWorker<ObservationKey, EmpaticaE4InterBeat
     override fun initialize() {
         defineWindowedSensorStream(
             "android_empatica_e4_inter_beat_interval",
-            "android_empatica_e4_heart_rate"
+            "android_empatica_e4_heart_rate",
         )
         config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
     }
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4InterBeatInterval>
+        kstream: KStream<ObservationKey, EmpaticaE4InterBeatInterval>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateCustomNumeric(
-            definition, kstream,
-            { 60.0 / floatToDouble(it.interBeatInterval) }, "heartRate"
+            definition,
+            kstream,
+            { 60.0 / floatToDouble(it.interBeatInterval) },
+            "heartRate",
         )
     }
 

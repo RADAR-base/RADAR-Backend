@@ -19,33 +19,31 @@ class PhoneUsageAggregationStream : SensorStreamWorker<ObservationKey, PhoneUsag
         defineStream(
             "android_phone_usage_event_output",
             "android_phone_usage_event_aggregated",
-            Duration.ofDays(1)
+            Duration.ofDays(1),
         )
         config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
     }
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, PhoneUsageEvent>
+        kstream: KStream<ObservationKey, PhoneUsageEvent>,
     ): KStream<AggregateKey, PhoneUsageAggregate> {
-        return kstream.groupBy { k, v -> temporaryKey(k, v) }
-            .windowedBy(definition.timeWindows)
-            .aggregate(
-                { PhoneUsageCollector() },
-                { _, v, valueCollector -> valueCollector.update(v) },
-                RadarSerdes.Companion.materialized<TemporaryPackageKey, PhoneUsageCollector>(
-                    definition.stateStoreName,
-                    RadarSerdes.Companion.getInstance().getPhoneUsageCollector()
-                )
-            )
-            .toStream()
-            .map(utilities::phoneCollectorToAvro)
+        return kstream.groupBy { k, v -> temporaryKey(k, v) }.windowedBy(definition.timeWindows).aggregate(
+            { PhoneUsageCollector() },
+            { _, v, valueCollector -> valueCollector.update(v) },
+            RadarSerdes.Companion.materialized<TemporaryPackageKey, PhoneUsageCollector>(
+                definition.stateStoreName,
+                RadarSerdes.Companion.getInstance().getPhoneUsageCollector(),
+            ),
+        ).toStream().map(utilities::phoneCollectorToAvro)
     }
 
     private fun temporaryKey(key: ObservationKey, value: PhoneUsageEvent): TemporaryPackageKey {
         return TemporaryPackageKey(
-            key.projectId, key.userId, key.sourceId,
-            value.packageName
+            key.projectId,
+            key.userId,
+            key.sourceId,
+            value.packageName,
         )
     }
 }

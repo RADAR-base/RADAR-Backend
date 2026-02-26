@@ -37,7 +37,7 @@ class PlayStoreLookupTest {
                 Arguments.of("com.android.chrome", "COMMUNICATION"),
                 Arguments.of("com.google.android.youtube", "VIDEO_PLAYERS"),
                 Arguments.of("com.android.systemui", null),
-                Arguments.of("abc.abc", null)
+                Arguments.of("abc.abc", null),
             )
         }
     }

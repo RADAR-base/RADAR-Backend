@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Properties;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -74,9 +75,9 @@ public class E4AggregatedAccelerationMonitor extends AbstractKafkaMonitor<Generi
             GenericRecord value = record.value();
             GenericData.Array fields = (GenericData.Array) value.get("fields");
             logger.info("Received [{}, {}, {}] E4 messages",
-                    ((GenericRecord)fields.get(0)).get("count"), ((GenericRecord)fields.get(1)).get("count"), ((GenericRecord)fields.get(2)).get("count"));
+                    ((GenericRecord) fields.get(0)).get("count"), ((GenericRecord) fields.get(1)).get("count"), ((GenericRecord) fields.get(2)).get("count"));
 
-            if ((Integer)((GenericRecord)fields.get(0)).get("count") > 100) {
+            if ((Integer) ((GenericRecord) fields.get(0)).get("count") > 100) {
                 shutdown();
             }
         }

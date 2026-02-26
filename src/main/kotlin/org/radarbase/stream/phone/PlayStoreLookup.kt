@@ -19,7 +19,7 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
     fun lookupCategory(packageName: String): AppCategory {
         val category = categoryCache[packageName]
         val cacheThreshold = (System.currentTimeMillis() - cacheTimeout) / 1000.0
-        
+
         return if (category == null || category.fetchTimeStamp < cacheThreshold) {
             try {
                 fetchCategory(packageName).also {
@@ -37,7 +37,7 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
     /** Android app category.  */
     data class AppCategory(
         val categoryName: String?,
-        val fetchTimeStamp: Double = System.currentTimeMillis() / 1000.0
+        val fetchTimeStamp: Double = System.currentTimeMillis() / 1000.0,
     )
 
     companion object {

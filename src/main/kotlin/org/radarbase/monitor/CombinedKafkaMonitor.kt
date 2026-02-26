@@ -31,9 +31,8 @@ import java.util.stream.Stream
  * Runs multiple monitors, each in its own thread.
  */
 class CombinedKafkaMonitor(monitors: Stream<KafkaMonitor>) : KafkaMonitor {
-    private val monitors: List<KafkaMonitor> = Objects.requireNonNull(monitors)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList())
+    private val monitors: List<KafkaMonitor> =
+        Objects.requireNonNull(monitors).filter(Objects::nonNull).collect(Collectors.toList())
 
     private val done = AtomicBoolean(false)
     private var executor: ExecutorService? = null

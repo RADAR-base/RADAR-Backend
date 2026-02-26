@@ -18,10 +18,18 @@ import org.radarcns.stream.aggregator.PhoneUsageAggregate
 interface RadarUtilities {
     fun getWindowed(window: Windowed<ObservationKey>): AggregateKey
     fun getWindowedTuple(window: Windowed<TemporaryPackageKey>): AggregateKey
-    fun listCollectorToAvro(window: Windowed<ObservationKey>, collector: AggregateListCollector):
-        KeyValue<AggregateKey, AggregateList>
-    fun numericCollectorToAvro(window: Windowed<ObservationKey>, collector: NumericAggregateCollector):
-        KeyValue<AggregateKey, NumericAggregate>
-    fun phoneCollectorToAvro(window: Windowed<TemporaryPackageKey>, collector: PhoneUsageCollector):
-        KeyValue<AggregateKey, PhoneUsageAggregate>
+    fun listCollectorToAvro(
+        window: Windowed<ObservationKey>,
+        collector: AggregateListCollector,
+    ): KeyValue<AggregateKey, AggregateList>
+
+    fun numericCollectorToAvro(
+        window: Windowed<ObservationKey>,
+        collector: NumericAggregateCollector,
+    ): KeyValue<AggregateKey, NumericAggregate>
+
+    fun phoneCollectorToAvro(
+        window: Windowed<TemporaryPackageKey>,
+        collector: PhoneUsageCollector,
+    ): KeyValue<AggregateKey, PhoneUsageAggregate>
 }

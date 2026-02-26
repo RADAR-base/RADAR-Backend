@@ -21,7 +21,15 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerConfig.*
+import org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG
+import org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -49,7 +57,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
     protected val topics: Collection<String>,
     private val groupId: String,
     clientId: String,
-    stateDefault: S?
+    stateDefault: S?,
 ) : KafkaMonitor {
     protected val state: S?
     private val stateStore: PersistentStateStore?
@@ -88,7 +96,9 @@ abstract class AbstractKafkaMonitor<K, V, S>(
         } catch (ex: IOException) {
             logger.warn(
                 "Cannot get persistent state store {}. Not persisting state.",
-                stateDefault?.let { it::class.java.name } ?: "null", ex)
+                stateDefault?.let { it::class.java.name } ?: "null",
+                ex,
+            )
             null
         }
 
@@ -100,7 +110,8 @@ abstract class AbstractKafkaMonitor<K, V, S>(
             } catch (ex: IOException) {
                 logger.warn(
                     "Cannot retrieve persistent state {}. Restarting from empty state.",
-                    stateDefault!!::class.java.name, ex
+                    stateDefault!!::class.java.name,
+                    ex,
                 )
             }
         } else if (stateDefault != null) {
@@ -162,15 +173,13 @@ abstract class AbstractKafkaMonitor<K, V, S>(
     protected open fun handleSerializationException() {
         logger.error("Failed to deserialize message. Skipping message.")
         val currentConsumer = consumer ?: return
-        topics.parallelStream()
-            .flatMap { t -> currentConsumer.partitionsFor(t).stream() }
-            .map { tp -> TopicPartition(tp.topic(), tp.partition()) }
-            .filter { tp ->
+        topics.parallelStream().flatMap { t -> currentConsumer.partitionsFor(t).stream() }
+            .map { tp -> TopicPartition(tp.topic(), tp.partition()) }.filter { tp ->
                 val tmpProperties = Properties().apply {
                     putAll(properties)
                     setProperty(
                         CLIENT_ID_CONFIG,
-                        "${properties.getProperty(CLIENT_ID_CONFIG)}-tmp-${UUID.randomUUID()}"
+                        "${properties.getProperty(CLIENT_ID_CONFIG)}-tmp-${UUID.randomUUID()}",
                     )
                 }
 
@@ -185,8 +194,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
                     logger.error("Serialization error, skipping message", ex)
                     true
                 }
-            }
-            .forEach { tp -> currentConsumer.seek(tp, currentConsumer.position(tp) + 1) }
+            }.forEach { tp -> currentConsumer.seek(tp, currentConsumer.position(tp) + 1) }
     }
 
     /** Evaluate a single record that the monitor receives by overriding this function */
@@ -207,8 +215,8 @@ abstract class AbstractKafkaMonitor<K, V, S>(
                 stateStore.storeState(groupId, clientId, state)
             } catch (ex: IOException) {
                 logger.error(
-                    "Failed to store monitor state: {}. "
-                            + "When restarted, all current state will be lost.", ex.message
+                    "Failed to store monitor state: {}. " + "When restarted, all current state will be lost.",
+                    ex.message,
                 )
             }
         }
@@ -249,7 +257,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
             return ObservationKey(
                 projectIdValue?.toString(),
                 record[userIdField.pos()].toString(),
-                record[sourceIdField.pos()].toString()
+                record[sourceIdField.pos()].toString(),
             )
         }
     }

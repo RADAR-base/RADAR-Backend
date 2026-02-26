@@ -30,10 +30,8 @@ class DeviceTimestampExtractorTest {
 
     @Test
     fun extract() {
-        val userSchema = "{" +
-            "\"namespace\": \"test.radar.backend\", \"type\": \"record\"," +
-            "\"name\": \"TestTimeExtract\"," +
-            "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"double\"}]}"
+        val userSchema =
+            "{" + "\"namespace\": \"test.radar.backend\", \"type\": \"record\"," + "\"name\": \"TestTimeExtract\"," + "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"double\"}]}"
         val record = buildIndexedRecord(userSchema)
         val timeValue = 40880.051388
         record.put("timeReceived", timeValue)
@@ -44,10 +42,8 @@ class DeviceTimestampExtractorTest {
 
     @Test
     fun extractWithNotDoubleTimeReceived() {
-        val userSchema = "{" +
-            "\"namespace\": \"test.radar.backend\", \"type\": \"record\"," +
-            "\"name\": \"TestTimeExtract\"," +
-            "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}"
+        val userSchema =
+            "{" + "\"namespace\": \"test.radar.backend\", \"type\": \"record\"," + "\"name\": \"TestTimeExtract\"," + "\"fields\": [{\"name\": \"timeReceived\", \"type\": \"string\"}]}"
         val record = buildIndexedRecord(userSchema)
         record.put("timeReceived", "timeValue")
         val consumerRecord = ConsumerRecord<Any, Any>(topic, 3, 30L, null, record as Any)

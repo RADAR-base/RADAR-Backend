@@ -9,10 +9,10 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
 class EmailServerExtension(
-    val port: Int = 25251, 
-    val bindAddress: String = "localhost"
+    val port: Int = 25251,
+    val bindAddress: String = "localhost",
 ) : BeforeEachCallback, AfterEachCallback {
-    
+
     private lateinit var emailServer: GreenMail
 
     @Throws(MessagingException::class)

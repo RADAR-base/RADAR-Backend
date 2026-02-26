@@ -33,15 +33,17 @@ class PhoneUsageCollector {
                 timesTurnedOn++
                 lastForegroundEvent = event.time
             }
+
             UsageEventType.BACKGROUND -> {
                 if (lastForegroundEvent != 0.0) {
                     val duration = BigDecimal.valueOf(event.time)
                         .subtract(BigDecimal.valueOf(lastForegroundEvent), MathContext.DECIMAL128)
-                    
+
                     totalForegroundTime = totalForegroundTime.add(duration)
                     lastForegroundEvent = 0.0
                 }
             }
+
             else -> {
                 // Ignore other event types or repeated backgrounds
             }

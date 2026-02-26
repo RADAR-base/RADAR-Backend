@@ -27,14 +27,16 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.radarbase.util.EmailSender
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.YamlPersistentStateStore
 import org.radarcns.kafka.ObservationKey
 import java.nio.file.Path
 import java.time.Duration
-import java.util.*
+import java.util.Collections
 import kotlin.test.assertTrue
 
 class DisconnectMonitorTest {
@@ -59,17 +61,29 @@ class DisconnectMonitorTest {
         fun setUp() {
             val parser = Schema.Parser()
             keySchema = parser.parse(
-                "{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
-                        + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
-                        + "{\"name\": \"userId\", \"type\": \"string\"},"
-                        + "{\"name\": \"sourceId\", \"type\": \"string\"}"
-                        + "]} "
+                """
+                {
+                  "name": "key",
+                  "type": "record",
+                  "fields": [
+                    {"name": "projectId", "type": ["null", "string"]},
+                    {"name": "userId", "type": "string"},
+                    {"name": "sourceId", "type": "string"}
+                  ]
+                }
+                """.trimIndent(),
             )
 
             valueSchema = parser.parse(
-                "{\"name\": \"value\", \"type\": \"record\", \"fields\": ["
-                        + "{\"name\": \"timeReceived\", \"type\": \"double\"}"
-                        + "]} "
+                """
+                {
+                  "name": "value",
+                  "type": "record",
+                  "fields": [
+                    {"name": "timeReceived", "type": "double"}
+                  ]
+                }
+                """.trimIndent(),
             )
 
             offset = 1000L
@@ -127,7 +141,10 @@ class DisconnectMonitorTest {
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
     }
 
-    private fun sendMessage(monitor: DisconnectMonitor, source: String) {
+    private fun sendMessage(
+        monitor: DisconnectMonitor,
+        source: String,
+    ) {
         val key = Record(keySchema)
         key.put("projectId", PROJECT_ID)
         key.put("sourceId", source)
@@ -152,7 +169,11 @@ class DisconnectMonitorTest {
         val now = System.currentTimeMillis()
         state.lastSeen[stateStore.keyToString(key1)] = now
         state.lastSeen[stateStore.keyToString(key2)] = now + 1L
-        state.reportedMissing[stateStore.keyToString(key3)] = DisconnectMonitor.MissingRecordsReport(now - 60L, now + 2L, 0)
+        state.reportedMissing[stateStore.keyToString(key3)] = DisconnectMonitor.MissingRecordsReport(
+            now - 60L,
+            now + 2L,
+            0,
+        )
         stateStore.storeState("one", "two", state)
 
         val stateStore2 = YamlPersistentStateStore(base)

@@ -20,11 +20,13 @@ class E4TemperatureStream : SensorStreamWorker<ObservationKey, EmpaticaE4Tempera
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4Temperature>
+        kstream: KStream<ObservationKey, EmpaticaE4Temperature>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "temperature",
-            EmpaticaE4Temperature.getClassSchema()
+            definition,
+            kstream,
+            "temperature",
+            EmpaticaE4Temperature.getClassSchema(),
         )
     }
 }

@@ -61,23 +61,24 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             val statisticsStore = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore("statistics"),
                 SpecificAvroSerde<ObservationKey>(),
-                RadarSerde(SourceStatisticsRecord::class.java).getSerde()
+                RadarSerde(SourceStatisticsRecord::class.java).getSerde(),
             )
 
-            val inputTopics = streamDefinitions
-                .map { it.inputTopic.name }
-                .toTypedArray()
+            val inputTopics = streamDefinitions.map { it.inputTopic.name }.toTypedArray()
 
             builder.addSource("source", genericReader, genericReader, *inputTopics)
-            builder.addProcessor("process",
-                { SourceStatisticsProcessor() }, "source")
+            builder.addProcessor(
+                "process",
+                { SourceStatisticsProcessor() },
+                "source",
+            )
             builder.addSink(
                 "sink",
                 streamDefinitions.firstNotNullOfOrNull { it.outputTopic?.name }
                     ?: throw IllegalStateException("Output topic for SourceStatisticsStream $streamName is undefined."),
                 SpecificAvroSerializer<ObservationKey>(),
                 SpecificAvroSerializer<SourceStatistics>(),
-                "process"
+                "process",
             )
 
             builder.addStateStore(statisticsStore, "process")
@@ -92,14 +93,17 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             return settings
         }
 
-    private inner class SourceStatisticsProcessor : Processor<GenericRecord, GenericRecord, ObservationKey, SourceStatisticsRecord> {
+    private inner class SourceStatisticsProcessor :
+        Processor<GenericRecord, GenericRecord, ObservationKey, SourceStatisticsRecord> {
         private lateinit var context: ProcessorContext<ObservationKey, SourceStatisticsRecord>
         private lateinit var store: KeyValueStore<ObservationKey, SourceStatisticsRecord>
         private var punctuateCancellor: Cancellable? = null
         private var localInterval = Duration.ZERO
 
         @Suppress("UNCHECKED_CAST")
-        override fun init(context: org.apache.kafka.streams.processor.api.ProcessorContext<ObservationKey, SourceStatisticsRecord>) {
+        override fun init(
+            context: org.apache.kafka.streams.processor.api.ProcessorContext<ObservationKey, SourceStatisticsRecord>,
+        ) {
             store = context.getStateStore("statistics") as KeyValueStore<ObservationKey, SourceStatisticsRecord>
             this.context = context
             updatePunctuate()
@@ -112,7 +116,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 punctuateCancellor = this.context.schedule(
                     Duration.ofMillis(localInterval.toMillis()),
                     PunctuationType.WALL_CLOCK_TIME,
-                    { timestamp -> this.sendNew(timestamp) }
+                    { timestamp -> this.sendNew(timestamp) },
                 )
             }
         }
@@ -183,7 +187,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
     data class SourceStatisticsRecord(
         val timeStart: Double,
         val timeEnd: Double,
-        val isSent: Boolean
+        val isSent: Boolean,
     ) {
         fun sourceStatistics() = SourceStatistics(timeStart, timeEnd)
 
@@ -197,7 +201,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                     SourceStatisticsRecord(
                         min(timeStart, old.timeStart),
                         max(timeEnd, old.timeEnd),
-                        false
+                        false,
                     )
                 } else {
                     old

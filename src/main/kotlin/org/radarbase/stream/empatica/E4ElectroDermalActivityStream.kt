@@ -20,11 +20,13 @@ class E4ElectroDermalActivityStream : SensorStreamWorker<ObservationKey, Empatic
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4ElectroDermalActivity>
+        kstream: KStream<ObservationKey, EmpaticaE4ElectroDermalActivity>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "electroDermalActivity",
-            EmpaticaE4ElectroDermalActivity.getClassSchema()
+            definition,
+            kstream,
+            "electroDermalActivity",
+            EmpaticaE4ElectroDermalActivity.getClassSchema(),
         )
     }
 }

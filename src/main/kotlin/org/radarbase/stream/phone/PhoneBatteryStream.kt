@@ -17,11 +17,13 @@ class PhoneBatteryStream : SensorStreamWorker<ObservationKey, PhoneBatteryLevel>
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, PhoneBatteryLevel>
+        kstream: KStream<ObservationKey, PhoneBatteryLevel>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "batteryLevel",
-            PhoneBatteryLevel.getClassSchema()
+            definition,
+            kstream,
+            "batteryLevel",
+            PhoneBatteryLevel.getClassSchema(),
         )
     }
 }

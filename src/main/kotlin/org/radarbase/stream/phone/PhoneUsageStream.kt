@@ -18,17 +18,16 @@ class PhoneUsageStream : SensorStreamWorker<ObservationKey, PhoneUsageEvent>() {
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, PhoneUsageEvent>
+        kstream: KStream<ObservationKey, PhoneUsageEvent>,
     ): KStream<ObservationKey, PhoneUsageEvent> {
-        return kstream
-            .mapValues { value ->
-                val packageName = value.packageName
-                val category = playStoreLookup.lookupCategory(packageName)
-                logger.info("Looked up {}: {}", packageName, category.categoryName)
-                value.categoryName = category.categoryName
-                value.categoryNameFetchTime = category.fetchTimeStamp
-                value
-            }
+        return kstream.mapValues { value ->
+            val packageName = value.packageName
+            val category = playStoreLookup.lookupCategory(packageName)
+            logger.info("Looked up {}: {}", packageName, category.categoryName)
+            value.categoryName = category.categoryName
+            value.categoryNameFetchTime = category.fetchTimeStamp
+            value
+        }
     }
 
     companion object {

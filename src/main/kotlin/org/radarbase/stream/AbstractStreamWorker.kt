@@ -28,7 +28,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
 
     protected fun defineStream(input: String, output: String, window: Duration?) {
         streamDefinitions.add(
-            StreamDefinition(KafkaTopic(input), KafkaTopic(output), window)
+            StreamDefinition(KafkaTopic(input), KafkaTopic(output), window),
         )
     }
 
@@ -49,8 +49,8 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
                     KafkaTopic(input),
                     KafkaTopic(w.getTopicLabel(outputBase)),
                     Duration.ofMillis(w.intervalInMilliSec),
-                    allConfig.stream!!.getCommitIntervalForTimeWindow(w)
-                )
+                    allConfig.stream!!.getCommitIntervalForTimeWindow(w),
+                ),
             )
         }
     }
@@ -62,7 +62,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     override fun configure(
         streamMaster: StreamMaster,
         properties: RadarPropertyHandler,
-        singleConfig: SingleStreamConfig
+        singleConfig: SingleStreamConfig,
     ) {
         this.kafkaProperty = properties.kafkaProperties
         this.allConfig = properties.radarProperties
@@ -117,6 +117,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     companion object {
         private val logger = LoggerFactory.getLogger(AbstractStreamWorker::class.java)
         const val OUTPUT_LABEL = "_output"
+
         @JvmField
         val TIME_WINDOW_COMMIT_INTERVAL_DEFAULT: Duration = Duration.ofSeconds(30)
     }

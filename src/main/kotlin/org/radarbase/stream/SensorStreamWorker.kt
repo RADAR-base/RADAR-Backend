@@ -51,11 +51,10 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
 
         val kstream = implementStream(
             def,
-            builder.stream<K, V>(def.inputTopic.name)
-                .map { k, v ->
-                    monitor?.increment()
-                    KeyValue.pair(k, v)
-                }
+            builder.stream<K, V>(def.inputTopic.name).map { k, v ->
+                monitor?.increment()
+                KeyValue.pair(k, v)
+            },
         )
 
         val outputTopicName = def.outputTopic.name
@@ -81,11 +80,11 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         val props = kafkaProperty.getStreamProperties(
             localClientId,
             config,
-            DeviceTimestampExtractor::class.java
+            DeviceTimestampExtractor::class.java,
         )
 
-        val interval = (ThreadLocalRandom.current().nextDouble(0.75, 1.25) *
-                definition.commitInterval.toMillis()).toLong()
+        val interval =
+            (ThreadLocalRandom.current().nextDouble(0.75, 1.25) * definition.commitInterval.toMillis()).toLong()
 
         props[StreamsConfig.COMMIT_INTERVAL_MS_CONFIG] = interval.toString()
 
@@ -95,19 +94,12 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
     internal abstract fun implementStream(definition: StreamDefinition, kstream: KStream<K, V>): KStream<*, *>
 
     override fun createStreams(): List<KafkaStreams>? {
-        val streamBuilders = getStreamDefinitions()
-            .map { createBuilder(it) }
+        val streamBuilders = getStreamDefinitions().map { createBuilder(it) }.collect(Collectors.toList())
+
+        monitors = streamBuilders.stream().map(StreamUtil.first()).filter { it != null }.map { it!! }
             .collect(Collectors.toList())
 
-        monitors = streamBuilders.stream()
-            .map(StreamUtil.first())
-            .filter { it != null }
-            .map { it!! }
-            .collect(Collectors.toList())
-
-        return streamBuilders.stream()
-            .map(StreamUtil.second())
-            .collect(Collectors.toList())
+        return streamBuilders.stream().map(StreamUtil.second()).collect(Collectors.toList())
     }
 
     override fun doCleanup() {
@@ -119,60 +111,48 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         definition: StreamDefinition,
         kstream: KStream<ObservationKey, V>,
         fieldName: String,
-        schema: Schema
+        schema: Schema,
     ): KStream<AggregateKey, NumericAggregate> {
-        return kstream.groupByKey()
-            .windowedBy(definition.timeWindows)
-            .aggregate(
-                { NumericAggregateCollector(fieldName, schema) },
-                { _, v, valueCollector -> valueCollector.add(v) },
-                RadarSerdes.Companion.materialized(
-                    definition.stateStoreName,
-                    RadarSerdes.Companion.getInstance().getNumericAggregateCollector() as Serde<NumericAggregateCollector>
-                )
-            )
-            .toStream()
-            .map(utilities::numericCollectorToAvro)
+        return kstream.groupByKey().windowedBy(definition.timeWindows).aggregate(
+            { NumericAggregateCollector(fieldName, schema) },
+            { _, v, valueCollector -> valueCollector.add(v) },
+            RadarSerdes.Companion.materialized(
+                definition.stateStoreName,
+                RadarSerdes.Companion.getInstance().getNumericAggregateCollector() as Serde<NumericAggregateCollector>,
+            ),
+        ).toStream().map(utilities::numericCollectorToAvro)
     }
 
     protected fun aggregateCustomNumeric(
         definition: StreamDefinition,
         kstream: KStream<ObservationKey, V>,
         calculation: (V) -> Double,
-        fieldName: String
+        fieldName: String,
     ): KStream<AggregateKey, NumericAggregate> {
-        return kstream.groupByKey()
-            .windowedBy(definition.timeWindows)
-            .aggregate(
-                { NumericAggregateCollector(fieldName) },
-                { _, v, valueCollector -> valueCollector.add(calculation(v)) },
-                RadarSerdes.Companion.materialized(
-                    definition.stateStoreName,
-                    RadarSerdes.Companion.getInstance().getNumericAggregateCollector() as Serde<NumericAggregateCollector>
-                )
-            )
-            .toStream()
-            .map(utilities::numericCollectorToAvro)
+        return kstream.groupByKey().windowedBy(definition.timeWindows).aggregate(
+            { NumericAggregateCollector(fieldName) },
+            { _, v, valueCollector -> valueCollector.add(calculation(v)) },
+            RadarSerdes.Companion.materialized(
+                definition.stateStoreName,
+                RadarSerdes.Companion.getInstance().getNumericAggregateCollector() as Serde<NumericAggregateCollector>,
+            ),
+        ).toStream().map(utilities::numericCollectorToAvro)
     }
 
     protected fun aggregateFields(
         definition: StreamDefinition,
         kstream: KStream<ObservationKey, V>,
         fieldNames: Array<String>,
-        schema: Schema
+        schema: Schema,
     ): KStream<AggregateKey, AggregateList> {
-        return kstream.groupByKey()
-            .windowedBy(definition.timeWindows)
-            .aggregate(
-                { AggregateListCollector(fieldNames, schema, false) },
-                { _, v, valueCollector -> valueCollector.add(v) },
-                RadarSerdes.Companion.materialized(
-                    definition.stateStoreName,
-                    RadarSerdes.Companion.getInstance().getAggregateListCollector() as Serde<AggregateListCollector>
-                )
-            )
-            .toStream()
-            .map(utilities::listCollectorToAvro)
+        return kstream.groupByKey().windowedBy(definition.timeWindows).aggregate(
+            { AggregateListCollector(fieldNames, schema, false) },
+            { _, v, valueCollector -> valueCollector.add(v) },
+            RadarSerdes.Companion.materialized(
+                definition.stateStoreName,
+                RadarSerdes.Companion.getInstance().getAggregateListCollector() as Serde<AggregateListCollector>,
+            ),
+        ).toStream().map(utilities::listCollectorToAvro)
     }
 
     override fun toString(): String {

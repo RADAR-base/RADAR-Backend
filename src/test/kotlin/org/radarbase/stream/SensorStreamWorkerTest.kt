@@ -20,7 +20,12 @@ import org.apache.kafka.streams.kstream.KStream
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.*
+import org.mockito.Mockito.any
+import org.mockito.Mockito.doCallRealMethod
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.radarbase.config.KafkaProperty
 import org.radarbase.config.RadarPropertyHandler
 import org.radarbase.config.SingleStreamConfig
@@ -31,7 +36,7 @@ import java.util.stream.Stream
 import kotlin.test.Ignore
 
 @Ignore("Covered by Java test; Kotlin + Mockito nullability matcher issue")
-class SensorStreamWorkerKotlinTest {
+class SensorStreamWorkerTest {
 
     companion object {
         private lateinit var aggregator: SensorStreamWorker<*, *>
@@ -57,12 +62,14 @@ class SensorStreamWorkerKotlinTest {
         val kafkaProperty: KafkaProperty = propertyHandler.kafkaProperties
         `when`(aggregator.getStreamProperties(eq(sensorTopic))).thenReturn(
             kafkaProperty.getStreamProperties(
-                "test", SingleStreamConfig(), DeviceTimestampExtractor::class.java
-            )
+                "test",
+                SingleStreamConfig(),
+                DeviceTimestampExtractor::class.java,
+            ),
         )
         @Suppress("UNCHECKED_CAST", "rawtypes")
         `when`(aggregator.implementStream(eq(sensorTopic), any())).thenReturn(
-            mock(KStream::class.java) as KStream<Any, Any>
+            mock(KStream::class.java) as KStream<Any, Any>,
         )
         doCallRealMethod().`when`(aggregator).createBuilder(sensorTopic)
         aggregator.createBuilder(sensorTopic)

@@ -20,11 +20,13 @@ class E4BatteryLevelStream : SensorStreamWorker<ObservationKey, EmpaticaE4Batter
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4BatteryLevel>
+        kstream: KStream<ObservationKey, EmpaticaE4BatteryLevel>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "batteryLevel",
-            EmpaticaE4BatteryLevel.getClassSchema()
+            definition,
+            kstream,
+            "batteryLevel",
+            EmpaticaE4BatteryLevel.getClassSchema(),
         )
     }
 }

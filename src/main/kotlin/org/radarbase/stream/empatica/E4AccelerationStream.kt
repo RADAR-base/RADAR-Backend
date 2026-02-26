@@ -20,11 +20,13 @@ class E4AccelerationStream : SensorStreamWorker<ObservationKey, EmpaticaE4Accele
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4Acceleration>
+        kstream: KStream<ObservationKey, EmpaticaE4Acceleration>,
     ): KStream<AggregateKey, AggregateList> {
         return aggregateFields(
-            definition, kstream, arrayOf("x", "y", "z"),
-            EmpaticaE4Acceleration.getClassSchema()
+            definition,
+            kstream,
+            arrayOf("x", "y", "z"),
+            EmpaticaE4Acceleration.getClassSchema(),
         )
     }
 }

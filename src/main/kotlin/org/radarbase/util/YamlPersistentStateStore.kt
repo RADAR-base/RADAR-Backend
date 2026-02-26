@@ -42,7 +42,7 @@ class YamlPersistentStateStore(private val basePath: File) : PersistentStateStor
         val userId = key.userId
         val sourceId = key.sourceId
         val builder = StringBuilder(
-            (projectId?.length ?: 0) + userId.length + 6 + sourceId.length
+            (projectId?.length ?: 0) + userId.length + 6 + sourceId.length,
         )
         projectId?.let { escape(it, builder) }
         builder.append(SEPARATOR)
@@ -77,6 +77,7 @@ class YamlPersistentStateStore(private val basePath: File) : PersistentStateStor
                         hasSlash = true
                     }
                 }
+
                 SEPARATOR -> {
                     if (hasSlash) {
                         builder.append(c)
@@ -96,6 +97,7 @@ class YamlPersistentStateStore(private val basePath: File) : PersistentStateStor
                         }
                     }
                 }
+
                 else -> {
                     builder.append(c)
                 }

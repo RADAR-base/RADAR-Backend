@@ -13,8 +13,7 @@ class RadarSerdes private constructor() {
         RadarSerde(NumericAggregateState::class.java).getSerde()
     private val aggregateListCollector: Serde<AggregateListState> =
         RadarSerde(AggregateListState::class.java).getSerde()
-    private val phoneUsageCollector: Serde<PhoneUsageCollector> =
-        RadarSerde(PhoneUsageCollector::class.java).getSerde()
+    private val phoneUsageCollector: Serde<PhoneUsageCollector> = RadarSerde(PhoneUsageCollector::class.java).getSerde()
 
     fun getNumericAggregateCollector(): Serde<NumericAggregateState> = numericCollector
     fun getAggregateListCollector(): Serde<AggregateListState> = aggregateListCollector
@@ -22,12 +21,14 @@ class RadarSerdes private constructor() {
 
     companion object {
         private val instance = RadarSerdes()
-        @JvmStatic fun getInstance(): RadarSerdes = instance
+
+        @JvmStatic
+        fun getInstance(): RadarSerdes = instance
 
         @JvmStatic
         fun <K, V> materialized(
             name: String,
-            valueSerde: Serde<V>
+            valueSerde: Serde<V>,
         ): Materialized<K, V, WindowStore<Bytes, ByteArray>> =
             Materialized.`as`<K, V, WindowStore<Bytes, ByteArray>>(name).withValueSerde(valueSerde)
     }

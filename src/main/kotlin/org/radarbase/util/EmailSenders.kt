@@ -13,7 +13,7 @@ class EmailSenders(private val emailSenderMap: Map<String, EmailSender>) {
      * [EmailSender] to each project. A project can have a list of
      * associated email addresses.
      *
-     * @param  config  Configuration of the Monitor containing project
+     * @param config  Configuration of the Monitor containing project
      *                 and email address mapping
      * @throws IOException
      */
@@ -26,7 +26,7 @@ class EmailSenders(private val emailSenderMap: Map<String, EmailSender>) {
                     config.emailHost,
                     config.emailPort,
                     config.emailUser,
-                    notifyConfig.emailAddress
+                    notifyConfig.emailAddress,
                 )
             }
             return EmailSenders(map)

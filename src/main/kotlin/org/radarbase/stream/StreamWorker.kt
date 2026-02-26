@@ -9,8 +9,9 @@ interface StreamWorker {
     fun configure(
         streamMaster: StreamMaster,
         properties: RadarPropertyHandler,
-        singleConfig: SingleStreamConfig
+        singleConfig: SingleStreamConfig,
     )
+
     fun getStreamDefinitions(): Stream<StreamDefinition>
     fun shutdown()
 }

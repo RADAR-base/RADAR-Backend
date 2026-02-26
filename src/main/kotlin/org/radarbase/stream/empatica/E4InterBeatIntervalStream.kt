@@ -20,11 +20,13 @@ class E4InterBeatIntervalStream : SensorStreamWorker<ObservationKey, EmpaticaE4I
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4InterBeatInterval>
+        kstream: KStream<ObservationKey, EmpaticaE4InterBeatInterval>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "interBeatInterval",
-            EmpaticaE4InterBeatInterval.getClassSchema()
+            definition,
+            kstream,
+            "interBeatInterval",
+            EmpaticaE4InterBeatInterval.getClassSchema(),
         )
     }
 }

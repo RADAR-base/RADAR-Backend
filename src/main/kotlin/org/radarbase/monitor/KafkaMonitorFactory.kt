@@ -28,7 +28,7 @@ import java.util.stream.Stream
 
 class KafkaMonitorFactory(
     private val options: RadarBackendOptions,
-    private val properties: RadarPropertyHandler
+    private val properties: RadarPropertyHandler,
 ) {
     @Throws(IOException::class)
     fun createMonitor(): KafkaMonitor {
@@ -59,7 +59,11 @@ class KafkaMonitorFactory(
             try {
                 minLevel = BatteryLevelMonitor.Status.valueOf(level)
             } catch (ex: IllegalArgumentException) {
-                logger.warn("Minimum battery level $level is not recognized. Choose from ${BatteryLevelMonitor.Status.values().contentToString()} instead. Using CRITICAL.")
+                logger.warn(
+                    "Minimum battery level $level is not recognized. Choose from ${
+                        BatteryLevelMonitor.Status.values().contentToString()
+                    } instead. Using CRITICAL.",
+                )
             }
         }
         val logInterval = config.logInterval.toLong()

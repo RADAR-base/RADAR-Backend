@@ -42,9 +42,10 @@ class StreamDefinitionTest {
         assertTrue(TOPIC_PATTERN.matcher(definition.stateStoreName).matches())
         assertEquals(
             "From-android_empatica_e4_blood_volume_pulse-To-android_empatica_e4_blood_volume_pulse_output",
-            definition.stateStoreName
+            definition.stateStoreName,
         )
     }
+
     @Test
     fun faultyNameValidation() {
         assertFailsWith(IllegalArgumentException::class) {

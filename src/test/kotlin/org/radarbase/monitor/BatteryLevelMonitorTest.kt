@@ -21,7 +21,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.radarbase.util.EmailSender
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.YamlPersistentStateStore

@@ -20,10 +20,17 @@ import java.nio.ByteBuffer
 
 @Suppress("all")
 class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
-    @JvmField var projectId: String? = null
-    @JvmField var userId: String? = null
-    @JvmField var sourceId: String? = null
-    @JvmField var packageName: String? = null
+    @JvmField
+    var projectId: String? = null
+
+    @JvmField
+    var userId: String? = null
+
+    @JvmField
+    var sourceId: String? = null
+
+    @JvmField
+    var packageName: String? = null
 
     constructor()
 
@@ -61,9 +68,56 @@ class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
 
     companion object {
         private const val serialVersionUID = 5825691401492875312L
+
         @JvmField
-        val SCHEMA: Schema = Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TemporaryPackageKey\",\"namespace\":\"org.radarbase.stream.phone\",\"fields\":[{\"name\":\"projectId\",\"type\":[\"null\",{\"type\":\"string\",\"avro.java.string\":\"String\"}],\"doc\":\"Project ID.\"},{\"name\":\"userId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"User ID.\"},{\"name\":\"sourceId\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Source ID.\"},{\"name\":\"packageName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Package name.\"}]}")
-        
+        val SCHEMA: Schema = Schema.Parser()
+            .parse(
+                """
+    {
+      "type": "record",
+      "name": "TemporaryPackageKey",
+      "namespace": "org.radarbase.stream.phone",
+      "fields": [
+        {
+          "name": "projectId",
+          "type": [
+            "null",
+            {
+              "type": "string",
+              "avro.java.string": "String"
+            }
+          ],
+          "doc": "Project ID."
+        },
+        {
+          "name": "userId",
+          "type": {
+            "type": "string",
+            "avro.java.string": "String"
+          },
+          "doc": "User ID."
+        },
+        {
+          "name": "sourceId",
+          "type": {
+            "type": "string",
+            "avro.java.string": "String"
+          },
+          "doc": "Source ID."
+        },
+        {
+          "name": "packageName",
+          "type": {
+            "type": "string",
+            "avro.java.string": "String"
+          },
+          "doc": "Package name."
+        }
+      ]
+    }
+                """.trimIndent(),
+            )
+
         @JvmStatic
         fun getClassSchema(): Schema = SCHEMA
 
@@ -112,6 +166,7 @@ class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
             fieldSetFlags()[0] = true
             return this
         }
+
         fun hasProjectId(): Boolean = fieldSetFlags()[0]
         fun clearProjectId(): Builder {
             projectId = null
@@ -126,6 +181,7 @@ class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
             fieldSetFlags()[1] = true
             return this
         }
+
         fun hasUserId(): Boolean = fieldSetFlags()[1]
         fun clearUserId(): Builder {
             userId = null
@@ -140,6 +196,7 @@ class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
             fieldSetFlags()[2] = true
             return this
         }
+
         fun hasSourceId(): Boolean = fieldSetFlags()[2]
         fun clearSourceId(): Builder {
             sourceId = null
@@ -154,6 +211,7 @@ class TemporaryPackageKey : SpecificRecordBase, SpecificRecord {
             fieldSetFlags()[3] = true
             return this
         }
+
         fun hasPackageName(): Boolean = fieldSetFlags()[3]
         fun clearPackageName(): Builder {
             packageName = null

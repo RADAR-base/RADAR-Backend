@@ -20,11 +20,13 @@ class E4BloodVolumePulseStream : SensorStreamWorker<ObservationKey, EmpaticaE4Bl
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, EmpaticaE4BloodVolumePulse>
+        kstream: KStream<ObservationKey, EmpaticaE4BloodVolumePulse>,
     ): KStream<AggregateKey, NumericAggregate> {
         return aggregateNumeric(
-            definition, kstream, "bloodVolumePulse",
-            EmpaticaE4BloodVolumePulse.getClassSchema()
+            definition,
+            kstream,
+            "bloodVolumePulse",
+            EmpaticaE4BloodVolumePulse.getClassSchema(),
         )
     }
 }

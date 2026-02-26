@@ -55,13 +55,16 @@ class ConfigRadar {
     var buildVersion: String? = null
 
     val zookeeperPaths: String
-        get() = zookeeper?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("'zookeeper' is not configured")
+        get() = zookeeper?.let { ServerConfig.getPaths(it) }
+            ?: throw IllegalStateException("'zookeeper' is not configured")
 
     val brokerPaths: String
-        get() = broker?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("Kafka 'broker' is not configured")
+        get() = broker?.let { ServerConfig.getPaths(it) }
+            ?: throw IllegalStateException("Kafka 'broker' is not configured")
 
     val schemaRegistryPaths: String
-        get() = schemaRegistry?.let { ServerConfig.getPaths(it) } ?: throw IllegalStateException("'schema_registry' is not configured")
+        get() = schemaRegistry?.let { ServerConfig.getPaths(it) }
+            ?: throw IllegalStateException("'schema_registry' is not configured")
 
     val restProxyPath: String
         get() {

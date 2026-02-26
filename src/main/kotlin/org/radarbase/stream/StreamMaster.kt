@@ -6,26 +6,28 @@ import org.radarbase.config.SubCommand
 import org.radarbase.util.Monitor
 import org.slf4j.LoggerFactory
 import java.io.IOException
-import java.util.concurrent.*
+import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
 open class StreamMaster(
     propertyHandler: RadarPropertyHandler,
-    streams: Stream<out SingleStreamConfig>
+    streams: Stream<out SingleStreamConfig>,
 ) : SubCommand, Thread.UncaughtExceptionHandler {
     private val streamWorkers: List<StreamWorker>
     private val currentStream = AtomicInteger(0)
     private lateinit var executor: ScheduledExecutorService
 
     init {
-        streamWorkers = streams
-            .map { createWorker(propertyHandler, it) }
-            .collect(Collectors.toList())
+        streamWorkers = streams.map { createWorker(propertyHandler, it) }.collect(Collectors.toList())
         logger.info(
             "Configured streams: \n{}",
-            streamWorkers.joinToString("\n") { " - ${it.javaClass.name}" }
+            streamWorkers.joinToString("\n") { " - ${it.javaClass.name}" },
         )
     }
 
@@ -36,10 +38,19 @@ open class StreamMaster(
             worker
         } catch (e: Exception) {
             when (e) {
-                is InstantiationException, is IllegalAccessException, is NoSuchMethodException ->
-                    throw IllegalArgumentException("Cannot instantiate class ${c.streamClass}", e)
-                is ClassCastException ->
-                    throw IllegalArgumentException("Given class ${c.streamClass} does not implement StreamWorker.", e)
+                is InstantiationException,
+                is IllegalAccessException,
+                is NoSuchMethodException,
+                -> throw IllegalArgumentException(
+                    "Cannot instantiate class ${c.streamClass}",
+                    e,
+                )
+
+                is ClassCastException -> throw IllegalArgumentException(
+                    "Given class ${c.streamClass} does not implement StreamWorker.",
+                    e,
+                )
+
                 else -> throw e
             }
         }
@@ -86,8 +97,12 @@ open class StreamMaster(
 
     fun notifyStartedStream(stream: StreamWorker) {
         val current = currentStream.incrementAndGet()
-        logger.info("[{}] {} is started. {}/{} streams are now running",
-            stream, current, streamWorkers.size)
+        logger.info(
+            "[{}] {} is started. {}/{} streams are now running",
+            stream,
+            current,
+            streamWorkers.size,
+        )
     }
 
     fun notifyClosedStream(stream: StreamWorker) {
@@ -95,8 +110,12 @@ open class StreamMaster(
         if (current == 0) {
             logger.info("{} is closed. All streams have been terminated", stream)
         } else {
-            logger.info("{} is closed. {}/{} streams are still running",
-                stream, current, streamWorkers.size)
+            logger.info(
+                "{} is closed. {}/{} streams are still running",
+                stream,
+                current,
+                streamWorkers.size,
+            )
         }
     }
 
@@ -122,13 +141,9 @@ open class StreamMaster(
     protected fun announceTopics() {
         logger.info(
             "If AUTO.CREATE.TOPICS.ENABLE is FALSE you must create the following topics before starting: \n  - {}",
-            streamWorkers.asSequence()
-                .flatMap { it.getStreamDefinitions().collect(Collectors.toList()) }
-                .flatMap { listOfNotNull(it.inputTopic, it.outputTopic) }
-                .map { it.name }
-                .distinct()
-                .sorted()
-                .joinToString("\n - ")
+            streamWorkers.asSequence().flatMap { it.getStreamDefinitions().collect(Collectors.toList()) }
+                .flatMap { listOfNotNull(it.inputTopic, it.outputTopic) }.map { it.name }.distinct().sorted()
+                .joinToString("\n - "),
         )
     }
 

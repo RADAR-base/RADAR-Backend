@@ -32,8 +32,14 @@ import org.slf4j.LoggerFactory
 import java.text.DateFormat
 import java.time.Duration
 import java.time.Instant
-import java.util.*
-import java.util.concurrent.*
+import java.util.Date
+import java.util.Locale
+import java.util.Properties
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
@@ -42,9 +48,13 @@ class DisconnectMonitor(
     radar: RadarPropertyHandler,
     topics: Collection<String>,
     groupId: String,
-    private val senders: EmailSenders?
+    private val senders: EmailSenders?,
 ) : AbstractKafkaMonitor<GenericRecord, GenericRecord, DisconnectMonitor.DisconnectMonitorState>(
-    radar, topics, groupId, "1", DisconnectMonitorState()
+    radar,
+    topics,
+    groupId,
+    "1",
+    DisconnectMonitorState(),
 ) {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val timeUntilReportedMissing: Duration
@@ -120,7 +130,10 @@ class DisconnectMonitor(
         }
     }
 
-    private fun scheduleRepetition(key: String, report: MissingRecordsReport) {
+    private fun scheduleRepetition(
+        key: String,
+        report: MissingRecordsReport,
+    ) {
         if (report.messageNumber < numRepetitions) {
             val reportedMissing = report.reportedMissing
             val now = Instant.now()
@@ -132,22 +145,34 @@ class DisconnectMonitor(
                 repeatInterval.minus(passedInterval)
             }
 
-            report.future = scheduler.schedule({ reportMissing(key, report.newRepetition()) },
-                nextRepetition.toMillis(), TimeUnit.MILLISECONDS)
+            report.future = scheduler.schedule(
+                { reportMissing(key, report.newRepetition()) },
+                nextRepetition.toMillis(), TimeUnit.MILLISECONDS,
+            )
         }
     }
 
-    private fun reportMissing(keyString: String, report: MissingRecordsReport) {
+    private fun reportMissing(
+        keyString: String,
+        report: MissingRecordsReport,
+    ) {
         val key = getStateStore()!!.stringToKey(keyString)
         val sender = senders?.getEmailSenderForProject(key.projectId) ?: return
 
         val timeout = report.timeout
-        logger.info("Device {} timeout {} (message {} of {}). Reporting it missing.", key,
-            timeout, report.messageNumber, numRepetitions)
+        logger.info(
+            "Device {} timeout {} (message {} of {}). Reporting it missing.",
+            key,
+            timeout,
+            report.messageNumber,
+            numRepetitions,
+        )
 
         try {
             val lastSeen = dayFormat.format(report.lastSeenDate)
-            var text = "The device $key seems disconnected. It was last seen on $lastSeen (${timeout / 1000L} seconds ago). If this is not intended, please ensure that it gets reconnected."
+            var text =
+                "The device $key seems disconnected. It was last seen on $lastSeen (${timeout / 1000L} seconds ago). " +
+                    "If this is not intended, please ensure that it gets reconnected."
             if (message != null) {
                 text += "\n\n$message"
             }
@@ -169,7 +194,10 @@ class DisconnectMonitor(
         }
     }
 
-    private fun reportRecovered(key: ObservationKey, reportedMissingTime: Long) {
+    private fun reportRecovered(
+        key: ObservationKey,
+        reportedMissingTime: Long,
+    ) {
         val sender = senders?.getEmailSenderForProject(key.projectId) ?: return
 
         logger.info("Device {} seen again. Reporting it recovered.", key)
@@ -177,8 +205,11 @@ class DisconnectMonitor(
             val reportedMissingDate = Date(reportedMissingTime)
             val reportedMissing = dayFormat.format(reportedMissingDate)
 
-            sender.sendEmail("[RADAR] device has reconnected",
-                "The device $key that was reported disconnected on $reportedMissing has reconnected: it is sending new data.")
+            sender.sendEmail(
+                "[RADAR] device has reconnected",
+                "The device $key that was reported disconnected on $reportedMissing " +
+                    "has reconnected: it is sending new data.",
+            )
             logger.debug("Sent reconnected message successfully")
         } catch (mex: MessagingException) {
             logger.error("Failed to send reconnected message.", mex)
@@ -201,7 +232,7 @@ class DisconnectMonitor(
     class MissingRecordsReport @JsonCreator constructor(
         @JsonProperty("lastSeen") val lastSeen: Long,
         @JsonProperty("reportedMissing") val reportedMissing: Long,
-        @JsonProperty("messageNumber") val messageNumber: Int
+        @JsonProperty("messageNumber") val messageNumber: Int,
     ) {
         @JsonIgnore
         @Volatile
@@ -217,7 +248,8 @@ class DisconnectMonitor(
         val lastSeenDate: Date
             get() = Date(lastSeen)
 
-        fun newRepetition(): MissingRecordsReport = MissingRecordsReport(lastSeen, System.currentTimeMillis(), messageNumber + 1)
+        fun newRepetition(): MissingRecordsReport =
+            MissingRecordsReport(lastSeen, System.currentTimeMillis(), messageNumber + 1)
 
         fun cancelRepetition() {
             future?.cancel(true)

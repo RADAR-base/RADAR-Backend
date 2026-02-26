@@ -24,10 +24,12 @@ class PlayStoreCategoryParserTest {
 
     @Test
     fun getCategoryFromDocumentNoCategory() {
-        val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_no_category.html.gz")?.use { stream ->
-            GZIPInputStream(stream).use { gzipStream -> Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
-            }
-        } ?: throw IllegalStateException("Resource not found")
+        val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_no_category.html.gz")
+            ?.use { stream ->
+                GZIPInputStream(stream).use { gzipStream ->
+                    Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
+                }
+            } ?: throw IllegalStateException("Resource not found")
 
         val category = PlayStoreLookup.getCategoryFromDocument(doc, "nl.thehyve.transmartclient")
         assertNull(category.categoryName)
@@ -35,11 +37,12 @@ class PlayStoreCategoryParserTest {
 
     @Test
     fun getCategoryFromDocumentBroken() {
-        val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_broken.html.gz")?.use { stream ->
-            GZIPInputStream(stream).use { gzipStream ->
-                Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
-            }
-        } ?: throw IllegalStateException("Resource not found")
+        val doc =
+            javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_broken.html.gz")?.use { stream ->
+                GZIPInputStream(stream).use { gzipStream ->
+                    Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
+                }
+            } ?: throw IllegalStateException("Resource not found")
 
         val category = PlayStoreLookup.getCategoryFromDocument(doc, "nl.thehyve.transmartclient")
         assertNull(category.categoryName)

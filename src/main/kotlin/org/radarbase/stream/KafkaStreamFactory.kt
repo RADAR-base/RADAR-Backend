@@ -10,7 +10,7 @@ import java.util.stream.Stream
 
 class KafkaStreamFactory(
     private val options: RadarBackendOptions,
-    private val radarProperties: RadarPropertyHandler
+    private val radarProperties: RadarPropertyHandler,
 ) {
     fun createSensorStreams(): StreamMaster {
         val args = options.subCommandArgs
@@ -20,12 +20,11 @@ class KafkaStreamFactory(
             emptySet()
         }
 
-        val configs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream()
-            .filter { s ->
-                streamTypes.isEmpty() || streamTypes.any { n ->
-                    s.streamClass!!.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
-                }
+        val configs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream().filter { s ->
+            streamTypes.isEmpty() || streamTypes.any { n ->
+                s.streamClass!!.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
             }
+        }
 
         return master(configs)
     }

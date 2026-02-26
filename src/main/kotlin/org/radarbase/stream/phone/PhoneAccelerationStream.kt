@@ -17,11 +17,13 @@ class PhoneAccelerationStream : SensorStreamWorker<ObservationKey, PhoneAccelera
 
     override fun implementStream(
         definition: StreamDefinition,
-        kstream: KStream<ObservationKey, PhoneAcceleration>
+        kstream: KStream<ObservationKey, PhoneAcceleration>,
     ): KStream<AggregateKey, AggregateList> {
         return aggregateFields(
-            definition, kstream, arrayOf("x", "y", "z"),
-            PhoneAcceleration.getClassSchema()
+            definition,
+            kstream,
+            arrayOf("x", "y", "z"),
+            PhoneAcceleration.getClassSchema(),
         )
     }
 }

@@ -54,11 +54,13 @@ class RadarBackendOptions(private val cli: CommandLine) {
 
     companion object {
         private val log = LoggerFactory.getLogger(RadarBackendOptions::class.java)
-        val OPTIONS: Options = Options()
-            .addOption("c", "config", true, "Configuration YAML file")
-            .addOption("d", "devices", true, "Number of devices to use with the mock command.")
-            .addOption("D", "direct", false, "The mock device will bypass the rest-proxy and use the Kafka Producer API instead.")
-            .addOption("f", "file", true, "Read mock data from given configuration file.")
+        val OPTIONS: Options = Options().addOption("c", "config", true, "Configuration YAML file")
+            .addOption("d", "devices", true, "Number of devices to use with the mock command.").addOption(
+                "D",
+                "direct",
+                false,
+                "The mock device will bypass the rest-proxy and use the Kafka Producer API instead.",
+            ).addOption("f", "file", true, "Read mock data from given configuration file.")
 
         @Throws(ParseException::class)
         fun parse(args: Array<String>): RadarBackendOptions {
