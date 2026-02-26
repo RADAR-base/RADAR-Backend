@@ -5,13 +5,12 @@ commonsCli = "1.11.0"
 confluent = "8.1.1"
 findbug = "3.0.2"
 greenmail = "2.1.8"
-hamcrest = "1.3"
 jackson = "2.21"
 javaMail = "2.1.5"
-junit = "4.13.2"
+junit-jupiter = "5.10.1"
 kafka = "8.1.1-ce"
 # Project and Plugins
-kotlin = "1.9.24"
+kotlin = "2.2.10"
 ksoup = "0.2.6"
 log4j = "1.2.17"
 mockito = "5.21.0"
@@ -24,13 +23,10 @@ versionCatalogUpdate = "0.8.5"
 avro = { module = "org.apache.avro:avro", version.ref = "avro" }
 commons-cli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
 greenmail = { module = "com.icegreen:greenmail", version.ref = "greenmail" }
-hamcrest-all = { module = "org.hamcrest:hamcrest-all", version.ref = "hamcrest" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
 jakarta-mail = { module = "jakarta.mail:jakarta.mail-api", version.ref = "javaMail" }
 # Utilities
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "findbug" }
-# Testing
-junit = { module = "junit:junit", version.ref = "junit" }
 # Kafka & Confluent
 kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka" }
 kafka-streams-avro-serde = { module = "io.confluent:kafka-streams-avro-serde", version.ref = "confluent" }
@@ -47,6 +43,7 @@ radar-commons-server = { module = "org.radarbase:radar-commons-server", version.
 radar-commons-testing = { module = "org.radarbase:radar-commons-testing", version.ref = "radarCommons" }
 radar-schemas-commons = { module = "org.radarbase:radar-schemas-commons", version.ref = "radarSchemas" }
 slf4j-log4j = { module = "org.slf4j:slf4j-log4j12", version.ref = "slf4j" }
+junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
 
 [plugins]
 radar-dependency-management = { id = "org.radarbase.radar-dependency-management", version.ref = "radarCommons" }
@@ -54,6 +51,7 @@ radar-kotlin = { id = "org.radarbase.radar-kotlin", version.ref = "radarCommons"
 radar-publishing = { id = "org.radarbase.radar-publishing", version.ref = "radarCommons" }
 radar-root-project = { id = "org.radarbase.radar-root-project", version.ref = "radarCommons" }
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdate" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]
 ksoup = [

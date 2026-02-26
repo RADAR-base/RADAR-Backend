@@ -1,9 +1,9 @@
 package org.radarbase.stream.phone
 
-import java.math.BigDecimal
-import java.math.MathContext
 import org.radarcns.passive.phone.PhoneUsageEvent
 import org.radarcns.passive.phone.UsageEventType
+import java.math.BigDecimal
+import java.math.MathContext
 
 /**
  * Created by piotrzakrzewski on 27/07/2017.

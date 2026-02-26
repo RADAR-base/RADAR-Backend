@@ -16,9 +16,8 @@
 
 package org.radarbase.util.serde
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import org.radarbase.util.serde.JsonDeserializer
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.radarcns.kafka.ObservationKey
 
 class JsonDeserializerTest {

@@ -31,8 +31,8 @@ import org.apache.kafka.common.errors.InterruptException
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.errors.WakeupException
 import org.radarbase.config.RadarPropertyHandler
-import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.PersistentStateStore
+import org.radarcns.kafka.ObservationKey
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.time.Duration
@@ -86,7 +86,8 @@ abstract class AbstractKafkaMonitor<K, V, S>(
         stateStore = try {
             radar.getPersistentStateStore()
         } catch (ex: IOException) {
-            logger.warn("Cannot get persistent state store {}. Not persisting state.",
+            logger.warn(
+                "Cannot get persistent state store {}. Not persisting state.",
                 stateDefault?.let { it::class.java.name } ?: "null", ex)
             null
         }
@@ -97,8 +98,10 @@ abstract class AbstractKafkaMonitor<K, V, S>(
                 localState = stateStore.retrieveState(groupId, this.clientId, stateDefault!!)
                 logger.info("Using existing {} from persistence store.", stateDefault!!::class.java.name)
             } catch (ex: IOException) {
-                logger.warn("Cannot retrieve persistent state {}. Restarting from empty state.",
-                    stateDefault!!::class.java.name, ex)
+                logger.warn(
+                    "Cannot retrieve persistent state {}. Restarting from empty state.",
+                    stateDefault!!::class.java.name, ex
+                )
             }
         } else if (stateDefault != null) {
             logger.info("Persistence path not specified; not retrieving or storing state.")
@@ -165,7 +168,10 @@ abstract class AbstractKafkaMonitor<K, V, S>(
             .filter { tp ->
                 val tmpProperties = Properties().apply {
                     putAll(properties)
-                    setProperty(CLIENT_ID_CONFIG, "${properties.getProperty(CLIENT_ID_CONFIG)}-tmp-${UUID.randomUUID()}")
+                    setProperty(
+                        CLIENT_ID_CONFIG,
+                        "${properties.getProperty(CLIENT_ID_CONFIG)}-tmp-${UUID.randomUUID()}"
+                    )
                 }
 
                 try {
@@ -200,8 +206,10 @@ abstract class AbstractKafkaMonitor<K, V, S>(
             try {
                 stateStore.storeState(groupId, clientId, state)
             } catch (ex: IOException) {
-                logger.error("Failed to store monitor state: {}. "
-                        + "When restarted, all current state will be lost.", ex.message)
+                logger.error(
+                    "Failed to store monitor state: {}. "
+                            + "When restarted, all current state will be lost.", ex.message
+                )
             }
         }
     }
@@ -236,7 +244,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
                 ?: throw IllegalArgumentException("Failed to process record with key type $schema without user ID.")
             val sourceIdField = schema.getField("sourceId")
                 ?: throw IllegalArgumentException("Failed to process record with key type $schema without source ID.")
-            
+
             val projectIdValue = record[projectIdField.pos()]
             return ObservationKey(
                 projectIdValue?.toString(),

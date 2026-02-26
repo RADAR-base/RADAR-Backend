@@ -33,7 +33,7 @@ class KafkaProperty(private val configRadar: ConfigRadar) {
      */
     fun getStreamProperties(
         clientId: String,
-        singleStreamConfig: SingleStreamConfig
+        singleStreamConfig: SingleStreamConfig,
     ): Properties {
         val props = Properties()
 
@@ -64,7 +64,7 @@ class KafkaProperty(private val configRadar: ConfigRadar) {
     fun getStreamProperties(
         clientId: String,
         singleStreamConfig: SingleStreamConfig,
-        timestampExtractor: Class<out TimestampExtractor>
+        timestampExtractor: Class<out TimestampExtractor>,
     ): Properties {
         val props = getStreamProperties(clientId, singleStreamConfig)
         props[StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG] = timestampExtractor.name

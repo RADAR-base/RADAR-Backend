@@ -16,37 +16,40 @@
 
 package org.radarbase.monitor
 
-import org.junit.Assert.*
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
-import org.radarbase.monitor.CombinedKafkaMonitor
-import org.radarbase.monitor.KafkaMonitor
 import java.io.IOException
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlin.test.assertFailsWith
+import kotlin.test.junit5.JUnit5Asserter.fail
 
 class CombinedKafkaMonitorTest {
 
-    @Test(expected = IOException::class)
+    @Test
     fun testExceptionFlow() {
-        val kafkaMonitor1 = mock(KafkaMonitor::class.java)
-        val kafkaMonitor2 = mock(KafkaMonitor::class.java)
+        assertFailsWith(IOException::class) {
+            val kafkaMonitor1 = mock(KafkaMonitor::class.java)
+            val kafkaMonitor2 = mock(KafkaMonitor::class.java)
 
-        `when`(kafkaMonitor2.start()).thenThrow(IOException("failed to run!"))
+            `when`(kafkaMonitor2.start()).thenThrow(IOException("failed to run!"))
 
-        val km = CombinedKafkaMonitor(Stream.of(kafkaMonitor1, kafkaMonitor2))
+            val km = CombinedKafkaMonitor(Stream.of(kafkaMonitor1, kafkaMonitor2))
 
-        try {
-            km.start()
-        } catch (ex: IOException) {
-            verify(kafkaMonitor1, times(1)).start()
-            verify(kafkaMonitor2, times(1)).start()
-            verify(kafkaMonitor1, times(1)).shutdown()
-            verify(kafkaMonitor2, times(1)).shutdown()
-            assertTrue(km.isShutdown)
-            throw ex
+            try {
+                km.start()
+            } catch (ex: IOException) {
+                verify(kafkaMonitor1, times(1)).start()
+                verify(kafkaMonitor2, times(1)).start()
+                verify(kafkaMonitor1, times(1)).shutdown()
+                verify(kafkaMonitor2, times(1)).shutdown()
+                assertTrue(km.isShutdown)
+                throw ex
+            }
         }
     }
 
@@ -93,13 +96,17 @@ class CombinedKafkaMonitorTest {
         verify(kafkaMonitor2, times(1)).pollTimeout = Duration.ofSeconds(1L)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun testEmpty() {
-        CombinedKafkaMonitor(Stream.empty())
+        assertFailsWith(IllegalArgumentException::class) {
+            CombinedKafkaMonitor(Stream.empty())
+        }
     }
 
-    @Test(expected = NullPointerException::class)
+    @Test
     fun testNull() {
-        CombinedKafkaMonitor(null!!)
+        assertFailsWith(NullPointerException::class) {
+            CombinedKafkaMonitor(null!!)
+        }
     }
 }

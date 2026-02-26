@@ -19,26 +19,22 @@ package org.radarbase.monitor
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.junit.Assert.*
 import org.junit.ClassRule
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import org.radarbase.config.BatteryMonitorConfig
-import org.radarbase.config.ConfigRadar
-import org.radarbase.config.DisconnectMonitorConfig
-import org.radarbase.config.NotifyConfig
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.SourceStatisticsStreamConfig
-import org.radarbase.config.YamlConfigLoader
-import org.radarbase.util.EmailServerRule
-import org.radarbase.config.RadarPropertyHandler as KotlinRadarPropertyHandler
-import org.radarbase.config.RadarPropertyHandlerImpl as KotlinRadarPropertyHandlerImpl
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.io.TempDir
+import org.radarbase.config.*
+import org.radarbase.util.EmailServerExtension
 import java.io.File
 import java.io.IOException
+import java.nio.file.Path
+import kotlin.io.path.createFile
+import org.radarbase.config.RadarPropertyHandler as KotlinRadarPropertyHandler
+import org.radarbase.config.RadarPropertyHandlerImpl as KotlinRadarPropertyHandlerImpl
 
 class KafkaMonitorFactoryTest {
-    @Rule
-    @JvmField
-    val folder = TemporaryFolder()
+
+    @TempDir
+    lateinit var folder: Path
 
     @Test
     fun createBatteryMonitor() {
@@ -100,13 +96,14 @@ class KafkaMonitorFactoryTest {
     }
 
     companion object {
-        @ClassRule
+
+        @RegisterExtension
         @JvmField
-        val emailServer = EmailServerRule(25251)
+        val emailServer = EmailServerExtension(port = 3025)
 
         @Throws(IOException::class)
-        fun getRadarPropertyHandler(config: ConfigRadar, folder: TemporaryFolder): KotlinRadarPropertyHandler {
-            val tmpConfig = folder.newFile("radar.yml")
+        fun getRadarPropertyHandler(config: ConfigRadar, folder: Path): KotlinRadarPropertyHandler {
+            val tmpConfig = folder.resolve("radar.yml").createFile().toFile()
             YamlConfigLoader().store(tmpConfig.toPath(), config)
 
             val properties = KotlinRadarPropertyHandlerImpl()
@@ -115,9 +112,9 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun createBasicConfig(folder: TemporaryFolder): ConfigRadar {
+        fun createBasicConfig(folder: Path): ConfigRadar {
             val config = ConfigRadar()
-            config.persistencePath = folder.newFolder().absolutePath
+            config.persistencePath = folder.toFile().absolutePath
             config.schemaRegistry = emptyList()
             config.broker = emptyList()
             return config
@@ -136,7 +133,7 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun getDisconnectMonitorConfig(port: Int, folder: TemporaryFolder): ConfigRadar {
+        fun getDisconnectMonitorConfig(port: Int, folder: Path): ConfigRadar {
             val config = createBasicConfig(folder)
             config.disconnectMonitor = getDisconnectMonitorConfig(port)
             return config
@@ -155,14 +152,14 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun getBatteryMonitorConfig(port: Int, folder: TemporaryFolder): ConfigRadar {
+        fun getBatteryMonitorConfig(port: Int, folder: Path): ConfigRadar {
             val config = createBasicConfig(folder)
             config.batteryMonitor = getBatteryMonitorConfig(port)
             return config
         }
 
         @Throws(IOException::class)
-        fun getSourceStatisticsMonitorConfig(folder: TemporaryFolder): ConfigRadar {
+        fun getSourceStatisticsMonitorConfig(folder: Path): ConfigRadar {
             val config = createBasicConfig(folder)
             val sourceConfig = SourceStatisticsStreamConfig()
             sourceConfig.name = "source_statistics_test"

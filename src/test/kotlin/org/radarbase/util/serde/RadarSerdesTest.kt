@@ -17,22 +17,24 @@
 package org.radarbase.util.serde
 
 import org.apache.kafka.common.serialization.Serde
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.radarbase.stream.collector.AggregateListState
 import org.radarbase.stream.collector.NumericAggregateState
-import org.radarbase.util.serde.JsonDeserializer
-import org.radarbase.util.serde.JsonSerializer
-import org.radarbase.util.serde.RadarSerdes
 
 class RadarSerdesTest {
-    private lateinit var radarSerdes: RadarSerdes
 
-    @Before
-    fun setUp() {
-        radarSerdes = RadarSerdes.getInstance()
+    companion object {
+
+        private lateinit var radarSerdes: RadarSerdes
+
+        @BeforeAll
+        @JvmStatic
+        fun setUp() {
+            radarSerdes = RadarSerdes.getInstance()
+        }
     }
 
     @Test

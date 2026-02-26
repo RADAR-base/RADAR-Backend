@@ -18,25 +18,23 @@ package org.radarbase.monitor
 
 import org.apache.avro.generic.GenericData.Record
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.hasEntry
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.*
-import org.radarcns.kafka.ObservationKey
-import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel
 import org.radarbase.util.EmailSender
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.YamlPersistentStateStore
+import org.radarcns.kafka.ObservationKey
+import org.radarcns.passive.empatica.EmpaticaE4BatteryLevel
+import java.nio.file.Path
 import java.util.*
+import kotlin.test.assertEquals
 
 class BatteryLevelMonitorTest {
 
-    @Rule
-    @JvmField
-    val folder = TemporaryFolder()
+    @TempDir
+    lateinit var folder: Path
 
     private var offset: Long = 0
     private var timeReceived: Long = 0
@@ -94,7 +92,7 @@ class BatteryLevelMonitorTest {
 
     @Test
     fun retrieveState() {
-        val base = folder.newFolder()
+        val base = folder.toFile()
         val stateStore = YamlPersistentStateStore(base)
         val state = BatteryLevelMonitor.BatteryLevelState()
         val key1 = ObservationKey("test", "a", "b")
@@ -105,6 +103,7 @@ class BatteryLevelMonitorTest {
         val stateStore2 = YamlPersistentStateStore(base)
         val state2 = stateStore2.retrieveState("one", "two", BatteryLevelMonitor.BatteryLevelState())
         val values = state2.levels
-        assertThat(values, hasEntry(keyString, 0.1f))
+        assert(values.containsKey(keyString))
+        assertEquals(0.1f, values[keyString])
     }
 }

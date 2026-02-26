@@ -8,13 +8,13 @@ import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.KStream
+import org.radarbase.stream.collector.AggregateListCollector
+import org.radarbase.stream.collector.NumericAggregateCollector
 import org.radarbase.util.Monitor
 import org.radarbase.util.RadarSingletonFactory
 import org.radarbase.util.RadarUtilities
 import org.radarbase.util.StreamUtil
 import org.radarbase.util.serde.RadarSerdes
-import org.radarbase.stream.collector.AggregateListCollector
-import org.radarbase.stream.collector.NumericAggregateCollector
 import org.radarcns.kafka.AggregateKey
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.stream.aggregator.AggregateList

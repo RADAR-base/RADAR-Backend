@@ -16,14 +16,14 @@
 
 package org.radarbase.stream
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.radarbase.stream.AbstractStreamWorker.Companion.OUTPUT_LABEL
-import org.radarbase.stream.StreamDefinition
 import org.radarbase.topic.KafkaTopic
 import java.util.regex.Pattern
+import kotlin.test.assertFailsWith
 
 class StreamDefinitionTest {
     companion object {
@@ -45,12 +45,14 @@ class StreamDefinitionTest {
             definition.stateStoreName
         )
     }
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun faultyNameValidation() {
-        val inputTopic = KafkaTopic("$INPUT$")
-        val outputTopic = KafkaTopic(OUTPUT)
+        assertFailsWith(IllegalArgumentException::class) {
+            val inputTopic = KafkaTopic("$INPUT$")
+            val outputTopic = KafkaTopic(OUTPUT)
 
-        val definition = StreamDefinition(inputTopic, outputTopic)
-        assertFalse(TOPIC_PATTERN.matcher(definition.stateStoreName).matches())
+            val definition = StreamDefinition(inputTopic, outputTopic)
+            assertFalse(TOPIC_PATTERN.matcher(definition.stateStoreName).matches())
+        }
     }
 }

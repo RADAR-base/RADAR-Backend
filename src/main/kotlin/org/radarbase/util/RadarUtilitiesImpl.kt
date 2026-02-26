@@ -4,6 +4,8 @@ import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.KeyValue.pair
 import org.apache.kafka.streams.kstream.Window
 import org.apache.kafka.streams.kstream.Windowed
+import org.radarbase.stream.collector.AggregateListCollector
+import org.radarbase.stream.collector.NumericAggregateCollector
 import org.radarbase.stream.phone.PhoneUsageCollector
 import org.radarbase.stream.phone.TemporaryPackageKey
 import org.radarcns.kafka.AggregateKey
@@ -11,8 +13,6 @@ import org.radarcns.kafka.ObservationKey
 import org.radarcns.stream.aggregator.AggregateList
 import org.radarcns.stream.aggregator.NumericAggregate
 import org.radarcns.stream.aggregator.PhoneUsageAggregate
-import org.radarbase.stream.collector.AggregateListCollector
-import org.radarbase.stream.collector.NumericAggregateCollector
 
 class RadarUtilitiesImpl : RadarUtilities {
     override fun getWindowed(window: Windowed<ObservationKey>): AggregateKey {

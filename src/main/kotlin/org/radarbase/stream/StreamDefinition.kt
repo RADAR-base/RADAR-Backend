@@ -1,8 +1,8 @@
 package org.radarbase.stream
 
 import org.apache.kafka.streams.kstream.TimeWindows
-import org.radarbase.util.Comparison
 import org.radarbase.topic.KafkaTopic
+import org.radarbase.util.Comparison
 import java.time.Duration
 
 class StreamDefinition(

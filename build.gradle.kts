@@ -1,5 +1,6 @@
 plugins {
     application
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.radar.dependency.management)
     alias(libs.plugins.radar.publishing)
     alias(libs.plugins.radar.kotlin)
@@ -31,16 +32,6 @@ radarKotlin {
     sentryEnabled.set(true)
 }
 
-application {
-    mainClass.set("org.radarbase.RadarBackend")
-    applicationDefaultJvmArgs = listOf("-Dlog4j.configuration=log4j.properties")
-}
-
-repositories {
-    mavenCentral()
-    maven { url = uri("https://packages.confluent.io/maven/") }
-}
-
 dependencies {
     implementation(libs.radar.commons)
     implementation(libs.radar.commons.server)
@@ -68,14 +59,20 @@ dependencies {
     runtimeOnly(libs.slf4j.log4j)
 
     // Testing
-    testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
-    testImplementation(libs.hamcrest.all)
 
     // Mock mail server
     testImplementation(libs.greenmail)
 
     // Using the bundle for Logging
     testImplementation(libs.bundles.logging.log4j)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter.params)
 }
+
+kotlin {
+    jvmToolchain(21)
+}
+
 

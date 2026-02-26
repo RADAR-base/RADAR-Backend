@@ -17,36 +17,32 @@
 package org.radarbase.stream
 
 import org.apache.kafka.streams.kstream.KStream
-import org.junit.Before
-import org.junit.Test
-import org.junit.Ignore
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.any
-import org.mockito.Mockito.doCallRealMethod
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.*
 import org.radarbase.config.KafkaProperty
 import org.radarbase.config.RadarPropertyHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.RadarSingletonFactory
-import org.radarbase.stream.DeviceTimestampExtractor
-import org.radarbase.stream.SensorStreamWorker
-import org.radarbase.stream.StreamDefinition
 import java.io.IOException
 import java.util.stream.Stream
+import kotlin.test.Ignore
 
 @Ignore("Covered by Java test; Kotlin + Mockito nullability matcher issue")
 class SensorStreamWorkerKotlinTest {
-    private lateinit var aggregator: SensorStreamWorker<*, *>
 
-    @Before
-    fun setUp() {
-        @Suppress("UNCHECKED_CAST")
-        val mockAgg = mock(SensorStreamWorker::class.java) as SensorStreamWorker<*, *>
-        aggregator = mockAgg
+    companion object {
+        private lateinit var aggregator: SensorStreamWorker<*, *>
+
+        @BeforeAll
+        @JvmStatic
+        fun setUp() {
+            @Suppress("UNCHECKED_CAST")
+            val mockAgg = mock(SensorStreamWorker::class.java) as SensorStreamWorker<*, *>
+            aggregator = mockAgg
+        }
     }
 
     @Test

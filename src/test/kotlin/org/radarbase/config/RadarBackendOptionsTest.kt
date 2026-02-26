@@ -17,11 +17,10 @@
 package org.radarbase.config
 
 import org.apache.commons.cli.ParseException
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
-import org.radarbase.config.RadarBackendOptions
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class RadarBackendOptionsTest {
     @Test

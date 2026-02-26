@@ -43,6 +43,7 @@ class StreamConfig {
     @get:JsonGetter("threads_per_priority")
     var threadsPerPriority: Map<String, Int>
         get() = priorityThreads.entries.associate { it.key.param to it.value }
+
         @JsonSetter("threads_per_priority")
         set(streamPriority) {
             streamPriority.values.forEach { v ->

@@ -22,55 +22,62 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.TopicPartition
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.*
-import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSender
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.YamlPersistentStateStore
+import org.radarcns.kafka.ObservationKey
+import java.nio.file.Path
 import java.time.Duration
 import java.util.*
+import kotlin.test.assertTrue
 
 class DisconnectMonitorTest {
-    @Rule
-    @JvmField
-    val folder = TemporaryFolder()
 
-    private var offset: Long = 0
-    private var timeReceived: Long = 0
-    private var timesSent: Int = 0
-    private lateinit var keySchema: Schema
-    private lateinit var valueSchema: Schema
-    private lateinit var senders: EmailSenders
-    private lateinit var sender: EmailSender
+    companion object {
 
-    private val PROJECT_ID = "test"
+        @TempDir
+        lateinit var folder: Path
 
-    @Before
-    fun setUp() {
-        val parser = Schema.Parser()
-        keySchema = parser.parse("{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
-                + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
-                + "{\"name\": \"userId\", \"type\": \"string\"},"
-                + "{\"name\": \"sourceId\", \"type\": \"string\"}"
-                + "]} ")
+        private var offset: Long = 0
+        private var timeReceived: Long = 0
+        private var timesSent: Int = 0
+        private lateinit var keySchema: Schema
+        private lateinit var valueSchema: Schema
+        private lateinit var senders: EmailSenders
+        private lateinit var sender: EmailSender
 
-        valueSchema = parser.parse("{\"name\": \"value\", \"type\": \"record\", \"fields\": ["
-                + "{\"name\": \"timeReceived\", \"type\": \"double\"}"
-                + "]} ")
+        private val PROJECT_ID = "test"
 
-        offset = 1000L
-        timeReceived = 2000L
-        timesSent = 0
-        sender = mock(EmailSender::class.java)
-        senders = EmailSenders(Collections.singletonMap(PROJECT_ID, sender))
+        @BeforeAll
+        @JvmStatic
+        fun setUp() {
+            val parser = Schema.Parser()
+            keySchema = parser.parse(
+                "{\"name\": \"key\", \"type\": \"record\", \"fields\": ["
+                        + "{\"name\": \"projectId\", \"type\": [\"null\", \"string\"]},"
+                        + "{\"name\": \"userId\", \"type\": \"string\"},"
+                        + "{\"name\": \"sourceId\", \"type\": \"string\"}"
+                        + "]} "
+            )
+
+            valueSchema = parser.parse(
+                "{\"name\": \"value\", \"type\": \"record\", \"fields\": ["
+                        + "{\"name\": \"timeReceived\", \"type\": \"double\"}"
+                        + "]} "
+            )
+
+            offset = 1000L
+            timeReceived = 2000L
+            timesSent = 0
+            sender = mock(EmailSender::class.java)
+            senders = EmailSenders(Collections.singletonMap(PROJECT_ID, sender))
+        }
     }
 
     private fun evaluateRecords() {
@@ -136,7 +143,7 @@ class DisconnectMonitorTest {
 
     @Test
     fun retrieveState() {
-        val base = folder.newFolder()
+        val base = folder.toFile()
         val stateStore = YamlPersistentStateStore(base)
         val state = DisconnectMonitor.DisconnectMonitorState()
         val key1 = ObservationKey(PROJECT_ID, "a", "b")
@@ -151,11 +158,14 @@ class DisconnectMonitorTest {
         val stateStore2 = YamlPersistentStateStore(base)
         val state2 = stateStore2.retrieveState("one", "two", DisconnectMonitor.DisconnectMonitorState())
         val lastSeen = state2.lastSeen
-        assertThat(lastSeen.size, `is`(2))
-        assertThat(lastSeen, hasEntry(stateStore.keyToString(key1), now))
-        assertThat(lastSeen, hasEntry(stateStore.keyToString(key2), now + 1L))
+        assertEquals(2, lastSeen.size, "Expected 2 keys in lastSeen")
+        assertTrue(lastSeen.containsKey(stateStore.keyToString(key1)))
+        assertTrue(lastSeen.containsKey(stateStore.keyToString(key2)))
+        assertEquals(lastSeen[stateStore.keyToString(key1)], now)
+        assertEquals(lastSeen[stateStore.keyToString(key2)], now + 1L)
+
         val reported = state2.reportedMissing
-        assertThat(reported.size, `is`(1))
-        assertThat(reported, hasKey(stateStore.keyToString(key3)))
+        assertEquals(1, reported.size, "Expected 1 key in reportedMissing")
+        assertTrue(reported.containsKey(stateStore.keyToString(key3)))
     }
 }

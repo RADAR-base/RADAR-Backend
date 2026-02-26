@@ -10,7 +10,11 @@ import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG
 import org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG
 import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.processor.*
+import org.apache.kafka.streams.processor.Cancellable
+import org.apache.kafka.streams.processor.PunctuationType
+import org.apache.kafka.streams.processor.api.Processor
+import org.apache.kafka.streams.processor.api.ProcessorContext
+import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
 import org.radarbase.config.SourceStatisticsStreamConfig
@@ -65,12 +69,11 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 .toTypedArray()
 
             builder.addSource("source", genericReader, genericReader, *inputTopics)
-            builder.addProcessor("process", ProcessorSupplier<GenericRecord, GenericRecord> { SourceStatisticsProcessor() }, "source")
+            builder.addProcessor("process",
+                { SourceStatisticsProcessor() }, "source")
             builder.addSink(
                 "sink",
-                streamDefinitions
-                    .mapNotNull { it.outputTopic?.name }
-                    .firstOrNull()
+                streamDefinitions.firstNotNullOfOrNull { it.outputTopic?.name }
                     ?: throw IllegalStateException("Output topic for SourceStatisticsStream $streamName is undefined."),
                 SpecificAvroSerializer<ObservationKey>(),
                 SpecificAvroSerializer<SourceStatistics>(),
@@ -89,14 +92,14 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             return settings
         }
 
-    private inner class SourceStatisticsProcessor : Processor<GenericRecord, GenericRecord> {
+    private inner class SourceStatisticsProcessor : Processor<GenericRecord, GenericRecord, ObservationKey, SourceStatisticsRecord> {
+        private lateinit var context: ProcessorContext<ObservationKey, SourceStatisticsRecord>
         private lateinit var store: KeyValueStore<ObservationKey, SourceStatisticsRecord>
-        private lateinit var context: ProcessorContext
         private var punctuateCancellor: Cancellable? = null
         private var localInterval = Duration.ZERO
 
         @Suppress("UNCHECKED_CAST")
-        override fun init(context: ProcessorContext) {
+        override fun init(context: org.apache.kafka.streams.processor.api.ProcessorContext<ObservationKey, SourceStatisticsRecord>) {
             store = context.getStateStore("statistics") as KeyValueStore<ObservationKey, SourceStatisticsRecord>
             this.context = context
             updatePunctuate()
@@ -121,7 +124,8 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 while (iterator.hasNext()) {
                     val next = iterator.next()
                     if (!next.value.isSent) {
-                        context.forward(next.key, next.value.sourceStatistics())
+                        val record = Record(next.key, next.value, System.currentTimeMillis())
+                        context.forward(record)
                         sent.add(KeyValue(next.key, next.value.sentRecord()))
                     }
                 }
@@ -133,7 +137,13 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             updatePunctuate()
         }
 
-        override fun process(genericKey: GenericRecord?, value: GenericRecord?) {
+        override fun process(record: Record<GenericRecord?, GenericRecord?>?) {
+            if (record == null) {
+                logger.error("Cannot process null record")
+                return
+            }
+            val genericKey = record.key()
+            val value = record.value()
             if (genericKey == null || value == null) {
                 logger.error("Cannot process records without both a key and a value")
                 return

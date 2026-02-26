@@ -17,15 +17,18 @@
 package org.radarbase.util
 
 import jakarta.mail.Message
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.io.IOException
+import kotlin.test.assertFailsWith
 
 class EmailSenderTest {
-    @Rule @JvmField
-    val emailServer = EmailServerRule(2525, "localhost")
+
+    @RegisterExtension
+    @JvmField
+    val emailServer = EmailServerExtension(port = 2525)
 
     @Test
     fun testEmail() {
@@ -52,8 +55,10 @@ class EmailSenderTest {
         assertEquals("it's me", mime.content.toString().trim())
     }
 
-    @Test(expected = IOException::class)
+    @Test
     fun testEmailNonExisting() {
-        EmailSender("non-existing-host", 2525, "no-reply@radar-cns.org", listOf("test@radar-cns.org"))
+        assertFailsWith(IOException::class) {
+            EmailSender("non-existing-host", 2525, "no-reply@radar-cns.org", listOf("test@radar-cns.org"))
+        }
     }
 }

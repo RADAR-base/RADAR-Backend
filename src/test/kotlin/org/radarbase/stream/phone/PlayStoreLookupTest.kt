@@ -1,43 +1,43 @@
 package org.radarbase.stream.phone
 
-import org.junit.Assert.assertEquals
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.radarbase.stream.phone.PlayStoreLookup
-import java.io.IOException
+import java.util.stream.Stream
 
 @RunWith(Parameterized::class)
-class PlayStoreLookupTest(private val inputPackageName: String, private val expectedCategory: String?) {
+class PlayStoreLookupTest {
 
-    @Ignore("I think that PlayStore integration is broken.")
-    @Test
-    @Throws(IOException::class)
-    fun fetchCategoryTest() {
+    @Disabled("I think that PlayStore integration is broken.")
+    @ParameterizedTest(name = "{index}: {0}={1}")
+    @MethodSource("provideTestData")
+    fun fetchCategoryTest(inputPackageName: String, expectedCategory: String?) {
         val result = PlayStoreLookup.fetchCategory(inputPackageName)
         assertEquals(expectedCategory, result.categoryName)
     }
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{index}: {0}={1}")
-        fun data(): Collection<Array<Any?>> {
-            return listOf(
-                arrayOf("nl.nos.app", "NEWS_AND_MAGAZINES"),
-                arrayOf("nl.thehyve.transmartclient", "MEDICAL"),
-                arrayOf("com.twitter.android", "NEWS_AND_MAGAZINES"),
-                arrayOf("com.facebook.katana", "SOCIAL"),
-                arrayOf("com.nintendo.zara", "GAME_ACTION"),
-                arrayOf("com.duolingo", "EDUCATION"),
-                arrayOf("com.whatsapp", "COMMUNICATION"),
-                arrayOf("com.alibaba.aliexpresshd", "SHOPPING"),
-                arrayOf("com.google.android.wearable.app", "COMMUNICATION"),
-                arrayOf("com.strava", "HEALTH_AND_FITNESS"),
-                arrayOf("com.android.chrome", "COMMUNICATION"),
-                arrayOf("com.google.android.youtube", "VIDEO_PLAYERS"),
-                arrayOf("com.android.systemui", null),
-                arrayOf("abc.abc", null)
+        fun provideTestData(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of("nl.nos.app", "NEWS_AND_MAGAZINES"),
+                Arguments.of("nl.thehyve.transmartclient", "MEDICAL"),
+                Arguments.of("com.twitter.android", "NEWS_AND_MAGAZINES"),
+                Arguments.of("com.facebook.katana", "SOCIAL"),
+                Arguments.of("com.nintendo.zara", "GAME_ACTION"),
+                Arguments.of("com.duolingo", "EDUCATION"),
+                Arguments.of("com.whatsapp", "COMMUNICATION"),
+                Arguments.of("com.alibaba.aliexpresshd", "SHOPPING"),
+                Arguments.of("com.google.android.wearable.app", "COMMUNICATION"),
+                Arguments.of("com.strava", "HEALTH_AND_FITNESS"),
+                Arguments.of("com.android.chrome", "COMMUNICATION"),
+                Arguments.of("com.google.android.youtube", "VIDEO_PLAYERS"),
+                Arguments.of("com.android.systemui", null),
+                Arguments.of("abc.abc", null)
             )
         }
     }

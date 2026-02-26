@@ -25,7 +25,7 @@ import java.io.IOException
 interface RadarPropertyHandler {
 
     enum class Priority(val param: String) {
-        LOW("low"), NORMAL("normal"), HIGH("high");
+        LOW("low"), NORMAL("normal"), HIGH("high")
     }
 
     val radarProperties: ConfigRadar

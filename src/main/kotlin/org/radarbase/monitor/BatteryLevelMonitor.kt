@@ -16,17 +16,17 @@
 
 package org.radarbase.monitor
 
+import jakarta.mail.MessagingException
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.radarbase.config.RadarPropertyHandler
-import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.RadarSingletonFactory
+import org.radarcns.kafka.ObservationKey
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
-import jakarta.mail.MessagingException
 
 /**
  * Monitors the battery level for any devices running empty. It will optionally notify someone when

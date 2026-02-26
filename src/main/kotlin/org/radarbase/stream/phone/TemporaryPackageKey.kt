@@ -5,8 +5,8 @@
  */
 package org.radarbase.stream.phone
 
-import org.apache.avro.Schema
 import org.apache.avro.AvroRuntimeException
+import org.apache.avro.Schema
 import org.apache.avro.data.RecordBuilder
 import org.apache.avro.message.BinaryMessageDecoder
 import org.apache.avro.message.BinaryMessageEncoder

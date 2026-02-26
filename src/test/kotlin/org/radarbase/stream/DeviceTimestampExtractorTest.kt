@@ -20,19 +20,13 @@ import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.junit.Assert.assertEquals
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
-import org.radarbase.stream.DeviceTimestampExtractor
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import kotlin.test.assertFailsWith
 
 class DeviceTimestampExtractorTest {
     private val timestampExtractor = DeviceTimestampExtractor()
     private val topic = "TESTTopic"
-
-    @Rule
-    @JvmField
-    val exception: ExpectedException = ExpectedException.none()
 
     @Test
     fun extract() {
@@ -57,10 +51,9 @@ class DeviceTimestampExtractorTest {
         val record = buildIndexedRecord(userSchema)
         record.put("timeReceived", "timeValue")
         val consumerRecord = ConsumerRecord<Any, Any>(topic, 3, 30L, null, record as Any)
-
-        exception.expect(RuntimeException::class.java)
-        exception.expectMessage("Impossible to extract timeReceived from")
-        timestampExtractor.extract(consumerRecord, -1L)
+        assertFailsWith<RuntimeException>("Impossible to extract timeReceived from") {
+            timestampExtractor.extract(consumerRecord, -1L)
+        }
     }
 
     private fun buildIndexedRecord(userSchema: String): GenericRecord {

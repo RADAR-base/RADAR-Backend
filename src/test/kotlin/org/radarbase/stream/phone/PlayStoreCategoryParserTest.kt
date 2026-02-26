@@ -1,10 +1,10 @@
 package org.radarbase.stream.phone
 
-import org.jsoup.Jsoup
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
-import org.radarbase.stream.phone.PlayStoreLookup
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parseInputStream
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 import java.util.zip.GZIPInputStream
 
 class PlayStoreCategoryParserTest {
@@ -14,7 +14,7 @@ class PlayStoreCategoryParserTest {
     fun getCategoryFromDocument() {
         val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app.html.gz")?.use { stream ->
             GZIPInputStream(stream).use { gzipStream ->
-                Jsoup.parse(gzipStream, "UTF-8", BASE_URL)
+                Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
             }
         } ?: throw IllegalStateException("Resource not found")
 
@@ -25,8 +25,7 @@ class PlayStoreCategoryParserTest {
     @Test
     fun getCategoryFromDocumentNoCategory() {
         val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_no_category.html.gz")?.use { stream ->
-            GZIPInputStream(stream).use { gzipStream ->
-                Jsoup.parse(gzipStream, "UTF-8", BASE_URL)
+            GZIPInputStream(stream).use { gzipStream -> Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
             }
         } ?: throw IllegalStateException("Resource not found")
 
@@ -38,7 +37,7 @@ class PlayStoreCategoryParserTest {
     fun getCategoryFromDocumentBroken() {
         val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/transmart_app_broken.html.gz")?.use { stream ->
             GZIPInputStream(stream).use { gzipStream ->
-                Jsoup.parse(gzipStream, "UTF-8", BASE_URL)
+                Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
             }
         } ?: throw IllegalStateException("Resource not found")
 

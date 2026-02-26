@@ -19,21 +19,21 @@ package org.radarbase.monitor
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.mail.MessagingException
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.radarbase.config.RadarPropertyHandler
-import org.radarcns.kafka.ObservationKey
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.Monitor
+import org.radarcns.kafka.ObservationKey
 import org.slf4j.LoggerFactory
 import java.text.DateFormat
 import java.time.Duration
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.*
-import jakarta.mail.MessagingException
 
 /**
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.

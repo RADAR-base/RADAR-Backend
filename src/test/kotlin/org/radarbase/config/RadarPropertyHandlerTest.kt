@@ -16,35 +16,36 @@
 
 package org.radarbase.config
 
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.hasEntry
-import org.junit.Assert.assertNotNull
-import org.junit.Before
-import org.junit.Test
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.RadarPropertyHandlerImpl
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class RadarPropertyHandlerTest {
 
     private lateinit var propertyHandler: RadarPropertyHandler
 
-    @Before
+    @BeforeEach
     fun setUp() {
         this.propertyHandler = RadarPropertyHandlerImpl()
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun getInstanceEmptyProperties() {
-        propertyHandler.radarProperties
+        assertFailsWith(IllegalStateException::class) {
+            propertyHandler.radarProperties
+        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    @Throws(Exception::class)
+    @Test
     fun loadWithInvalidFilePath() {
         val invalidPath = "/usr/"
-        propertyHandler.load(invalidPath)
+        assertFailsWith(IllegalArgumentException::class) {
+            propertyHandler.load(invalidPath)
+        }
     }
 
     @Test
@@ -61,31 +62,40 @@ class RadarPropertyHandlerTest {
         assertNotNull(properties.zookeeper)
         assertNotNull(properties.zookeeperPaths)
         assertNotNull(properties.version)
-        assertThat(properties.extras, hasEntry("somethingother", "bla"))
+        assertNotNull(properties.extras)
+        assert(properties.extras!!.containsKey("somethingother"))
+        assertEquals("bla", properties.extras!!["somethingother"])
     }
 
-    @Test(expected = UnrecognizedPropertyException::class)
+    @Test
     @Throws(Exception::class)
     fun loadInvalidYaml() {
-        propertyHandler.load("src/test/resources/config/invalidradar.yml")
+        assertFailsWith(UnrecognizedPropertyException::class) {
+            propertyHandler.load("src/test/resources/config/invalidradar.yml")
+        }
     }
 
-    @Test(expected = JsonMappingException::class)
-    @Throws(Exception::class)
+    @Test
     fun loadInvalidStreamPriority() {
-        propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml")
+        assertFailsWith(JsonMappingException::class) {
+            propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml")
+        }
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     @Throws(Exception::class)
     fun loadWithInstance() {
-        propertyHandler.load("radar.yml")
-        propertyHandler.load("again.yml")
+        assertFailsWith(IllegalStateException::class) {
+            propertyHandler.load("radar.yml")
+            propertyHandler.load("again.yml")
+        }
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun getKafkaPropertiesBeforeLoad() {
-        propertyHandler.kafkaProperties
+        assertFailsWith(IllegalStateException::class) {
+            propertyHandler.kafkaProperties
+        }
     }
 
     @Test

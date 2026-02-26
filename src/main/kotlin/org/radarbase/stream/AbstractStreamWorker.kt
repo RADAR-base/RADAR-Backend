@@ -2,6 +2,7 @@ package org.radarbase.stream
 
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.errors.StreamsException
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
 import org.radarbase.config.ConfigRadar
 import org.radarbase.config.KafkaProperty
 import org.radarbase.config.RadarPropertyHandler
@@ -78,7 +79,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
         streams = createStreams() ?: throw IllegalStateException("Streams are not initialized during start")
 
         streams?.forEach { stream ->
-            stream.setUncaughtExceptionHandler(this)
+            stream.setUncaughtExceptionHandler(this as StreamsUncaughtExceptionHandler?)
             stream.start()
         }
 

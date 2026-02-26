@@ -19,20 +19,23 @@ package org.radarbase.util
 import org.apache.kafka.streams.kstream.Window
 import org.apache.kafka.streams.kstream.Windowed
 import org.apache.kafka.streams.kstream.internals.TimeWindow
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.radarbase.util.RadarUtilities
-import org.radarbase.util.RadarUtilitiesImpl
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.radarcns.kafka.AggregateKey
 import org.radarcns.kafka.ObservationKey
 
 class RadarUtilsTest {
-    private lateinit var radarUtilities: RadarUtilities
 
-    @Before
-    fun setUp() {
-        radarUtilities = RadarUtilitiesImpl()
+    companion object {
+
+        private lateinit var radarUtilities: RadarUtilities
+
+        @BeforeAll
+        @JvmStatic
+        fun setUp() {
+            radarUtilities = RadarUtilitiesImpl()
+        }
     }
 
     @Test

@@ -5,7 +5,6 @@ import org.radarcns.kafka.ObservationKey
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.text.iterator
 
 /**
  * Store a state for a Kafka consumer. This uses a file storage, storing files to YAML format. It
