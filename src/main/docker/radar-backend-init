@@ -2,8 +2,8 @@
 
 set -e
 
-# Busy waiting loop that waits untill all topic are available 
-echo "===> Waiting for RADAR-CNS topics ... "
+# Busy waiting loop that waits until all topic are available
+echo "===> Waiting for Kafka topics ... "
 
 # Check if variables exist
 if [ -z "$KAFKA_REST_PROXY" ]; then
