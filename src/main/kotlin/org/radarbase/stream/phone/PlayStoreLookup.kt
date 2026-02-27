@@ -43,7 +43,7 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
     companion object {
         private val logger = LoggerFactory.getLogger(PlayStoreLookup::class.java)
         private const val URL_PLAY_STORE_APP_DETAILS = "https://play.google.com/store/apps/details?id="
-        private const val CATEGORY_ANCHOR_SELECTOR = "a[itemprop='genre']"
+        private const val CATEGORY_ANCHOR_SELECTOR = "div[itemprop='genre']"
 
         @Throws(IOException::class)
         fun fetchCategory(packageName: String): AppCategory {
@@ -58,7 +58,7 @@ class PlayStoreLookup(private val cacheTimeoutSeconds: Long, maxCacheSize: Int) 
         }
 
         internal fun getCategoryFromDocument(doc: Document, packageName: String): AppCategory {
-            val categoryElement = doc.select(CATEGORY_ANCHOR_SELECTOR).first()
+            val categoryElement = doc.select(CATEGORY_ANCHOR_SELECTOR).first()?.select("a")?.first()
             if (categoryElement != null) {
                 val href = categoryElement.attr("href")
                 val urlSplit = href.split("/")
