@@ -3,8 +3,8 @@ package org.radarbase.stream
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.errors.StreamsException
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
-import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.KafkaProperty
+import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic

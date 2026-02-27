@@ -16,10 +16,10 @@
 
 package org.radarbase.producer
 
+import org.radarbase.config.BackendProcess
 import org.radarbase.config.MockConfig
 import org.radarbase.config.RadarBackendCliOptions
 import org.radarbase.config.RadarConfigHandler
-import org.radarbase.config.BackendProcess
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.mock.MockProducer
 import org.radarbase.mock.config.BasicMockConfig

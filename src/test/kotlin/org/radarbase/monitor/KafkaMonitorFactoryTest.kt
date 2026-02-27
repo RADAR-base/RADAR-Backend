@@ -24,10 +24,10 @@ import org.junit.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.api.io.TempDir
 import org.radarbase.config.BatteryMonitorConfig
-import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.DisconnectMonitorConfig
 import org.radarbase.config.NotifyConfig
 import org.radarbase.config.RadarBackendCliOptions
+import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.SourceStatisticsStreamConfig
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.util.EmailServerExtension

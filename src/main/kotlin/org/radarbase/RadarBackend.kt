@@ -1,9 +1,9 @@
 package org.radarbase
 
 import org.apache.commons.cli.ParseException
+import org.radarbase.config.BackendProcess
 import org.radarbase.config.RadarBackendCliOptions
 import org.radarbase.config.RadarConfigHandler
-import org.radarbase.config.BackendProcess
 import org.radarbase.monitor.KafkaMonitorFactory
 import org.radarbase.producer.MockProducerCommand
 import org.radarbase.stream.KafkaStreamFactory
