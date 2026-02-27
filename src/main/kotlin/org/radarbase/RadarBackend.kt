@@ -13,7 +13,7 @@ import java.io.IOException
 import kotlin.system.exitProcess
 
 /**
- * Core class that initialises configurations and then start all needed Kafka streams
+ * Core class that initializes configurations and then start configured Kafka streams
  */
 class RadarBackend(
     private val options: RadarBackendOptions,
@@ -30,7 +30,7 @@ class RadarBackend(
     }
 
     /**
-     * It starts streams and sets a ShutdownHook to close streams while closing the application
+     * Starts streams and sets a ShutdownHook to close streams while closing the application
      */
     fun application() {
         try {
