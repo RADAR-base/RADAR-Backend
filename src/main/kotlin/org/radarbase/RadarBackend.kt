@@ -84,8 +84,8 @@ class RadarBackend(
 
     @Throws(IOException::class)
     fun createCommand(): SubCommand {
-        val subCommand = cliOptions.subCommand ?: "stream"
-        return when (subCommand) {
+        val cliSubCommand = cliOptions.subCommand ?: "stream"
+        return when (cliSubCommand) {
             "stream" -> KafkaStreamFactory(cliOptions, radarConfigHandler).createSensorStreams()
             "statistics" -> KafkaStreamFactory(cliOptions, radarConfigHandler).createStreamStatisticsStream()
             "monitor" -> KafkaMonitorFactory(cliOptions, radarConfigHandler).createMonitor()
