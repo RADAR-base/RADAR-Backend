@@ -57,7 +57,7 @@ abstract class AbstractKafkaMonitor<K, V, S>(
     protected val topics: Collection<String>,
     private val groupId: String,
     clientId: String,
-    stateDefault: S?,
+    stateDefault: S,
 ) : KafkaMonitor {
     protected val state: S?
     private val stateStore: PersistentStateStore?
