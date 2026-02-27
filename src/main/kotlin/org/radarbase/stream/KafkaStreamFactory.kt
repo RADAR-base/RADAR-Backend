@@ -26,22 +26,21 @@ class KafkaStreamFactory(
             }
         }
 
-        return master(streamConfigs)
+        return streamMaster(streamConfigs)
     }
 
-    private fun master(streamConfigs: Stream<out SingleStreamConfig>): StreamMaster {
-        return StreamMaster(radarProperties, streamConfigs)
-    }
+    private fun streamMaster(streamConfigs: Stream<out SingleStreamConfig>) =
+        StreamMaster(radarProperties, streamConfigs)
 
     fun createStreamStatisticsStream(): BackendProcess {
         val streamConfigs = radarProperties.radarProperties.stream!!.sourceStatistics
 
         if (streamConfigs == null) {
             logger.warn("Statistics monitor is not configured. Cannot start it.")
-            return master(Stream.empty())
+            return streamMaster(Stream.empty())
         }
 
-        return master(streamConfigs.stream())
+        return streamMaster(streamConfigs.stream())
     }
 
     companion object {
