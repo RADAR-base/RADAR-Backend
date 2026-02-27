@@ -29,6 +29,7 @@ radarPublishing {
 }
 
 radarKotlin {
+    log4j2Version.set(libs.versions.log4j)
     sentryEnabled.set(true)
 }
 
@@ -55,17 +56,11 @@ dependencies {
     implementation(libs.jakarta.mail)
     implementation(libs.bundles.ksoup)
 
-    runtimeOnly(libs.log4j)
-    runtimeOnly(libs.slf4j.log4j)
-
     // Testing
     testImplementation(libs.mockito.core)
 
     // Mock mail server
     testImplementation(libs.greenmail)
-
-    // Using the bundle for Logging
-    testImplementation(libs.bundles.logging.log4j)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter.params)

@@ -12,7 +12,7 @@ kafka = "8.1.1-ce"
 # Project and Plugins
 kotlin = "2.2.10"
 ksoup = "0.2.6"
-log4j = "1.2.17"
+log4j = "2.23.1"
 mockito = "5.21.0"
 radarCommons = "1.2.4"
 radarSchemas = "0.8.15"
@@ -35,14 +35,12 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.re
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
 # Logging
-log4j = { module = "log4j:log4j", version.ref = "log4j" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 # RADAR-Base
 radar-commons = { module = "org.radarbase:radar-commons", version.ref = "radarCommons" }
 radar-commons-server = { module = "org.radarbase:radar-commons-server", version.ref = "radarCommons" }
 radar-commons-testing = { module = "org.radarbase:radar-commons-testing", version.ref = "radarCommons" }
 radar-schemas-commons = { module = "org.radarbase:radar-schemas-commons", version.ref = "radarSchemas" }
-slf4j-log4j = { module = "org.slf4j:slf4j-log4j12", version.ref = "slf4j" }
 junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
 
 [plugins]
@@ -57,9 +55,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksoup = [
     "ksoup",
     "ksoup-network",
-]
-# This allows you to include both logging libs with one line
-logging-log4j = [
-    "log4j",
-    "slf4j-log4j",
 ]
