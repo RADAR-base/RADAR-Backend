@@ -17,10 +17,8 @@ import kotlin.system.exitProcess
  */
 class RadarBackend(
     private val options: RadarBackendOptions,
-    private val radarPropertyHandler: RadarPropertyHandler,
+    private val radarPropertyHandler: RadarPropertyHandler = createPropertyHandler(options),
 ) {
-
-    constructor(options: RadarBackendOptions) : this(options, createPropertyHandler(options))
 
     private lateinit var command: SubCommand
 
@@ -89,9 +87,7 @@ class RadarBackend(
         val subCommand = options.subCommand ?: "stream"
         return when (subCommand) {
             "stream" -> KafkaStreamFactory(options, radarPropertyHandler).createSensorStreams()
-
             "statistics" -> KafkaStreamFactory(options, radarPropertyHandler).createStreamStatistics()
-
             "monitor" -> KafkaMonitorFactory(options, radarPropertyHandler).createMonitor()
             "mock" -> MockProducerCommand(options, radarPropertyHandler)
             else -> throw IllegalArgumentException("Unknown subcommand ${options.subCommand}")
