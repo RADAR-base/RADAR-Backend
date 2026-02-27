@@ -4,14 +4,14 @@ released: 2016-11-27
 #============================== Zookeeper ==============================#
 #List of Zookeeper instances
 zookeeper:
-    - host: localhost
-      port: 2181
+  - host: localhost
+    port: 2181
 
 #================================ Kafka ================================#
 #List of Kafka brokers
 broker:
-    - host: localhost
-      port: 9092
+  - host: localhost
+    port: 9092
 
 #Kafka internal parameters
 
@@ -45,35 +45,35 @@ stream:
   source_statistics:
     - name: Empatica E4
       topics:
-      - android_empatica_e4_blood_volume_pulse_1min
+        - android_empatica_e4_blood_volume_pulse_1min
       output_topic: source_statistics_empatica_e4
     - name: Biovotion VSM1
       topics:
-      - android_biovotion_vsm1_acceleration_1min
+        - android_biovotion_vsm1_acceleration_1min
       output_topic: source_statistics_biovotion_vsm1
     - name: RADAR pRMT
       topics:
-      - android_phone_acceleration_1min
-      - android_phone_bluetooth_devices
-      - android_phone_sms
-      - android_phone_call
-      - android_phone_contacts
-      - android_phone_usage_event
-      - android_phone_relative_location
+        - android_phone_acceleration_1min
+        - android_phone_bluetooth_devices
+        - android_phone_sms
+        - android_phone_call
+        - android_phone_contacts
+        - android_phone_usage_event
+        - android_phone_relative_location
       output_topic: source_statistics_android_phone
 
 
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
 schema_registry:
-    - host: localhost
-      port: 8081
-      protocol: http
+  - host: localhost
+    port: 8081
+    protocol: http
 
 rest_proxy:
-    host: radar-test.thehyve.net
-    port: 8082
-    protocol: http
+  host: radar-test.thehyve.net
+  port: 8082
+  protocol: http
 
 #======================== Battery level monitor ========================#
 battery_monitor:
