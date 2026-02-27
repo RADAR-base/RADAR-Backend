@@ -9,39 +9,39 @@ import java.util.*
 import java.util.stream.Stream
 
 class KafkaStreamFactory(
-    private val options: RadarBackendCliOptions,
+    private val cliOptions: RadarBackendCliOptions,
     private val radarProperties: RadarConfigHandler,
 ) {
     fun createSensorStreams(): StreamMaster {
-        val args = options.subCommandArgs
+        val args = cliOptions.subCommandArgs
         val streamTypes = if (args != null && args.isNotEmpty()) {
             args.toHashSet()
         } else {
             emptySet()
         }
 
-        val configs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream().filter { s ->
+        val streamConfigs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream().filter { s ->
             streamTypes.isEmpty() || streamTypes.any { n ->
                 s.streamClass!!.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
             }
         }
 
-        return master(configs)
+        return master(streamConfigs)
     }
 
-    private fun master(configs: Stream<out SingleStreamConfig>): StreamMaster {
-        return StreamMaster(radarProperties, configs)
+    private fun master(streamConfigs: Stream<out SingleStreamConfig>): StreamMaster {
+        return StreamMaster(radarProperties, streamConfigs)
     }
 
     fun createStreamStatisticsStream(): BackendProcess {
-        val configs = radarProperties.radarProperties.stream!!.sourceStatistics
+        val streamConfigs = radarProperties.radarProperties.stream!!.sourceStatistics
 
-        if (configs == null) {
+        if (streamConfigs == null) {
             logger.warn("Statistics monitor is not configured. Cannot start it.")
             return master(Stream.empty())
         }
 
-        return master(configs.stream())
+        return master(streamConfigs.stream())
     }
 
     companion object {
