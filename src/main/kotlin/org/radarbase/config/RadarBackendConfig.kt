@@ -13,47 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.radarbase.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
-/**
- * POJO representing the yml file
- */
-class RadarBackendConfig {
-    var released: Date? = null
-    var version: String? = null
-    var zookeeper: List<ServerConfig>? = null
-    var broker: List<ServerConfig>? = null
+data class RadarBackendConfig(
+    var released: Date? = null,
+    var version: String? = null,
+    var zookeeper: List<ServerConfig>? = null,
+    var broker: List<ServerConfig>? = null,
 
-    @JsonProperty("schema_registry")
-    var schemaRegistry: List<ServerConfig>? = null
+    @param:JsonProperty("schema_registry")
+    var schemaRegistry: List<ServerConfig>? = null,
 
-    @JsonProperty("rest_proxy")
-    var restProxy: ServerConfig? = null
+    @param:JsonProperty("rest_proxy")
+    var restProxy: ServerConfig? = null,
 
-    @JsonProperty("battery_monitor")
-    var batteryMonitor: BatteryMonitorConfig? = null
+    @param:JsonProperty("battery_monitor")
+    var batteryMonitor: BatteryMonitorConfig? = null,
 
-    @JsonProperty("disconnect_monitor")
-    var disconnectMonitor: DisconnectMonitorConfig? = null
+    @param:JsonProperty("disconnect_monitor")
+    var disconnectMonitor: DisconnectMonitorConfig? = null,
 
-    @JsonProperty("statistics_monitors")
-    var statisticsMonitors: List<SourceStatisticsStreamConfig>? = null
+    @param:JsonProperty("statistics_monitors")
+    var statisticsMonitors: List<SourceStatisticsStreamConfig>? = null,
 
-    @JsonProperty("stream")
-    var stream: StreamConfig? = null
+    @param:JsonProperty("stream")
+    var stream: StreamConfig? = null,
 
-    @JsonProperty("persistence_path")
-    var persistencePath: String? = null
+    @param:JsonProperty("persistence_path")
+    var persistencePath: String? = null,
 
-    var extras: Map<String, Any>? = null
+    var extras: Map<String, Any>? = null,
 
-    @JsonProperty("build_version")
-    var buildVersion: String? = null
-
+    @param:JsonProperty("build_version")
+    var buildVersion: String? = null,
+) {
     val zookeeperPaths: String
         get() = zookeeper?.let { ServerConfig.getPaths(it) }
             ?: throw IllegalStateException("'zookeeper' is not configured")
@@ -67,10 +63,7 @@ class RadarBackendConfig {
             ?: throw IllegalStateException("'schema_registry' is not configured")
 
     val restProxyPath: String
-        get() {
-            checkNotNull(restProxy) { "'rest_proxy' is not configured" }
-            return restProxy!!.path
-        }
+        get() = checkNotNull(restProxy) { "'rest_proxy' is not configured" }.path
 
     override fun toString(): String = YamlConfigLoader().prettyString(this)
 }

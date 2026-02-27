@@ -6,6 +6,7 @@ confluent = "8.1.1"
 findbug = "3.0.2"
 greenmail = "2.1.8"
 jackson = "2.21"
+jacksonModuleKotlin = "2.21.1"
 javaMail = "2.1.5"
 junit-jupiter = "5.10.1"
 kafka = "8.1.1-ce"
@@ -24,6 +25,7 @@ avro = { module = "org.apache.avro:avro", version.ref = "avro" }
 commons-cli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
 greenmail = { module = "com.icegreen:greenmail", version.ref = "greenmail" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
 jakarta-mail = { module = "jakarta.mail:jakarta.mail-api", version.ref = "javaMail" }
 # Utilities
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "findbug" }

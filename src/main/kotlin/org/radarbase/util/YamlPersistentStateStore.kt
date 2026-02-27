@@ -2,16 +2,22 @@ package org.radarbase.util
 
 import org.radarbase.config.YamlConfigLoader
 import org.radarcns.kafka.ObservationKey
-import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.file.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.div
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.isWritable
 
 /**
  * Store a state for a Kafka consumer. This uses a file storage, storing files to YAML format. It
  * uses Jackson for serialization and deserialization, so state objects must be serializable and
  * deserializable with this mechanism.
  */
-class YamlPersistentStateStore(private val basePath: File) : PersistentStateStore {
+class YamlPersistentStateStore(private val basePath: Path) : PersistentStateStore {
     private val loader = YamlConfigLoader()
 
     init {
@@ -19,23 +25,19 @@ class YamlPersistentStateStore(private val basePath: File) : PersistentStateStor
     }
 
     override fun <T : Any> retrieveState(groupId: String, clientId: String, stateDefault: T): T {
-        val consumerFile = getFile(groupId, clientId)
+        val consumerFile = getPath(groupId, clientId)
         if (!consumerFile.exists()) {
             return stateDefault
         }
         @Suppress("UNCHECKED_CAST")
         val stateClass = stateDefault.javaClass as Class<out T>
-        return loader.load(consumerFile.toPath(), stateClass)
+        return loader.load(consumerFile, stateClass)
     }
 
-    override fun storeState(groupId: String, clientId: String, value: Any) {
-        loader.store(getFile(groupId, clientId).toPath(), value)
-    }
+    override fun storeState(groupId: String, clientId: String, value: Any) =
+        loader.store(getPath(groupId, clientId), value)
 
-    /** File for given consumer. */
-    private fun getFile(groupId: String, clientId: String): File {
-        return File(basePath, "${groupId}_$clientId.yml")
-    }
+    private fun getPath(groupId: String, clientId: String) = basePath / "${groupId}_$clientId.yml"
 
     override fun keyToString(key: ObservationKey): String {
         val projectId = key.projectId
@@ -117,24 +119,19 @@ class YamlPersistentStateStore(private val basePath: File) : PersistentStateStor
          * @throws IOException if the base path is not writable for states.
          */
         @Throws(IOException::class)
-        private fun checkBasePath(basePath: File) {
+        private fun checkBasePath(basePath: Path) {
             if (basePath.exists()) {
-                if (!basePath.isDirectory) {
-                    throw IOException("State path ${basePath.absolutePath} is not a directory")
+                if (!basePath.isDirectory()) {
+                    throw IOException("State path ${basePath.toAbsolutePath()} is not a directory")
                 }
-            } else if (!basePath.mkdirs()) {
-                throw IOException("Failed to set up persistent state store for the Kafka Monitor.")
-            }
-
-            val testFile = File(basePath, ".check_base_path")
-            try {
-                FileOutputStream(testFile).use { fout ->
-                    fout.write(1)
+            } else {
+                try {
+                    basePath.createDirectories()
+                } catch (ex: Exception) {
+                    throw IOException("Failed to set up persistent state store for the Kafka Monitor.", ex)
                 }
-            } catch (ex: IOException) {
-                throw IOException("Cannot write files in directory $basePath", ex)
             }
-            testFile.delete()
+            require(basePath.isWritable()) { "Cannot write files in directory $basePath" }
         }
     }
 }

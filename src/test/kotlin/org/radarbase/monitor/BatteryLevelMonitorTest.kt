@@ -94,7 +94,7 @@ class BatteryLevelMonitorTest {
 
     @Test
     fun retrieveState() {
-        val base = folder.toFile()
+        val base = folder
         val stateStore = YamlPersistentStateStore(base)
         val state = BatteryLevelMonitor.BatteryLevelState()
         val key1 = ObservationKey("test", "a", "b")

@@ -18,6 +18,6 @@ package org.radarbase.config
 
 import org.radarbase.mock.config.MockDataConfig
 
-class MockConfig {
-    var data: List<MockDataConfig>? = null
-}
+data class MockConfig(
+    var data: List<MockDataConfig>,
+)

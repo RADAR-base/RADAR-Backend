@@ -16,9 +16,6 @@
 
 package org.radarbase.config
 
-/**
- * POJO representing a battery status monitor configuration
- */
-class BatteryMonitorConfig : MonitorConfig() {
-    var level: String? = null
-}
+data class BatteryMonitorConfig(
+    var level: String? = null,
+) : MonitorConfig()

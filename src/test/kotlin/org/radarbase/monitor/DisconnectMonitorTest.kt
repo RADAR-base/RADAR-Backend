@@ -160,7 +160,7 @@ class DisconnectMonitorTest {
 
     @Test
     fun retrieveState() {
-        val base = folder.toFile()
+        val base = folder
         val stateStore = YamlPersistentStateStore(base)
         val state = DisconnectMonitor.DisconnectMonitorState()
         val key1 = ObservationKey(PROJECT_ID, "a", "b")

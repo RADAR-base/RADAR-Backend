@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.jsr305)
     implementation(libs.commons.cli)
     implementation(libs.jackson.annotations)
+    implementation(libs.jackson.module.kotlin)
     implementation(libs.jakarta.mail)
     implementation(libs.bundles.ksoup)
 

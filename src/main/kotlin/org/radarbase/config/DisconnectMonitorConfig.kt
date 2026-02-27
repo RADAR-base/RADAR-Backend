@@ -18,15 +18,12 @@ package org.radarbase.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
- * POJO representing a disconnection status monitor configuration
- */
-class DisconnectMonitorConfig : MonitorConfig() {
-    var timeout: Long = 1800L // 30 minutes
+data class DisconnectMonitorConfig(
+    var timeout: Long = 1800L, // 30 minutes
 
-    @JsonProperty("alert_repeat_interval")
-    var alertRepeatInterval: Long = 86400 // 1 day
+    @param:JsonProperty("alert_repeat_interval")
+    var alertRepeatInterval: Long = 86400, // 1 day
 
-    @JsonProperty("alert_repetitions")
-    var alertRepetitions: Int = 0
-}
+    @param:JsonProperty("alert_repetitions")
+    var alertRepetitions: Int = 0,
+) : MonitorConfig()

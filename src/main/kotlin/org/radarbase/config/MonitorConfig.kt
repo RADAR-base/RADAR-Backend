@@ -18,9 +18,6 @@ package org.radarbase.config
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
- * POJO representing a monitor configuration
- */
 open class MonitorConfig {
     @JsonProperty("notify")
     var notifyConfig: List<NotifyConfig>? = null

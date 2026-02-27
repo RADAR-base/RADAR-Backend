@@ -16,17 +16,20 @@
 
 package org.radarbase.config
 
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.radarbase.RadarBackend
 import org.radarbase.util.PersistentStateStore
 import org.radarbase.util.YamlPersistentStateStore
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
+import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.exists
+import kotlin.io.path.isRegularFile
 
 /**
- * Java Singleton class for handling the yml config file. Implements [RadarConfigHandler]
+ * Singleton class for handling the yml config file. Implements [RadarConfigHandler]
  */
 class RadarConfigHandlerImpl : RadarConfigHandler {
     private var _properties: RadarBackendConfig? = null
@@ -39,23 +42,23 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
 
     @Throws(IOException::class)
     override fun load(pathFile: String?) {
-        if (isLoaded()) {
-            throw IllegalStateException("Properties class has been already loaded")
-        }
+        assert(!isLoaded()) { "Properties class has been already loaded" }
 
         val file = if (pathFile.isNullOrEmpty()) {
             getDefaultFile().also {
                 log.info("DEFAULT CONFIGURATION: loading config file at {}", it)
             }
         } else {
-            log.info("USER CONFIGURATION: loading config file at {}", pathFile)
-            File(pathFile)
+            Path.of(pathFile).also {
+                log.info("USER CONFIGURATION: loading config file at {}",  it)
+            }
         }
 
         require(file.exists()) { "Config file $file does not exist" }
-        require(file.isFile) { "Config file $file is invalid" }
+        require(file.isRegularFile()) { "Config file $file is invalid" }
 
-        _properties = YamlConfigLoader().load(file.toPath(), RadarBackendConfig::class.java)
+        _properties = YamlConfigLoader { mapper -> mapper.registerKotlinModule() }
+            .load(file, RadarBackendConfig::class.java)
 
         val buildProperties = Properties()
         javaClass.getResourceAsStream("/build.properties")?.use {
@@ -67,14 +70,14 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
     }
 
     @Throws(IOException::class)
-    private fun getDefaultFile(): File {
-        var localFile = File(CONFIG_FILE_NAME)
+    private fun getDefaultFile(): Path {
+        var localFile = Path.of(CONFIG_FILE_NAME)
         if (!localFile.exists()) {
             try {
                 val codePathUrl = RadarBackend::class.java.protectionDomain.codeSource.location
                 val codePath = codePathUrl.toURI().path
-                val codeDir = codePath.substring(0, codePath.lastIndexOf('/') + 1)
-                localFile = File(codeDir, CONFIG_FILE_NAME)
+                val codeDir = codePath.take(codePath.lastIndexOf('/') + 1)
+                localFile = Path.of(codeDir, CONFIG_FILE_NAME)
             } catch (ex: URISyntaxException) {
                 throw IOException("Cannot get path of executable", ex)
             }
@@ -86,14 +89,13 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
         get() = _kafkaProperty ?: KafkaProperty(radarProperties).also { _kafkaProperty = it }
 
     @Throws(IOException::class)
-    override fun getPersistentStateStore(): PersistentStateStore? {
-        return radarProperties.persistencePath?.let {
-            YamlPersistentStateStore(File(it))
+    override fun getPersistentStateStore(): PersistentStateStore? =
+        radarProperties.persistencePath?.let {
+            YamlPersistentStateStore(Path.of(it))
         }
-    }
 
     companion object {
-        private const val CONFIG_FILE_NAME = "radar.yml"
         private val log = LoggerFactory.getLogger(RadarConfigHandlerImpl::class.java)
+        private const val CONFIG_FILE_NAME = "radar.yml"
     }
 }

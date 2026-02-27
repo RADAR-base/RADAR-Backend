@@ -19,9 +19,6 @@ package org.radarbase.config
 import org.radarbase.util.PersistentStateStore
 import java.io.IOException
 
-/**
- * Interface that handles YAML configuration file loading
- */
 interface RadarConfigHandler {
 
     enum class Priority(val param: String) {

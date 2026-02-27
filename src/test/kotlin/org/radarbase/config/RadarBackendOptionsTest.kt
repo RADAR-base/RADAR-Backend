@@ -28,7 +28,7 @@ class RadarBackendOptionsTest {
     fun empty() {
         val opts = RadarBackendCliOptions.parse(arrayOf())
         assertNull(opts.subCommand)
-        assertNull(opts.subCommandArgs)
+        assertArrayEquals(emptyArray<String>(), opts.subCommandArgs)
         assertNull(opts.propertyPath)
     }
 
@@ -37,7 +37,7 @@ class RadarBackendOptionsTest {
     fun withConfig() {
         val opts = RadarBackendCliOptions.parse(arrayOf("-c", "cfg"))
         assertNull(opts.subCommand)
-        assertNull(opts.subCommandArgs)
+        assertArrayEquals(emptyArray<String>(), opts.subCommandArgs)
         assertEquals("cfg", opts.propertyPath)
     }
 

@@ -23,6 +23,8 @@ import org.radarcns.kafka.ObservationKey
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.div
+import kotlin.io.path.exists
 import kotlin.test.assertEquals
 
 class PersistentStateStoreTest {
@@ -32,16 +34,16 @@ class PersistentStateStoreTest {
 
     @Test
     fun retrieveState() {
-        val base = folder.toFile()
+        val base = folder
         val stateStore = YamlPersistentStateStore(base)
         val state = BatteryLevelState()
         val key1 = ObservationKey("test", "a", "b")
         state.updateLevel(stateStore.keyToString(key1), 0.1f)
         stateStore.storeState("one", "two", state)
 
-        val outputFile = File(base, "one_two.yml")
+        val outputFile = base / "one_two.yml"
         assert(outputFile.exists())
-        val rawFile = String(Files.readAllBytes(outputFile.toPath()))
+        val rawFile = String(Files.readAllBytes(outputFile))
         assertEquals(rawFile, "---\nlevels:\n  test#a#b: 0.1\n")
 
         val stateStore2 = YamlPersistentStateStore(base)

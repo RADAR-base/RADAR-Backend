@@ -26,17 +26,17 @@ import kotlin.test.assertFailsWith
 
 class RadarPropertyHandlerTest {
 
-    private lateinit var propertyHandler: RadarConfigHandler
+    private lateinit var configHandler: RadarConfigHandler
 
     @BeforeEach
     fun setUp() {
-        this.propertyHandler = RadarConfigHandlerImpl()
+        this.configHandler = RadarConfigHandlerImpl()
     }
 
     @Test
     fun getInstanceEmptyProperties() {
         assertFailsWith(IllegalStateException::class) {
-            propertyHandler.radarProperties
+            configHandler.radarProperties
         }
     }
 
@@ -44,16 +44,16 @@ class RadarPropertyHandlerTest {
     fun loadWithInvalidFilePath() {
         val invalidPath = "/usr/"
         assertFailsWith(IllegalArgumentException::class) {
-            propertyHandler.load(invalidPath)
+            configHandler.load(invalidPath)
         }
     }
 
     @Test
     @Throws(Exception::class)
     fun load() {
-        propertyHandler.load("src/test/resources/config/radar.yml")
+        configHandler.load("src/test/resources/config/radar.yml")
 
-        val properties = propertyHandler.radarProperties
+        val properties = configHandler.radarProperties
         assertNotNull(properties.broker)
         assertNotNull(properties.brokerPaths)
         assertNotNull(properties.released)
@@ -71,38 +71,36 @@ class RadarPropertyHandlerTest {
     @Throws(Exception::class)
     fun loadInvalidYaml() {
         assertFailsWith(UnrecognizedPropertyException::class) {
-            propertyHandler.load("src/test/resources/config/invalidradar.yml")
+            configHandler.load("src/test/resources/config/invalidradar.yml")
         }
     }
 
     @Test
     fun loadInvalidStreamPriority() {
         assertFailsWith(JsonMappingException::class) {
-            propertyHandler.load("src/test/resources/config/invalid_stream_priority.yml")
+            configHandler.load("src/test/resources/config/invalid_stream_priority.yml")
         }
     }
 
     @Test
-    @Throws(Exception::class)
     fun loadWithInstance() {
-        assertFailsWith(IllegalStateException::class) {
-            propertyHandler.load("radar.yml")
-            propertyHandler.load("again.yml")
+        assertFailsWith(AssertionError::class) {
+            configHandler.load("radar.yml")
+            configHandler.load("again.yml")
         }
     }
 
     @Test
     fun getKafkaPropertiesBeforeLoad() {
         assertFailsWith(IllegalStateException::class) {
-            propertyHandler.kafkaProperties
+            configHandler.kafkaProperties
         }
     }
 
     @Test
-    @Throws(Exception::class)
     fun getKafkaProperties() {
-        propertyHandler.load("radar.yml")
-        val property = propertyHandler.kafkaProperties
+        configHandler.load("radar.yml")
+        val property = configHandler.kafkaProperties
         assertNotNull(property)
     }
 }
