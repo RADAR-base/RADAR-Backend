@@ -107,14 +107,14 @@ class RadarBackend(
         @JvmStatic
         fun main(args: Array<String>) {
             try {
-                val options = RadarBackendCliOptions.Companion.parse(args)
+                val options = RadarBackendCliOptions.parse(args)
                 val backend = RadarBackend(options)
                 backend.application()
             } catch (ex: ParseException) {
                 logger.error(
                     "Cannot parse arguments {}. Valid options are:\n{}",
                     args.contentToString(),
-                    RadarBackendCliOptions.Companion.OPTIONS,
+                    RadarBackendCliOptions.OPTIONS,
                 )
                 exitProcess(1)
             } catch (ex: Exception) {
