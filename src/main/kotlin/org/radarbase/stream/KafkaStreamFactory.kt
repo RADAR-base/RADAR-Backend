@@ -13,18 +13,17 @@ class KafkaStreamFactory(
     private val radarProperties: RadarConfigHandler,
 ) {
     fun createSensorStreams(): StreamMaster {
-        val args = cliOptions.subCommandArgs
-        val streamTypes = if (args != null && args.isNotEmpty()) {
-            args.toHashSet()
-        } else {
-            emptySet()
-        }
+        val cliStreamTypes = cliOptions.subCommandArgs.orEmpty()
+            .toHashSet().map { it.lowercase(Locale.US) }
 
-        val streamConfigs = radarProperties.radarProperties.stream!!.streamConfigs!!.stream().filter { s ->
-            streamTypes.isEmpty() || streamTypes.any { n ->
-                s.streamClass!!.name.lowercase(Locale.US).endsWith(n.lowercase(Locale.US))
+        val streamConfigs = radarProperties.radarProperties.stream?.streamConfigs
+            // Keep only StreamConfigs enabled via CLI. Use all StreamConfigs if no CLI args are given.
+            ?.filter { s ->
+                val name = s.streamClass?.name?.lowercase(Locale.US).orEmpty()
+                cliStreamTypes.isEmpty() || cliStreamTypes.any { name.endsWith(it) }
             }
-        }
+            .orEmpty()
+            .stream()
 
         return streamMaster(streamConfigs)
     }
@@ -33,14 +32,13 @@ class KafkaStreamFactory(
         StreamMaster(radarProperties, streamConfigs)
 
     fun createStreamStatisticsStream(): BackendProcess {
-        val streamConfigs = radarProperties.radarProperties.stream!!.sourceStatistics
+        val streamConfigs = radarProperties.radarProperties.stream?.sourceStatistics?.stream()
+            ?: run {
+                logger.warn("Statistics monitor is not configured. Cannot start it.")
+                return streamMaster(Stream.empty())
+            }
 
-        if (streamConfigs == null) {
-            logger.warn("Statistics monitor is not configured. Cannot start it.")
-            return streamMaster(Stream.empty())
-        }
-
-        return streamMaster(streamConfigs.stream())
+        return streamMaster(streamConfigs)
     }
 
     companion object {
