@@ -19,7 +19,7 @@ package org.radarbase.producer
 import org.radarbase.config.MockConfig
 import org.radarbase.config.RadarBackendCliOptions
 import org.radarbase.config.RadarConfigHandler
-import org.radarbase.config.SubCommand
+import org.radarbase.config.BackendProcess
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.mock.MockProducer
 import org.radarbase.mock.config.BasicMockConfig
@@ -29,7 +29,7 @@ import java.io.IOException
 class MockProducerCommand(
     options: RadarBackendCliOptions,
     radarConfigHandler: RadarConfigHandler,
-) : SubCommand {
+) : BackendProcess {
     private val producer: MockProducer
 
     init {

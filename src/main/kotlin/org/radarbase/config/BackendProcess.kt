@@ -21,17 +21,17 @@ import java.io.IOException
 /**
  * Subcommand of RadarBackend to run.
  */
-interface SubCommand {
+interface BackendProcess {
     /**
-     * Start the subcommand. The command is not guaranteed to return
+     * Start the process. The process is not guaranteed to return
      * immediately.
-     * @throws IOException if the command cannot be started
-     * @throws InterruptedException if the command is interrupted
+     * @throws IOException if the process cannot be started
+     * @throws InterruptedException if the process is interrupted
      */
     @Throws(IOException::class, InterruptedException::class)
     fun start()
 
-    /** Stop the subcommand, possibly waiting for it to complete. */
+    /** Stop the process, possibly waiting for it to complete. */
     @Throws(IOException::class, InterruptedException::class)
     fun shutdown()
 }

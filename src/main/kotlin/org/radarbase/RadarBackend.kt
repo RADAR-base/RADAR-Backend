@@ -3,7 +3,7 @@ package org.radarbase
 import org.apache.commons.cli.ParseException
 import org.radarbase.config.RadarBackendCliOptions
 import org.radarbase.config.RadarConfigHandler
-import org.radarbase.config.SubCommand
+import org.radarbase.config.BackendProcess
 import org.radarbase.monitor.KafkaMonitorFactory
 import org.radarbase.producer.MockProducerCommand
 import org.radarbase.stream.KafkaStreamFactory
@@ -20,7 +20,7 @@ class RadarBackend(
     private val radarConfigHandler: RadarConfigHandler = createPropertyHandler(cliOptions),
 ) {
 
-    private lateinit var command: SubCommand
+    private lateinit var process: BackendProcess
 
     init {
         logger.info("Configuration successfully updated")
@@ -30,7 +30,7 @@ class RadarBackend(
     /**
      * Starts streams and sets a ShutdownHook to close streams while closing the application
      */
-    fun application() {
+    fun run() {
         try {
             start()
         } catch (ex: IOException) {
@@ -52,7 +52,7 @@ class RadarBackend(
     }
 
     /**
-     * Start here all needed StreamMaster
+     * Start here all needed StreamMasters
      *
      * @throws IOException if the command failed to start up
      * @throws InterruptedException if the command was interrupted
@@ -61,8 +61,8 @@ class RadarBackend(
     fun start() {
         logger.info("STARTING")
 
-        command = createCommand()
-        command.start()
+        process = createProcess()
+        process.start()
 
         logger.info("STARTED")
     }
@@ -77,13 +77,13 @@ class RadarBackend(
     fun shutdown() {
         logger.info("SHUTTING DOWN")
 
-        command.shutdown()
+        process.shutdown()
 
         logger.info("FINISHED")
     }
 
     @Throws(IOException::class)
-    fun createCommand(): SubCommand {
+    fun createProcess(): BackendProcess {
         val cliSubCommand = cliOptions.subCommand ?: "stream"
         return when (cliSubCommand) {
             "stream" -> KafkaStreamFactory(cliOptions, radarConfigHandler).createSensorStreams()
@@ -109,7 +109,7 @@ class RadarBackend(
             try {
                 val options = RadarBackendCliOptions.parse(args)
                 val backend = RadarBackend(options)
-                backend.application()
+                backend.run()
             } catch (ex: ParseException) {
                 logger.error(
                     "Cannot parse arguments {}. Valid options are:\n{}",

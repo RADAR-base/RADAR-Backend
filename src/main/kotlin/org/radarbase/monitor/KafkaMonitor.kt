@@ -16,10 +16,10 @@
 
 package org.radarbase.monitor
 
-import org.radarbase.config.SubCommand
+import org.radarbase.config.BackendProcess
 import java.time.Duration
 
-interface KafkaMonitor : SubCommand {
+interface KafkaMonitor : BackendProcess {
     val isShutdown: Boolean
     var pollTimeout: Duration
 }
