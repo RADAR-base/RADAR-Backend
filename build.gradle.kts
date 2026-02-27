@@ -16,7 +16,7 @@ radarRootProject {
 }
 
 radarPublishing {
-    val githubRepoName = "RADAR-base/radar-backend"
+    val githubRepoName = "RADAR-base/RADAR-Backend"
     githubUrl.set("https://github.com/$githubRepoName.git")
     developers {
         developer {
@@ -24,6 +24,12 @@ radarPublishing {
             name.set("Pim van Nierop")
             email.set("pim@thehyve.nl")
             organization.set("The Hyve")
+        }
+        developer {
+            id.set("yatharthranjan")
+            name.set("Yatharth Ranjan")
+            email.set("yatharth.ranjan@kcl.ac.uk")
+            organization.set("Institute of Psychiatry, Psychology & Neuroscience, King's College London")
         }
     }
 }
