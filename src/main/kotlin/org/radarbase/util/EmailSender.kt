@@ -31,7 +31,7 @@ import java.util.*
 class EmailSender
 @Throws(IOException::class)
 constructor(
-    host: String?,
+    host: String,
     port: Int,
     private val from: String?,
     private val to: List<String>,
@@ -39,16 +39,12 @@ constructor(
     private val session: Session
 
     init {
-        val properties = Properties()
-        // Get system properties
-        properties.putAll(System.getProperties())
+        assert(port > 0) { "Port must be positive" }
 
-        if (host != null) {
-            // Setup mail server
-            properties.setProperty("mail.smtp.host", host)
-        }
-        if (port > 0) {
-            properties.setProperty("mail.smtp.port", port.toString())
+        val properties = Properties().apply {
+            this.putAll(System.getProperties())
+            this.setProperty("mail.smtp.host", host)
+            this.setProperty("mail.smtp.port", port.toString())
         }
 
         session = Session.getInstance(properties)
@@ -72,24 +68,15 @@ constructor(
      */
     @Throws(MessagingException::class)
     fun sendEmail(subject: String, text: String) {
-        // Create a default MimeMessage object.
-        val message = MimeMessage(session)
-
-        // Set From: header field of the header.
-        message.setFrom(InternetAddress(from))
-
-        for (recipient in to) {
-            // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO, InternetAddress(recipient))
+        val from = from ?: throw IllegalArgumentException("No From address specified")
+        val message = MimeMessage(session).apply {
+            this.setFrom(InternetAddress(from))
+            for (recipient in to) {
+                this.addRecipient(Message.RecipientType.TO, InternetAddress(recipient))
+            }
+            this.subject = subject
+            this.setText(text)
         }
-
-        // Set Subject: header field
-        message.subject = subject
-
-        // Now set the actual message
-        message.setText(text)
-
-        // Send message
         Transport.send(message)
     }
 }

@@ -21,7 +21,7 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Options
 import org.apache.commons.cli.ParseException
 import org.slf4j.LoggerFactory
-import java.io.File
+import java.nio.file.Path
 
 class RadarBackendCliOptions(private val cli: CommandLine) {
     val subCommand: String?
@@ -48,8 +48,8 @@ class RadarBackendCliOptions(private val cli: CommandLine) {
     val isMockDirect: Boolean
         get() = cli.hasOption("direct")
 
-    val mockFile: File?
-        get() = cli.getOptionValue("file")?.let { File(it) }
+    val mockFile: Path?
+        get() = cli.getOptionValue("file")?.let { Path.of(it) }
 
     companion object {
         private val log = LoggerFactory.getLogger(RadarBackendCliOptions::class.java)

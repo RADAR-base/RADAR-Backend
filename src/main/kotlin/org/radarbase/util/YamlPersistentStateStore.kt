@@ -2,14 +2,12 @@ package org.radarbase.util
 
 import org.radarbase.config.YamlConfigLoader
 import org.radarcns.kafka.ObservationKey
-import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
-import kotlin.io.path.deleteExisting
 import kotlin.io.path.isWritable
 
 /**

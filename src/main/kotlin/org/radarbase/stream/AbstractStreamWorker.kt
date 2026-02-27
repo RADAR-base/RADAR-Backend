@@ -43,7 +43,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     protected fun defineWindowedSensorStream(input: String, outputBase: String) {
         // Since TimeWindowMetadata is in org.radarbase.stream package, we use it directly.
         // If it's not visible, we may need to use a fully qualified name or a helper.
-        TimeWindowMetadata.values().forEach { w ->
+        TimeWindowMetadata.entries.forEach { w ->
             streamDefinitions.add(
                 StreamDefinition(
                     KafkaTopic(input),
@@ -73,9 +73,8 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     }
 
     override fun start() {
-        if (streams != null) {
-            throw IllegalStateException("Streams already started. Cannot start them again.")
-        }
+        assert(streams != null) { "Streams already started. Cannot start them again." }
+
         streams = createStreams() ?: throw IllegalStateException("Streams are not initialized during start")
 
         streams?.forEach { stream ->

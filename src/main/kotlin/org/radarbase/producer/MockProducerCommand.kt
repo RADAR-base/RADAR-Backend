@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 
 class MockProducerCommand(
-    options: RadarBackendCliOptions,
+    cliOptions: RadarBackendCliOptions,
     radarConfigHandler: RadarConfigHandler,
 ) : BackendProcess {
     private val producer: MockProducer
@@ -35,18 +35,18 @@ class MockProducerCommand(
     init {
         val radar = radarConfigHandler.radarProperties
         val producerConfig = BasicMockConfig()
-        val mockFile = options.mockFile
+        val mockFile = cliOptions.mockFile
 
         if (mockFile != null) {
-            val mockConfig = YamlConfigLoader().load(mockFile.toPath(), MockConfig::class.java)
+            val mockConfig = YamlConfigLoader().load(mockFile, MockConfig::class.java)
             producerConfig.data = mockConfig.data
         } else {
-            producerConfig.numberOfDevices = options.numMockDevices
+            producerConfig.numberOfDevices = cliOptions.numMockDevices
         }
 
         producerConfig.restProxy = radar.restProxy
         producerConfig.schemaRegistry = radar.schemaRegistry?.get(0)
-        producerConfig.producerMode = if (options.isMockDirect) "direct" else "rest"
+        producerConfig.producerMode = if (cliOptions.isMockDirect) "direct" else "rest"
         producer = MockProducer(producerConfig)
     }
 

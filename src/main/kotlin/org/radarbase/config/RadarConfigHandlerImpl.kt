@@ -50,7 +50,7 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
             }
         } else {
             Path.of(pathFile).also {
-                log.info("USER CONFIGURATION: loading config file at {}",  it)
+                log.info("USER CONFIGURATION: loading config file at {}", it)
             }
         }
 

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.radarbase.monitor.BatteryLevelMonitor.BatteryLevelState
 import org.radarcns.kafka.ObservationKey
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.div

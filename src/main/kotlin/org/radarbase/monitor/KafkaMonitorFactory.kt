@@ -85,14 +85,17 @@ class KafkaMonitorFactory(
         if (config?.notifyConfig == null) {
             return null
         }
-        val javaConfig = MonitorConfig()
-        javaConfig.notifyConfig = config.notifyConfig?.map { c -> NotifyConfig(c.projectId, c.emailAddress) }
-        javaConfig.emailHost = config.emailHost
-        javaConfig.emailPort = config.emailPort
-        javaConfig.emailUser = config.emailUser
-        javaConfig.logInterval = config.logInterval
-        javaConfig.message = config.message
-        javaConfig.topics = config.topics
+        val javaConfig = MonitorConfig().apply {
+            this.notifyConfig = config.notifyConfig
+            this.notifyConfig = config.notifyConfig?.map { c -> NotifyConfig(c.projectId, c.emailAddress) }
+            this.emailHost = config.emailHost
+            this.emailPort = config.emailPort
+            this.emailUser = config.emailUser
+            this.logInterval = config.logInterval
+            this.message = config.message
+            this.topics = config.topics
+        }
+
         return EmailSenders.Companion.parseConfig(javaConfig)
     }
 
