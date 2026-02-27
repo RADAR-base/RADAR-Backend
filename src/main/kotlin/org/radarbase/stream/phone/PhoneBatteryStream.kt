@@ -1,7 +1,7 @@
 package org.radarbase.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.stream.SensorStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarcns.kafka.AggregateKey
@@ -12,7 +12,7 @@ import org.radarcns.stream.aggregator.NumericAggregate
 class PhoneBatteryStream : SensorStreamWorker<ObservationKey, PhoneBatteryLevel>() {
     override fun initialize() {
         defineWindowedSensorStream("android_phone_battery_level")
-        config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
+        config.setDefaultPriority(RadarConfigHandler.Priority.LOW)
     }
 
     override fun implementStream(

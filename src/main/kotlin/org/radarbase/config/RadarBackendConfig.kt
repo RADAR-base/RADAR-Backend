@@ -22,7 +22,7 @@ import java.util.*
 /**
  * POJO representing the yml file
  */
-class ConfigRadar {
+class RadarBackendConfig {
     var released: Date? = null
     var version: String? = null
     var zookeeper: List<ServerConfig>? = null

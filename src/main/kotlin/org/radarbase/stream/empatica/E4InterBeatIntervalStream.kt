@@ -1,7 +1,7 @@
 package org.radarbase.stream.empatica
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.stream.SensorStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarcns.kafka.AggregateKey
@@ -15,7 +15,7 @@ import org.radarcns.stream.aggregator.NumericAggregate
 class E4InterBeatIntervalStream : SensorStreamWorker<ObservationKey, EmpaticaE4InterBeatInterval>() {
     override fun initialize() {
         defineWindowedSensorStream("android_empatica_e4_inter_beat_interval")
-        config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
+        config.setDefaultPriority(RadarConfigHandler.Priority.LOW)
     }
 
     override fun implementStream(

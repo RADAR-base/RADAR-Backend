@@ -23,7 +23,7 @@ import org.apache.commons.cli.ParseException
 import org.slf4j.LoggerFactory
 import java.io.File
 
-class RadarBackendOptions(private val cli: CommandLine) {
+class RadarBackendCliOptions(private val cli: CommandLine) {
     val subCommand: String?
     val subCommandArgs: Array<String>?
 
@@ -53,7 +53,7 @@ class RadarBackendOptions(private val cli: CommandLine) {
         get() = cli.getOptionValue("file")?.let { File(it) }
 
     companion object {
-        private val log = LoggerFactory.getLogger(RadarBackendOptions::class.java)
+        private val log = LoggerFactory.getLogger(RadarBackendCliOptions::class.java)
         val OPTIONS: Options = Options().addOption("c", "config", true, "Configuration YAML file")
             .addOption("d", "devices", true, "Number of devices to use with the mock command.").addOption(
                 "D",
@@ -63,9 +63,9 @@ class RadarBackendOptions(private val cli: CommandLine) {
             ).addOption("f", "file", true, "Read mock data from given configuration file.")
 
         @Throws(ParseException::class)
-        fun parse(args: Array<String>): RadarBackendOptions {
+        fun parse(args: Array<String>): RadarBackendCliOptions {
             val cli = DefaultParser().parse(OPTIONS, args)
-            return RadarBackendOptions(cli)
+            return RadarBackendCliOptions(cli)
         }
     }
 }

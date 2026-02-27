@@ -3,9 +3,9 @@ package org.radarbase.stream
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.errors.StreamsException
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
-import org.radarbase.config.ConfigRadar
+import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.KafkaProperty
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ import java.util.stream.Stream
 abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHandler {
     internal val streamDefinitions = CopyOnWriteArrayList<StreamDefinition>()
     protected lateinit var config: SingleStreamConfig
-    protected lateinit var allConfig: ConfigRadar
+    protected lateinit var allConfig: RadarBackendConfig
     protected var numThreads: Int = 0
     protected lateinit var kafkaProperty: KafkaProperty
     protected lateinit var master: StreamMaster
@@ -61,7 +61,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
 
     override fun configure(
         streamMaster: StreamMaster,
-        properties: RadarPropertyHandler,
+        properties: RadarConfigHandler,
         singleConfig: SingleStreamConfig,
     ) {
         this.kafkaProperty = properties.kafkaProperties

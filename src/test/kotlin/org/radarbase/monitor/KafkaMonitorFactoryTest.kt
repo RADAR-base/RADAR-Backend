@@ -24,10 +24,10 @@ import org.junit.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.api.io.TempDir
 import org.radarbase.config.BatteryMonitorConfig
-import org.radarbase.config.ConfigRadar
+import org.radarbase.config.RadarBackendConfig
 import org.radarbase.config.DisconnectMonitorConfig
 import org.radarbase.config.NotifyConfig
-import org.radarbase.config.RadarBackendOptions
+import org.radarbase.config.RadarBackendCliOptions
 import org.radarbase.config.SourceStatisticsStreamConfig
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.util.EmailServerExtension
@@ -35,8 +35,8 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.createFile
-import org.radarbase.config.RadarPropertyHandler as KotlinRadarPropertyHandler
-import org.radarbase.config.RadarPropertyHandlerImpl as KotlinRadarPropertyHandlerImpl
+import org.radarbase.config.RadarConfigHandler as KotlinRadarPropertyHandler
+import org.radarbase.config.RadarConfigHandlerImpl as KotlinRadarPropertyHandlerImpl
 
 class KafkaMonitorFactoryTest {
 
@@ -46,7 +46,7 @@ class KafkaMonitorFactoryTest {
     @Test
     fun createBatteryMonitor() {
         val args = arrayOf("monitor", "battery")
-        val options = RadarBackendOptions.parse(args)
+        val options = RadarBackendCliOptions.parse(args)
         val config = getBatteryMonitorConfig(emailServer.port, folder)
         val properties = getRadarPropertyHandler(config, folder)
 
@@ -65,7 +65,7 @@ class KafkaMonitorFactoryTest {
     @Test(expected = IOException::class)
     fun createBatteryMonitorWithoutEmailServer() {
         val args = arrayOf("monitor", "battery")
-        val options = RadarBackendOptions.parse(args)
+        val options = RadarBackendCliOptions.parse(args)
         val config = getBatteryMonitorConfig(emailServer.port + 1, folder)
         val properties = getRadarPropertyHandler(config, folder)
 
@@ -75,7 +75,7 @@ class KafkaMonitorFactoryTest {
     @Test
     fun createDisconnectMonitor() {
         val args = arrayOf("monitor", "disconnect")
-        val options = RadarBackendOptions.parse(args)
+        val options = RadarBackendCliOptions.parse(args)
         val config = getDisconnectMonitorConfig(emailServer.port, folder)
         val properties = getRadarPropertyHandler(config, folder)
 
@@ -94,7 +94,7 @@ class KafkaMonitorFactoryTest {
     @Test
     fun createAllMonitor() {
         val args = arrayOf("monitor", "all")
-        val options = RadarBackendOptions.parse(args)
+        val options = RadarBackendCliOptions.parse(args)
         val config = createBasicConfig(folder)
         config.batteryMonitor = getBatteryMonitorConfig(emailServer.port)
         config.disconnectMonitor = getDisconnectMonitorConfig(emailServer.port)
@@ -117,7 +117,7 @@ class KafkaMonitorFactoryTest {
         val emailServer = EmailServerExtension(port = 3025)
 
         @Throws(IOException::class)
-        fun getRadarPropertyHandler(config: ConfigRadar, folder: Path): KotlinRadarPropertyHandler {
+        fun getRadarPropertyHandler(config: RadarBackendConfig, folder: Path): KotlinRadarPropertyHandler {
             val tmpConfig = folder.resolve("radar.yml").createFile().toFile()
             YamlConfigLoader().store(tmpConfig.toPath(), config)
 
@@ -127,8 +127,8 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun createBasicConfig(folder: Path): ConfigRadar {
-            val config = ConfigRadar()
+        fun createBasicConfig(folder: Path): RadarBackendConfig {
+            val config = RadarBackendConfig()
             config.persistencePath = folder.toFile().absolutePath
             config.schemaRegistry = emptyList()
             config.broker = emptyList()
@@ -148,7 +148,7 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun getDisconnectMonitorConfig(port: Int, folder: Path): ConfigRadar {
+        fun getDisconnectMonitorConfig(port: Int, folder: Path): RadarBackendConfig {
             val config = createBasicConfig(folder)
             config.disconnectMonitor = getDisconnectMonitorConfig(port)
             return config
@@ -167,14 +167,14 @@ class KafkaMonitorFactoryTest {
         }
 
         @Throws(IOException::class)
-        fun getBatteryMonitorConfig(port: Int, folder: Path): ConfigRadar {
+        fun getBatteryMonitorConfig(port: Int, folder: Path): RadarBackendConfig {
             val config = createBasicConfig(folder)
             config.batteryMonitor = getBatteryMonitorConfig(port)
             return config
         }
 
         @Throws(IOException::class)
-        fun getSourceStatisticsMonitorConfig(folder: Path): ConfigRadar {
+        fun getSourceStatisticsMonitorConfig(folder: Path): RadarBackendConfig {
             val config = createBasicConfig(folder)
             val sourceConfig = SourceStatisticsStreamConfig()
             sourceConfig.name = "source_statistics_test"

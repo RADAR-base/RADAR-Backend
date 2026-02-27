@@ -1,7 +1,7 @@
 package org.radarbase.stream
 
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarBackendCliOptions
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.config.SubCommand
 import org.slf4j.LoggerFactory
@@ -9,8 +9,8 @@ import java.util.*
 import java.util.stream.Stream
 
 class KafkaStreamFactory(
-    private val options: RadarBackendOptions,
-    private val radarProperties: RadarPropertyHandler,
+    private val options: RadarBackendCliOptions,
+    private val radarProperties: RadarConfigHandler,
 ) {
     fun createSensorStreams(): StreamMaster {
         val args = options.subCommandArgs

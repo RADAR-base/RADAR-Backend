@@ -18,8 +18,8 @@ package org.radarbase.monitor
 
 import org.radarbase.config.MonitorConfig
 import org.radarbase.config.NotifyConfig
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarBackendCliOptions
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.util.EmailSenders
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -27,8 +27,8 @@ import java.util.*
 import java.util.stream.Stream
 
 class KafkaMonitorFactory(
-    private val options: RadarBackendOptions,
-    private val properties: RadarPropertyHandler,
+    private val options: RadarBackendCliOptions,
+    private val properties: RadarConfigHandler,
 ) {
     @Throws(IOException::class)
     fun createMonitor(): KafkaMonitor {

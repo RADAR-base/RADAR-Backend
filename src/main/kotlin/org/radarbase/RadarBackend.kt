@@ -1,8 +1,8 @@
 package org.radarbase
 
 import org.apache.commons.cli.ParseException
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarBackendCliOptions
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SubCommand
 import org.radarbase.monitor.KafkaMonitorFactory
 import org.radarbase.producer.MockProducerCommand
@@ -16,15 +16,15 @@ import kotlin.system.exitProcess
  * Core class that initializes configurations and then start configured Kafka streams
  */
 class RadarBackend(
-    private val options: RadarBackendOptions,
-    private val radarPropertyHandler: RadarPropertyHandler = createPropertyHandler(options),
+    private val cliOptions: RadarBackendCliOptions,
+    private val radarConfigHandler: RadarConfigHandler = createPropertyHandler(cliOptions),
 ) {
 
     private lateinit var command: SubCommand
 
     init {
         logger.info("Configuration successfully updated")
-        logger.info("radar.yml configuration: {}", radarPropertyHandler.radarProperties)
+        logger.info("radar.yml configuration: {}", radarConfigHandler.radarProperties)
     }
 
     /**
@@ -84,13 +84,13 @@ class RadarBackend(
 
     @Throws(IOException::class)
     fun createCommand(): SubCommand {
-        val subCommand = options.subCommand ?: "stream"
+        val subCommand = cliOptions.subCommand ?: "stream"
         return when (subCommand) {
-            "stream" -> KafkaStreamFactory(options, radarPropertyHandler).createSensorStreams()
-            "statistics" -> KafkaStreamFactory(options, radarPropertyHandler).createStreamStatisticsStream()
-            "monitor" -> KafkaMonitorFactory(options, radarPropertyHandler).createMonitor()
-            "mock" -> MockProducerCommand(options, radarPropertyHandler)
-            else -> throw IllegalArgumentException("Unknown subcommand ${options.subCommand}")
+            "stream" -> KafkaStreamFactory(cliOptions, radarConfigHandler).createSensorStreams()
+            "statistics" -> KafkaStreamFactory(cliOptions, radarConfigHandler).createStreamStatisticsStream()
+            "monitor" -> KafkaMonitorFactory(cliOptions, radarConfigHandler).createMonitor()
+            "mock" -> MockProducerCommand(cliOptions, radarConfigHandler)
+            else -> throw IllegalArgumentException("Unknown subcommand ${cliOptions.subCommand}")
         }
     }
 
@@ -98,8 +98,8 @@ class RadarBackend(
         private val logger = LoggerFactory.getLogger(RadarBackend::class.java)
 
         @Throws(IOException::class)
-        private fun createPropertyHandler(options: RadarBackendOptions): RadarPropertyHandler {
-            val properties = RadarSingletonFactory.radarPropertyHandler
+        private fun createPropertyHandler(options: RadarBackendCliOptions): RadarConfigHandler {
+            val properties = RadarSingletonFactory.radarConfigHandler
             properties.load(options.propertyPath)
             return properties
         }
@@ -107,14 +107,14 @@ class RadarBackend(
         @JvmStatic
         fun main(args: Array<String>) {
             try {
-                val options = RadarBackendOptions.Companion.parse(args)
+                val options = RadarBackendCliOptions.Companion.parse(args)
                 val backend = RadarBackend(options)
                 backend.application()
             } catch (ex: ParseException) {
                 logger.error(
                     "Cannot parse arguments {}. Valid options are:\n{}",
                     args.contentToString(),
-                    RadarBackendOptions.Companion.OPTIONS,
+                    RadarBackendCliOptions.Companion.OPTIONS,
                 )
                 exitProcess(1)
             } catch (ex: Exception) {

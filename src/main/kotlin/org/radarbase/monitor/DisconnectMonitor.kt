@@ -24,7 +24,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.Monitor
 import org.radarcns.kafka.ObservationKey
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit
  * Monitors whether an ID has stopped sending measurements and sends an email when this occurs.
  */
 class DisconnectMonitor(
-    radar: RadarPropertyHandler,
+    radar: RadarConfigHandler,
     topics: Collection<String>,
     groupId: String,
     private val senders: EmailSenders?,

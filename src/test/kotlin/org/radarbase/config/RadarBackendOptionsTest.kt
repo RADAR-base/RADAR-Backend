@@ -26,7 +26,7 @@ class RadarBackendOptionsTest {
     @Test
     @Throws(ParseException::class)
     fun empty() {
-        val opts = RadarBackendOptions.parse(arrayOf())
+        val opts = RadarBackendCliOptions.parse(arrayOf())
         assertNull(opts.subCommand)
         assertNull(opts.subCommandArgs)
         assertNull(opts.propertyPath)
@@ -35,7 +35,7 @@ class RadarBackendOptionsTest {
     @Test
     @Throws(ParseException::class)
     fun withConfig() {
-        val opts = RadarBackendOptions.parse(arrayOf("-c", "cfg"))
+        val opts = RadarBackendCliOptions.parse(arrayOf("-c", "cfg"))
         assertNull(opts.subCommand)
         assertNull(opts.subCommandArgs)
         assertEquals("cfg", opts.propertyPath)
@@ -44,7 +44,7 @@ class RadarBackendOptionsTest {
     @Test
     @Throws(ParseException::class)
     fun withSubcommand() {
-        val opts = RadarBackendOptions.parse(arrayOf("-c", "cfg", "stream"))
+        val opts = RadarBackendCliOptions.parse(arrayOf("-c", "cfg", "stream"))
         assertEquals("stream", opts.subCommand)
         assertArrayEquals(arrayOf<String>(), opts.subCommandArgs)
         assertEquals("cfg", opts.propertyPath)
@@ -53,7 +53,7 @@ class RadarBackendOptionsTest {
     @Test
     @Throws(ParseException::class)
     fun withSubcommandArgs() {
-        val opts = RadarBackendOptions.parse(arrayOf("monitor", "battery"))
+        val opts = RadarBackendCliOptions.parse(arrayOf("monitor", "battery"))
         assertEquals("monitor", opts.subCommand)
         assertArrayEquals(arrayOf("battery"), opts.subCommandArgs)
     }

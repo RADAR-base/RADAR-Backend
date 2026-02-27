@@ -26,11 +26,11 @@ import kotlin.test.assertFailsWith
 
 class RadarPropertyHandlerTest {
 
-    private lateinit var propertyHandler: RadarPropertyHandler
+    private lateinit var propertyHandler: RadarConfigHandler
 
     @BeforeEach
     fun setUp() {
-        this.propertyHandler = RadarPropertyHandlerImpl()
+        this.propertyHandler = RadarConfigHandlerImpl()
     }
 
     @Test

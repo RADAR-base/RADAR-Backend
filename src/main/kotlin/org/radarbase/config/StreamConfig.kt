@@ -14,8 +14,8 @@ class StreamConfig {
         EnumMap(TimeWindowMetadata::class.java)
 
     @JsonIgnore
-    private val priorityThreads: MutableMap<RadarPropertyHandler.Priority, Int> =
-        EnumMap(RadarPropertyHandler.Priority::class.java)
+    private val priorityThreads: MutableMap<RadarConfigHandler.Priority, Int> =
+        EnumMap(RadarConfigHandler.Priority::class.java)
 
     @JsonProperty("min_commit_interval")
     var minCommitInterval: Long = 10
@@ -37,9 +37,9 @@ class StreamConfig {
     var sourceStatistics: List<SourceStatisticsStreamConfig>? = null
 
     init {
-        priorityThreads[RadarPropertyHandler.Priority.LOW] = 1
-        priorityThreads[RadarPropertyHandler.Priority.NORMAL] = 2
-        priorityThreads[RadarPropertyHandler.Priority.HIGH] = 4
+        priorityThreads[RadarConfigHandler.Priority.LOW] = 1
+        priorityThreads[RadarConfigHandler.Priority.NORMAL] = 2
+        priorityThreads[RadarConfigHandler.Priority.HIGH] = 4
     }
 
     @get:JsonGetter("threads_per_priority")
@@ -53,7 +53,7 @@ class StreamConfig {
             }
             priorityThreads.putAll(
                 streamPriority.entries.associate { (key, value) ->
-                    RadarPropertyHandler.Priority.valueOf(
+                    RadarConfigHandler.Priority.valueOf(
                         key.uppercase(Locale.US),
                     ) to value
                 },
@@ -73,5 +73,5 @@ class StreamConfig {
         return timeWindowCommitInterval[w]!!
     }
 
-    fun threadsByPriority(level: RadarPropertyHandler.Priority): Int = priorityThreads[level] ?: 1
+    fun threadsByPriority(level: RadarConfigHandler.Priority): Int = priorityThreads[level] ?: 1
 }

@@ -1,6 +1,6 @@
 package org.radarbase.stream
 
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.config.SubCommand
 import org.radarbase.util.Monitor
@@ -16,7 +16,7 @@ import java.util.stream.Collectors
 import java.util.stream.Stream
 
 open class StreamMaster(
-    propertyHandler: RadarPropertyHandler,
+    propertyHandler: RadarConfigHandler,
     streams: Stream<out SingleStreamConfig>,
 ) : SubCommand, Thread.UncaughtExceptionHandler {
     private val streamWorkers: List<StreamWorker>
@@ -31,7 +31,7 @@ open class StreamMaster(
         )
     }
 
-    private fun createWorker(config: RadarPropertyHandler, c: SingleStreamConfig): StreamWorker {
+    private fun createWorker(config: RadarConfigHandler, c: SingleStreamConfig): StreamWorker {
         return try {
             val worker = c.streamClass!!.getDeclaredConstructor().newInstance() as StreamWorker
             worker.configure(this, config, c)

@@ -26,13 +26,13 @@ import java.net.URISyntaxException
 import java.util.*
 
 /**
- * Java Singleton class for handling the yml config file. Implements [RadarPropertyHandler]
+ * Java Singleton class for handling the yml config file. Implements [RadarConfigHandler]
  */
-class RadarPropertyHandlerImpl : RadarPropertyHandler {
-    private var _properties: ConfigRadar? = null
+class RadarConfigHandlerImpl : RadarConfigHandler {
+    private var _properties: RadarBackendConfig? = null
     private var _kafkaProperty: KafkaProperty? = null
 
-    override val radarProperties: ConfigRadar
+    override val radarProperties: RadarBackendConfig
         get() = _properties ?: throw IllegalStateException("Properties cannot be accessed without calling load() first")
 
     override fun isLoaded(): Boolean = _properties != null
@@ -55,7 +55,7 @@ class RadarPropertyHandlerImpl : RadarPropertyHandler {
         require(file.exists()) { "Config file $file does not exist" }
         require(file.isFile) { "Config file $file is invalid" }
 
-        _properties = YamlConfigLoader().load(file.toPath(), ConfigRadar::class.java)
+        _properties = YamlConfigLoader().load(file.toPath(), RadarBackendConfig::class.java)
 
         val buildProperties = Properties()
         javaClass.getResourceAsStream("/build.properties")?.use {
@@ -94,6 +94,6 @@ class RadarPropertyHandlerImpl : RadarPropertyHandler {
 
     companion object {
         private const val CONFIG_FILE_NAME = "radar.yml"
-        private val log = LoggerFactory.getLogger(RadarPropertyHandlerImpl::class.java)
+        private val log = LoggerFactory.getLogger(RadarConfigHandlerImpl::class.java)
     }
 }

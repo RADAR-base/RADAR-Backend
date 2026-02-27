@@ -1,7 +1,7 @@
 package org.radarbase.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.stream.SensorStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarbase.util.serde.RadarSerdes
@@ -21,7 +21,7 @@ class PhoneUsageAggregationStream : SensorStreamWorker<ObservationKey, PhoneUsag
             "android_phone_usage_event_aggregated",
             Duration.ofDays(1),
         )
-        config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
+        config.setDefaultPriority(RadarConfigHandler.Priority.LOW)
     }
 
     override fun implementStream(

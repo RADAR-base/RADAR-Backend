@@ -1,7 +1,7 @@
 package org.radarbase.stream.empatica
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.stream.SensorStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarcns.kafka.AggregateKey
@@ -15,7 +15,7 @@ import org.radarcns.stream.aggregator.AggregateList
 class E4AccelerationStream : SensorStreamWorker<ObservationKey, EmpaticaE4Acceleration>() {
     override fun initialize() {
         defineWindowedSensorStream("android_empatica_e4_acceleration")
-        config.setDefaultPriority(RadarPropertyHandler.Priority.HIGH)
+        config.setDefaultPriority(RadarConfigHandler.Priority.HIGH)
     }
 
     override fun implementStream(

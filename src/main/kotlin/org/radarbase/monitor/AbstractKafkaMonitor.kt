@@ -38,7 +38,7 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.InterruptException
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.errors.WakeupException
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.util.PersistentStateStore
 import org.radarcns.kafka.ObservationKey
 import org.slf4j.LoggerFactory
@@ -53,7 +53,7 @@ import java.util.*
  * @param <S> state type
  */
 abstract class AbstractKafkaMonitor<K, V, S>(
-    radar: RadarPropertyHandler,
+    radar: RadarConfigHandler,
     protected val topics: Collection<String>,
     private val groupId: String,
     clientId: String,

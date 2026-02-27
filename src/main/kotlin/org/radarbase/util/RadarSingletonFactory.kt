@@ -16,8 +16,8 @@
 
 package org.radarbase.util
 
-import org.radarbase.config.RadarPropertyHandler
-import org.radarbase.config.RadarPropertyHandlerImpl
+import org.radarbase.config.RadarConfigHandler
+import org.radarbase.config.RadarConfigHandlerImpl
 
 /**
  * SingletonFactory of RadarBackend project. This factory composites all singleton objects that need
@@ -25,5 +25,5 @@ import org.radarbase.config.RadarPropertyHandlerImpl
  */
 object RadarSingletonFactory {
     val radarUtilities: RadarUtilities by lazy { RadarUtilitiesImpl() }
-    val radarPropertyHandler: RadarPropertyHandler by lazy { RadarPropertyHandlerImpl() }
+    val radarConfigHandler: RadarConfigHandler by lazy { RadarConfigHandlerImpl() }
 }

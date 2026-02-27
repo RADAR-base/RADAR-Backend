@@ -20,7 +20,7 @@ import jakarta.mail.MessagingException
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.util.EmailSenders
 import org.radarbase.util.RadarSingletonFactory
 import org.radarcns.kafka.ObservationKey
@@ -33,7 +33,7 @@ import java.util.*
  * a battery level is running low and when the battery level has returned to normal again.
  */
 class BatteryLevelMonitor(
-    radar: RadarPropertyHandler,
+    radar: RadarConfigHandler,
     topics: Collection<String>,
     private val senders: EmailSenders?,
     private val minLevel: Status = Status.CRITICAL,
@@ -172,7 +172,7 @@ class BatteryLevelMonitor(
         @JvmStatic
         @Throws(IOException::class)
         fun main(args: Array<String>) {
-            val radarPropertyHandler = RadarSingletonFactory.radarPropertyHandler
+            val radarPropertyHandler = RadarSingletonFactory.radarConfigHandler
             radarPropertyHandler.load(null)
 
             val monitor = BatteryLevelMonitor(

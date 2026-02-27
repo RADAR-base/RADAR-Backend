@@ -27,7 +27,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.radarbase.config.KafkaProperty
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.RadarSingletonFactory
@@ -57,7 +57,7 @@ class SensorStreamWorkerTest {
         val sensorTopic = StreamDefinition(KafkaTopic(topicName), KafkaTopic(topicName + "_output"))
         `when`(aggregator.getStreamDefinitions()).thenReturn(Stream.of(sensorTopic))
 
-        val propertyHandler: RadarPropertyHandler = RadarSingletonFactory.radarPropertyHandler
+        val propertyHandler: RadarConfigHandler = RadarSingletonFactory.radarConfigHandler
         propertyHandler.load("src/test/resources/config/radar.yml")
         val kafkaProperty: KafkaProperty = propertyHandler.kafkaProperties
         `when`(aggregator.getStreamProperties(eq(sensorTopic))).thenReturn(

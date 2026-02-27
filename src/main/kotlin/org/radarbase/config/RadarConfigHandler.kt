@@ -22,13 +22,13 @@ import java.io.IOException
 /**
  * Interface that handles YAML configuration file loading
  */
-interface RadarPropertyHandler {
+interface RadarConfigHandler {
 
     enum class Priority(val param: String) {
         LOW("low"), NORMAL("normal"), HIGH("high")
     }
 
-    val radarProperties: ConfigRadar
+    val radarProperties: RadarBackendConfig
 
     @Throws(IOException::class)
     fun load(pathFile: String?)

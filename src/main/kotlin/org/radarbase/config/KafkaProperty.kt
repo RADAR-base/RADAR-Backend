@@ -24,7 +24,7 @@ import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
 import org.apache.kafka.streams.processor.TimestampExtractor
 import java.util.*
 
-class KafkaProperty(private val configRadar: ConfigRadar) {
+class KafkaProperty(private val radarBackendConfig: RadarBackendConfig) {
 
     /**
      * @param clientId useful for debugging
@@ -37,18 +37,18 @@ class KafkaProperty(private val configRadar: ConfigRadar) {
     ): Properties {
         val props = Properties()
 
-        val streamConfig = configRadar.stream ?: throw IllegalStateException("Stream configuration is missing")
+        val streamConfig = radarBackendConfig.stream ?: throw IllegalStateException("Stream configuration is missing")
 
         props[StreamsConfig.APPLICATION_ID_CONFIG] = clientId
-        props[StreamsConfig.BOOTSTRAP_SERVERS_CONFIG] = configRadar.brokerPaths
-        props[AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG] = configRadar.schemaRegistryPaths
+        props[StreamsConfig.BOOTSTRAP_SERVERS_CONFIG] = radarBackendConfig.brokerPaths
+        props[AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG] = radarBackendConfig.schemaRegistryPaths
         props[StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.NUM_STREAM_THREADS_CONFIG] = streamConfig.threadsByPriority(singleStreamConfig.priority)
         props[StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG] =
             LogAndContinueExceptionHandler::class.java.name
 
-        configRadar.stream?.properties?.let { props.putAll(it) }
+        radarBackendConfig.stream?.properties?.let { props.putAll(it) }
         props.putAll(singleStreamConfig.properties)
 
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"

@@ -1,7 +1,7 @@
 package org.radarbase.stream.phone
 
 import org.apache.kafka.streams.kstream.KStream
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.stream.SensorStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarcns.kafka.ObservationKey
@@ -13,7 +13,7 @@ class PhoneUsageStream : SensorStreamWorker<ObservationKey, PhoneUsageEvent>() {
 
     override fun initialize() {
         defineSensorStream("android_phone_usage_event")
-        config.setDefaultPriority(RadarPropertyHandler.Priority.LOW)
+        config.setDefaultPriority(RadarConfigHandler.Priority.LOW)
     }
 
     override fun implementStream(

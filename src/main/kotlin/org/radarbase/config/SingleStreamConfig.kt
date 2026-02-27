@@ -12,15 +12,15 @@ open class SingleStreamConfig {
     var properties: Map<String, String> = emptyMap()
 
     @JsonProperty
-    var priority: RadarPropertyHandler.Priority = RadarPropertyHandler.Priority.NORMAL
+    var priority: RadarConfigHandler.Priority = RadarConfigHandler.Priority.NORMAL
 
     @JsonSetter("priority")
     protected fun setPriority(priority: String) {
-        this.priority = RadarPropertyHandler.Priority.valueOf(priority.uppercase(Locale.US))
+        this.priority = RadarConfigHandler.Priority.valueOf(priority.uppercase(Locale.US))
     }
 
-    fun setDefaultPriority(priority: RadarPropertyHandler.Priority) {
-        if (this.priority == RadarPropertyHandler.Priority.NORMAL) {
+    fun setDefaultPriority(priority: RadarConfigHandler.Priority) {
+        if (this.priority == RadarConfigHandler.Priority.NORMAL) {
             this.priority = priority
         }
     }

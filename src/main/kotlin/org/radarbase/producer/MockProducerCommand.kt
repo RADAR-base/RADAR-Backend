@@ -17,8 +17,8 @@
 package org.radarbase.producer
 
 import org.radarbase.config.MockConfig
-import org.radarbase.config.RadarBackendOptions
-import org.radarbase.config.RadarPropertyHandler
+import org.radarbase.config.RadarBackendCliOptions
+import org.radarbase.config.RadarConfigHandler
 import org.radarbase.config.SubCommand
 import org.radarbase.config.YamlConfigLoader
 import org.radarbase.mock.MockProducer
@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 
 class MockProducerCommand(
-    options: RadarBackendOptions,
-    radarPropertyHandler: RadarPropertyHandler,
+    options: RadarBackendCliOptions,
+    radarConfigHandler: RadarConfigHandler,
 ) : SubCommand {
     private val producer: MockProducer
 
     init {
-        val radar = radarPropertyHandler.radarProperties
+        val radar = radarConfigHandler.radarProperties
         val producerConfig = BasicMockConfig()
         val mockFile = options.mockFile
 
