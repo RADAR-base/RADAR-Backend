@@ -33,7 +33,7 @@ class KafkaStreamFactory(
         return StreamMaster(radarProperties, configs)
     }
 
-    fun createStreamStatistics(): SubCommand {
+    fun createStreamStatisticsStream(): SubCommand {
         val configs = radarProperties.radarProperties.stream!!.sourceStatistics
 
         if (configs == null) {

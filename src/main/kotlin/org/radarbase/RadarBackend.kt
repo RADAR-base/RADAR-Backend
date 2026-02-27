@@ -87,7 +87,7 @@ class RadarBackend(
         val subCommand = options.subCommand ?: "stream"
         return when (subCommand) {
             "stream" -> KafkaStreamFactory(options, radarPropertyHandler).createSensorStreams()
-            "statistics" -> KafkaStreamFactory(options, radarPropertyHandler).createStreamStatistics()
+            "statistics" -> KafkaStreamFactory(options, radarPropertyHandler).createStreamStatisticsStream()
             "monitor" -> KafkaMonitorFactory(options, radarPropertyHandler).createMonitor()
             "mock" -> MockProducerCommand(options, radarPropertyHandler)
             else -> throw IllegalArgumentException("Unknown subcommand ${options.subCommand}")
