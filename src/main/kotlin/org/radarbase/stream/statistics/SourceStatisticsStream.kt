@@ -74,7 +74,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             )
             builder.addSink(
                 "sink",
-                streamDefinitions.firstNotNullOfOrNull { it.outputTopic?.name }
+                streamDefinitions.firstNotNullOfOrNull { it.outputTopic.name }
                     ?: throw IllegalStateException("Output topic for SourceStatisticsStream $streamName is undefined."),
                 SpecificAvroSerializer<ObservationKey>(),
                 SpecificAvroSerializer<SourceStatistics>(),
@@ -116,12 +116,12 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 punctuateCancellor = this.context.schedule(
                     Duration.ofMillis(localInterval.toMillis()),
                     PunctuationType.WALL_CLOCK_TIME,
-                    { timestamp -> this.sendNew(timestamp) },
+                    { this.sendNew() },
                 )
             }
         }
 
-        private fun sendNew(timestamp: Long) {
+        private fun sendNew() {
             val sent = mutableListOf<KeyValue<ObservationKey, SourceStatisticsRecord>>()
 
             store.all().use { iterator ->

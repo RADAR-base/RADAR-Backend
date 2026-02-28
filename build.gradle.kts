@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     application
     alias(libs.plugins.kotlin.jvm)
@@ -6,6 +8,7 @@ plugins {
     alias(libs.plugins.radar.kotlin)
     alias(libs.plugins.radar.root.project)
     alias(libs.plugins.version.catalog.update)
+    `jvm-test-suite`
 }
 
 description = "RADAR-base service for Kafka stream processing, monitoring, and statistics utilities."
@@ -76,3 +79,48 @@ dependencies {
 kotlin {
     jvmToolchain(21)
 }
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+            targets {
+                all {
+                    testTask {
+                        testLogging {
+                            showStandardStreams = true
+                            showExceptions = true
+                            showCauses = true
+                            showStackTraces = true
+                            exceptionFormat = TestExceptionFormat.FULL
+                            events("skipped", "failed")
+                        }
+                    }
+                }
+            }
+        }
+        register<JvmTestSuite>("integrationTest") {
+            description = "Run integration tests (located in src/integrationTest/...)."
+            dependencies {
+                implementation(project())
+            }
+            targets {
+                all {
+                    testTask {
+                        shouldRunAfter(test)
+                        testLogging {
+                            events("passed", "skipped", "failed")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// As part of check task, compile the integration test code
+tasks.named("check") {
+    dependsOn(testing.suites.named("integrationTestClasses"))
+}
+
+configurations["integrationTestImplementation"].extendsFrom(configurations.testImplementation.get())

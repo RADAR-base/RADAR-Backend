@@ -198,10 +198,10 @@ abstract class AbstractKafkaMonitor<K, V, S>(
     }
 
     /** Evaluate a single record that the monitor receives by overriding this function */
-    internal abstract fun evaluateRecord(record: ConsumerRecord<K, V>)
+    abstract fun evaluateRecord(record: ConsumerRecord<K, V>)
 
     /** Evaluates the records that the monitor receives */
-    internal open fun evaluateRecords(records: ConsumerRecords<K, V>) {
+    open fun evaluateRecords(records: ConsumerRecords<K, V>) {
         for (record in records) {
             evaluateRecord(record)
         }
