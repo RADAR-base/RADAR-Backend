@@ -21,6 +21,10 @@ slf4j = "2.0.17"
 versionCatalogUpdate = "0.8.5"
 
 [libraries]
+# For buildSrc project
+gradle-radar-kotlin = { group = "org.radarbase.radar-kotlin", name = "org.radarbase.radar-kotlin.gradle.plugin", version.ref = "radarCommons" }
+gradle-radar-publishing = { group = "org.radarbase.radar-publishing", name = "org.radarbase.radar-publishing.gradle.plugin", version.ref = "radarCommons" }
+
 avro = { module = "org.apache.avro:avro", version.ref = "avro" }
 commons-cli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
 greenmail = { module = "com.icegreen:greenmail", version.ref = "greenmail" }
