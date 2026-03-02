@@ -94,12 +94,18 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
     internal abstract fun implementStream(definition: StreamDefinition, kstream: KStream<K, V>): KStream<*, *>
 
     override fun createStreams(): List<KafkaStreams>? {
-        val streamBuilders = getStreamDefinitions().map { createBuilder(it) }.collect(Collectors.toList())
-
-        monitors = streamBuilders.stream().map(StreamUtil.first()).filter { it != null }.map { it!! }
+        val streamBuilders = getStreamDefinitions()
+            .map { createBuilder(it) }
             .collect(Collectors.toList())
 
-        return streamBuilders.stream().map(StreamUtil.second()).collect(Collectors.toList())
+        monitors = streamBuilders.stream()
+            .map(StreamUtil.first())
+            .filter { it != null }
+            .collect(Collectors.toList())
+
+        return streamBuilders.stream()
+            .map(StreamUtil.second())
+            .collect(Collectors.toList())
     }
 
     override fun doCleanup() {
