@@ -11,12 +11,12 @@ javaMail = "2.1.5"
 junit-jupiter = "5.10.1"
 kafka = "8.1.1-ce"
 # Project and Plugins
-kotlin = "2.2.10"
+kotlin = "1.9.24"
 ksoup = "0.2.6"
 log4j = "2.23.1"
 mockito = "5.21.0"
-radarCommons = "1.2.4"
-radarSchemas = "0.8.15"
+radarCommons = "1.2.6"
+radarSchemas = "0.8.16"
 slf4j = "2.0.17"
 versionCatalogUpdate = "0.8.5"
 
@@ -37,7 +37,7 @@ jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "findbug" }
 kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka" }
 kafka-streams-avro-serde = { module = "io.confluent:kafka-streams-avro-serde", version.ref = "confluent" }
 # Kotlin
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
 # Logging

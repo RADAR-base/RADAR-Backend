@@ -40,6 +40,7 @@ radarPublishing {
 radarKotlin {
     log4j2Version.set(libs.versions.log4j)
     sentryEnabled.set(true)
+    openTelemetryAgentEnabled.set(false)
 }
 
 dependencies {

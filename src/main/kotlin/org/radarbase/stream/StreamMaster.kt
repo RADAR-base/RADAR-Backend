@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.Stream
+import kotlin.streams.toList
 
 open class StreamMaster(
     propertyHandler: RadarConfigHandler,
@@ -24,7 +25,9 @@ open class StreamMaster(
     private lateinit var executor: ScheduledExecutorService
 
     init {
-        streamWorkers = streams.map { createWorker(propertyHandler, it) }.collect(Collectors.toList())
+        streamWorkers = streams
+            .map { createWorker(propertyHandler, it) }
+            .toList()
         logger.info(
             "Configured streams: \n{}",
             streamWorkers.joinToString("\n") { " - ${it.javaClass.name}" },

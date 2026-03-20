@@ -24,6 +24,7 @@ import java.util.*
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Collectors
+import kotlin.streams.toList
 
 abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : AbstractStreamWorker() {
     private val monitorLog = LoggerFactory.getLogger(javaClass)
@@ -96,7 +97,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
     override fun createStreams(): List<KafkaStreams>? {
         val streamBuilders = getStreamDefinitions()
             .map { createBuilder(it) }
-            .collect(Collectors.toList())
+            .toList()
 
         monitors = streamBuilders.stream()
             .map(StreamUtil.first())
@@ -105,7 +106,7 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
 
         return streamBuilders.stream()
             .map(StreamUtil.second())
-            .collect(Collectors.toList())
+            .toList()
     }
 
     override fun doCleanup() {
@@ -151,7 +152,8 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         fieldNames: Array<String>,
         schema: Schema,
     ): KStream<AggregateKey, AggregateList> {
-        return kstream.groupByKey().windowedBy(definition.timeWindows).aggregate(
+        return kstream
+            .groupByKey().windowedBy(definition.timeWindows).aggregate(
             { AggregateListCollector(fieldNames, schema, false) },
             { _, v, valueCollector -> valueCollector.add(v) },
             RadarSerdes.Companion.materialized(
