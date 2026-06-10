@@ -43,6 +43,10 @@ radarKotlin {
     openTelemetryAgentEnabled.set(false)
 }
 
+application {
+    mainClass.set("org.radarbase.RadarBackend")
+}
+
 dependencies {
     implementation(libs.radar.commons)
     implementation(libs.radar.commons.server)
@@ -64,7 +68,8 @@ dependencies {
     implementation(libs.commons.cli)
     implementation(libs.jackson.annotations)
     implementation(libs.jackson.module.kotlin)
-    implementation(libs.jakarta.mail)
+    implementation(libs.jakarta.mail.api)
+    runtimeOnly(libs.jakarta.mail)
     implementation(libs.bundles.ksoup)
 
     // Testing
