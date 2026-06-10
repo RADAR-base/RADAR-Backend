@@ -37,8 +37,8 @@ FROM confluentinc/cp-base-new:8.0.4
 WORKDIR /app
 
 # Copy built application from build stage
-COPY --from=build /app/build/install/kotlin-backend/bin/* /usr/bin
-COPY --from=build /app/build/install/kotlin-backend/lib/* /usr/lib
+COPY --from=build /app/build/install/radar-backend/bin/* /usr/bin
+COPY --from=build /app/build/install/radar-backend/lib/* /usr/lib
 
 # Load topics validator
 COPY ./src/main/docker/radar-backend-init /usr/bin
