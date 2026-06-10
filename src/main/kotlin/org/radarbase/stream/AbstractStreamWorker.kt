@@ -13,7 +13,7 @@ import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.stream.Stream
 
-abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHandler {
+abstract class AbstractStreamWorker : StreamWorker, StreamsUncaughtExceptionHandler {
     internal val streamDefinitions = CopyOnWriteArrayList<StreamDefinition>()
     protected lateinit var config: SingleStreamConfig
     protected lateinit var allConfig: RadarBackendConfig
@@ -73,7 +73,7 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
     }
 
     override fun start() {
-        assert(streams != null) { "Streams already started. Cannot start them again." }
+        assert(streams == null) { "Streams already started. Cannot start them again." }
 
         streams = createStreams() ?: throw IllegalStateException("Streams are not initialized during start")
 
@@ -103,13 +103,17 @@ abstract class AbstractStreamWorker : StreamWorker, Thread.UncaughtExceptionHand
 
     protected abstract fun initialize()
 
-    override fun uncaughtException(t: Thread, e: Throwable) {
-        logger.error("Thread {} has been terminated due to {}", t.name, e.message, e)
+    override fun handle(e: Throwable?): StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse? {
+        logger.error("Thread has been terminated due to {} - {}", e?.message, e)
         closeStreams()
         if (e is StreamsException) {
             master.restartStream(this)
+            // TODO check whether this is the right way to handle this
+            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD
         } else {
             master.notifyCrashedStream(javaClass.simpleName)
+            // TODO check whether this is the right way to handle this
+            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_APPLICATION
         }
     }
 
