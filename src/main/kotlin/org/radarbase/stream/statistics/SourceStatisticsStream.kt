@@ -12,9 +12,9 @@ import org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.processor.Cancellable
 import org.apache.kafka.streams.processor.PunctuationType
-import org.apache.kafka.streams.processor.api.Processor
-import org.apache.kafka.streams.processor.api.ProcessorContext
-import org.apache.kafka.streams.processor.api.Record
+import org.apache.kafka.streams.processor.Processor
+import org.apache.kafka.streams.processor.ProcessorContext
+import org.apache.kafka.streams.processor.ProcessorSupplier
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
 import org.radarbase.config.SourceStatisticsStreamConfig
@@ -69,7 +69,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             builder.addSource("source", genericReader, genericReader, *inputTopics)
             builder.addProcessor(
                 "process",
-                { SourceStatisticsProcessor() },
+                ProcessorSupplier { SourceStatisticsProcessor() },
                 "source",
             )
             builder.addSink(
@@ -94,15 +94,15 @@ class SourceStatisticsStream : AbstractStreamWorker() {
         }
 
     private inner class SourceStatisticsProcessor :
-        Processor<GenericRecord, GenericRecord, ObservationKey, SourceStatisticsRecord> {
-        private lateinit var context: ProcessorContext<ObservationKey, SourceStatisticsRecord>
+        Processor<GenericRecord, GenericRecord> {
+        private lateinit var context: ProcessorContext
         private lateinit var store: KeyValueStore<ObservationKey, SourceStatisticsRecord>
         private var punctuateCancellor: Cancellable? = null
         private var localInterval = Duration.ZERO
 
         @Suppress("UNCHECKED_CAST")
         override fun init(
-            context: org.apache.kafka.streams.processor.api.ProcessorContext<ObservationKey, SourceStatisticsRecord>,
+            context: ProcessorContext,
         ) {
             store = context.getStateStore("statistics") as KeyValueStore<ObservationKey, SourceStatisticsRecord>
             this.context = context
@@ -116,8 +116,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 punctuateCancellor = this.context.schedule(
                     Duration.ofMillis(localInterval.toMillis()),
                     PunctuationType.WALL_CLOCK_TIME,
-                    { this.sendNew() },
-                )
+                ) { this.sendNew() }
             }
         }
 
@@ -128,8 +127,7 @@ class SourceStatisticsStream : AbstractStreamWorker() {
                 while (iterator.hasNext()) {
                     val next = iterator.next()
                     if (!next.value.isSent) {
-                        val record = Record(next.key, next.value, System.currentTimeMillis())
-                        context.forward(record)
+                        context.forward(next.key, next.value)
                         sent.add(KeyValue(next.key, next.value.sentRecord()))
                     }
                 }
@@ -141,34 +139,28 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             updatePunctuate()
         }
 
-        override fun process(record: Record<GenericRecord?, GenericRecord?>?) {
-            if (record == null) {
-                logger.error("Cannot process null record")
-                return
-            }
-            val genericKey = record.key()
-            val value = record.value()
-            if (genericKey == null || value == null) {
+        override fun process(key: GenericRecord?, value: GenericRecord?) {
+            if (key == null || value == null) {
                 logger.error("Cannot process records without both a key and a value")
                 return
             }
-            val keySchema = genericKey.schema
+            val keySchema = key.schema
             val valueSchema = value.schema
 
             var time = getTime(value, valueSchema, "time", Double.NaN)
             time = getTime(value, valueSchema, "timeReceived", time)
-            val timeStart = getTime(genericKey, keySchema, "timeStart", time)
-            val timeEnd = getTime(genericKey, keySchema, "timeEnd", time)
+            val timeStart = getTime(key, keySchema, "timeStart", time)
+            val timeEnd = getTime(key, keySchema, "timeEnd", time)
 
             if (timeStart.isNaN() || timeEnd.isNaN()) {
-                logger.error("Record did not contain time values: <{}, {}>", genericKey, value)
+                logger.error("Record did not contain time values: <{}, {}>", key, value)
                 return
             }
 
             val key: ObservationKey = try {
-                AbstractKafkaMonitor.Companion.extractKey(genericKey, keySchema)
+                AbstractKafkaMonitor.Companion.extractKey(key, keySchema)
             } catch (ex: IllegalArgumentException) {
-                logger.error("Could not deserialize key without projectId, userId or sourceId: {}", genericKey)
+                logger.error("Could not deserialize key without projectId, userId or sourceId: {}", key)
                 return
             }
 

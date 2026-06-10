@@ -45,7 +45,7 @@ class KafkaProperty(private val radarBackendConfig: RadarBackendConfig) {
         props[StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG] = SpecificAvroSerde::class.java
         props[StreamsConfig.NUM_STREAM_THREADS_CONFIG] = streamConfig.threadsByPriority(singleStreamConfig.priority)
-        props[StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG] =
+        props[StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG] =
             LogAndContinueExceptionHandler::class.java.name
 
         radarBackendConfig.stream?.properties?.let { props.putAll(it) }

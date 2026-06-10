@@ -2,22 +2,22 @@
 avro = "1.12.1"
 commonsCli = "1.11.0"
 # Dependencies
-confluent = "8.1.1"
+confluent = "7.6.1"
 findbug = "3.0.2"
 greenmail = "2.1.8"
-jackson = "2.21"
-jacksonModuleKotlin = "2.21.1"
+jackson = "2.20"
+jacksonModuleKotlin = "2.17.2"
 javaMail = "2.1.5"
 junit-jupiter = "5.10.1"
-kafka = "8.1.1-ce"
+kafka = "7.6.1-ce"
 # Project and Plugins
 kotlin = "1.9.24"
-ksoup = "0.2.6"
+ksoup = "0.1.5"
 log4j = "2.23.1"
+lz4 = "1.10.1"
 mockito = "5.21.0"
-radarCommons = "1.2.6"
-radarSchemas = "0.8.16"
-slf4j = "2.0.17"
+radarCommons = "1.2.5"
+radarSchemas = "0.8.9"
 versionCatalogUpdate = "0.8.5"
 
 [libraries]
@@ -42,6 +42,8 @@ ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
 # Logging
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+# Test
+lz4 = { module = "at.yawk.lz4:lz4-java", version.ref = "lz4" }
 # RADAR-Base
 radar-commons = { module = "org.radarbase:radar-commons", version.ref = "radarCommons" }
 radar-commons-server = { module = "org.radarbase:radar-commons-server", version.ref = "radarCommons" }

@@ -116,7 +116,7 @@ class DisconnectMonitorTest {
         sendMessage(monitor, "1")
         sendMessage(monitor, "2")
         Thread.sleep(timeout.toMillis() + disconnectConfig.timeout * 1000)
-        monitor.evaluateRecords(ConsumerRecords(emptyMap(), emptyMap()))
+        monitor.evaluateRecords(ConsumerRecords(emptyMap()))
         timesSent += 2
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
         sendMessage(monitor, "1")
@@ -128,7 +128,7 @@ class DisconnectMonitorTest {
         sendMessage(monitor, "0")
         timesSent += 1
         Thread.sleep(timeout.toMillis() + disconnectConfig.timeout * 1000)
-        monitor.evaluateRecords(ConsumerRecords(emptyMap(), emptyMap()))
+        monitor.evaluateRecords(ConsumerRecords(emptyMap()))
         timesSent += 3
         verify(sender, times(timesSent)).sendEmail(anyString(), anyString())
     }
@@ -155,7 +155,7 @@ class DisconnectMonitorTest {
         val record = ConsumerRecord<GenericRecord, GenericRecord>("mytopic", 0, offset++, key, value)
         val partition = TopicPartition(record.topic(), record.partition())
 
-        monitor.evaluateRecords(ConsumerRecords(mapOf(partition to listOf(record)), emptyMap()))
+        monitor.evaluateRecords(ConsumerRecords(mapOf(partition to listOf(record))))
     }
 
     @Test

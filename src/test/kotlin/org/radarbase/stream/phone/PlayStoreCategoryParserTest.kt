@@ -14,7 +14,7 @@ class PlayStoreCategoryParserTest {
     fun getCategoryFromDocument() {
         val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/armt_app.html.gz")?.use { stream ->
             GZIPInputStream(stream).use { gzipStream ->
-                Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
+                Ksoup.parseInputStream(gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
             }
         } ?: throw IllegalStateException("Resource not found")
 
@@ -27,7 +27,7 @@ class PlayStoreCategoryParserTest {
         val doc = javaClass.getResourceAsStream("/org/radarbase/stream/phone/armt_app_no_category.html.gz")
             ?.use { stream ->
                 GZIPInputStream(stream).use { gzipStream ->
-                    Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
+                    Ksoup.parseInputStream(gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
                 }
             } ?: throw IllegalStateException("Resource not found")
 
@@ -40,7 +40,7 @@ class PlayStoreCategoryParserTest {
         val doc =
             javaClass.getResourceAsStream("/org/radarbase/stream/phone/armt_app_broken.html.gz")?.use { stream ->
                 GZIPInputStream(stream).use { gzipStream ->
-                    Ksoup.parseInputStream(input = gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
+                    Ksoup.parseInputStream(gzipStream, baseUri = BASE_URL, charsetName = "UTF-8")
                 }
             } ?: throw IllegalStateException("Resource not found")
 

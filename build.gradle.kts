@@ -77,6 +77,17 @@ dependencies {
     testImplementation(libs.junit.jupiter.params)
 }
 
+// --- Vulnerability fixes start ---
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        // Substitute the old group/module with drop-in replacement
+        substitute(module("org.lz4:lz4-java"))
+            .using(module(libs.lz4.get().toString()))
+            .because("Force safe version of LZ4 across all modules")
+    }
+}
+// --- Vulnerability fixes end ---
+
 kotlin {
     jvmToolchain(21)
 }
@@ -121,7 +132,7 @@ testing {
 
 // As part of check task, compile the integration test code
 tasks.named("check") {
-    dependsOn(testing.suites.named("integrationTestClasses"))
+    dependsOn(tasks.named("integrationTest"))
 }
 
 configurations["integrationTestImplementation"].extendsFrom(configurations.testImplementation.get())
