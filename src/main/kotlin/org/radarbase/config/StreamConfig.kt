@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
+import org.radarbase.config.ConfigUtils.Companion.withEnvVars
 import org.radarbase.stream.TimeWindowMetadata
 import java.time.Duration
 import java.util.*
@@ -28,7 +29,7 @@ class StreamConfig {
 
     @JsonProperty
     var properties: Map<String, String>? = null
-        get() = field ?: emptyMap()
+        get() = (field ?: emptyMap()).withEnvVars(ENV_VAR_PREFIX_PROPERTIES)
 
     @JsonProperty("streams")
     var streamConfigs: List<SingleStreamConfig>? = null
@@ -74,4 +75,8 @@ class StreamConfig {
     }
 
     fun threadsByPriority(level: RadarConfigHandler.Priority): Int = priorityThreads[level] ?: 1
+
+    companion object {
+        const val ENV_VAR_PREFIX_PROPERTIES = "STREAM_"
+    }
 }
