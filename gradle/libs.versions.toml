@@ -7,7 +7,8 @@ findbug = "3.0.2"
 greenmail = "2.1.8"
 jackson = "2.20"
 jacksonModuleKotlin = "2.17.2"
-javaMail = "2.1.5"
+jakartaMailApi = "2.1.5"
+jakartaMail = "2.0.5"
 junit-jupiter = "5.10.1"
 kafka = "7.6.1-ce"
 # Project and Plugins
@@ -31,8 +32,9 @@ commons-cli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
 greenmail = { module = "com.icegreen:greenmail", version.ref = "greenmail" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
-jakarta-mail = { module = "jakarta.mail:jakarta.mail-api", version.ref = "javaMail" }
-# Utilities
+jakarta-mail-api = { module = "jakarta.mail:jakarta.mail-api", version.ref = "jakartaMailApi" }
+jakarta-mail = { module = "org.eclipse.angus:jakarta.mail", version.ref = "jakartaMail" }
+# implementation
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "findbug" }
 # Kafka & Confluent
 kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka" }
