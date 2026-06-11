@@ -37,4 +37,4 @@ echo "Kafka is available. Ready to go!"
 
 # Start streams
 echo "===> Starting " "$@" "...."
-exec radar-backend -c /etc/radar.yml "$@"
+exec "$@"
