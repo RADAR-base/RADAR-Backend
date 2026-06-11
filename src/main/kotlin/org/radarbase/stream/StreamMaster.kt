@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.Stream
-import kotlin.streams.toList
 
 open class StreamMaster(
     propertyHandler: RadarConfigHandler,
@@ -101,7 +100,7 @@ open class StreamMaster(
     fun notifyStartedStream(stream: StreamWorker) {
         val current = currentStream.incrementAndGet()
         logger.info(
-            "[{}] {} is started. {}/{} streams are now running",
+            "{} is started. {}/{} streams are now running",
             stream,
             current,
             streamWorkers.size,
@@ -124,11 +123,11 @@ open class StreamMaster(
 
     fun notifyCrashedStream(stream: String) {
         logger.error("{} is crashed", stream)
-        logger.info("Forcing shutdown of {}")
+        logger.info("Forcing shutdown of {}", stream)
         try {
             shutdown()
         } catch (ex: InterruptedException) {
-            logger.warn("Shutdown interrupted")
+            logger.warn("Shutdown interrupted: {}", ex.message)
         }
     }
 
@@ -137,7 +136,7 @@ open class StreamMaster(
         try {
             executor.schedule({ worker.start() }, RETRY_TIMEOUT.toLong(), TimeUnit.MILLISECONDS)
         } catch (ex: RejectedExecutionException) {
-            logger.info("Failed to schedule")
+            logger.info("Failed to schedule: {}", ex.message)
         }
     }
 
