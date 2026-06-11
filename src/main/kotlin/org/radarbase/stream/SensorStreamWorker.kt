@@ -66,8 +66,9 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
     }
 
     internal fun getStreamProperties(definition: StreamDefinition): Properties {
+        val className = javaClass.name
         val localClientId = buildString {
-            append(javaClass.name)
+            append(className)
             append("-")
             append(allConfig.buildVersion)
             definition.timeWindows?.let {

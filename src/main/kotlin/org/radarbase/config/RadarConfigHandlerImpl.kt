@@ -18,13 +18,13 @@ package org.radarbase.config
 
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.radarbase.RadarBackend
+import org.radarbase.radar_backend.BuildConfig
 import org.radarbase.util.PersistentStateStore
 import org.radarbase.util.YamlPersistentStateStore
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URISyntaxException
 import java.nio.file.Path
-import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.isRegularFile
 
@@ -60,11 +60,8 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
         _properties = YamlConfigLoader { mapper -> mapper.registerKotlinModule() }
             .load(file, RadarBackendConfig::class.java)
 
-        val buildProperties = Properties()
-        javaClass.getResourceAsStream("/build.properties")?.use {
-            buildProperties.load(it)
-        }
-        buildProperties.getProperty("version")?.let {
+        val buildProperties = BuildConfig
+        buildProperties.version.let {
             _properties?.buildVersion = it
         }
     }
@@ -91,6 +88,7 @@ class RadarConfigHandlerImpl : RadarConfigHandler {
     @Throws(IOException::class)
     override fun getPersistentStateStore(): PersistentStateStore? =
         radarProperties.persistencePath?.let {
+            log.info("Initializing persistent state store at path '{}'", it)
             YamlPersistentStateStore(Path.of(it))
         }
 

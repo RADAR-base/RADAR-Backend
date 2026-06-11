@@ -19,6 +19,7 @@ mockito = "5.21.0"
 radarCommons = "1.2.5"
 radarSchemas = "0.8.9"
 versionCatalogUpdate = "0.8.5"
+buildconfigPlugin = "5.3.5"
 
 [libraries]
 # For buildSrc project
@@ -58,6 +59,7 @@ radar-publishing = { id = "org.radarbase.radar-publishing", version.ref = "radar
 radar-root-project = { id = "org.radarbase.radar-root-project", version.ref = "radarCommons" }
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdate" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+build-config = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfigPlugin" }
 
 [bundles]
 ksoup = [

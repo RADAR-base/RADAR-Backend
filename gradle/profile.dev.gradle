@@ -1,1 +1,1 @@
-apply from: 'gradle/test.gradle'
+apply from: 'gradle/profile.test.gradle'

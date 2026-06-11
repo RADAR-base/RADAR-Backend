@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.radar.kotlin)
     alias(libs.plugins.radar.root.project)
     alias(libs.plugins.version.catalog.update)
+    alias(libs.plugins.build.config)
     `jvm-test-suite`
 }
 
@@ -35,6 +36,10 @@ radarPublishing {
             organization.set("Institute of Psychiatry, Psychology & Neuroscience, King's College London")
         }
     }
+}
+
+buildConfig {
+    buildConfigField("String", "version", "\"${properties["projectVersion"] as String}\"")
 }
 
 radarKotlin {

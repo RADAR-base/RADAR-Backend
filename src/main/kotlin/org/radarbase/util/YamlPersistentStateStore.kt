@@ -2,6 +2,7 @@ package org.radarbase.util
 
 import org.radarbase.config.YamlConfigLoader
 import org.radarcns.kafka.ObservationKey
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -19,6 +20,7 @@ class YamlPersistentStateStore(private val basePath: Path) : PersistentStateStor
     private val loader = YamlConfigLoader()
 
     init {
+        logger.info("Initializing stream state store at path: {}", basePath)
         checkBasePath(basePath)
     }
 
@@ -109,6 +111,8 @@ class YamlPersistentStateStore(private val basePath: Path) : PersistentStateStor
 
     companion object {
         private const val SEPARATOR = '#'
+
+        private val logger = LoggerFactory.getLogger(YamlPersistentStateStore::class.java)
 
         /**
          * Check whether the base path can be made into a valid directory and is writable.
