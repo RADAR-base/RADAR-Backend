@@ -26,6 +26,11 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Collectors
 import kotlin.streams.toList
 
+/**
+ * Specialized [AbstractStreamWorker] for processing sensor data.
+ * It provides common aggregation functions (e.g., numeric aggregation) and handles the standard
+ * setup for monitoring and building sensor-related streams.
+ */
 abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : AbstractStreamWorker() {
     private val monitorLog = LoggerFactory.getLogger(javaClass)
     private var monitors: MutableCollection<ScheduledFuture<*>>? = null

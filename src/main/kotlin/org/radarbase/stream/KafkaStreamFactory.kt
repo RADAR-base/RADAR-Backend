@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Stream
 
+/**
+ * Factory for creating [StreamMaster] and [StreamWorker] instances.
+ * It uses the configuration file and CLI options to determine which streams should be instantiated and started.
+ */
 class KafkaStreamFactory(
     private val cliOptions: RadarBackendCliOptions,
     private val radarProperties: RadarConfigHandler,

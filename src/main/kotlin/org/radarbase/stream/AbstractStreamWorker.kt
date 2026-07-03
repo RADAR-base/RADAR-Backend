@@ -13,6 +13,11 @@ import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.stream.Stream
 
+/**
+ * Abstract implementation of [StreamWorker] that provides common logic for managing Kafka Streams.
+ * This class handles lifecycle management (start, shutdown), error handling, and defines the structure
+ * for configuring one or more streams.
+ */
 abstract class AbstractStreamWorker : StreamWorker, StreamsUncaughtExceptionHandler {
     internal val streamDefinitions = CopyOnWriteArrayList<StreamDefinition>()
     protected lateinit var config: SingleStreamConfig

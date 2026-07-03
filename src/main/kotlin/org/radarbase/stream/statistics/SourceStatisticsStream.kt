@@ -29,6 +29,11 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Kafka Stream worker that computes and maintains statistics for each source.
+ * It tracks the minimum and maximum timestamps of records processed from input topics
+ * and periodically outputs these statistics to a specified output topic.
+ */
 class SourceStatisticsStream : AbstractStreamWorker() {
     private var streamName: String? = null
     private var interval: Duration = Duration.ZERO
@@ -93,6 +98,11 @@ class SourceStatisticsStream : AbstractStreamWorker() {
             return settings
         }
 
+    /**
+     * Processor that updates source statistics based on incoming records.
+     * It uses a state store to persist statistics and schedules a punctuation
+     * to periodically flush new or updated statistics to the output topic.
+     */
     private inner class SourceStatisticsProcessor :
         Processor<GenericRecord, GenericRecord> {
         private lateinit var context: ProcessorContext
@@ -176,6 +186,12 @@ class SourceStatisticsStream : AbstractStreamWorker() {
         }
     }
 
+    /**
+     * Internal record structure to store source statistics in the state store.
+     * @property timeStart Minimum timestamp seen for the source.
+     * @property timeEnd Maximum timestamp seen for the source.
+     * @property isSent Whether this version of the record has already been sent to the output topic.
+     */
     data class SourceStatisticsRecord(
         val timeStart: Double,
         val timeEnd: Double,

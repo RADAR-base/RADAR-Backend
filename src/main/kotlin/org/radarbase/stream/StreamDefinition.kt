@@ -5,6 +5,10 @@ import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.Comparison
 import java.time.Duration
 
+/**
+ * Defines a single Kafka stream processing step.
+ * It maps an input topic to an output topic, optionally specifying time windows and a commit interval.
+ */
 class StreamDefinition(
     val inputTopic: KafkaTopic,
     val outputTopic: KafkaTopic,

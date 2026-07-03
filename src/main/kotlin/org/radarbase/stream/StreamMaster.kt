@@ -15,6 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
+/**
+ * Orchestrates the lifecycle of multiple [StreamWorker]s.
+ * It handles starting, stopping, and monitoring of all configured streams in a single process,
+ * ensuring they are managed as a cohesive unit.
+ */
 open class StreamMaster(
     propertyHandler: RadarConfigHandler,
     streams: Stream<out SingleStreamConfig>,

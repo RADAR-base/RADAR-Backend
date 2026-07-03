@@ -6,6 +6,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.streams.processor.TimestampExtractor
 import org.slf4j.LoggerFactory
 
+/**
+ * Custom Kafka Streams [TimestampExtractor] that extracts the timestamp from the `timeReceived` field
+ * of an Avro record. The `timeReceived` field is expected to be a Double representing seconds since epoch.
+ */
 class DeviceTimestampExtractor : TimestampExtractor {
     override fun extract(record: ConsumerRecord<Any, Any>, previousTimestamp: Long): Long {
         val value = record.value() as IndexedRecord
