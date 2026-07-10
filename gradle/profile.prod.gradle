@@ -1,9 +1,5 @@
-task downloadRuntimeDependencies {
+tasks.register('downloadRuntimeDependencies') {
     description "Pre-downloads dependencies"
     configurations.compileClasspath.files
     configurations.runtimeClasspath.files
-}
-
-processResources {
-    expand(version: version)
 }

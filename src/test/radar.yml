@@ -28,6 +28,6 @@ stream:
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
 schema_registry:
-    - host: localhost
-      port: 8081
-      protocol: http
+  - host: localhost
+    port: 8081
+    protocol: http

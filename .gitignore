@@ -12,10 +12,16 @@ log/
 
 # Gradle
 .gradle/
+/buildSrc/.gradle/
 .gradletasknamecache
 
 # Build
 /build/
+/buildSrc/build
+
+# Kotlin
+/.kotlin/
+/buildSrc/.kotlin/
 
 # logs
 backend.log

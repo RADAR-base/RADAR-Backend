@@ -4,14 +4,14 @@ released: 2016-11-27
 #============================== Zookeeper ==============================#
 #List of Zookeeper instances
 zookeeper:
-    - host: localhost
-      port: 2181
+  - host: localhost
+    port: 2181
 
 #================================ Kafka ================================#
 #List of Kafka brokers
 broker:
-    - host: localhost
-      port: 9092
+  - host: localhost
+    port: 9092
 
 #Kafka internal parameters
 
@@ -29,51 +29,57 @@ stream:
     session.timeout.ms: 20000
 
   streams:
-    - class: org.radarcns.stream.empatica.E4AccelerationStream
-    - class: org.radarcns.stream.empatica.E4BatteryLevelStream
-    - class: org.radarcns.stream.empatica.E4BloodVolumePulseStream
-    - class: org.radarcns.stream.empatica.E4ElectroDermalActivityStream
-    - class: org.radarcns.stream.empatica.E4HeartRateStream
-    - class: org.radarcns.stream.empatica.E4InterBeatIntervalStream
-    - class: org.radarcns.stream.empatica.E4TemperatureStream
-    - class: org.radarcns.stream.phone.PhoneAccelerationStream
-    - class: org.radarcns.stream.phone.PhoneBatteryStream
-    - class: org.radarcns.stream.phone.PhoneUsageStream
-    - class: org.radarcns.stream.phone.PhoneUsageAggregationStream
+    - class: org.radarbase.stream.empatica.E4AccelerationStream
+    - class: org.radarbase.stream.empatica.E4BatteryLevelStream
+    - class: org.radarbase.stream.empatica.E4BloodVolumePulseStream
+    - class: org.radarbase.stream.empatica.E4ElectroDermalActivityStream
+    - class: org.radarbase.stream.empatica.E4HeartRateStream
+    - class: org.radarbase.stream.empatica.E4InterBeatIntervalStream
+    - class: org.radarbase.stream.empatica.E4TemperatureStream
+    - class: org.radarbase.stream.phone.PhoneAccelerationStream
+    - class: org.radarbase.stream.phone.PhoneBatteryStream
+    - class: org.radarbase.stream.phone.PhoneUsageStream
+    - class: org.radarbase.stream.phone.PhoneUsageAggregationStream
+    - class: org.radarbase.stream.ruleengine.RuleEngineStream
+      properties:
+        input_topic: questionnaire_response
+        output_topic: rule_engine_output
+        global_store_name: JIT_RULES_STORE
+        global_store_topic: jit_rules
 
   #====================== Source statistics monitor ======================#
   source_statistics:
     - name: Empatica E4
       topics:
-      - android_empatica_e4_blood_volume_pulse_1min
+        - android_empatica_e4_blood_volume_pulse_1min
       output_topic: source_statistics_empatica_e4
     - name: Biovotion VSM1
       topics:
-      - android_biovotion_vsm1_acceleration_1min
+        - android_biovotion_vsm1_acceleration_1min
       output_topic: source_statistics_biovotion_vsm1
     - name: RADAR pRMT
       topics:
-      - android_phone_acceleration_1min
-      - android_phone_bluetooth_devices
-      - android_phone_sms
-      - android_phone_call
-      - android_phone_contacts
-      - android_phone_usage_event
-      - android_phone_relative_location
+        - android_phone_acceleration_1min
+        - android_phone_bluetooth_devices
+        - android_phone_sms
+        - android_phone_call
+        - android_phone_contacts
+        - android_phone_usage_event
+        - android_phone_relative_location
       output_topic: source_statistics_android_phone
 
 
 #=========================== Schema Registry ===========================#
 #List of Schema Registry instances
 schema_registry:
-    - host: localhost
-      port: 8081
-      protocol: http
+  - host: localhost
+    port: 8081
+    protocol: http
 
 rest_proxy:
-    host: radar-test.thehyve.net
-    port: 8082
-    protocol: http
+  host: radar-test.thehyve.net
+  port: 8082
+  protocol: http
 
 #======================== Battery level monitor ========================#
 battery_monitor:
@@ -109,3 +115,5 @@ disconnect_monitor:
   alert_repetitions: 2  # number of additional emails to send after the first
 
 # persistence_path: /var/lib/radar/data
+
+rule_engine:

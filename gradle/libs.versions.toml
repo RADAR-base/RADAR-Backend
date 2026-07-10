@@ -1,0 +1,74 @@
+[versions]
+avro = "1.12.1"
+cel = "0.5.0"
+commonsCli = "1.11.0"
+# Dependencies
+confluent = "7.6.1"
+findbug = "3.0.2"
+greenmail = "2.1.8"
+jackson = "2.20"
+jacksonModuleKotlin = "2.17.2"
+jakartaMailApi = "2.1.5"
+jakartaMail = "2.0.5"
+junit-jupiter = "5.10.1"
+kafka = "7.6.1-ce"
+# Project and Plugins
+kotlin = "1.9.24"
+ksoup = "0.1.5"
+log4j = "2.23.1"
+lz4 = "1.10.1"
+mockito = "5.21.0"
+radarCommons = "1.2.5"
+radarSchemas = "0.8.9"
+versionCatalogUpdate = "0.8.5"
+buildconfigPlugin = "5.3.5"
+
+[libraries]
+# For buildSrc project
+gradle-radar-kotlin = { group = "org.radarbase.radar-kotlin", name = "org.radarbase.radar-kotlin.gradle.plugin", version.ref = "radarCommons" }
+gradle-radar-publishing = { group = "org.radarbase.radar-publishing", name = "org.radarbase.radar-publishing.gradle.plugin", version.ref = "radarCommons" }
+
+avro = { module = "org.apache.avro:avro", version.ref = "avro" }
+commons-cli = { module = "commons-cli:commons-cli", version.ref = "commonsCli" }
+greenmail = { module = "com.icegreen:greenmail", version.ref = "greenmail" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
+jakarta-mail-api = { module = "jakarta.mail:jakarta.mail-api", version.ref = "jakartaMailApi" }
+jakarta-mail = { module = "org.eclipse.angus:jakarta.mail", version.ref = "jakartaMail" }
+# implementation
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "findbug" }
+# Kafka & Confluent
+kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka" }
+kafka-streams-avro-serde = { module = "io.confluent:kafka-streams-avro-serde", version.ref = "confluent" }
+# Kotlin
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
+# Logging
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+# Test
+lz4 = { module = "at.yawk.lz4:lz4-java", version.ref = "lz4" }
+# RADAR-Base
+radar-commons = { module = "org.radarbase:radar-commons", version.ref = "radarCommons" }
+radar-commons-server = { module = "org.radarbase:radar-commons-server", version.ref = "radarCommons" }
+radar-commons-testing = { module = "org.radarbase:radar-commons-testing", version.ref = "radarCommons" }
+radar-schemas-commons = { module = "org.radarbase:radar-schemas-commons", version.ref = "radarSchemas" }
+junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
+
+# CEL (Common Expression Language)
+cel-core = { group = "dev.cel", name = "cel", version.ref = "cel" }
+
+[plugins]
+radar-dependency-management = { id = "org.radarbase.radar-dependency-management", version.ref = "radarCommons" }
+radar-kotlin = { id = "org.radarbase.radar-kotlin", version.ref = "radarCommons" }
+radar-publishing = { id = "org.radarbase.radar-publishing", version.ref = "radarCommons" }
+radar-root-project = { id = "org.radarbase.radar-root-project", version.ref = "radarCommons" }
+version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdate" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+build-config = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfigPlugin" }
+
+[bundles]
+ksoup = [
+    "ksoup",
+    "ksoup-network",
+]
