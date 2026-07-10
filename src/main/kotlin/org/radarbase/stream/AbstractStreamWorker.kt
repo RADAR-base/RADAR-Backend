@@ -37,6 +37,10 @@ abstract class AbstractStreamWorker : StreamWorker, StreamsUncaughtExceptionHand
         )
     }
 
+    protected fun defineStream(def: StreamDefinition) {
+        streamDefinitions.add(def)
+    }
+
     protected fun defineSensorStream(input: String) {
         defineStream(input, input + OUTPUT_LABEL, null)
     }

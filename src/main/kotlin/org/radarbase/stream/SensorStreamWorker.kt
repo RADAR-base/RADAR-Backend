@@ -6,7 +6,6 @@ import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsBuilder
-import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.KStream
 import org.radarbase.stream.collector.AggregateListCollector
 import org.radarbase.stream.collector.NumericAggregateCollector
@@ -14,17 +13,15 @@ import org.radarbase.util.Monitor
 import org.radarbase.util.RadarSingletonFactory
 import org.radarbase.util.RadarUtilities
 import org.radarbase.util.StreamUtil
+import org.radarbase.util.getStreamProperties
 import org.radarbase.util.serde.RadarSerdes
 import org.radarcns.kafka.AggregateKey
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.stream.aggregator.AggregateList
 import org.radarcns.stream.aggregator.NumericAggregate
 import org.slf4j.LoggerFactory
-import java.util.*
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Collectors
-import kotlin.streams.toList
 
 /**
  * Specialized [AbstractStreamWorker] for processing sensor data.
@@ -66,36 +63,9 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         val outputTopicName = def.outputTopic.name
         kstream.to(outputTopicName)
 
-        val properties = getStreamProperties(def)
+        val properties = getStreamProperties(
+            this.javaClass, def, config, allConfig, kafkaProperty, DeviceTimestampExtractor::class.java)
         return KeyValue.pair(future, KafkaStreams(builder.build(), properties))
-    }
-
-    internal fun getStreamProperties(definition: StreamDefinition): Properties {
-        val className = javaClass.name
-        val localClientId = buildString {
-            append(className)
-            append("-")
-            append(allConfig.buildVersion)
-            definition.timeWindows?.let {
-                append("-")
-                append(it.sizeMs)
-                append("-")
-                append(it.advanceMs)
-            }
-        }
-
-        val props = kafkaProperty.getStreamProperties(
-            localClientId,
-            config,
-            DeviceTimestampExtractor::class.java,
-        )
-
-        val interval =
-            (ThreadLocalRandom.current().nextDouble(0.75, 1.25) * definition.commitInterval.toMillis()).toLong()
-
-        props[StreamsConfig.COMMIT_INTERVAL_MS_CONFIG] = interval.toString()
-
-        return props
     }
 
     internal abstract fun implementStream(definition: StreamDefinition, kstream: KStream<K, V>): KStream<*, *>

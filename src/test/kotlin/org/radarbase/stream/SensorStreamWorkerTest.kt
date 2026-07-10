@@ -60,13 +60,6 @@ class SensorStreamWorkerTest {
         val propertyHandler: RadarConfigHandler = RadarSingletonFactory.radarConfigHandler
         propertyHandler.load("src/test/resources/config/radar.yml")
         val kafkaProperty: KafkaProperty = propertyHandler.kafkaProperties
-        `when`(aggregator.getStreamProperties(eq(sensorTopic))).thenReturn(
-            kafkaProperty.getStreamProperties(
-                "test",
-                SingleStreamConfig(),
-                DeviceTimestampExtractor::class.java,
-            ),
-        )
         @Suppress("UNCHECKED_CAST", "rawtypes")
         `when`(aggregator.implementStream(eq(sensorTopic), any())).thenReturn(
             mock(KStream::class.java) as KStream<Any, Any>,

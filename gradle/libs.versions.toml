@@ -1,5 +1,6 @@
 [versions]
 avro = "1.12.1"
+cel = "0.5.0"
 commonsCli = "1.11.0"
 # Dependencies
 confluent = "7.6.1"
@@ -53,6 +54,9 @@ radar-commons-server = { module = "org.radarbase:radar-commons-server", version.
 radar-commons-testing = { module = "org.radarbase:radar-commons-testing", version.ref = "radarCommons" }
 radar-schemas-commons = { module = "org.radarbase:radar-schemas-commons", version.ref = "radarSchemas" }
 junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
+
+# CEL (Common Expression Language)
+cel-core = { group = "dev.cel", name = "cel", version.ref = "cel" }
 
 [plugins]
 radar-dependency-management = { id = "org.radarbase.radar-dependency-management", version.ref = "radarCommons" }

@@ -1,6 +1,8 @@
 package org.radarbase.stream
 
 import org.apache.kafka.streams.kstream.TimeWindows
+import org.radarbase.config.GlobalStoreConfig
+import org.radarbase.stream.AbstractStreamWorker.Companion.TIME_WINDOW_COMMIT_INTERVAL_DEFAULT
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.Comparison
 import java.time.Duration
@@ -13,14 +15,15 @@ class StreamDefinition(
     val inputTopic: KafkaTopic,
     val outputTopic: KafkaTopic,
     val timeWindows: TimeWindows? = null,
-    val commitInterval: Duration = AbstractStreamWorker.Companion.TIME_WINDOW_COMMIT_INTERVAL_DEFAULT,
+    val commitInterval: Duration = TIME_WINDOW_COMMIT_INTERVAL_DEFAULT,
+    val globalStoreConfig: GlobalStoreConfig? = null,
 ) : Comparable<StreamDefinition> {
 
     constructor(input: KafkaTopic, output: KafkaTopic, window: Duration?) : this(
         input,
         output,
         window?.let { TimeWindows.ofSizeWithNoGrace(it) },
-        AbstractStreamWorker.Companion.TIME_WINDOW_COMMIT_INTERVAL_DEFAULT,
+        TIME_WINDOW_COMMIT_INTERVAL_DEFAULT,
     )
 
     constructor(input: KafkaTopic, output: KafkaTopic, window: Duration?, commitInterval: Duration) : this(
@@ -54,7 +57,7 @@ class StreamDefinition(
     }
 
     override fun compareTo(other: StreamDefinition): Int {
-        return Comparison.Companion.compare<StreamDefinition, String> { it.inputTopic.name }
+        return Comparison.compare<StreamDefinition, String> { it.inputTopic.name }
             .then { it.outputTopic.name }.then { it.timeWindows?.sizeMs ?: 0L }.then { it.timeWindows?.advanceMs ?: 0L }
             .invoke(this, other)
     }

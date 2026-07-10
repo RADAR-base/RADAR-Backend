@@ -40,6 +40,12 @@ stream:
     - class: org.radarbase.stream.phone.PhoneBatteryStream
     - class: org.radarbase.stream.phone.PhoneUsageStream
     - class: org.radarbase.stream.phone.PhoneUsageAggregationStream
+    - class: org.radarbase.stream.ruleengine.RuleEngineStream
+      properties:
+        input_topic: questionnaire_response
+        output_topic: rule_engine_output
+        global_store_name: JIT_RULES_STORE
+        global_store_topic: jit_rules
 
   #====================== Source statistics monitor ======================#
   source_statistics:
@@ -109,3 +115,5 @@ disconnect_monitor:
   alert_repetitions: 2  # number of additional emails to send after the first
 
 # persistence_path: /var/lib/radar/data
+
+rule_engine:
