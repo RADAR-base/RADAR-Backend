@@ -1,4 +1,4 @@
-package org.radarbase.config.jit
+package org.radarbase.config.intervention
 
 interface BaseConfig {
     val name: String

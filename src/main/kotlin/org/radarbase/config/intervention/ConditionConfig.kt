@@ -1,6 +1,6 @@
-package org.radarbase.config.jit
+package org.radarbase.config.intervention
 
-data class ActionConfig(
+data class ConditionConfig(
         override val name: String,
         override val properties: Map<String, Any>? = null,
         override val projects: List<String>? = null,
@@ -9,4 +9,4 @@ data class ActionConfig(
         override val subjectIdField: String? = null,
         override val sourceIdField: String? = null,
         override val timeField: String? = null,
-): BaseConfig
+) : BaseConfig
