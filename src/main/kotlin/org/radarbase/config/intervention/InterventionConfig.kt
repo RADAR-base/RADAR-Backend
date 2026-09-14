@@ -2,8 +2,8 @@ package org.radarbase.config.intervention
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class JustInTimeInterventionConfig(
-        val name: String,
+data class InterventionConfig(
+        val name: String?,
         val topic: String,
         @JsonProperty("conditions")
         val conditionConfigs: List<ConditionConfig>,

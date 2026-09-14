@@ -4,36 +4,73 @@ import org.apache.kafka.streams.processor.api.Processor
 import org.apache.kafka.streams.processor.api.ProcessorContext
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
+import org.radarbase.config.intervention.ConditionConfig
+import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.ruleengine.domain.RuleGroup
 import org.radarbase.stream.ruleengine.domain.RuleKey
-import org.radarbase.stream.ruleengine.domain.RuleValue
+import org.slf4j.LoggerFactory
 
 class RuleGroupProcessor(
     val globalStoreName: String,
-) : Processor<RuleKey, RuleValue, Void, Void> {
+) : Processor<RuleKey, InterventionConfig, Void, Void> {
+
     private lateinit var store: KeyValueStore<String, RuleGroup>
 
     override fun init(context: ProcessorContext<Void, Void>) {
         store = context.getStateStore(globalStoreName)
     }
 
-    override fun process(record: Record<RuleKey, RuleValue>) {
-        val key = record.key()
+    override fun process(record: Record<RuleKey, InterventionConfig>) {
+        val key = record.key() ?: return
         val value = record.value()
-        val lookupKey = "${key.topicName}:${key.project}"
 
-        val aggregate = store.get(lookupKey) ?: RuleGroup()
-        val newRules = aggregate.rules.toMutableList()
+        // Key to collect all rules for a given topic and scope. Examples:
+        value.conditionConfigs.forEach { conditionConfig ->
 
-        newRules.removeIf { it.first == key }
-        if (value != null) {
-            newRules.add(key to value)
+            logger.debug("Processing condition {} for rule {}", conditionConfig, key)
+
+            conditionConfig.toScopeKeys().forEach { scopeKey ->
+
+                val currentGroup = store.get(scopeKey) ?: RuleGroup()
+                val groupRules = currentGroup.rules
+
+                // When tombstone is received.
+                if (value==null) {
+                    groupRules.remove(key)
+                    logger.debug("Removed condition key {} for scope {}", key, scopeKey)
+                }
+                if (value!=null) {
+                    groupRules[key] = value
+                    logger.debug("Added condition key {} for scope {}", key, scopeKey)
+                }
+
+                if (groupRules.isEmpty()) {
+                    store.delete(scopeKey)
+                    logger.debug("Removed all conditions for scope {}", scopeKey)
+                } else {
+                    store.put(scopeKey, RuleGroup(groupRules))
+                    logger.debug("Updating conditions for scope {}", scopeKey)
+                }
+            }
         }
 
-        if (newRules.isEmpty()) {
-            store.delete(lookupKey)
-        } else {
-            store.put(lookupKey, RuleGroup(newRules))
-        }
     }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(RuleGroupProcessor::class.java)
+    }
+}
+
+fun ConditionConfig.toScopeKeys(): List<String> {
+    if (!this.subjects.isNullOrEmpty()) {
+        return this.subjects.map { "${ScopePrefix.PROJECT}$it" }
+    }
+    if (!this.projects.isNullOrEmpty()) {
+        return this.projects.map { "${ScopePrefix.USER}$it" }
+    }
+    return listOf(ScopePrefix.GLOBAL.scope)
+}
+
+enum class ScopePrefix(val scope: String) {
+    GLOBAL("global"), PROJECT("project."), USER("user."),
 }

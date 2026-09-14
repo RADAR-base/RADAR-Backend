@@ -1,7 +1,7 @@
 package org.radarbase.stream.ruleengine.domain
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import org.radarbase.config.intervention.InterventionConfig
 
 data class RuleGroup(
-    @JsonProperty("rules") val rules: List<Pair<RuleKey, RuleValue>> = emptyList(),
+    val rules: MutableMap<RuleKey, InterventionConfig> = mutableMapOf(),
 )

@@ -9,12 +9,11 @@ import org.apache.kafka.streams.kstream.Produced
 import org.apache.kafka.streams.processor.api.ProcessorSupplier
 import org.apache.kafka.streams.state.Stores
 import org.radarbase.config.GlobalStoreConfig
+import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.AbstractStreamWorker
 import org.radarbase.stream.StreamDefinition
-import org.radarbase.stream.ruleengine.domain.ActionConfig
 import org.radarbase.stream.ruleengine.domain.RuleGroup
 import org.radarbase.stream.ruleengine.domain.RuleKey
-import org.radarbase.stream.ruleengine.domain.RuleValue
 import org.radarbase.stream.ruleengine.processor.RuleGroupProcessor
 import org.radarbase.stream.ruleengine.processor.RuleProcessor
 import org.radarbase.stream.ruleengine.serde.JsonSerde
@@ -28,8 +27,7 @@ class RuleEngineStream : AbstractStreamWorker() {
 
     val ruleGroupSerde = JsonSerde(RuleGroup::class.java)
     val ruleKeySerde = JsonSerde(RuleKey::class.java)
-    val ruleValueSerde = JsonSerde(RuleValue::class.java)
-    val actionConfigSerde = JsonSerde(ActionConfig::class.java)
+    val interventionConfig = JsonSerde(InterventionConfig::class.java)
 
     /*
       Create Stream Topologies based on StreamDefinitions
@@ -46,12 +44,12 @@ class RuleEngineStream : AbstractStreamWorker() {
             builder.addGlobalStore(
                 storeBuilder,
                 storeConfig.topic.name,
-                Consumed.with(ruleKeySerde, ruleValueSerde),
+                Consumed.with(ruleKeySerde, interventionConfig),
                 ProcessorSupplier { RuleGroupProcessor(storeConfig.storeName) }
             )
             builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
                 .process(ProcessorSupplier { RuleProcessor(storeConfig.storeName) })
-                .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, actionConfigSerde))
+                .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, interventionConfig))
             val properties = getStreamProperties(
                 this.javaClass, def, config, allConfig, kafkaProperty, null)
             return@map KafkaStreams(builder.build(), properties)

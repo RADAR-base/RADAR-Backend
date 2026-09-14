@@ -1,6 +1,7 @@
 package org.radarbase.config.intervention
 
 data class ActionConfig(
+        // 'name' must match defined nomenclature recognizable by consumers.
         override val name: String,
         override val properties: Map<String, Any>? = null,
         override val projects: List<String>? = null,
