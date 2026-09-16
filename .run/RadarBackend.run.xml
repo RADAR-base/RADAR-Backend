@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RadarBackend" type="JetRunConfigurationType" nameIsGenerated="true">
+    <envs>
+      <env name="STREAM_SASL_MECHANISM" value="SCRAM-SHA-512" />
+      <env name="STREAM_SECURITY_PROTOCOL" value="SASL_PLAINTEXT" />
+      <env name="STREAM_SASL_JAAS_CONFIG" value="org.apache.kafka.common.security.scram.ScramLoginModule required username=&quot;shared-service-user&quot; password=&quot;CRvl4k3Pt1nMBfhQAoIAxdJ4emBpF8mI&quot;;" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="org.radarbase.RadarBackend" />
+    <module name="radar-backend.main" />
+    <option name="PROGRAM_PARAMETERS" value="-c $ProjectFileDir$/radar.yml stream" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
