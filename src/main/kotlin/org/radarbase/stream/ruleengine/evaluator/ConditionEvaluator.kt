@@ -13,5 +13,4 @@ interface ConditionEvaluator {
 
     @Throws(IOException::class)
     fun isTrueFor(record: Record<GenericRecord, GenericRecord>, expression: String): Boolean
-
 }

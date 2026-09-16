@@ -35,11 +35,11 @@ class RuleGroupProcessor(
                 val groupRules = currentGroup.rules
 
                 // When tombstone is received.
-                if (value==null) {
+                if (value == null) {
                     groupRules.remove(key)
                     logger.debug("Removed condition key {} for scope {}", key, scopeKey)
                 }
-                if (value!=null) {
+                if (value != null) {
                     groupRules[key] = value
                     logger.debug("Added condition key {} for scope {}", key, scopeKey)
                 }
@@ -53,7 +53,6 @@ class RuleGroupProcessor(
                 }
             }
         }
-
     }
 
     companion object {

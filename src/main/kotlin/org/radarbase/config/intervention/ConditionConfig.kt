@@ -11,7 +11,7 @@ data class ConditionConfig(
     override val subjectIdField: String? = null,
     override val sourceIdField: String? = null,
     override val timeField: String? = null,
- ) : BaseConfig
+) : BaseConfig
 
 enum class ExpressionType(val type: String) {
     CEL("cel"), //    JSON_PATH(type = "jsonpath"),

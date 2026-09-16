@@ -11,10 +11,10 @@ import org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG
 import org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.processor.Cancellable
-import org.apache.kafka.streams.processor.PunctuationType
 import org.apache.kafka.streams.processor.Processor
 import org.apache.kafka.streams.processor.ProcessorContext
 import org.apache.kafka.streams.processor.ProcessorSupplier
+import org.apache.kafka.streams.processor.PunctuationType
 import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
 import org.radarbase.config.SourceStatisticsStreamConfig

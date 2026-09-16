@@ -12,7 +12,7 @@ import org.radarbase.stream.ruleengine.evaluator.ConditionFactory
 import org.slf4j.LoggerFactory
 
 class RuleProcessor(
-    val globalStoreName: String
+    val globalStoreName: String,
 ) : org.apache.kafka.streams.processor.api.ContextualProcessor<GenericRecord, GenericRecord, RuleKey, InterventionConfig>() {
 
     private lateinit var groupedRulesStore: ReadOnlyKeyValueStore<String, RuleGroup>
@@ -27,7 +27,7 @@ class RuleProcessor(
         val recordKeyAvro = record.key()
         val recordValueAvro = record.value()
 
-        if (recordKeyAvro==null || recordValueAvro==null) return
+        if (recordKeyAvro == null || recordValueAvro == null) return
 
         val recordKey = recordKeyAvro.toMap()
         val recordValue = recordValueAvro.toMap()
@@ -40,7 +40,7 @@ class RuleProcessor(
         val lookupKey = "$topic:$project"
         val ruleGroup = groupedRulesStore.get(lookupKey)
 
-        if (ruleGroup==null || ruleGroup.rules.isEmpty()) {
+        if (ruleGroup == null || ruleGroup.rules.isEmpty()) {
             logger.debug("No rules found for project {} on topic {}", project, topic)
             return
         }
@@ -51,14 +51,13 @@ class RuleProcessor(
                 interventionConfig.conditionConfigs.forEach { conditionConfig ->
                     val evaluator = ConditionFactory.getConditionEvaluator(conditionConfig)
                     if (evaluator.isTrueFor(record, conditionConfig.expression)) {
-                       interventionConfig.actionConfigs.forEach { actionConfig ->
-                           actionConfig.forward()
-                       }
+                        interventionConfig.actionConfigs.forEach { actionConfig ->
+                            actionConfig.forward()
+                        }
                     }
                 }
             }
         }
-
     }
 
     //    private fun evaluateRule(key: RuleKey, value: RuleValue, payload: Map<String, Any?>, timestamp: Long) {
@@ -85,7 +84,7 @@ class RuleProcessor(
 
     fun GenericRecord.toMap(): Map<String, Any?> = this.schema.fields.associate { it.name() to this.get(it.pos()) }
 
-    fun ActionConfig.forward() : Unit {
+    fun ActionConfig.forward() {
         // TODO implement forwarding
 //        context().forward<Record<RuleKey, ActionConfig>(null, this, timestamp))
     }

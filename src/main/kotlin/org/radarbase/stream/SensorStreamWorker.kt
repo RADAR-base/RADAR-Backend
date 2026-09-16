@@ -64,7 +64,13 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
         kstream.to(outputTopicName)
 
         val properties = getStreamProperties(
-            this.javaClass, def, config, allConfig, kafkaProperty, DeviceTimestampExtractor::class.java)
+            this.javaClass,
+            def,
+            config,
+            allConfig,
+            kafkaProperty,
+            DeviceTimestampExtractor::class.java,
+        )
         return KeyValue.pair(future, KafkaStreams(builder.build(), properties))
     }
 
@@ -130,13 +136,13 @@ abstract class SensorStreamWorker<K : SpecificRecord, V : SpecificRecord> : Abst
     ): KStream<AggregateKey, AggregateList> {
         return kstream
             .groupByKey().windowedBy(definition.timeWindows).aggregate(
-            { AggregateListCollector(fieldNames, schema, false) },
-            { _, v, valueCollector -> valueCollector.add(v) },
-            RadarSerdes.Companion.materialized(
-                definition.stateStoreName,
-                RadarSerdes.Companion.getInstance().getAggregateListCollector() as Serde<AggregateListCollector>,
-            ),
-        ).toStream().map(utilities::listCollectorToAvro)
+                { AggregateListCollector(fieldNames, schema, false) },
+                { _, v, valueCollector -> valueCollector.add(v) },
+                RadarSerdes.Companion.materialized(
+                    definition.stateStoreName,
+                    RadarSerdes.Companion.getInstance().getAggregateListCollector() as Serde<AggregateListCollector>,
+                ),
+            ).toStream().map(utilities::listCollectorToAvro)
     }
 
     override fun toString(): String {

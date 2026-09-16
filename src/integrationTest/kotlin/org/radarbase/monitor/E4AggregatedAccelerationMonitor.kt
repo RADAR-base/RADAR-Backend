@@ -14,13 +14,13 @@ import java.util.*
 class E4AggregatedAccelerationMonitor(
     radar: RadarConfigHandler,
     topic: String?,
-    clientID: String
+    clientID: String,
 ) : AbstractKafkaMonitor<GenericRecord?, GenericRecord?, Any?>(
     radar,
     mutableListOf(topic!!),
     "new",
     clientID,
-null
+    null,
 ) {
     init {
         val props = Properties().apply {
@@ -50,10 +50,11 @@ null
             }
             val value: GenericRecord = it.value()!!
             val fields = value.get("fields") as GenericData.Array<*>
-            logger.info("Received [{}, {}, {}] E4 messages",
+            logger.info(
+                "Received [{}, {}, {}] E4 messages",
                 (fields[0] as GenericRecord).get("count"),
                 (fields[1] as GenericRecord).get("count"),
-                (fields[2] as GenericRecord).get("count")
+                (fields[2] as GenericRecord).get("count"),
             )
 
             if (((fields[0] as GenericRecord).get("count") as Int?)!! > 100) {

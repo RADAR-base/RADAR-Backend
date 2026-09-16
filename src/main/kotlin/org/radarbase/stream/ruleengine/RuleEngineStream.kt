@@ -31,11 +31,11 @@ class RuleEngineStream : AbstractStreamWorker() {
 
     /*
       Create Stream Topologies based on StreamDefinitions
-    */
+     */
     override fun createStreams(): List<KafkaStreams>? {
         return getStreamDefinitions().map { def ->
             val storeConfig = def.globalStoreConfig!!
-            val storeBuilder =  Stores.keyValueStoreBuilder(
+            val storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(storeConfig.storeName),
                 Serdes.String(),
                 ruleGroupSerde,
@@ -45,13 +45,19 @@ class RuleEngineStream : AbstractStreamWorker() {
                 storeBuilder,
                 storeConfig.topic.name,
                 Consumed.with(ruleKeySerde, interventionConfig),
-                ProcessorSupplier { RuleGroupProcessor(storeConfig.storeName) }
+                ProcessorSupplier { RuleGroupProcessor(storeConfig.storeName) },
             )
             builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
                 .process(ProcessorSupplier { RuleProcessor(storeConfig.storeName) })
                 .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, interventionConfig))
             val properties = getStreamProperties(
-                this.javaClass, def, config, allConfig, kafkaProperty, null)
+                this.javaClass,
+                def,
+                config,
+                allConfig,
+                kafkaProperty,
+                null,
+            )
             return@map KafkaStreams(builder.build(), properties)
         }.toList()
     }
@@ -71,13 +77,12 @@ class RuleEngineStream : AbstractStreamWorker() {
         defineStream(
             StreamDefinition(
                 inputTopic = KafkaTopic(config.properties["input_topic"] as String),
-                outputTopic = KafkaTopic( config.properties["output_topic"] as String),
+                outputTopic = KafkaTopic(config.properties["output_topic"] as String),
                 globalStoreConfig = GlobalStoreConfig(
                     storeName = config.properties["global_store_name"] as String,
                     topic = KafkaTopic(config.properties["global_store_topic"] as String),
                 ),
-            )
+            ),
         )
     }
-
 }

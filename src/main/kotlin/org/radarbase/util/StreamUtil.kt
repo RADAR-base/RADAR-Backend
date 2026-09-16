@@ -51,15 +51,18 @@ internal fun getStreamProperties(
         }
     }
 
-    val props = if (timeStampExtractorClass!=null) kafkaProperty.getStreamProperties(
-        localClientId,
-        streamConfig,
-        timeStampExtractorClass,
-    )
-    else kafkaProperty.getStreamProperties(
-        localClientId,
-        streamConfig,
-    )
+    val props = if (timeStampExtractorClass != null) {
+        kafkaProperty.getStreamProperties(
+            localClientId,
+            streamConfig,
+            timeStampExtractorClass,
+        )
+    } else {
+        kafkaProperty.getStreamProperties(
+            localClientId,
+            streamConfig,
+        )
+    }
 
     val interval = (ThreadLocalRandom.current().nextDouble(0.75, 1.25) * definition.commitInterval.toMillis()).toLong()
 

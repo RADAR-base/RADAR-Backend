@@ -14,8 +14,9 @@ object ConditionFactory {
             CelConditionEvaluator.TYPE_NAME -> CelConditionEvaluator
             else -> throw IllegalArgumentException(
                 "The specified condition with type " + conditionConfig.type + " is not correct. Implementations are: " + ExpressionType.entries.joinToString(
-                    ", "
-                ) { it.name })
+                    ", ",
+                ) { it.name },
+            )
         }
     }
 }

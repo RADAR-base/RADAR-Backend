@@ -26,7 +26,6 @@ object CelConditionEvaluator : ConditionEvaluator {
     private val programCache = ConcurrentHashMap<String, CelRuntime.Program>()
 
     override fun isTrueFor(record: Record<GenericRecord, GenericRecord>, expression: String): Boolean {
-
         val recordKey = record.key().toCelCompatible() as Map<*, *>
         val recordValue = record.value().toCelCompatible() as Map<*, *>
 
@@ -35,8 +34,8 @@ object CelConditionEvaluator : ConditionEvaluator {
         return getEvaluator(expression)?.eval(
             mapOf(
                 KEY_MEMBER_NAME to recordKey,
-                VALUE_MEMBER_NAME to recordValue
-            )
+                VALUE_MEMBER_NAME to recordValue,
+            ),
         ).let {
             it is Boolean && it
         }
@@ -49,7 +48,6 @@ object CelConditionEvaluator : ConditionEvaluator {
         }
         celRuntime.createProgram(ast)
     }
-
 }
 
 fun Any?.toCelCompatible(): Any? = when (this) {

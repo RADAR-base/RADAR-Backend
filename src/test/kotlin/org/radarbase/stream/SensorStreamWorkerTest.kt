@@ -28,7 +28,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.radarbase.config.KafkaProperty
 import org.radarbase.config.RadarConfigHandler
-import org.radarbase.config.SingleStreamConfig
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.RadarSingletonFactory
 import java.io.IOException
