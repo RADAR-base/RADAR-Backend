@@ -33,7 +33,7 @@ class RuleEngineStream : AbstractStreamWorker() {
       Create Stream Topologies based on StreamDefinitions
      */
     override fun createStreams(): List<KafkaStreams>? {
-        return getStreamDefinitions().map { def ->
+        return getStreamDefinitions().toList().first().let {listOf(it)}.map { def ->
             val storeConfig = def.globalStoreConfig!!
             val storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(storeConfig.storeName),
@@ -47,7 +47,7 @@ class RuleEngineStream : AbstractStreamWorker() {
                 Consumed.with(ruleKeySerde, interventionConfig),
                 ProcessorSupplier { RuleGroupProcessor(storeConfig.storeName) },
             )
-            builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
+           builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
                 .process(ProcessorSupplier { RuleProcessor(storeConfig.storeName) })
                 .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, interventionConfig))
             val properties = getStreamProperties(

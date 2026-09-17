@@ -15,14 +15,18 @@ class JsonSerde<T : Any>(private val clazz: Class<T>? = null, private val typeRe
     }
 
     override fun deserializer(): Deserializer<T> = Deserializer { _, data ->
-        data?.let {
-            if (clazz != null) {
-                mapper.readValue(it, clazz)
-            } else if (typeRef != null) {
-                mapper.readValue(it, typeRef)
-            } else {
-                throw IllegalArgumentException("Either clazz or typeRef must be provided")
+        try {
+            data?.let {
+                if (clazz != null) {
+                    mapper.readValue(it, clazz)
+                } else if (typeRef != null) {
+                    mapper.readValue(it, typeRef)
+                } else {
+                    throw IllegalArgumentException("Either clazz or typeRef must be provided")
+                }
             }
+        }catch (e: Exception){
+            throw e
         }
     }
 }
