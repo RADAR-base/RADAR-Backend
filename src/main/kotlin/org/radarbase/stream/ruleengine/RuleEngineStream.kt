@@ -1,9 +1,11 @@
 package org.radarbase.stream.ruleengine
 
 import org.apache.avro.generic.GenericRecord
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.Produced
 import org.apache.kafka.streams.processor.api.ProcessorSupplier
@@ -44,12 +46,13 @@ class RuleEngineStream : AbstractStreamWorker() {
             builder.addGlobalStore(
                 storeBuilder,
                 storeConfig.topic.name,
-                Consumed.with(ruleKeySerde, interventionConfig),
+                Consumed.with(ruleKeySerde, interventionConfig)
+                    .withOffsetResetPolicy(Topology.AutoOffsetReset.EARLIEST),
                 ProcessorSupplier { RuleGroupProcessor(storeConfig.storeName) },
             )
-           builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
+           /*builder.stream<GenericRecord, GenericRecord>(def.inputTopic.name)
                 .process(ProcessorSupplier { RuleProcessor(storeConfig.storeName) })
-                .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, interventionConfig))
+                .to({ _, actionConfig, _ -> actionConfig.topic }, Produced.with(ruleKeySerde, interventionConfig))*/
             val properties = getStreamProperties(
                 this.javaClass,
                 def,
@@ -57,7 +60,9 @@ class RuleEngineStream : AbstractStreamWorker() {
                 allConfig,
                 kafkaProperty,
                 null,
-            )
+            ).apply {
+                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+            }
             return@map KafkaStreams(builder.build(), properties)
         }.toList()
     }
