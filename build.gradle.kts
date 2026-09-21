@@ -138,6 +138,33 @@ testing {
                 }
             }
         }
+        // The "integrationTest" suite above targets the legacy src/integrationTest Zookeeper+Kafka
+        // compose stack, has zero @Test classes, and isn't used. New JVM-managed integration tests
+        // (Testcontainers-backed) live in src/integrationTest2 instead.
+        register<JvmTestSuite>("integrationTest2") {
+            description = "Run integration tests backed by a Testcontainers-managed Kafka broker (located in src/integrationTest2/...)."
+            useJUnitJupiter()
+            dependencies {
+                implementation(project())
+                implementation(libs.testcontainers.kafka)
+                implementation(libs.testcontainers.junit.jupiter)
+            }
+            targets {
+                all {
+                    testTask {
+                        shouldRunAfter(test)
+                        testLogging {
+                            showStandardStreams = true
+                            showExceptions = true
+                            showCauses = true
+                            showStackTraces = true
+                            exceptionFormat = TestExceptionFormat.FULL
+                            events("passed", "skipped", "failed")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -147,3 +174,4 @@ tasks.named("check") {
 }
 
 configurations["integrationTestImplementation"].extendsFrom(configurations.testImplementation.get())
+configurations["integrationTest2Implementation"].extendsFrom(configurations.testImplementation.get())

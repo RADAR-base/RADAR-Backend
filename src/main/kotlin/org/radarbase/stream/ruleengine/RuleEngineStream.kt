@@ -1,24 +1,21 @@
 package org.radarbase.stream.ruleengine
 
-import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Consumed
-import org.apache.kafka.streams.kstream.Produced
 import org.apache.kafka.streams.processor.api.ProcessorSupplier
 import org.apache.kafka.streams.state.Stores
 import org.radarbase.config.GlobalStoreConfig
-import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.AbstractStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarbase.stream.ruleengine.domain.RuleGroup
-import org.radarbase.stream.ruleengine.domain.RuleKey
 import org.radarbase.stream.ruleengine.processor.RuleGroupProcessor
-import org.radarbase.stream.ruleengine.processor.RuleProcessor
+import org.radarbase.stream.ruleengine.serde.InterventionConfigAvroSerde
 import org.radarbase.stream.ruleengine.serde.JsonSerde
+import org.radarbase.stream.ruleengine.serde.RuleKeyAvroSerde
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.getStreamProperties
 
@@ -28,14 +25,14 @@ import org.radarbase.util.getStreamProperties
 class RuleEngineStream : AbstractStreamWorker() {
 
     val ruleGroupSerde = JsonSerde(RuleGroup::class.java)
-    val ruleKeySerde = JsonSerde(RuleKey::class.java)
-    val interventionConfig = JsonSerde(InterventionConfig::class.java)
+    val ruleKeySerde = RuleKeyAvroSerde()
+    val interventionConfig = InterventionConfigAvroSerde()
 
     /*
       Create Stream Topologies based on StreamDefinitions
      */
     override fun createStreams(): List<KafkaStreams>? {
-        return getStreamDefinitions().toList().first().let {listOf(it)}.map { def ->
+        return getStreamDefinitions().toList().first().let { listOf(it) }.map { def ->
             val storeConfig = def.globalStoreConfig!!
             val storeBuilder = Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(storeConfig.storeName),

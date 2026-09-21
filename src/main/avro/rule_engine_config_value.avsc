@@ -1,0 +1,15 @@
+{
+    "namespace": "org.radarbase.stream.ruleengine.avro",
+    "name": "AppConfigRow",
+    "type": "record",
+    "doc": "Reverse-engineered from raw bytes on the rule_engine_config topic (see docs/rule-engine-global-store-findings.md) - the real Confluent Schema Registry that wrote this data isn't reachable from this repo, so this is not a registry-fetched schema. CDC-style row: repeats the key columns (client_id/scope/name) alongside the row's own id/value/create_timestamp/version.",
+    "fields": [
+        {"name": "id", "type": "int", "doc": "Database row id."},
+        {"name": "client_id", "type": ["null", "string"], "default": null},
+        {"name": "scope", "type": ["null", "string"], "default": null},
+        {"name": "name", "type": ["null", "string"], "default": null},
+        {"name": "value", "type": ["null", "string"], "default": null, "doc": "JSON-encoded InterventionConfig, not a nested Avro structure."},
+        {"name": "create_timestamp", "type": ["null", "long"], "default": null},
+        {"name": "version", "type": ["null", "int"], "default": null}
+    ]
+}

@@ -20,6 +20,7 @@ lz4 = "1.10.1"
 mockito = "5.21.0"
 radarCommons = "1.2.5"
 radarSchemas = "0.8.9"
+testcontainers = "2.0.5"
 versionCatalogUpdate = "0.8.5"
 buildconfigPlugin = "5.3.5"
 
@@ -54,6 +55,10 @@ radar-commons-server = { module = "org.radarbase:radar-commons-server", version.
 radar-commons-testing = { module = "org.radarbase:radar-commons-testing", version.ref = "radarCommons" }
 radar-schemas-commons = { module = "org.radarbase:radar-schemas-commons", version.ref = "radarSchemas" }
 junit-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
+
+# Testcontainers (integrationTest2 only)
+testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
 
 # CEL (Common Expression Language)
 cel-core = { group = "dev.cel", name = "cel", version.ref = "cel" }

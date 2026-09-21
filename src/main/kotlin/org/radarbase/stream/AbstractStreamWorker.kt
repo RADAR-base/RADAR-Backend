@@ -27,6 +27,9 @@ abstract class AbstractStreamWorker : StreamWorker, StreamsUncaughtExceptionHand
     protected lateinit var master: StreamMaster
     protected var streams: List<KafkaStreams>? = null
 
+    val kafkaStreamsInstances: List<KafkaStreams>?
+        get() = streams
+
     protected fun defineStream(input: String, output: String) {
         defineStream(input, output, null)
     }

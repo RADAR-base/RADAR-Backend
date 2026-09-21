@@ -25,7 +25,7 @@ class JsonSerde<T : Any>(private val clazz: Class<T>? = null, private val typeRe
                     throw IllegalArgumentException("Either clazz or typeRef must be provided")
                 }
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             throw e
         }
     }

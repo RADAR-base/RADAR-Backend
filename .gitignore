@@ -34,3 +34,5 @@ smtp.env
 
 # Distribution
 /radar-backend-*
+/CLAUDE.md
+/.claude/
