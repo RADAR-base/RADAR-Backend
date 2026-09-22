@@ -13,9 +13,9 @@ import org.radarbase.stream.AbstractStreamWorker
 import org.radarbase.stream.StreamDefinition
 import org.radarbase.stream.ruleengine.domain.RuleGroup
 import org.radarbase.stream.ruleengine.processor.RuleGroupProcessor
-import org.radarbase.stream.ruleengine.serde.InterventionConfigAvroSerde
+import org.radarbase.stream.ruleengine.serde.InterventionConfigSerde
 import org.radarbase.stream.ruleengine.serde.JsonSerde
-import org.radarbase.stream.ruleengine.serde.RuleKeyAvroSerde
+import org.radarbase.stream.ruleengine.serde.RuleKeySerde
 import org.radarbase.topic.KafkaTopic
 import org.radarbase.util.getStreamProperties
 
@@ -25,8 +25,8 @@ import org.radarbase.util.getStreamProperties
 class RuleEngineStream : AbstractStreamWorker() {
 
     val ruleGroupSerde = JsonSerde(RuleGroup::class.java)
-    val ruleKeySerde = RuleKeyAvroSerde()
-    val interventionConfig = InterventionConfigAvroSerde()
+    val ruleKeySerde = RuleKeySerde()
+    val interventionConfig = InterventionConfigSerde()
 
     /*
       Create Stream Topologies based on StreamDefinitions

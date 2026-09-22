@@ -14,14 +14,6 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.Properties
 
-/**
- * Encodes and publishes fixture rows for the `rule_engine_config` topic in the same Confluent
- * wire format (1 magic byte + 4-byte schema-ID + Avro binary) that
- * [org.radarbase.stream.ruleengine.serde.RuleEngineConfigAvroSerde] decodes. That production serde
- * has no working serializer for this topic - it's externally owned, see its doc comment - so this
- * encoder is test-only and mirrors its reverse-engineered AppConfigKey/AppConfigRow schemas; it
- * must not be promoted into main as a production serializer.
- */
 object RuleEngineConfigFixtures {
     private const val WIRE_FORMAT_MAGIC_BYTE = 0
     private const val FIXTURE_SCHEMA_ID = 1
@@ -83,7 +75,6 @@ object RuleEngineConfigFixtures {
 
     fun value(id: Int, clientId: String, scope: String, name: String, config: InterventionConfig): ByteArray =
         valueRaw(id, clientId, scope, name, mapper.writeValueAsString(config))
-
 
     fun valueRaw(id: Int, clientId: String, scope: String, name: String, rawJson: String?): ByteArray = encode(
         VALUE_SCHEMA,
