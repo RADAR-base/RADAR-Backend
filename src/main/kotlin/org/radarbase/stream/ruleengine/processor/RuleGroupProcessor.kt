@@ -23,6 +23,12 @@ class RuleGroupProcessor(
     override fun process(record: Record<RuleKey, InterventionConfig>) {
         val key = record.key() ?: return
         val value = record.value()
+        val storeKey = key.toStoreKey()
+
+        if (value == null) {
+            logger.info("Received tombstone for rule key {}; no condition data available to resolve which scope(s) to remove it from", key)
+            return
+        }
 
         // Key to collect all rules for a given topic and scope. Examples:
         value.conditionConfigs.forEach { conditionConfig ->
@@ -34,23 +40,9 @@ class RuleGroupProcessor(
                 val currentGroup = store.get(scopeKey) ?: RuleGroup()
                 val groupRules = currentGroup.rules
 
-                // When tombstone is received.
-                if (value == null) {
-                    groupRules.remove(key)
-                    logger.debug("Removed condition key {} for scope {}", key, scopeKey)
-                }
-                if (value != null) {
-                    groupRules[key] = value
-                    logger.debug("Added condition key {} for scope {}", key, scopeKey)
-                }
-
-                if (groupRules.isEmpty()) {
-                    store.delete(scopeKey)
-                    logger.debug("Removed all conditions for scope {}", scopeKey)
-                } else {
-                    store.put(scopeKey, RuleGroup(groupRules))
-                    logger.debug("Updating conditions for scope {}", scopeKey)
-                }
+                groupRules[storeKey] = value
+                store.put(scopeKey, RuleGroup(groupRules))
+                logger.debug("Added condition key {} for scope {}", key, scopeKey)
             }
         }
     }

@@ -7,4 +7,6 @@ data class RuleKey(
     @JsonProperty("client_id") val clientId: String,
     @JsonProperty("scope") val scope: String,
     @JsonProperty("name") val name: String,
-)
+) {
+    fun toStoreKey(): String = "$clientId|$scope|$name"
+}

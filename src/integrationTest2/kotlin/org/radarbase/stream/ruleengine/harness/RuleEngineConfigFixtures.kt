@@ -81,14 +81,18 @@ object RuleEngineConfigFixtures {
         },
     )
 
-    fun value(id: Int, clientId: String, scope: String, name: String, config: InterventionConfig): ByteArray = encode(
+    fun value(id: Int, clientId: String, scope: String, name: String, config: InterventionConfig): ByteArray =
+        valueRaw(id, clientId, scope, name, mapper.writeValueAsString(config))
+
+
+    fun valueRaw(id: Int, clientId: String, scope: String, name: String, rawJson: String?): ByteArray = encode(
         VALUE_SCHEMA,
         GenericData.Record(VALUE_SCHEMA).apply {
             put("id", id)
             put("client_id", clientId)
             put("scope", scope)
             put("name", name)
-            put("value", mapper.writeValueAsString(config))
+            put("value", rawJson)
             put("create_timestamp", System.currentTimeMillis())
             put("version", 1)
         },

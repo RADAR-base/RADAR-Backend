@@ -1,5 +1,6 @@
 package org.radarbase.stream.ruleengine.serde
 
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericDatumReader
@@ -10,17 +11,9 @@ import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serializer
 import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.ruleengine.domain.RuleKey
+import org.slf4j.LoggerFactory
 
-/**
- * The rule_engine_config topic is produced by an external app-config service as Confluent
- * wire-format Avro (5-byte magic-byte + schema-ID prefix). Its schema registry isn't reachable
- * from this repo (only the Kafka broker is), so these schemas were reverse-engineered directly
- * from the raw bytes instead of fetched from a registry - see
- * docs/rule-engine-global-store-findings.md and src/main/avro/rule_engine_config_*.avsc for the
- * evidence and field-by-field derivation. Every record is a client_id/scope/name-keyed config
- * row whose "value" column holds a JSON-encoded [InterventionConfig], not a nested Avro
- * structure.
- */
+
 private const val CONFLUENT_WIRE_FORMAT_HEADER_SIZE = 5
 
 private val KEY_SCHEMA: Schema = Schema.Parser().parse(
@@ -93,12 +86,38 @@ class InterventionConfigAvroSerde : Serde<InterventionConfig> {
 
     override fun serializer(): Serializer<InterventionConfig> = Serializer { topic, _ -> unsupportedProducer(topic) }
 
-    override fun deserializer(): Deserializer<InterventionConfig> = Deserializer { _, data ->
-        data?.let {
-            val record = decodeGenericRecord(VALUE_SCHEMA, it)
+    override fun deserializer(): Deserializer<InterventionConfig> = object : Deserializer<InterventionConfig> {
+        override fun deserialize(topic: String?, data: ByteArray?): InterventionConfig? {
+            val bytes = data ?: return null
+            val record = decodeGenericRecord(VALUE_SCHEMA, bytes)
             val json = record["value"]?.toString()
-                ?: throw IllegalStateException("rule_engine_config row id=${record["id"]} has no 'value' payload")
-            mapper.readValue(json, InterventionConfig::class.java)
+            if (json == null) {
+                logger.debug(
+                    "rule_engine_config row id={} client_id={} scope={} name={} has no 'value' payload, treating as tombstone",
+                    record["id"],
+                    record["client_id"],
+                    record["scope"],
+                    record["name"],
+                )
+                return null
+            }
+            return try {
+                mapper.readValue(json, InterventionConfig::class.java)
+            } catch (e: JsonProcessingException) {
+                logger.warn(
+                    "Failed to parse InterventionConfig JSON for rule_engine_config row id={} client_id={} scope={} name={}: {}",
+                    record["id"],
+                    record["client_id"],
+                    record["scope"],
+                    record["name"],
+                    e.message,
+                )
+                null
+            }
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(InterventionConfigAvroSerde::class.java)
     }
 }
