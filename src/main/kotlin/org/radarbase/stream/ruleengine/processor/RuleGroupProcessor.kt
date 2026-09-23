@@ -4,7 +4,7 @@ import org.apache.kafka.streams.processor.api.Processor
 import org.apache.kafka.streams.processor.api.ProcessorContext
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
-import org.radarbase.config.intervention.ConditionConfig
+import org.radarbase.config.intervention.BaseConfig
 import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.ruleengine.domain.RuleGroup
 import org.radarbase.stream.ruleengine.domain.RuleKey
@@ -25,12 +25,18 @@ class RuleGroupProcessor(
         val value = record.value()
         val storeKey = key.toStoreKey()
 
+        val newScopeKeys = value
+            ?.conditionConfigs
+            ?.flatMapTo(mutableSetOf()) { it.toScopeKeys() }
+            .orEmpty()
+
+        removeStaleMemberships(storeKey, newScopeKeys)
+
         if (value == null) {
-            logger.info("Received tombstone for rule key {}; no condition data available to resolve which scope(s) to remove it from", key)
+            logger.info("Received tombstone for rule key {}; removed from all scopes", key)
             return
         }
 
-        // Key to collect all rules for a given topic and scope. Examples:
         value.conditionConfigs.forEach { conditionConfig ->
 
             logger.debug("Processing condition {} for rule {}", conditionConfig, key)
@@ -47,17 +53,39 @@ class RuleGroupProcessor(
         }
     }
 
+    private fun removeStaleMemberships(storeKey: String, newScopeKeys: Set<String>) {
+        val staleScopeKeys = store.all().use { iterator ->
+            iterator.asSequence()
+                .filter { it.key !in newScopeKeys && it.value.rules.containsKey(storeKey) }
+                .map { it.key }
+                .toList()
+        }
+
+        staleScopeKeys.forEach { scopeKey ->
+            val group = store.get(scopeKey) ?: return@forEach
+            val remainingRules = group.rules.toMutableMap().apply { remove(storeKey) }
+            if (remainingRules.isEmpty()) {
+                store.delete(scopeKey)
+            } else {
+                store.put(scopeKey, RuleGroup(remainingRules))
+            }
+            logger.debug("Removed stale rule key {} from scope {}", storeKey, scopeKey)
+        }
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(RuleGroupProcessor::class.java)
     }
 }
 
-fun ConditionConfig.toScopeKeys(): List<String> {
-    if (!this.subjects.isNullOrEmpty()) {
-        return this.subjects.map { "${ScopePrefix.PROJECT}$it" }
+fun BaseConfig.toScopeKeys(): List<String> {
+    val subjects = this.subjects
+    if (!subjects.isNullOrEmpty()) {
+        return subjects.map { "${ScopePrefix.USER.scope}$it" }
     }
-    if (!this.projects.isNullOrEmpty()) {
-        return this.projects.map { "${ScopePrefix.USER}$it" }
+    val projects = this.projects
+    if (!projects.isNullOrEmpty()) {
+        return projects.map { "${ScopePrefix.PROJECT.scope}$it" }
     }
     return listOf(ScopePrefix.GLOBAL.scope)
 }

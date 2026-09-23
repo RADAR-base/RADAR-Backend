@@ -7,7 +7,6 @@ import dev.cel.compiler.CelCompilerFactory
 import dev.cel.runtime.CelRuntime
 import dev.cel.runtime.CelRuntimeFactory
 import org.apache.avro.generic.GenericRecord
-import org.apache.kafka.streams.processor.api.Record
 import org.radarbase.config.intervention.ExpressionType
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
@@ -20,21 +19,26 @@ object CelConditionEvaluator : ConditionEvaluator {
     const val VALUE_MEMBER_NAME = "value"
 
     private val celCompiler: CelCompiler =
-        CelCompilerFactory.standardCelCompilerBuilder().addVar(VALUE_MEMBER_NAME, CelTypes.DYN).build()
+        CelCompilerFactory.standardCelCompilerBuilder()
+            .addVar(KEY_MEMBER_NAME, CelTypes.DYN)
+            .addVar(VALUE_MEMBER_NAME, CelTypes.DYN)
+            .build()
     private val celRuntime: CelRuntime = CelRuntimeFactory.standardCelRuntimeBuilder().build()
     private val astCache = ConcurrentHashMap<String, CelAbstractSyntaxTree>()
     private val programCache = ConcurrentHashMap<String, CelRuntime.Program>()
 
-    override fun isTrueFor(record: Record<GenericRecord, GenericRecord>, expression: String): Boolean {
-        val recordKey = record.key().toCelCompatible() as Map<*, *>
-        val recordValue = record.value().toCelCompatible() as Map<*, *>
+    //TODO Can ik Map<*,*> typed maken maar uiteindelijk hoeft getEvaluator gewoon een map krijgen.
 
-        logger.debug("Processing record from topic with key: {} and value {}", recordKey, recordValue)
+    //TODO: kunnen we forwarden naar specifike output topic. Anders naar 1
+    //TODO: forwarden naar specifiek topic
+    //todo: Nieuwe repo toe.
+    override fun isTrueFor(key: Map<*, *>, value: Map<*, *>, expression: String): Boolean {
+        logger.debug("Evaluating expression {} against key: {} and value {}", expression, key, value)
 
         return getEvaluator(expression)?.eval(
             mapOf(
-                KEY_MEMBER_NAME to recordKey,
-                VALUE_MEMBER_NAME to recordValue,
+                KEY_MEMBER_NAME to key,
+                VALUE_MEMBER_NAME to value,
             ),
         ).let {
             it is Boolean && it

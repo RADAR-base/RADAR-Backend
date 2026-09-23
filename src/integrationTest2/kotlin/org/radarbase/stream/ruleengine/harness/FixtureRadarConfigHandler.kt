@@ -10,11 +10,18 @@ import org.radarbase.util.PersistentStateStore
 /**
  * A [RadarConfigHandler] built in-memory from a Testcontainers broker address, standing in for
  * the `radar.yml`-backed [org.radarbase.config.RadarConfigHandlerImpl] used in production. Only
- * `broker` is real; `schema_registry` is a placeholder because the rule-engine stream's global
- * store uses explicit key/value Serdes (see [org.radarbase.stream.ruleengine.RuleEngineStream])
- * and never actually contacts it.
+ * `broker` is real by default; `schema_registry` is a placeholder because the rule-engine
+ * stream's global store uses explicit key/value Serdes (see
+ * [org.radarbase.stream.ruleengine.RuleEngineStream]) and never actually contacts it. Pass
+ * [schemaRegistryUrl] (e.g. `mock://<scope>`, backed by Confluent's in-memory
+ * `MockSchemaRegistryClient`) for tests that exercise the `input_topic` side of the topology,
+ * where the default `SpecificAvroSerde` key/value serdes need a real schema registry to decode
+ * Avro records.
  */
-class FixtureRadarConfigHandler(bootstrapServers: String) : RadarConfigHandler {
+class FixtureRadarConfigHandler(
+    bootstrapServers: String,
+    schemaRegistryUrl: String = "http://unused-schema-registry:1",
+) : RadarConfigHandler {
     override val radarProperties: RadarBackendConfig = run {
         // KafkaContainer.bootstrapServers may or may not carry a "PLAINTEXT://" scheme prefix
         // depending on the Testcontainers version; java.net.URI misparses a bare "host:port" as
@@ -31,9 +38,8 @@ class FixtureRadarConfigHandler(bootstrapServers: String) : RadarConfigHandler {
             ),
             schemaRegistry = listOf(
                 ServerConfig().apply {
-                    this.host = "unused-schema-registry"
-                    this.port = 1
-                    protocol = "http"
+                    this.protocol = schemaRegistryUrl.substringBefore("://")
+                    this.host = schemaRegistryUrl.substringAfter("://")
                 },
             ),
             stream = StreamConfig(),
