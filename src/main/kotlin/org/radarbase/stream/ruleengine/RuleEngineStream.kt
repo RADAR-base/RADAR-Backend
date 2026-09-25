@@ -33,6 +33,7 @@ class RuleEngineStream : AbstractStreamWorker() {
     val interventionConfig = InterventionConfigSerde()
     val actionConfigSerde = JsonSerde(ActionConfig::class.java)
 
+    //TODO: implement a clean up phase
 
     // TODO: Create
     override fun createStreams(): List<KafkaStreams> {

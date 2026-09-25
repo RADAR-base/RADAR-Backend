@@ -125,6 +125,7 @@ class RuleEngineStreamGlobalStoreIT {
                 "global_store_name" to topics.globalStoreName,
                 "global_store_topic" to topics.globalStoreTopic,
                 StreamsConfig.STATE_DIR_CONFIG to stateDir.toString(),
+                StreamsConfig.APPLICATION_ID_CONFIG to "rule-engine-it-${topics.globalStoreName}",
             )
         }
 
