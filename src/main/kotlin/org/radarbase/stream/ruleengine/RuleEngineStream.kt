@@ -33,9 +33,8 @@ class RuleEngineStream : AbstractStreamWorker() {
     val interventionConfig = InterventionConfigSerde()
     val actionConfigSerde = JsonSerde(ActionConfig::class.java)
 
-    /*
-      Create Stream Topologies based on StreamDefinitions
-     */
+
+    // TODO: Create
     override fun createStreams(): List<KafkaStreams> {
         return getStreamDefinitions().toList().map { def ->
             val storeConfig = def.globalStoreConfig!!

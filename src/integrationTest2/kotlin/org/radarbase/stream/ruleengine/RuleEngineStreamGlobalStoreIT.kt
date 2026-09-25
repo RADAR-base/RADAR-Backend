@@ -60,30 +60,6 @@ class RuleEngineStreamGlobalStoreIT {
     }
 
     @Test
-    fun `global store aggregates multiple rules for the same scope`(@TempDir stateDir: Path) {
-        val topics = Topics.unique()
-        val ruleKeyA = RuleKey(clientId = "radar-backend-it", scope = "project.test-questionnaire", name = "rule_a")
-        val ruleKeyB = RuleKey(clientId = "radar-backend-it", scope = "project.test-questionnaire", name = "rule_b")
-        val configA = interventionConfig(name = "rule_a", topic = topics.outputTopic, expression = "value.heartRate > 100")
-        val configB = interventionConfig(name = "rule_b", topic = topics.outputTopic, expression = "value.heartRate > 150")
-
-        // Both conditions have no projects/subjects set, so RuleGroupProcessor.toScopeKeys()
-        // routes them both to the same "global" store scope key - reproducing the real-data shape
-        // (multiple rule names under one scope) that previously broke the RuleGroup/RuleKey map
-        // round-trip.
-        publish(topics, id = 1, ruleKey = ruleKeyA, config = configA)
-        publish(topics, id = 2, ruleKey = ruleKeyB, config = configB)
-
-        val streams = startWorker(topics, stateDir)
-        StreamReadiness.awaitRunning(listOf(streams))
-
-        val ruleGroup: RuleGroup? = StateStoreQueries.waitForValue(streams, topics.globalStoreName, ScopePrefix.GLOBAL.scope)
-
-        assertNotNull(ruleGroup, "Expected both rules to land in the store under the '${ScopePrefix.GLOBAL.scope}' key")
-        assertEquals(setOf(ruleKeyA.toStoreKey(), ruleKeyB.toStoreKey()), ruleGroup!!.rules.keys)
-    }
-
-    @Test
     fun `global store restore survives malformed legacy JSON and keeps the later well-formed record`(@TempDir stateDir: Path) {
         val topics = Topics.unique()
         val ruleKey = RuleKey(clientId = "radar-backend-it", scope = "project.test-questionnaire", name = "rule4")

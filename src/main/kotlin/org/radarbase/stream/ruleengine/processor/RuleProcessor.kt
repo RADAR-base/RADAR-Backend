@@ -9,7 +9,6 @@ import org.radarbase.config.intervention.ActionConfig
 import org.radarbase.config.intervention.InterventionConfig
 import org.radarbase.stream.ruleengine.domain.RuleGroup
 import org.radarbase.stream.ruleengine.evaluator.ConditionFactory
-import org.radarbase.stream.ruleengine.evaluator.toCelCompatible
 import org.slf4j.LoggerFactory
 
 class RuleProcessor(
@@ -31,72 +30,56 @@ class RuleProcessor(
 
         val topic = context().recordMetadata().get().topic()
 
-
-        @Suppress("UNCHECKED_CAST")
-        val recordKey = recordKeyAvro.toCelCompatible() as Map<String, Any?>
-
-        @Suppress("UNCHECKED_CAST")
-        val recordValue = recordValueAvro.toCelCompatible() as Map<String, Any?>
+        val recordKey = recordKeyAvro.toCelCompatible()
+        val recordValue = recordValueAvro.toCelCompatible()
 
         logger.debug("Processing record from topic {} with key {} and value {}", topic, recordKey, recordValue)
 
-        val projectId = recordKey["projectId"] as? String
-        val userId = recordKey["userId"] as? String
+        val rule = groupedRulesStore.get(ScopePrefix.GLOBAL.scope)
+        // TODO: do something with Scope
 
-        val applicableScopeKeys = buildSet {
-            add(ScopePrefix.GLOBAL.scope)
-            projectId?.let { add("${ScopePrefix.PROJECT.scope}$it") }
-            userId?.let { add("${ScopePrefix.USER.scope}$it") }
+        rule.rules.forEach { (_, interventionConfig) ->
+            val result = evaluateRule(interventionConfig, recordKey, recordValue)
+            if (result) {
+                interventionConfig.actionConfigs
+                    .forEach { action -> context().forward(Record(null, action, record.timestamp())) }
+                // TODO: update the tests
+                // TODO: Can we send to different output streams
+            }
         }
 
-        val matchedRules = applicableScopeKeys
-            .mapNotNull { groupedRulesStore.get(it) }
-            .flatMap { it.rules.entries }
-            .distinctBy { it.key }
-
-        if (matchedRules.isEmpty()) {
-            logger.debug("No rules found for topic {} with scopes {}", topic, applicableScopeKeys)
-            return
-        }
-
-        matchedRules.forEach { (storeKey, interventionConfig) ->
-            evaluateRule(storeKey, interventionConfig, applicableScopeKeys, recordKey, recordValue, recordKeyAvro, record.timestamp())
-        }
     }
 
     private fun evaluateRule(
-        storeKey: String,
         interventionConfig: InterventionConfig,
-        applicableScopeKeys: Set<String>,
         recordKey: Map<String, Any?>,
         recordValue: Map<String, Any?>,
-        originalKey: GenericRecord,
-        timestamp: Long,
-    ) {
-        val applicableConditions = interventionConfig.conditionConfigs.filter { condition ->
-            condition.toScopeKeys().any { it in applicableScopeKeys }
-        }
-
-        if (applicableConditions.isEmpty()) return
-
-        val matched = try {
-            applicableConditions.all { condition ->
+    ):Boolean {
+        val applicableConditions = interventionConfig.conditionConfigs
+        try {
+            return applicableConditions.any { condition ->
                 val evaluator = ConditionFactory.getConditionEvaluator(condition)
                 evaluator.isTrueFor(recordKey, recordValue, condition.expression)
             }
         } catch (e: Exception) {
-            logger.warn("Failed to evaluate rule {}: {}", storeKey, e.message)
-            false
+            logger.warn("Failed to evaluate rule {}: {}", interventionConfig.name ,e.message)
+            return false
         }
-
-        if (!matched) return
-
-        interventionConfig.actionConfigs
-            .filter { action -> action.toScopeKeys().any { it in applicableScopeKeys } }
-            .forEach { action -> context().forward(Record(originalKey, action, timestamp)) }
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(RuleProcessor::class.java)
     }
+
+    fun GenericRecord.toCelCompatible(): Map<String, Any> =
+        this.schema.fields.associate { it.name() to this.get(it.pos()).toCelCompatible() }
+
+    fun Any.toCelCompatible(): Any = when (this) {
+        is CharSequence -> this.toString() // Converts Avro Utf8 to java.lang.String
+        is List<*> -> this.map { it?.toCelCompatible() }
+        is Map<*, *> -> this.entries.associate { it.key.toString() to it.value?.toCelCompatible() }
+        else -> this
+    }
 }
+
+

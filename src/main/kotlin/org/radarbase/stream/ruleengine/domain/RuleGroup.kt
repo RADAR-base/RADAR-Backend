@@ -8,3 +8,4 @@ import org.radarbase.config.intervention.InterventionConfig
 data class RuleGroup(
     val rules: MutableMap<String, InterventionConfig> = mutableMapOf(),
 )
+// TODO: make immutable

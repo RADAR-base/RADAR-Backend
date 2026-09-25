@@ -53,11 +53,3 @@ object CelConditionEvaluator : ConditionEvaluator {
         celRuntime.createProgram(ast)
     }
 }
-
-fun Any?.toCelCompatible(): Any? = when (this) {
-    is GenericRecord -> this.schema.fields.associate { it.name() to this.get(it.pos()).toCelCompatible() }
-    is CharSequence -> this.toString() // Converts Avro Utf8 to java.lang.String
-    is List<*> -> this.map { it.toCelCompatible() }
-    is Map<*, *> -> this.entries.associate { it.key.toString() to it.value.toCelCompatible() }
-    else -> this
-}

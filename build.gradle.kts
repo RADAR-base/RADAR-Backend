@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.version.catalog.update)
     alias(libs.plugins.build.config)
     `jvm-test-suite`
+    kotlin("kapt") version "1.9.24"
 }
 
 description = "RADAR-base service for Kafka stream processing, monitoring, and statistics utilities."
@@ -142,7 +143,8 @@ testing {
         // compose stack, has zero @Test classes, and isn't used. New JVM-managed integration tests
         // (Testcontainers-backed) live in src/integrationTest2 instead.
         register<JvmTestSuite>("integrationTest2") {
-            description = "Run integration tests backed by a Testcontainers-managed Kafka broker (located in src/integrationTest2/...)."
+            description =
+                "Run integration tests backed by a Testcontainers-managed Kafka broker (located in src/integrationTest2/...)."
             useJUnitJupiter()
             dependencies {
                 implementation(project())
@@ -175,3 +177,6 @@ tasks.named("check") {
 
 configurations["integrationTestImplementation"].extendsFrom(configurations.testImplementation.get())
 configurations["integrationTest2Implementation"].extendsFrom(configurations.testImplementation.get())
+repositories {
+    mavenCentral()
+}

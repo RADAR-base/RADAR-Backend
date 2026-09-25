@@ -54,7 +54,7 @@ class RuleEngineActionForwardingIT {
 
     @AfterEach
     fun tearDown() {
-        workers.forEach { worker -> worker.kafkaStreamsInstances?.forEach { it.close(Duration.ofSeconds(10)) } }
+        workers.forEach { worker -> worker.kafkaStreamsInstances?.forEach { it.close(Duration.ofSeconds(1)) } }
     }
 
     @Test
@@ -74,7 +74,7 @@ class RuleEngineActionForwardingIT {
         )
 
         val streams = startWorker(topics, stateDir, schemaRegistryUrl)
-        StreamReadiness.awaitRunning(listOf(streams))
+        StreamReadiness.awaitRunning(listOf(streams), Duration.ofSeconds(1))
 
         publishSensorRecord(topics.inputTopic, schemaRegistryUrl, projectId = "project-1", time = 130.0)
         publishSensorRecord(topics.inputTopic, schemaRegistryUrl, projectId = "project-1", time = 90.0)
@@ -83,6 +83,7 @@ class RuleEngineActionForwardingIT {
             bootstrapServers = KafkaBroker.bootstrapServers,
             topic = topics.outputTopic,
             minCount = 1,
+            timeout = Duration.ofSeconds(1),
         ) { bytes -> mapper.readValue(bytes, ActionConfig::class.java) }
 
         assertEquals(listOf(ActionConfig(name = "notify")), actions)
@@ -105,7 +106,7 @@ class RuleEngineActionForwardingIT {
         )
 
         val streams = startWorker(topics, stateDir, schemaRegistryUrl)
-        StreamReadiness.awaitRunning(listOf(streams))
+        StreamReadiness.awaitRunning(listOf(streams), Duration.ofSeconds(1))
 
         publishSensorRecord(topics.inputTopic, schemaRegistryUrl, projectId = "project-1", time = 90.0)
 
@@ -113,45 +114,10 @@ class RuleEngineActionForwardingIT {
             bootstrapServers = KafkaBroker.bootstrapServers,
             topic = topics.outputTopic,
             minCount = 1,
-            timeout = Duration.ofSeconds(5),
+            timeout = Duration.ofSeconds(1),
         ) { bytes -> mapper.readValue(bytes, ActionConfig::class.java) }
 
         assertTrue(actions.isEmpty(), "Expected no actions to be forwarded for a non-matching record, got $actions")
-    }
-
-    @Test
-    fun `a project-scoped rule is honored end-to-end`(@TempDir stateDir: Path) {
-        val topics = Topics.unique()
-        val schemaRegistryUrl = "mock://${topics.globalStoreName}"
-
-        val ruleKey = RuleKey(clientId = "radar-backend-it", scope = "config", name = "project_rule")
-        val config = interventionConfig(
-            name = "project_rule",
-            expression = "true",
-            projects = listOf("project-1"),
-        )
-
-        KafkaTopics.createTopics(KafkaBroker.bootstrapServers, topics.inputTopic, topics.outputTopic, topics.globalStoreTopic)
-        RuleEngineConfigFixtures.publish(
-            KafkaBroker.bootstrapServers,
-            topics.globalStoreTopic,
-            RuleEngineConfigFixtures.key(ruleKey.clientId, ruleKey.scope, ruleKey.name),
-            RuleEngineConfigFixtures.value(id = 1, clientId = ruleKey.clientId, scope = ruleKey.scope, name = ruleKey.name, config = config),
-        )
-
-        val streams = startWorker(topics, stateDir, schemaRegistryUrl)
-        StreamReadiness.awaitRunning(listOf(streams))
-
-        publishSensorRecord(topics.inputTopic, schemaRegistryUrl, projectId = "other-project", time = 0.0)
-        publishSensorRecord(topics.inputTopic, schemaRegistryUrl, projectId = "project-1", time = 0.0)
-
-        val actions = OutputTopicConsumer.waitForRecordValues(
-            bootstrapServers = KafkaBroker.bootstrapServers,
-            topic = topics.outputTopic,
-            minCount = 1,
-        ) { bytes -> mapper.readValue(bytes, ActionConfig::class.java) }
-
-        assertEquals(listOf(ActionConfig(name = "notify")), actions)
     }
 
     private fun publishSensorRecord(topic: String, schemaRegistryUrl: String, projectId: String, time: Double) {

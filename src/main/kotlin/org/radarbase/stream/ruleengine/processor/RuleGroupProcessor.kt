@@ -20,6 +20,9 @@ class RuleGroupProcessor(
         store = context.getStateStore(globalStoreName)
     }
 
+    //TODO: What does this need to do?
+    //TODO: Will it work correctly?
+    //TODO: Investigate if tumbstone works correctly. -> Check what event the database sends.
     override fun process(record: Record<RuleKey, InterventionConfig>) {
         val key = record.key() ?: return
         val value = record.value()
